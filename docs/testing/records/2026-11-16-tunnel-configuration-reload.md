@@ -139,10 +139,27 @@ r4 对实际原件分别解析后通过，普通 Rust、rustdoc、主 Python 和
 记录清理后主封存再次验证 `0/reaped/0.155s`，以及原生通道再次报告锁屏、
 GUI 操作／截图仍为 0；没有重跑宿主完整门禁。
 
+## 精确 CI 终态补充
+
+精确 Quality `43901863960` 已 completed/success，watch 已实际
+`0/reaped/1258.244s`；Windows `133420285732`、Ubuntu `133420286130`、
+macOS `133420286347` 的完整 gate 均 success，macOS／Ubuntu OpenSSH step
+success、Windows 该 step skipped。
+
+| 平台 | 普通 Rust passed / failed / ignored | app passed / failed / ignored | Python run / skipped | rustdoc passed |
+| --- | --- | --- | --- | --- |
+| Windows | `3233 / 0 / 46` | `1351 / 0 / 2` | `293 / 34` | 14 |
+| macOS | `3246 / 0 / 48` | `1362 / 0 / 2` | `293 / 2` | 14 |
+| Ubuntu | `3239 / 0 / 49` | `1363 / 0 / 2` | `293 / 2` | 14 |
+
+每平台 92 个普通套件的声明／唯一结果／摘要匹配。CI app 无独立 `--list`，
+Python 无逐名输出；宿主独立库存不能移签给 CI。
+[25 成员终态封存](2026-11-16-tunnel-configuration-reload-evidence/ci-completion/README.md)
+实际验证 `0/reaped/7.658s`，从真实 Git blob 核对原 721 输入，零 mismatch。
+两次前缀／转义派生诊断和原日志保持，没有重放测试。
+
 ## 尚未验证
 
-精确 Quality `43901863960` 正在运行；Windows `133420285732`、Ubuntu
-`133420286130`、macOS `133420286347` 均 in_progress，尚无新候选平台终态。
 正常包结构检查不代表 GUI 已启动，也不代表 Windows／Linux 或六目标发行通过。
 本轮 `cua.getState` 再次明确报告 Mac 锁屏且自动解锁失败，GUI 操作与截图均为 0。
 前批源码、正常包与 CI 成绩不移签为本批。

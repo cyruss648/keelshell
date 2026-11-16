@@ -7,9 +7,7 @@ use std::{path::PathBuf, time::Duration};
 
 use keelshell_session::{
     SshAuth, SshOptions, SshSession,
-    monitor::{
-        CapabilityReason, CapabilityState, DiskIoError, LinuxMonitor, MonitorError, MonitorPlatform,
-    },
+    monitor::{CapabilityState, DiskIoError, LinuxMonitor, MonitorError, MonitorPlatform},
 };
 use russh::keys::{HashAlg, PublicKey};
 
@@ -146,24 +144,110 @@ async fn darwin_ps_is_read_only_and_linux_actions_fail_closed() -> TestResult {
         monitor.inspect_process(process).await,
         Err(MonitorError::Unsupported(_))
     ));
-    assert!(matches!(
-        monitor.listening_sockets().await,
-        Err(MonitorError::Unsupported(_))
-    ));
-    assert!(
-        matches!(
-            monitor.listening_sockets().await,
-            Err(MonitorError::CapabilityUnavailable {
-                reason: CapabilityReason::UnsupportedPlatform,
-                ..
-            })
-        ),
-        "subsequent unsupported socket check is negatively cached"
-    );
     assert_eq!(
         monitor.capabilities().await.processes.state,
         CapabilityState::Available
     );
+    session.close().await?;
+    Ok(())
+}
+
+#[tokio::test]
+#[ignore = "requires the disposable macOS OpenSSH monitoring fixture"]
+async fn darwin_tcp_listeners_include_owned_ipv4_and_exclude_connected_endpoints() -> TestResult {
+    let listener = std::net::TcpListener::bind("127.0.0.1:0")?;
+    let address = listener.local_addr()?;
+    let client = std::net::TcpStream::connect_timeout(&address, Duration::from_secs(2))?;
+    let client_address = client.local_addr()?.to_string();
+    let session = connect().await?;
+    let monitor = LinuxMonitor::new(session.clone());
+    let sockets = monitor.listening_sockets().await?;
+    let owned = sockets
+        .iter()
+        .find(|socket| socket.local == address.to_string())
+        .ok_or("owned IPv4 TCP listener was not observed")?;
+    assert_eq!((&*owned.protocol, &*owned.state), ("tcp", "LISTEN"));
+    assert!(
+        owned
+            .process
+            .as_deref()
+            .is_some_and(|process| process.contains(&format!("(pid={})", std::process::id()))),
+        "the visible listener must identify this owned test process"
+    );
+    assert!(
+        sockets
+            .iter()
+            .all(|socket| socket.protocol == "tcp" && socket.state == "LISTEN"),
+        "Darwin collection is TCP LISTEN only"
+    );
+    assert!(
+        sockets.iter().all(|socket| socket.local != client_address),
+        "the owned connected client endpoint is not a listener"
+    );
+    assert_eq!(
+        monitor.capabilities().await.sockets.state,
+        CapabilityState::Available
+    );
+    drop(client);
+    drop(listener);
+    session.close().await?;
+    Ok(())
+}
+
+#[tokio::test]
+#[ignore = "requires the disposable macOS OpenSSH monitoring fixture"]
+async fn darwin_tcp_listeners_include_owned_ipv6_and_recheck_revokes_report() -> TestResult {
+    let listener = std::net::TcpListener::bind("[::1]:0")?;
+    let address = listener.local_addr()?.to_string();
+    let session = connect().await?;
+    let monitor = LinuxMonitor::new(session.clone());
+    let sockets = monitor.listening_sockets().await?;
+    assert!(
+        sockets
+            .iter()
+            .any(|socket| socket.local == address && socket.state == "LISTEN"),
+        "the owned IPv6 loopback listener must be visible"
+    );
+    let report = monitor.capability_report().await;
+    assert!(monitor.accepts_capability_report(&report));
+    monitor.reset_capabilities().await;
+    assert!(!monitor.accepts_capability_report(&report));
+    assert_eq!(
+        monitor.capabilities().await.sockets.state,
+        CapabilityState::Unknown
+    );
+    assert!(
+        monitor
+            .listening_sockets()
+            .await?
+            .iter()
+            .any(|socket| socket.local == address)
+    );
+    drop(listener);
+    session.close().await?;
+    Ok(())
+}
+
+#[tokio::test]
+#[ignore = "requires the disposable macOS OpenSSH monitoring fixture"]
+async fn darwin_ipv4_mapped_ipv6_listener_retains_lsof_numeric_ipv4_endpoint() -> TestResult {
+    let listener = std::net::TcpListener::bind("[::ffff:127.0.0.1]:0")?;
+    let endpoint = format!("127.0.0.1:{}", listener.local_addr()?.port());
+    let session = connect().await?;
+    let monitor = LinuxMonitor::new(session.clone());
+    let sockets = monitor.listening_sockets().await?;
+    assert!(
+        sockets.iter().any(|socket| {
+            socket.local == endpoint
+                && socket.protocol == "tcp"
+                && socket.state == "LISTEN"
+                && socket.process.as_deref().is_some_and(|process| {
+                    process.contains(&format!("(pid={})", std::process::id()))
+                })
+        }),
+        "the owned mapped listener must preserve the observed numeric IPv4 endpoint"
+    );
+    drop(listener);
     session.close().await?;
     Ok(())
 }

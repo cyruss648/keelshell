@@ -80,18 +80,23 @@ async fn darwin_controls_reject_linux_actions_without_ssh_commands(cx: &mut Test
     h.panel.update(cx, |panel, cx| {
         let process = panel.processes[0].clone();
         panel.run(Job::Inspect(process), cx);
-        panel.run(Job::Sockets, cx);
+        panel.run(
+            Job::Probe(keelshell_session::monitor::SocketInfo {
+                protocol: "tcp".into(),
+                state: "LISTEN".into(),
+                local: "127.0.0.1:2222".into(),
+                peer: "*:*".into(),
+                process: None,
+            }),
+            cx,
+        );
         assert!(panel.pending.is_none());
         assert!(!panel.busy);
     });
     cx.update_window(h.window, |_, window, cx| {
         window.render_frame(cx);
         assert!(window.try_find(("review-process", 42_usize)).is_none());
-        assert_eq!(
-            window.find("refresh-sockets").label(),
-            Some("监听端口：macOS 暂不支持")
-        );
-        window.click("refresh-sockets", cx);
+        assert_eq!(window.find("refresh-sockets").label(), Some("读取监听端口"));
     })
     .checked("Darwin disabled action");
     h.idle(cx).await;
@@ -204,6 +209,14 @@ async fn darwin_memory_and_capability_labels_follow_all_themes_and_languages_wit
                         })
                     );
                     assert!(window.find("monitor-darwin-memory-note").label().is_some());
+                    assert_eq!(
+                        window.find("monitor-sockets-note").label(),
+                        Some(if english {
+                            "Read-only listeners visible to this account; macOS lists TCP only."
+                        } else {
+                            "只读采集当前账户可见的监听端口；macOS 仅列 TCP。"
+                        })
+                    );
                 })
                 .checked("Darwin themed labels");
             }

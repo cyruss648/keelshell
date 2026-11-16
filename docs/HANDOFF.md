@@ -5,29 +5,32 @@
 旧计数不覆盖当前授权。旧入口可从 `2f29744:docs/HANDOFF.md` 的 Git blob 读取；
 更早原文见[交接历史](HANDOFF_HISTORY_2026-11-16.md)与[路线历史](ROADMAP_HISTORY_2026-11-16.md)。
 
-当前新功能批为隧道面板内显式配置重新加载，按钮／原请求身份、后台读取和冲突
-恢复已完成。基线 `c81f718`，721 输入 r2 冻结；21 新例、独立隧道 63 项通过，
-源码与功能两位新非作者均限定 APPROVE、P0–P3 全 0，三个自有 agent 均已关闭。
-集中 `full-gate-r1` 已 `0/reaped/834.958s`：普通 Rust `3246/0/48 ignored`、
-app `1362/0/2 ignored`、rustdoc 14，Python 主 discovery 293/2 skipped、
-archive helper 另列 30；1364 app 库存与逐名执行相等。
-官方 russh `0.65.2` 已更新、113 项复查通过，manifest 保留 `0.65`，
-session library `288/0/4 ignored`、真实 OpenSSH 17/17；Mac 仍锁屏、GUI 0。
-按[本批记录](testing/records/2026-11-16-tunnel-configuration-reload.md)接续，
-正常 release build `0/reaped/183.646s`，提交前包结构／arm64／minos 15.0 检查通过，
-未启动或安装。工程 `6f28f5c424752a221746fbfb621e319c20ff38b9` 已普通推送，
-本地／tracking／远端一致；76 原件与 721 输入从真实 Git blob 验证
-`0/reaped/7.350s`，零 mismatch。精确提交正常包位于
-`work/tunnel-configuration-reload-20261116/package-r1/KeelShell.app`，
-GUI `0db8640a…`、MCP `bb415f3a…`，完整摘要见本批记录。
-新 Quality `43901863960` 的 Windows `133420285732`、Ubuntu `133420286130`、
-macOS `133420286347` 均 in_progress；接续收取实际终态，不重放宿主 gate。
-交付文档 `e56f3cf7bcd621cbce37ee9b112b0bf3755b98aa` 已普通推送。
-在真实 Git 原件逐项核对后，115 文件／115,495,894 字节自有副本已回收，
-旧 publication 活动目录与提交前重复包已删除；新正常包六文件摘要和 target 目录
-身份前后不变，三个 agent 已关闭。当前活动目录是
-`work/tunnel-configuration-reload-20261116/`，保留正常包／工装和最后交付回执；
-原日志、冻结及解析器从 docs 封存读取。唯一 Cargo 槽仍保持，不切换归属。
+当前功能批新增远端 macOS 账户可见的 TCP LISTEN 列表，使用已有 lsof，
+独立于 Python 资源采集；UDP、主动探测、进程核对／终止保持不支持。
+基线 `8d95d71cfa08181d5d44b689c108edcad7d995c4`，最终 r4 冻结 724 输入、
+aggregate `baae8aaab5903ad60509c23341b91a23553fac47ea7d1b0ff9ac993031c2e6ef`。
+完整 `full-gate-r1` 为 `0/reaped/794.954s`：普通 Rust `3272/0/51 ignored`、
+app `1367/0/2 ignored`、14 rustdoc，Python discovery 293/2 skipped、helper 另列 30。
+准确 gate app 的 1369 库存与逐名执行相等，26 新例全部 ok。
+两位非作者分别限定源码／预编译功能 APPROVE，P0–P3 全 0；三位自有 agent 已关闭。
+原缺帧 P2 已修复，初始负例和 mapped 显示失败保留。
+真实 Darwin SSH `9/0/0`、Linux Podman 降级／恢复 `2/0/0`，自有服务、临时密钥、
+容器、私有 network 与派生／临时基础镜像已清理。Linux 回执的 source-SHA 参数
+是基线 HEAD，实际 working diff 另由冻结和 binary SHA 绑定，不能混同。
+依赖官方复查 37 包／113 声明通过，本批 manifest／lock 未改。
+正常 release build `0/reaped/151.594s`，arm64／minos 15.0 包结构检查通过；
+没有启动或安装。最新 native 可用性观察仍为锁屏，GUI 操作／截图 0。
+按[本批记录](testing/records/2026-11-17-darwin-tcp-listeners.md)完成源码提交／普通推送
+并读回三方 SHA；完整产品、原生和发行仍开放。
+
+上一工程 `6f28f5c424752a221746fbfb621e319c20ff38b9` 的 Quality `43901863960`
+已三平台 completed/success，watch 已 `0/reaped/1258.244s`，无活动 watcher。
+Windows／macOS／Ubuntu 普通 Rust 为 `3233/0/46`、`3246/0/48`、`3239/0/49`，
+app 为 `1351/0/2`、`1362/0/2`、`1363/0/2`，各 14 rustdoc；
+Python 均 293 run，分别 34／2／2 skipped。macOS／Ubuntu OpenSSH success。
+[25 成员终态](testing/records/2026-11-16-tunnel-configuration-reload-evidence/ci-completion/README.md)
+从精确 Git blob 核对原 721 输入，`0/reaped/7.658s`、零 mismatch，不重放测试。
+CI 无独立 app 库存，不把该批成功移签为当前 724 输入。
 
 ## 不变的实现与交付约束
 
@@ -47,9 +50,9 @@ macOS `133420286347` 均 in_progress；接续收取实际终态，不重放宿�
   当前分支 `feature/editor-unicode-codec-20261114`，普通 push，不强推；读回本地／tracking／远端 SHA。
   `origin/main` 的独立状态文档不可直接覆盖。
 
-## 最近实际交付与精确 CI
+## 此前 Windows 工装交付与精确 CI
 
-当前工程 `ee3ad7320e90f40c9d777c500543cc6e909d0484` 已普通推送，三方一致、读回干净。
+该批工程 `ee3ad7320e90f40c9d777c500543cc6e909d0484` 已普通推送，三方一致、读回干净。
 25 成员／719 输入的精确 Git 绑定 `0/reaped/6.641s`、零 mismatch。
 新 Quality `43880245383` 已 completed/success；Windows `133343901451`、
 macOS `133343901229`、Ubuntu `133343901650` 的完整 gate 均 success，
@@ -115,9 +118,9 @@ unittest 6.134s／外层 6.203s，实际 waited；辅助检索诊断原文保留
 
 ## 下一步与资源
 
-1. 当前 `43880245383` 三平台终态、原日志、独立窄复核及自有副本清理已完成；
-   本批工程／源码批准／CI 成功各自有精确记录，后续按当前路线继续产品验收。
-   不重复未变 Rust 输入的宿主完整测试，不重放当前成功 CI。
+1. 本批 Darwin TCP 功能的专项、独立复核、真实 SSH 和一次完整宿主 gate 已通过；
+   优先完成普通提交／推送和精确 CI 终态，再按当前路线继续产品验收，不重放未变宿主 gate。
+   上批 `43901863960` 与更早 `43880245383` 的终态分别记录，不能代签当前源码。
 2. Windows 源码完整质量门禁现已通过；继续真实桌面、协议 peer、远端平台及发行缺口，
    不把 runner 测试和正常包结构扩大成原生桌面／完整产品验收。
 3. 桌面可用后复核英文工具栏 P2，再补主题／尺寸／双语／完整键盘／IME／辅助技术。
@@ -127,6 +130,8 @@ unittest 6.134s／外层 6.203s，实际 waited；辅助检索诊断原文保留
 唯一 Cargo target 为 `work/recovery-batch-integration-20261115/target`，
 `CARGO_BUILD_JOBS=2`、`MACOSX_DEPLOYMENT_TARGET=15.0`。同一 checkout 连续使用，归属未切换，
 不反复 clean；换归属前遵循[共享 target 合同](testing/SHARED_TARGET.md)。
+当前活动目录为 `work/darwin-tcp-listeners-20261117/`；
+本批原件按封存与 Git blob 核对后回收，保留必要正常包与最后交付回执。
 上一发布批活动目录为 `work/windows-fixture-publication-integration-20261116/`；
 旧 publication、两个已完成 reviewer 目录及稳定测试副本在精确 Git 原件核对后
 已回收 88 文件／13,465,970 字节，三个自有 agent 均已关闭。

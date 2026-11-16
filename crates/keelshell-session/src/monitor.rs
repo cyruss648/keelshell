@@ -19,6 +19,7 @@ pub use capabilities::{
 };
 use capabilities::{CapabilityCache, cached_reason, command_text, error_state, failure_reason};
 mod darwin;
+mod darwin_sockets;
 mod disk;
 pub use disk::{
     DiskCounters, DiskDevice, DiskIoError, DiskIoRates, DiskIoSnapshot, DiskRate,
@@ -82,9 +83,28 @@ command -v ps >/dev/null 2>&1 || exit 66
 ps -ww -eo pid=,user=,pcpu=,pmem=,args= || exit 65
 "#;
 const SOCKETS_SCRIPT: &str = r#"LC_ALL=C; export LC_ALL
-if [ "$(uname -s)" != Linux ]; then exit 64; fi
+ks_uname=''
+for ks_candidate in /usr/bin/uname /bin/uname; do
+  if [ -f "$ks_candidate" ] && [ -x "$ks_candidate" ]; then ks_uname="$ks_candidate"; break; fi
+done
+[ -n "$ks_uname" ] || exit 66
+case "$("$ks_uname" -s)" in
+  Linux) ;;
+  Darwin)
+    [ -f /usr/sbin/lsof ] && [ -x /usr/sbin/lsof ] || exit 66
+    printf '@@KS:darwin-sockets:1@@\n'
+    /usr/sbin/lsof -nP -a -iTCP -sTCP:LISTEN -F0pcftPnT -Ts
+    ks_lsof_status=$?
+    printf '@@KS:lsof-status@@\n%s\n@@KS:end@@\n' "$ks_lsof_status"
+    exit 0
+    ;;
+  *) exit 64 ;;
+esac
 command -v ss >/dev/null 2>&1 || exit 66
-ss -H -lntupn || exit 65
+printf '@@KS:linux-sockets:1@@\n'
+ss -H -lntupn
+ks_ss_status=$?
+printf '@@KS:ss-status@@\n%s\n@@KS:end@@\n' "$ks_ss_status"
 "#;
 const DF_COLLECTION: &str = r#"df_status=0
 if command -v df >/dev/null 2>&1; then
@@ -409,18 +429,21 @@ pub struct ProcessInfo {
     pub command: String,
 }
 
-/// A listening TCP or UDP socket reported by the remote Linux host.
+/// A socket visible to the authenticated remote account.
+///
+/// Linux supplies TCP/UDP rows from `ss`; Darwin supplies only TCP LISTEN
+/// rows from the system `lsof`. Neither collector proves whole-host visibility.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SocketInfo {
     /// Transport protocol, currently `tcp` or `udp`.
     pub protocol: String,
     /// Kernel socket state, normally `LISTEN` or `UNCONN`.
     pub state: String,
-    /// Local address and port as printed by `ss`.
+    /// Numeric local address and port; Darwin wildcards are normalized by family.
     pub local: String,
     /// Peer address and port, if the protocol reports one.
     pub peer: String,
-    /// Optional process metadata from `ss`, retained as display text.
+    /// Optional bounded process metadata, retained only as display text.
     pub process: Option<String>,
 }
 
@@ -602,10 +625,13 @@ impl LinuxMonitor {
         result
     }
 
-    /// Collect listening TCP/UDP sockets using the fixed `ss` command.
+    /// Collect sockets visible to the authenticated remote account.
     ///
-    /// The result is diagnostic text only. It is never treated as an executable
-    /// command and it does not imply that a service accepted a connection.
+    /// Linux uses fixed `ss` TCP/UDP output. Darwin uses the absolute system
+    /// `lsof` path and returns only TCP LISTEN sockets. Permission diagnostics,
+    /// incomplete Darwin frames and nonempty failed collections are rejected.
+    /// Results are diagnostic data, not executable commands, whole-host
+    /// visibility, or proof that a service accepted a connection.
     pub async fn listening_sockets(&self) -> MonitorResult<Vec<SocketInfo>> {
         let (revision, state) = self.capabilities.begin(Capability::Sockets).await;
         if let Some(reason) = cached_reason(state) {
@@ -619,7 +645,7 @@ impl LinuxMonitor {
                 .session
                 .exec_limited(SOCKETS_SCRIPT, MAX_OUTPUT)
                 .await?;
-            parse_sockets(&command_text(output, Capability::Sockets)?)
+            parse_socket_collection(output)
         }
         .await;
         let state = result
@@ -755,6 +781,49 @@ pub fn parse_processes(input: &str) -> MonitorResult<Vec<ProcessInfo>> {
             .then(a.pid.cmp(&b.pid))
     });
     Ok(processes)
+}
+
+fn parse_socket_collection(output: ExecOutput) -> MonitorResult<Vec<SocketInfo>> {
+    if output.stdout.len().saturating_add(output.stderr.len()) > MAX_OUTPUT {
+        return Err(MonitorError::InvalidData("socket collection exceeds 2 MiB"));
+    }
+    if output.exit_status != Some(0) {
+        command_text(output, Capability::Sockets)?;
+        return Err(MonitorError::InvalidData(
+            "socket collector did not complete",
+        ));
+    }
+    if output.stdout.starts_with(darwin_sockets::START.as_bytes()) {
+        return darwin_sockets::parse(output);
+    }
+    // An absent Darwin frame must never masquerade as ss's valid empty output.
+    // Both platforms therefore prove their origin and completion explicitly.
+    let text = String::from_utf8(output.stdout)
+        .map_err(|_| MonitorError::InvalidData("non-UTF-8 socket collection"))?;
+    let text = text
+        .strip_prefix("@@KS:linux-sockets:1@@\n")
+        .ok_or(MonitorError::InvalidData("missing socket collector frame"))?;
+    let (rows, status) = text
+        .split_once("@@KS:ss-status@@\n")
+        .ok_or(MonitorError::InvalidData("missing Linux socket status"))?;
+    let status = status
+        .strip_suffix("\n@@KS:end@@\n")
+        .filter(|status| {
+            !status.is_empty()
+                && status.len() <= 10
+                && status.bytes().all(|byte| byte.is_ascii_digit())
+        })
+        .and_then(|status| status.parse::<u32>().ok())
+        .ok_or(MonitorError::InvalidData(
+            "invalid Linux socket status or completion",
+        ))?;
+    if status != 0 || !output.stderr.is_empty() {
+        return Err(MonitorError::CapabilityUnavailable {
+            capability: Capability::Sockets,
+            reason: failure_reason(status, &output.stderr),
+        });
+    }
+    parse_sockets(rows)
 }
 
 /// Parse headerless `ss -H -lntup` output.
@@ -1409,7 +1478,7 @@ mod tests {
                 (PROCESS_ROWS.to_owned(), 0)
             } else if command == SOCKETS_SCRIPT {
                 (
-                    "tcp LISTEN 0 128 127.0.0.1:2222 0.0.0.0:* users:((\"fixture\",pid=42,fd=3))\n"
+                    "@@KS:linux-sockets:1@@\ntcp LISTEN 0 128 127.0.0.1:2222 0.0.0.0:* users:((\"fixture\",pid=42,fd=3))\n@@KS:ss-status@@\n0\n@@KS:end@@\n"
                         .into(),
                     0,
                 )

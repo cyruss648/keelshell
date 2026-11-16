@@ -19,7 +19,7 @@ pub enum Capability {
     Filesystems,
     /// Fixed process columns from `ps`.
     Processes,
-    /// Listening TCP/UDP rows from `ss`.
+    /// Account-visible Linux TCP/UDP rows from `ss`, or Darwin TCP LISTEN rows from system `lsof`.
     Sockets,
 }
 

@@ -20,9 +20,26 @@
 
 ## 当前交付快照
 
-以下为 2026-11-16 的精确快照；后续 CI 终态记录在对应批次，不改写历史原件。
+2026-11-17 当前功能批为远端 macOS 账户可见 TCP LISTEN 列表，设计见
+[ADR 0152](adr/0152-darwin-tcp-listeners.md)。724 输入冻结后，一次完整宿主 gate
+`0/reaped/794.954s`，普通 Rust `3272/0/51 ignored`、app `1367/0/2`、14 rustdoc；
+293 项 Python／2 skipped，archive helper 另列 30。1369 app 独立库存和逐名执行
+相等，26 新例全部 ok；两位非作者限定 APPROVE、P0–P3 全 0。
+真实 Darwin SSH `9/0/0`、Linux Podman 恢复 `2/0/0`，自有运行资源已清理。
+正常 macOS build／包结构通过，桌面未启动；原失败及最新锁屏事实保持，
+见[本批记录](testing/records/2026-11-17-darwin-tcp-listeners.md)。
+依赖 37 包／113 声明官方复查通过，manifest／lock 未改。
 
-- 当前工程源码 `ee3ad7320e90f40c9d777c500543cc6e909d0484` 已普通推送、
+上一隧道工程 `6f28f5c` 的 `43901863960` 已三平台 completed/success，
+普通 Rust Windows／macOS／Ubuntu 为 `3233/0/46`、`3246/0/48`、`3239/0/49`，
+app 为 `1351/0/2`、`1362/0/2`、`1363/0/2`；各 14 rustdoc，Python 293 项，
+分别 34／2／2 skipped。macOS／Ubuntu OpenSSH step success；
+[25 成员终态](testing/records/2026-11-16-tunnel-configuration-reload-evidence/ci-completion/README.md)
+与原 721 输入精确 Git 绑定通过，不移签为当前源码。
+
+以下为此前 2026-11-16 的精确快照；历史终态保留在对应批次。
+
+- 该批工程源码 `ee3ad7320e90f40c9d777c500543cc6e909d0484` 已普通推送、
   本地／tracking／远端三方一致，读回干净。25 成员／719 输入精确 Git 绑定通过。
   新 Quality `43880245383` 已 completed/success；Windows `133343901451`、
   macOS `133343901229`、Ubuntu `133343901650` 的完整 gate 均 success，
@@ -86,14 +103,10 @@
 
 ## 接续顺序
 
-0. 当前功能批：已实现隧道面板内配置重新加载，覆盖冲突／失败重试、草稿与活动
-   owner 保留、跨面板 busy 和迟到结果边界；russh 锁版本更新至 `0.65.2`。
-   21 新例、独立 63 项及两位非作者限定批准；最终完整门禁 `0/reaped/834.958s`，
-   普通 Rust `3246/0/48 ignored`、app `1362/0/2 ignored`、rustdoc 14。
-   工程 `6f28f5c` 已普通 push、三方一致，精确正常包／本机结构通过；
-   新 Quality `43901863960` 三平台进行中，按
-   [本批记录](testing/records/2026-11-16-tunnel-configuration-reload.md)接续终态；
-   原生桌面仍待验，前批成功不移签。
+0. 当前 Darwin TCP 功能的专项、独立复核、真实 SSH 与一次最终完整门禁均已通过；
+   完成普通提交／推送、三方读回及当前源码的 CI 收取。
+   上一隧道源码的三平台 CI 已全部成功；不重复宿主全量或重放已成功 CI。
+   两批原生桌面、完整产品及六目标发行仍待验。
 
 1. `ee3ad73` 的 `43880245383` 三平台完整 gate、Windows 293 项 Python／七类真实 tree／Job barrier，
    以及 macOS／Ubuntu OpenSSH 均已收齐终态，证据窄复核批准、副本清理完成；
@@ -132,7 +145,7 @@
 | P1 | 工作区 | 分屏、逐叶标签、显式保存／恢复、独立窗口与窗口切换器已有实现；继续多 OS 窗口、外框、完整关闭／重连审核和 worker 回收原生矩阵，见[窗口指南](product/WORKSPACE_WINDOW_SWITCHER.md)。 |
 | P1 | 外部 AI／MCP | API／受控 CLI Ask、逐步审核 Agent、对外 MCP 已实现；继续供应商账户、真实外部客户端和文件提案闭环、撤权／重连／取消；CLI 登录身份复用启用前仍需请求前隔离证明，见[能力计划](product/DESIGN_AND_AGENT_PLAN.md)。 |
 | P2 | 日常文件与编辑器 | UTF-16 LE/BE、五种显式旧编码、审核保存／备份／合并／读回和键盘已有实现；继续更多编码边界、原生文件管理器拖放、完整键盘／辅助技术和其他平台，保持原字节与备份合同，见[文本格式](product/REMOTE_TEXT_FORMAT.md)及[文件键盘](product/FILE_BROWSER_KEYBOARD.md)。 |
-| P2 | 监控与网络 | 按项能力、缓存、Linux 恢复与远端 macOS 只读资源观察已有实现；继续更广工具缺失后恢复、ss 可用、真实错误／取消、ICMP 与诊断完整矩阵和远端 Windows 适配；Darwin 不支持指标保持未知，见[监控记录](testing/records/2026-11-16-host-monitor.md)。 |
+| P2 | 监控与网络 | 按项能力、缓存、Linux 恢复、远端 macOS 只读资源及账户可见 TCP 监听已有实现；继续更广工具缺失后恢复、真实错误／取消、ICMP 与诊断完整矩阵和远端 Windows 适配；Darwin UDP／主动探测／终止及不支持指标保持未知，见[监听记录](testing/records/2026-11-17-darwin-tcp-listeners.md)与[资源记录](testing/records/2026-11-16-host-monitor.md)。 |
 | P2 | 持久化隧道 | 命名规则、三方向转发、流量、审核／停止及运行快照显式恢复已有实现；继续完整重连／管理、owner 失效、真实远端和跨平台验收，见[隧道指南](product/NAMED_TUNNEL_RULE_MANAGEMENT.md)。 |
 | P2 | 配置恢复／同步 | 审核恢复、回退与认证加密目录同步已有实现；跨机器挂载、断电耐久性、最终一致同步器适用性及约束仍待验，不把原子发布专项扩成这些承诺，见[同步指南](product/PROFILE_SYNC.md)和[原子发布记录](testing/records/2026-11-14-profile-sync-atomic-publish.md)。 |
 | P3 | AI 知识复用 | 本地分类、显式 Ask、审核式批量管理与命令片段草稿已有实现；跨设备同步和更多复用待设计，不恢复旧 SSH 权限、不自动执行 runbook，见[知识指南](product/AI_KNOWLEDGE_LIBRARY.md)。 |

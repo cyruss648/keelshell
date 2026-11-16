@@ -538,14 +538,13 @@ impl MonitorPanel {
         if self.busy {
             return;
         }
-        if (matches!(&job, Job::Inspect(_) | Job::Terminate(_))
-            && !self.linux_process_actions_available())
-            || (matches!(&job, Job::Sockets | Job::Probe(_)) && self.is_darwin())
+        if matches!(&job, Job::Inspect(_) | Job::Terminate(_) | Job::Probe(_))
+            && !self.linux_monitor_actions_available()
         {
             self.pending = None;
             self.status = Message::new(
-                "目标系统不支持此项操作；macOS 当前仅支持资源采样和只读进程列表。",
-                "This operation is unsupported on the target; macOS supports resource samples and read-only process listing.",
+                "此操作需要当前 Linux 资源采样；macOS 支持资源、进程和 TCP 监听端口的只读采集。",
+                "This operation requires a current Linux resource sample; macOS supports read-only resources, processes and TCP listeners.",
             );
             cx.notify();
             return;
@@ -649,7 +648,7 @@ impl MonitorPanel {
             .is_some_and(|snapshot| snapshot.platform == MonitorPlatform::Darwin)
     }
 
-    fn linux_process_actions_available(&self) -> bool {
+    fn linux_monitor_actions_available(&self) -> bool {
         self.snapshot
             .as_ref()
             .is_some_and(|snapshot| snapshot.platform == MonitorPlatform::Linux)
@@ -1061,21 +1060,13 @@ impl Render for MonitorPanel {
                     )
                     .child(
                         Button::new("refresh-sockets")
-                            .disabled(self.suspended || self.is_darwin())
+                            .disabled(self.suspended || self.busy || self.pending.is_some())
                             .icon(IconName::Network)
                             .ghost()
                             .compact()
                             .rounded(px(components.control_radius))
                             .label(t(cx, "端口", "Sockets"))
-                            .accessibility_label(if self.is_darwin() {
-                                t(
-                                    cx,
-                                    "监听端口：macOS 暂不支持",
-                                    "Listening sockets: unavailable on macOS",
-                                )
-                            } else {
-                                t(cx, "读取监听端口", "Read listening sockets")
-                            })
+                            .accessibility_label(t(cx, "读取监听端口", "Read listening sockets"))
                             .on_click(cx.listener(|panel, _, _, cx| {
                                 if panel.pending.is_none() {
                                     panel.run(Job::Sockets, cx);
@@ -1359,21 +1350,35 @@ impl Render for MonitorPanel {
         .test_support()
         .role(accesskit::Role::Group)
         .aria_label(t(cx, "监听端口", "Listening sockets"))
-        .child(div().text_xs().text_color(rgb(visual.muted)).child(t(
-            cx,
-            "通过 ss 读取，结果仅供诊断",
-            "Read with ss for diagnostics only",
-        )));
+        .child(
+            div()
+                .id("monitor-sockets-note")
+                .test_support()
+                .role(accesskit::Role::Label)
+                .aria_label(t(
+                    cx,
+                    "只读采集当前账户可见的监听端口；macOS 仅列 TCP。",
+                    "Read-only listeners visible to this account; macOS lists TCP only.",
+                ))
+                .text_xs()
+                .whitespace_normal()
+                .text_color(rgb(visual.muted))
+                .child(t(
+                    cx,
+                    "只读采集当前账户可见的监听端口；macOS 仅列 TCP。",
+                    "Read-only listeners visible to this account; macOS lists TCP only.",
+                )),
+        );
         if self.sockets.is_empty() {
             sockets = sockets.child(div().text_xs().text_color(rgb(visual.muted)).child(t(
                 cx,
                 if self.capabilities.sockets.state == CapabilityState::Available {
-                    "未发现监听端口"
+                    "当前账户未观察到监听端口"
                 } else {
                     "暂无可用端口采样；可点击端口或重新检测"
                 },
                 if self.capabilities.sockets.state == CapabilityState::Available {
-                    "No listening sockets found"
+                    "No listening sockets visible to this account"
                 } else {
                     "No socket sample; click Sockets or Recheck"
                 },
@@ -1426,7 +1431,7 @@ impl Render for MonitorPanel {
                             .text_color(rgb(visual.text))
                             .child(endpoint),
                     );
-                if socket.protocol == "tcp" {
+                if socket.protocol == "tcp" && self.linux_monitor_actions_available() {
                     let selected = socket.clone();
                     row = row.child(
                         Button::new(("probe-socket", socket_index))
@@ -1604,7 +1609,7 @@ impl Render for MonitorPanel {
                         .truncate()
                         .child(format!("{} {}", process.pid, process.command)),
                 );
-            if process.pid > 1 && self.linux_process_actions_available() {
+            if process.pid > 1 && self.linux_monitor_actions_available() {
                 row = row.child(
                     Button::new(("review-process", process.pid as usize))
                         .text_color(rgb(visual.danger))

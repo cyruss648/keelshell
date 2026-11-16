@@ -101,7 +101,7 @@ impl MonitorPanel {
                 "Filesystem capacity df",
             ),
             (Capability::Processes, "进程 ps", "Processes ps"),
-            (Capability::Sockets, "监听端口 ss", "Listening sockets ss"),
+            (Capability::Sockets, "监听端口", "Listening sockets"),
         ]
         .into_iter()
         .enumerate()

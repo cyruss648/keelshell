@@ -662,8 +662,8 @@ async fn compact_capability_reasons_ages_and_recheck_are_keyboard_accessible(
                         ),
                         (
                             Capability::Sockets,
-                            "监听端口 ss：权限不足",
-                            "Listening sockets ss: Permission denied",
+                            "监听端口：权限不足",
+                            "Listening sockets: Permission denied",
                         ),
                     ]
                     .into_iter()

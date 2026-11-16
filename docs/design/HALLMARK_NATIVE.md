@@ -1,5 +1,17 @@
 # Hallmark 与原生 GPUI 界面
 
+## 2026-11-17 远端 TCP 监听列表
+
+复用监控区的端口按钮、紧凑行和功能能力状态，不新增装饰或主题分支。
+说明文字明确账户可见范围及 macOS 仅 TCP；空列表避免声称全系统没有监听端口。
+状态与双语 AX 名称保持可辨识，macOS 不出现 Linux 专属探测／终止入口。
+所有控件和说明继续使用 registry、Palette 与 Kit 焦点行为。
+本片只修改原生组件，Web render 为 not_applicable；headless 回归、真实 SSH
+和原生桌面分别验收，见 [ADR 0152](../adr/0152-darwin-tcp-listeners.md)。
+三主题双语行为与晚到结果回归、真实 Darwin SSH 9 项及 Linux 恢复 2 项已通过；
+最新原生可用性观察仍为锁屏、GUI 操作／截图 0，不签署本片 native finish。
+实际范围见[本批测试记录](../testing/records/2026-11-17-darwin-tcp-listeners.md)。
+
 ## 2026-11-16 隧道面板配置恢复入口
 
 命名规则动作区提供紧凑的“重新加载”，靠近新建入口，以 ghost Kit 按钮表达

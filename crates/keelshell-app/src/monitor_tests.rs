@@ -3,6 +3,8 @@
 mod capabilities;
 #[path = "monitor_tests/darwin.rs"]
 mod darwin;
+#[path = "monitor_tests/darwin_sockets.rs"]
+mod darwin_sockets;
 #[path = "monitor_tests/independent_disk_monitor.rs"]
 mod independent_disk_monitor;
 use super::{Job, MonitorPanel};
@@ -137,11 +139,18 @@ impl server::Handler for Peer {
                     .map_err(|_| russh::Error::Disconnect)?
                     .forget();
             }
-            (
-                "tcp LISTEN 0 128 127.0.0.1:2222 0.0.0.0:* users:((\"fixture\",pid=42,fd=3))\n"
-                    .into(),
-                self.0.socket_failure.load(Ordering::Acquire) as u32,
-            )
+            let status = self.0.socket_failure.load(Ordering::Acquire) as u32;
+            let body = if self.0.darwin.load(Ordering::Acquire) {
+                if status == 0 {
+                    darwin_sockets::wire().into()
+                } else {
+                    String::new()
+                }
+            } else {
+                "@@KS:linux-sockets:1@@\ntcp LISTEN 0 128 127.0.0.1:2222 0.0.0.0:* users:((\"fixture\",pid=42,fd=3))\n@@KS:ss-status@@\n0\n@@KS:end@@\n"
+                    .into()
+            };
+            (body, status)
         } else if command.contains("command -v nc") {
             self.0.probes.fetch_add(1, Ordering::Release);
             ("@@KS:probe@@\n0\n".into(), 0)

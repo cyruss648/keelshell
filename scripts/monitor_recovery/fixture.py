@@ -84,8 +84,24 @@ esac
 command -v ps >/dev/null 2>&1 || exit 66
 ps -ww -eo pid=,user=,pcpu=,pmem=,args= || exit 65
 """
-SOCKETS = PREFIX + """command -v ss >/dev/null 2>&1 || exit 66
-ss -H -lntupn || exit 65
+SOCKETS = """LC_ALL=C; export LC_ALL
+""" + PLATFORM_SELECTOR + """case "$("$ks_uname" -s)" in
+  Linux) ;;
+  Darwin)
+    [ -f /usr/sbin/lsof ] && [ -x /usr/sbin/lsof ] || exit 66
+    printf '@@KS:darwin-sockets:1@@\\n'
+    /usr/sbin/lsof -nP -a -iTCP -sTCP:LISTEN -F0pcftPnT -Ts
+    ks_lsof_status=$?
+    printf '@@KS:lsof-status@@\\n%s\\n@@KS:end@@\\n' "$ks_lsof_status"
+    exit 0
+    ;;
+  *) exit 64 ;;
+esac
+command -v ss >/dev/null 2>&1 || exit 66
+printf '@@KS:linux-sockets:1@@\\n'
+ss -H -lntupn
+ks_ss_status=$?
+printf '@@KS:ss-status@@\\n%s\\n@@KS:end@@\\n' "$ks_ss_status"
 """
 COLLECTORS = {
     SNAPSHOT: ("core", "df"), CACHED_SNAPSHOT: ("core", None),

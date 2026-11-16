@@ -1,5 +1,42 @@
 # Capability ledger
 
+## 2026-11-17: remote macOS TCP listeners
+
+The existing port control can read account-visible TCP LISTEN sockets using the
+remote system's `/usr/sbin/lsof`, independently of Python resource collection.
+IPv4, IPv6, wildcard and IPv4-mapped display forms are parsed with bounded,
+strict fields and complete platform/status/end framing. Missing frames,
+diagnostics and failed tools cannot become an available empty list.
+UDP, active TCP probes, process identity checks and termination remain unavailable
+on Darwin. Three themes and both languages share existing semantic controls.
+
+The 724-input final batch passed its host full gate: ordinary Rust
+3272/0/51 ignored, app 1367/0/2, 14 doctests and Python discovery 293/two skipped;
+the separate archive helper ran 30 tests. All 1369 app inventory names matched
+execution and all 26 new default names passed. Real Darwin OpenSSH passed 9/0/0;
+Linux Podman capability recovery passed 2/0/0. Its source-SHA argument names the
+base HEAD; a separate freeze/binary binding identifies the actual working diff.
+Independent source and prebuilt functional reviews approved with no P0–P3.
+Initial failures remain recorded. Normal macOS GUI/MCP build and package
+structure checks passed; no desktop launch, installation or release is signed off.
+See the [listener record](../testing/records/2026-11-17-darwin-tcp-listeners.md).
+
+## 2026-11-16: tunnel configuration reload and completed source CI
+
+The tunnel panel has an explicit configuration reload action, with background
+reads, preserved drafts and active owners, cross-panel busy admission and stale
+completion protection. Source `6f28f5c424752a221746fbfb621e319c20ff38b9` is pushed.
+Exact Quality `43901863960` completed successfully on Windows, macOS and Ubuntu;
+their ordinary Rust passed/failed/ignored counts are 3233/0/46, 3246/0/48 and
+3239/0/49, app counts are 1351/0/2, 1362/0/2 and 1363/0/2, with 14 doctests each.
+Python ran 293 cases on each, skipping 34 on Windows and two on the others.
+macOS/Ubuntu OpenSSH checks succeeded; that step was skipped on Windows.
+The 25-member completion archive binds the exact 721 historical inputs without
+replaying tests. CI app has declared/unique result equality, without an independent
+`--list`. Native desktop and release scope remain open. See the
+[reload record](../testing/records/2026-11-16-tunnel-configuration-reload.md)
+and [CI completion](../testing/records/2026-11-16-tunnel-configuration-reload-evidence/ci-completion/README.md).
+
 ## 2026-11-16: process-fixture publication barrier and exact CI follow-up
 
 Source `ee3ad7320e90f40c9d777c500543cc6e909d0484` is pushed with matching
