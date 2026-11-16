@@ -1,0 +1,27 @@
+{
+  "observed_exit": 0,
+  "controller_exit": 0,
+  "timed_out": false,
+  "interrupted": false,
+  "terminal": {
+    "direct_reaped": true,
+    "active_processes": 0,
+    "pipes_drained": true,
+    "errors": []
+  },
+  "errors": [],
+  "command": [
+    "git",
+    "push",
+    "origin",
+    "HEAD:refs/heads/feature/editor-unicode-codec-20261114"
+  ],
+  "seconds": 4.910334709005838,
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "cargo_target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target",
+  "cargo_owner_checkout_unchanged": true,
+  "wrapper_stdout": "",
+  "wrapper_stderr": "",
+  "log_bytes": 113,
+  "log_sha256": "203b4dbd9a02d7fc19b89d8da9d166c16d77bf91346a3a1b118381bd157f825f"
+}

@@ -1,0 +1,365 @@
+{
+  "verified_archive_members": true,
+  "deleted_files": 67,
+  "deleted_bytes": 5974402,
+  "files": [
+    {
+      "path": "work/windows-extraction-stage-candidate-20261116/REPORT.md",
+      "bytes": 5757,
+      "sha256": "5e1cce786321aa661f5166dc804e490a8d2fda40001927c4d6ecd12aa883b986"
+    },
+    {
+      "path": "work/windows-extraction-stage-candidate-20261116/candidate.diff",
+      "bytes": 3326,
+      "sha256": "d572fc0003a0f6218af98a55c58ff68e381429e91902f2f855e32dd0046f3856"
+    },
+    {
+      "path": "work/windows-extraction-stage-candidate-20261116/diff-check.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "work/windows-extraction-stage-candidate-20261116/expected-tests.txt",
+      "bytes": 3314,
+      "sha256": "8504e93ec1511ea4d6d9bfc1989029099c4e95b9af6878c8852ce26d4b956180"
+    },
+    {
+      "path": "work/windows-extraction-stage-candidate-20261116/rustfmt-check.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "work/windows-extraction-stage-candidate-20261116/static-verification.json",
+      "bytes": 2255,
+      "sha256": "34cfb130936cadd09590b9109c5b42708d8b484d3a92a6965732e7bc89d5b348"
+    },
+    {
+      "path": "work/windows-archive-preflight-review-20261116/review-r1.md",
+      "bytes": 10951,
+      "sha256": "9333bcd9a174cbabefb7e6a059c539cf2ae58addc1cf423ebbf21457f1a5efa0"
+    },
+    {
+      "path": "work/windows-archive-preflight-review-20261116/static-check-attempt-r1.json",
+      "bytes": 923,
+      "sha256": "30917406eca17e4f60f70d99da5d832faeaa474e7dd0d5e673252368ab4efaf7"
+    },
+    {
+      "path": "work/windows-archive-preflight-review-20261116/static-receipt-r1.json",
+      "bytes": 17166,
+      "sha256": "bb9b1a000941c3e23e1dc6fd426d5a51ed9047755c2ee2234777b7318c8dc5ff"
+    },
+    {
+      "path": "work/workbench-fit-review-20261116/binding.json",
+      "bytes": 7253,
+      "sha256": "08796879076bc7cfbd14a5706bed1b694ab1462e0844ae661c48f1eaeaecec77"
+    },
+    {
+      "path": "work/workbench-fit-review-20261116/review.md",
+      "bytes": 16192,
+      "sha256": "62862d9f2625ad598e06fcf58dc787af122436778b08f8927d175ed2aa28d005"
+    },
+    {
+      "path": "work/workbench-fit-review-20261116/summary.json",
+      "bytes": 12796,
+      "sha256": "87d24f98e7b216e3625783f4828a4a7325cc19258407f8e1d069208b56fb10da"
+    },
+    {
+      "path": "work/workbench-fit-20261116/app-inventory-r1.json",
+      "bytes": 794,
+      "sha256": "63a8af8a4ac7beb13b71d3da49871badb3a7ee4286794080901071079d8bc904"
+    },
+    {
+      "path": "work/workbench-fit-20261116/app-inventory-r1.log",
+      "bytes": 1623,
+      "sha256": "ae6a31d450b915c19ce99b32ee6bc2dd5f24a39fdcfa78ff3d414d6e81af6b17"
+    },
+    {
+      "path": "work/workbench-fit-20261116/app-inventory-r2.json",
+      "bytes": 792,
+      "sha256": "b51bd3d696773ad34778871c4c692bf264e4a1c530d8ed4333b208d75ede04ba"
+    },
+    {
+      "path": "work/workbench-fit-20261116/app-inventory-r2.log",
+      "bytes": 143800,
+      "sha256": "4d3160f62389dcec0033273f9c5590d6b2c2722604f6997366919ac79262a673"
+    },
+    {
+      "path": "work/workbench-fit-20261116/app-inventory-summary-r2.json",
+      "bytes": 145353,
+      "sha256": "aa82bc5cd85228cda717664fbaf56b129dd4e79208e6680a94765de55d324630"
+    },
+    {
+      "path": "work/workbench-fit-20261116/dependencies-live-r1.json",
+      "bytes": 791,
+      "sha256": "b28fa104e09a7b46716a5adef1c7a9b7385e89cd2f473a84431297ac79b06b9e"
+    },
+    {
+      "path": "work/workbench-fit-20261116/dependencies-live-r1.log",
+      "bytes": 84,
+      "sha256": "f260e6a52b517fa20768daab3427c40155a1b2e763f75e2ff04625bc1e093921"
+    },
+    {
+      "path": "work/workbench-fit-20261116/docs-delivery-r1.json",
+      "bytes": 382,
+      "sha256": "cfded82bf90bf0fdafa064f63397c694c5640c3a37552a5e50e39918b7953038"
+    },
+    {
+      "path": "work/workbench-fit-20261116/full-gate-r1.json",
+      "bytes": 734,
+      "sha256": "06e1adf3ff1389c200582cf33cf9483f108a2105325433422c61e6b1e1eca2c6"
+    },
+    {
+      "path": "work/workbench-fit-20261116/full-gate-r1.log",
+      "bytes": 645604,
+      "sha256": "4080ba7e07ef8ac8578a0a96f4107d2749173a23dd79d1e2d778a38e4d37a4c1"
+    },
+    {
+      "path": "work/workbench-fit-20261116/full-gate-summary-r1.json",
+      "bytes": 33314,
+      "sha256": "e4e470513fb0f3a6276ee8e5303b64bc291003ffc66001099a5b3b8bc1743987"
+    },
+    {
+      "path": "work/workbench-fit-20261116/inputs-freeze-r2.json",
+      "bytes": 132220,
+      "sha256": "e42e34726afa354035ee5fe8e7caf466c23127744eaf0213768188da1b9a8494"
+    },
+    {
+      "path": "work/workbench-fit-20261116/inspect-package-r1.json",
+      "bytes": 880,
+      "sha256": "7793d029e1cf7db63293c94b4b18dbbf00c4c1cdf0e2aa186e76fb8d5eb73bd6"
+    },
+    {
+      "path": "work/workbench-fit-20261116/inspect-package-r1.log",
+      "bytes": 3649,
+      "sha256": "a05d3865adc84f5c8db1de4f3de5d06c244896a95469321568b3dcaef63bf622"
+    },
+    {
+      "path": "work/workbench-fit-20261116/macos-job-log-r1.clean.txt",
+      "bytes": 847917,
+      "sha256": "a529e426036bdbdb087c203ba48e4695d9479c3230cb233c125a71b739d8476a"
+    },
+    {
+      "path": "work/workbench-fit-20261116/macos-job-log-r1.json",
+      "bytes": 808,
+      "sha256": "179fd30fb755362334fd96804126a79f8e840611d39e39d0b6bcc98a3e70bb8f"
+    },
+    {
+      "path": "work/workbench-fit-20261116/macos-job-log-r1.log",
+      "bytes": 849626,
+      "sha256": "c59bdada5fb2fcb0419981761116ba2bd08fd3d4acab012f1d0311cb46543468"
+    },
+    {
+      "path": "work/workbench-fit-20261116/native-access-blocked-r1.json",
+      "bytes": 879,
+      "sha256": "ea2cd0f1edec62dee9b572f4120b511c76633b410449c723404561c1ffa82ee4"
+    },
+    {
+      "path": "work/workbench-fit-20261116/native-app-r1.json",
+      "bytes": 995,
+      "sha256": "26f647dff0e971b019d6cce25b0d387d18d5bc6199d182bbdc89d10ac0e9b634"
+    },
+    {
+      "path": "work/workbench-fit-20261116/native-app-r1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "work/workbench-fit-20261116/native-runtime-cleanup-r1.json",
+      "bytes": 491,
+      "sha256": "c376dbc8330d7eebe817bc91a3326d6c8a3eee23cad102c73e45e8afd61fe3ff"
+    },
+    {
+      "path": "work/workbench-fit-20261116/normal-package-binding-r1.json",
+      "bytes": 604,
+      "sha256": "e5591982cf24a4d3fe2e1df6bef4a67e7dabd8ed0b6fdcff2f9f0af3c99114dd"
+    },
+    {
+      "path": "work/workbench-fit-20261116/normal-release-build-r1.json",
+      "bytes": 814,
+      "sha256": "588e261bf699683fe8d98e46734e56e8c27a62f5e7a26ff361652efd48d5a088"
+    },
+    {
+      "path": "work/workbench-fit-20261116/normal-release-build-r1.log",
+      "bytes": 188,
+      "sha256": "31a9a102aa849eb831eb7b12984f9324bf22d61c7aa6613a9f229829bf7f24ef"
+    },
+    {
+      "path": "work/workbench-fit-20261116/owned-duplicate-cleanup-r1.json",
+      "bytes": 1106,
+      "sha256": "97ea540bf4480b2102f1244c70e18fe4a4f6d2b6f8a5425527af721d59c36823"
+    },
+    {
+      "path": "work/workbench-fit-20261116/package-r1.json",
+      "bytes": 1046,
+      "sha256": "4edc570225250955682d77e999013adc5f627c65995e12d53d92db0d0bb9c429"
+    },
+    {
+      "path": "work/workbench-fit-20261116/package-r1.log",
+      "bytes": 209,
+      "sha256": "f0b1f184fcc9a161d42fbb0d62c95c827801dce5f2a0f8d372810a3409906cda"
+    },
+    {
+      "path": "work/workbench-fit-20261116/seal_workbench.py",
+      "bytes": 2734,
+      "sha256": "6b3f24ab095511b45fd6e0f99d638c4fa8b94e4fe72fc26b9c3e85714f56ef18"
+    },
+    {
+      "path": "work/workbench-fit-20261116/source-ci-final-r1.json",
+      "bytes": 807,
+      "sha256": "bc6ee71830b4261612c68691f0cffd2620e37a95b118bb105d22ed34396dcc28"
+    },
+    {
+      "path": "work/workbench-fit-20261116/source-ci-final-r1.log",
+      "bytes": 7307,
+      "sha256": "5587f57d4066acef505c67d90ed59dcf7b10470b5d32639ec25b2c4256767029"
+    },
+    {
+      "path": "work/workbench-fit-20261116/source-ci-snapshot-r2.json",
+      "bytes": 808,
+      "sha256": "f2f3acc45f49bd05e47804a71150fff44e38b81e816bf711533a4b6da85e6c37"
+    },
+    {
+      "path": "work/workbench-fit-20261116/source-ci-snapshot-r2.log",
+      "bytes": 6888,
+      "sha256": "ad267f54afc73bc4123e45cc3ce19e1bd2f3af6d7ee27df92b62de0cd65eed21"
+    },
+    {
+      "path": "work/workbench-fit-20261116/source-ci-summary-r1.json",
+      "bytes": 39181,
+      "sha256": "f99712e14f86a0c34e3869e7013595a0e2053b937bc2aa2680e4663c588741d2"
+    },
+    {
+      "path": "work/workbench-fit-20261116/source-ci-watch-r1.json",
+      "bytes": 798,
+      "sha256": "945144a8f50eb936425ef4ce15a5bca72e564f792d3346bddc7f2c2d519f589d"
+    },
+    {
+      "path": "work/workbench-fit-20261116/source-ci-watch-r1.log",
+      "bytes": 102889,
+      "sha256": "950de17eb647720dfa6238113c2beba0ff0cd29be9e1f89ef32403c89ac99c35"
+    },
+    {
+      "path": "work/workbench-fit-20261116/source-r2/crates/keelshell-app/src/files/archive_tests.rs",
+      "bytes": 32908,
+      "sha256": "b41d222aca93f1ed9f21955b598580c6c2c647b8720b27aeed7c339d76477fb8"
+    },
+    {
+      "path": "work/workbench-fit-20261116/source-r2/crates/keelshell-app/src/files/fixture_isolation_tests.rs",
+      "bytes": 14037,
+      "sha256": "617b7a72d4a6d5327d74b5829cb435bc00dae83f24b708d844ccd221005a5e78"
+    },
+    {
+      "path": "work/workbench-fit-20261116/source-r2/crates/keelshell-app/src/files/transfer_tests.rs",
+      "bytes": 73659,
+      "sha256": "1a6be63c495d6f3729c493db074da4822addf5e7363c7ca91d494008e70e0aa3"
+    },
+    {
+      "path": "work/workbench-fit-20261116/source-r2/crates/keelshell-app/src/workspace/tests/workbench_layout.rs",
+      "bytes": 45276,
+      "sha256": "f9aeec31aff3028db0398a74a630ddc8cb5365c75ff28cf38bb9246687db5ea0"
+    },
+    {
+      "path": "work/workbench-fit-20261116/source-r2/crates/keelshell-app/src/workspace/view.rs",
+      "bytes": 92918,
+      "sha256": "aa3827cbb53ec180e86d75b705defb524ccbf1bc6b9f0cab97d2bbbd8e4ae2db"
+    },
+    {
+      "path": "work/workbench-fit-20261116/source-r2.diff",
+      "bytes": 14451,
+      "sha256": "af11356888187809402a59931ee76494ac11c93b6958f98ff0f18e2afd43dd0d"
+    },
+    {
+      "path": "work/workbench-fit-20261116/toolbar-focused-r1.json",
+      "bytes": 931,
+      "sha256": "b79679b226566d3ac58d158a9fea7a7a0f56a0e6469f1facaac09c0b5ceafe1e"
+    },
+    {
+      "path": "work/workbench-fit-20261116/toolbar-focused-r1.log",
+      "bytes": 1461,
+      "sha256": "99907b8ad04ba0a320711f7169b1ede9feb7aba5419bd468d340bf827166f6a4"
+    },
+    {
+      "path": "work/workbench-fit-20261116/toolbar-focused-r2.json",
+      "bytes": 926,
+      "sha256": "6fa4be26bf142fca853d0dc6ae4ffe8dff0d6b558f37d18dc340502468b81f60"
+    },
+    {
+      "path": "work/workbench-fit-20261116/toolbar-focused-r2.log",
+      "bytes": 903,
+      "sha256": "65191153b921a0b1fa5c01c60bf1f8b84e3790256b1c142f41393b29426557a0"
+    },
+    {
+      "path": "work/workbench-fit-20261116/toolbar-inputs-r1.json",
+      "bytes": 716,
+      "sha256": "7ad072f708785653473851d96dd853754de7a7db64d454d980f111bed10ddac6"
+    },
+    {
+      "path": "work/workbench-fit-20261116/ubuntu-job-log-r1.clean.txt",
+      "bytes": 868910,
+      "sha256": "bdd8a6b5c77fd61974f5e5c6864f342fca861fefe3d8f5a3c735c1cb0d3d50c9"
+    },
+    {
+      "path": "work/workbench-fit-20261116/ubuntu-job-log-r1.json",
+      "bytes": 808,
+      "sha256": "9a3db6bd0cfaadea6417aeb4a51150217509988819d932034498f07b91e6b8e4"
+    },
+    {
+      "path": "work/workbench-fit-20261116/ubuntu-job-log-r1.log",
+      "bytes": 870595,
+      "sha256": "b3bad381803b6d2c7433b637ce0c74afb74245430f844d945bc6b3202d8c0e7c"
+    },
+    {
+      "path": "work/workbench-fit-20261116/windows-failure-summary-r1.json",
+      "bytes": 9244,
+      "sha256": "eb13259c057e49ac92874d902c134949daf64da792b03fa39a35bc86a1fcdce8"
+    },
+    {
+      "path": "work/workbench-fit-20261116/windows-job-log-r1.clean.txt",
+      "bytes": 443184,
+      "sha256": "84ae8c71e3ec2ce5351cea7e281bc10d462d356e10f7ebe4e93de180c593b857"
+    },
+    {
+      "path": "work/workbench-fit-20261116/windows-job-log-r1.json",
+      "bytes": 812,
+      "sha256": "44ffdcf9ae944a1eaa56ad44416e4ffdeb22692516d35136ee06a9903f8ad8db"
+    },
+    {
+      "path": "work/workbench-fit-20261116/windows-job-log-r1.log",
+      "bytes": 443728,
+      "sha256": "b7207f60cf393ad66c6694215992c5b7ce5190b4fc64b77d9d08761544fad00b"
+    },
+    {
+      "path": "work/workbench-fit-20261116/workbench-layout-r1.json",
+      "bytes": 837,
+      "sha256": "1bd2e67ff79ef16edbdd7688a33818b93adba974e1b08de13b4cb0abe15a4024"
+    },
+    {
+      "path": "work/workbench-fit-20261116/workbench-layout-r1.log",
+      "bytes": 2050,
+      "sha256": "457832032b03eb5ea7b3995efa4c527944f1836930b9a1a2e27a08c2c9a69b4b"
+    }
+  ],
+  "retained": [
+    "work/workbench-fit-20261116/docs-delivery-r2.json",
+    "work/workbench-fit-20261116/evidence-commit-bind-r1.json",
+    "work/workbench-fit-20261116/evidence-commit-bind-r1.log",
+    "work/workbench-fit-20261116/evidence-verify-r1.json",
+    "work/workbench-fit-20261116/evidence-verify-r1.log",
+    "work/workbench-fit-20261116/package-r1/KeelShell.app/Contents/Info.plist",
+    "work/workbench-fit-20261116/package-r1/KeelShell.app/Contents/MacOS/keelshell-app",
+    "work/workbench-fit-20261116/package-r1/KeelShell.app/Contents/MacOS/keelshell-mcp",
+    "work/workbench-fit-20261116/package-r1/KeelShell.app/Contents/PkgInfo",
+    "work/workbench-fit-20261116/package-r1/KeelShell.app/Contents/Resources/KeelShell.icns",
+    "work/workbench-fit-20261116/package-r1/package-manifest.json",
+    "work/workbench-fit-20261116/run_command.py",
+    "work/workbench-fit-20261116/seal_native_ci.py",
+    "work/workbench-fit-20261116/source-ci-jobs-query-r1.json",
+    "work/workbench-fit-20261116/source-ci-jobs-r1.json",
+    "work/workbench-fit-20261116/source-ci-query-r1.json",
+    "work/workbench-fit-20261116/source-ci-runs-r1.json",
+    "work/workbench-fit-20261116/source-delivery-r1.json"
+  ],
+  "normal_package_retained": true,
+  "other_checkouts_touched": false,
+  "active_agents": 0
+}

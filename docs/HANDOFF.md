@@ -9,7 +9,7 @@
 - 用户已确认远端恢复，完成的功能批次及时提交并推送，读取本地、tracking、
   远端 SHA；不强推。当前分支为 `feature/editor-unicode-codec-20261114`。
   最近已实际读回三方相等的源码提交是
-  `8c07d61009dba14f989dd0c00a2a370dc7a2d37b`，读回时工作区干净。
+  `8527cf2af581e50ac0e1f795176ab69737730e18`，读回时工作区干净。
   `origin/main` 另有独立状态文档，不能直接覆盖。
 - 本批源码及证据已在 `878f13b` 推送原功能分支；临时
   `feature/archive-deadline-clock-20261116` 已删除，本地/tracking/远端均 absent。
@@ -49,6 +49,10 @@ Windows session cross-Clippy 实际 `101/reaped/6.879s`，依赖缺 Windows SDK
 `windows.h`；Windows 类型检查未完成、实际执行 0，须由新精确 CI 验证。
 新非作者三文件静态 APPROVE、P0–P3 全 0、36/36 静态核验通过，
 独立 Rust/PowerShell/native 执行 0，已关闭，未签 Windows 通过。
+三文件及 46 成员证据已在 `8527cf2af581e50ac0e1f795176ab69737730e18` 推送，三方一致；
+精确源码绑定实际 `0/reaped/6.583s`，719 输入/46 成员零 mismatch。
+新 Quality `43854113236` 运行中，Windows `133253865501` 执行新归档预检；
+旧四败保持，不能将当前启动状态签成通过。已核对后回收 67 文件/5,974,402 字节。
 见[本批记录](testing/records/2026-11-16-windows-archive-preflight.md)。
 
 工具栏 1800 紧凑断点、五文件诊断与 44 成员证据已在 `8c07d61` 推送；
@@ -297,10 +301,11 @@ Python `290 run / 1 skip`；app 1,341 名逐项一致。源码 `76b8253` 与后�
 所测三主题/macOS 范围见新记录；不能用该包代签后续工作区修订。
 本批与游标批次原目录已在持久归档和精确 Git 树绑定后回收，不能再依赖。
 前批交付/CI、正常包、原生复核、Windows 库存及封存目录均已持久绑定后清理。
-当前活动目录为 `work/workbench-fit-20261116/`，新非作者原件为
-`work/workbench-fit-review-20261116/`（该 reviewer 已关闭）；
-Windows-only 作者材料为 `work/windows-extraction-stage-candidate-20261116/`。
-正常包仍保留给锁屏解除后的原生复核。
+当前活动目录为 `work/windows-archive-preflight-integration-20261116/`，
+新旧作者和非作者材料已封存，67 份重复文件已核对后回收；无活动 agent。
+`work/workbench-fit-20261116/package-r1/` 的正常包仍保留供解锁后的原生复核，
+SHA 为 `3b127956723c187943236537c9c49814e99866834a9d01a2468d85cf751dd19f`。
+该包绑定 8c 工程输入；不把源码测试/CI 增量或旧原生观察移签为当前通过。
 旧 `work/windows-native-phases-integration-20261116/` 已回收。
 前批父命令回执目录 `work/archive-deadline-delivery-20261116/` 的 11 文件、
 23,386 字节已在 `878f13b` 归档后回收。

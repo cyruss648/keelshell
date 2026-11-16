@@ -18,6 +18,8 @@ app `13/0/0`、宿主发布 `1/0/0`，14 名逐项匹配、719 输入零漂移�
 Windows cross-Clippy 因缺 SDK `windows.h` 退出 101，未完成 Windows 检查；
 本批完整产品 gate/Windows 实际执行未签。Mac 仍锁屏，原生工具栏 P2 开放。
 新非作者三文件静态批准、P0–P3 全 0，36/36 静态核验通过；独立运行 0，已关闭。
+三文件及 46 成员证据已在 `8527cf2af581e50ac0e1f795176ab69737730e18` 推送，三方一致；
+新精确 Quality `43854113236` 运行中，Windows 后端预检待实测终态。
 见[本批记录](testing/records/2026-11-16-windows-archive-preflight.md)。
 
 ## 2026-11-16 工具栏宽度与文件诊断

@@ -1,0 +1,22 @@
+fatal: ambiguous argument '8527cf2a0d18396e85da38dacfa8dcb5b32651c2^{commit}': unknown revision or path not in the working tree.
+Use '--' to separate paths from revisions, like this:
+'git <command> [<revision>...] -- [<file>...]'
+Traceback (most recent call last):
+  File "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/docs/testing/records/2026-11-16-windows-archive-preflight-evidence/verify.py", line 126, in <module>
+    main()
+    ~~~~^^
+  File "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/docs/testing/records/2026-11-16-windows-archive-preflight-evidence/verify.py", line 35, in main
+    require(git("rev-parse", args.source + "^{commit}").decode().strip() == args.source,
+            ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/docs/testing/records/2026-11-16-windows-archive-preflight-evidence/verify.py", line 26, in git
+    return subprocess.check_output(["git", *args], cwd=ROOT, timeout=60)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.15/3.15.2/Frameworks/Python.framework/Versions/3.15/lib/python3.15/subprocess.py", line 587, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+               **kwargs).stdout
+               ^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.15/3.15.2/Frameworks/Python.framework/Versions/3.15/lib/python3.15/subprocess.py", line 692, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command ['git', 'rev-parse', '8527cf2a0d18396e85da38dacfa8dcb5b32651c2^{commit}'] returned non-zero exit status 128.

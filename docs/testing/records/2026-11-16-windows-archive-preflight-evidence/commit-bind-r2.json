@@ -1,0 +1,27 @@
+{
+  "observed_exit": 0,
+  "controller_exit": 0,
+  "timed_out": false,
+  "interrupted": false,
+  "terminal": {
+    "direct_reaped": true,
+    "active_processes": 0,
+    "pipes_drained": true,
+    "errors": []
+  },
+  "errors": [],
+  "command": [
+    "/opt/homebrew/opt/python@3.15/bin/python3.15",
+    "docs/testing/records/2026-11-16-windows-archive-preflight-evidence/verify.py",
+    "--source",
+    "8527cf2af581e50ac0e1f795176ab69737730e18"
+  ],
+  "seconds": 6.583139249996748,
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "cargo_target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target",
+  "cargo_owner_checkout_unchanged": true,
+  "wrapper_stdout": "",
+  "wrapper_stderr": "",
+  "log_bytes": 309,
+  "log_sha256": "9112191479be4203b7b9fdaea68f40a12882489e42911fdd69acc4f6fcbbaa8f"
+}

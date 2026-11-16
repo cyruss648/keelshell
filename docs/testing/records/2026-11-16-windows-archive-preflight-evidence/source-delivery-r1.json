@@ -1,0 +1,10 @@
+{
+  "local": "8527cf2af581e50ac0e1f795176ab69737730e18",
+  "tracking": "8527cf2af581e50ac0e1f795176ab69737730e18",
+  "remote": "8527cf2af581e50ac0e1f795176ab69737730e18",
+  "equal": true,
+  "worktree_clean_at_readback": true,
+  "status": "",
+  "branch": "feature/editor-unicode-codec-20261114",
+  "pushed": true
+}
