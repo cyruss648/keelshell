@@ -1,0 +1,25 @@
+{
+  "observed_exit": 0,
+  "controller_exit": 0,
+  "timed_out": false,
+  "interrupted": false,
+  "terminal": {
+    "direct_reaped": true,
+    "active_processes": 0,
+    "pipes_drained": true,
+    "errors": []
+  },
+  "errors": [],
+  "command": [
+    "python3",
+    "docs/testing/records/2026-11-16-windows-fixture-publication-evidence/ci-completion/verify.py"
+  ],
+  "seconds": 6.801697166003578,
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "cargo_target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target",
+  "cargo_owner_checkout_unchanged": true,
+  "wrapper_stdout": "",
+  "wrapper_stderr": "",
+  "log_bytes": 867,
+  "log_sha256": "abf3d27e7584d12f52fed551b9abe9483caacc95833a1c297f6e014ccd3f8d6d"
+}

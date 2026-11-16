@@ -112,3 +112,67 @@ GUI 操作／截图 0，英文工具栏 P2 和完整桌面矩阵保持开放。
 在精确 Git 原件核对后回收共 66,095 字节，Ramanujan、Boyle 均已关闭。
 旧 ZIP／准备候选与 Turing 副本的 58 文件清理按上一批记录保持。
 没有新建用户 chat、工作树、分支或容器。
+
+纯文档提交 `ebefc90e850a4843475da01587b771ab1d244f11` 已普通推送，
+本地／tracking／远端完整 SHA 一致、读回干净；13 项 docs 文件逐字节绑定精确 Git。
+新非作者 Beauvoir 对这 13 项及两个补充完成限定复核：APPROVE、P0–P3 全 0，
+两个 verifier 实际退出 0，分别 7.399527s、7.424355s；本地链接／anchor 268 项无坏链。
+没有运行 Cargo／测试、写 target 或查询网络，不批准当前 CI/native／完整产品。
+已收取并关闭。原报告、辅助脚本失败、精确 SHA 和文档交付原件保存于
+[17 成员后续补充](2026-11-16-windows-fixture-publication-evidence/delivery/followup/README.md)。
+
+该补充及既有原件在删除前均从真实 Git blob 逐字节核对；
+新原件先进入 index 和不可变 Git tree，随后回收旧 Zmodem 活动目录及本次 reviewer
+两个报告副本，共 71 文件、9,100,899 字节。原失败、诊断及中间快照保留，
+r3 解析器已复制到当前活动批，共享 target 目录身份不变。
+
+## 当前 ee3 精确 CI 终态
+
+Quality `43880245383` 绑定工程源码
+`ee3ad7320e90f40c9d777c500543cc6e909d0484`，已 completed/success。
+watch 实际 `0/reaped/1893.751s`，没有超时／中断／取消或重放。
+Windows `133343901451`、macOS `133343901229`、Ubuntu `133343901650`
+全部完整 gate success；macOS／Ubuntu 真实 OpenSSH 也 success。
+
+| 范围 | Windows | macOS | Ubuntu |
+| --- | --- | --- | --- |
+| Python 主 discovery run / skipped | `293 / 34` | `293 / 2` | `293 / 2` |
+| 普通 Rust passed / failed / ignored | `3212 / 0 / 46` | `3225 / 0 / 48` | `3218 / 0 / 49` |
+| app passed / failed / ignored | `1330 / 0 / 2` | `1341 / 0 / 2` | `1342 / 0 / 2` |
+| app 运行声明／唯一结果 | `1332 / 1332` | `1343 / 1343` | `1344 / 1344` |
+| rustdoc passed / failed / ignored | `14 / 0 / 0` | `14 / 0 / 0` | `14 / 0 / 0` |
+
+各平台 92 个普通套件、全部文档子运行都保持声明数／唯一结果／summary 相等。
+CI app 没有独立 `--list`，Python 没有逐名 `-v`；不补填这些不存在的证据。
+macOS／Ubuntu 的 Rust 内单列 30 项 Python archive helper 不加入主 discovery 或普通 Rust 总数，
+Windows 无该段摘要；
+三个 Rust controller 与预检也不重复累加进这些数字。
+Windows codec 41／session 332 名具有独立库存，逐项匹配
+`41/0/0`、`329/0/3 ignored`，其中 45 名 Zmodem local 为 `43/0/2 ignored`。
+
+Windows 七类实际 tree 控制均使用原始 native handles、确认身份后才 ACK；
+退出 7 的父进程继续保留 `observed_exit=controller_exit=7`，即使 descendant pipe 超时。
+staged 模式确实观察并拒绝空／部分记录；所有控制在返回前已有父子原对象 TERMINAL，
+direct reaped、active 0、pipes drained，无 ownership 错误。
+native nested Job barrier 的两个原对象在关闭 admission 前后均 LIVE，
+后建 CreateProcess 被拒绝（Win32 1816）、marker 未执行；最终两个原对象 TERMINAL，
+controller／observed exit 0、active 0、pipes drained。
+新实际 share=0 文件反例纳入 Windows 完整 discovery；这里只签完整集合覆盖，
+不虚构独立逐名 stdout。原 958 的读取失败和本地负例继续保留。
+
+[36 成员终态封存](2026-11-16-windows-fixture-publication-evidence/ci-completion/README.md)
+保存三个完整原日志、API 快照／最终元数据、watch、派生结果、解析器和诊断。
+验证 `0/reaped/6.699s`、719 精确源码输入零 mismatch、全部计数重派生相等，
+测试重放 0。新非作者 Parfit 独立重算全部计数与 Windows 控制，限定 APPROVE、P0–P3 全 0，
+14 项输入前后哈希一致；没有 Cargo／测试／CI 查询／target 写入，已关闭。
+exclusive 新例的证据由源码 collection、实际 Windows skip 条件和完整 discovery 成功共同支持，
+不补写独立逐名回执。原 reviewer 读回比较诊断和最终成功回执均保留。
+这关闭本片完整三平台质量门禁缺口，不关闭桌面、独立协议 peer、完整产品或发行验收。
+
+[独立复核与清理补充](2026-11-16-windows-fixture-publication-evidence/ci-completion/independent-review/README.md)
+保存两份原报告及先前派生结果。所有原件先与真实 Git blob 匹配，
+再回收本批运行／源码副本及 reviewer 两原件，共 98 文件、7,481,351 字节，
+其中一个为生成的 Python bytecode；其余均有逐字节持久原件。
+正常包全部六文件前后摘要一致，共享 target 目录身份不变。
+加此前 71 文件，本轮共回收 169 文件、16,582,250 字节；
+活动目录只保留正常包及最后交付命令的工装／回执，后台 CI watcher 已实际 reap。

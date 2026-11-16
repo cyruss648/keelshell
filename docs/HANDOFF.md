@@ -27,9 +27,25 @@
 
 当前工程 `ee3ad7320e90f40c9d777c500543cc6e909d0484` 已普通推送，三方一致、读回干净。
 25 成员／719 输入的精确 Git 绑定 `0/reaped/6.641s`、零 mismatch。
-新 Quality `43880245383` 运行中：Windows `133343901451` 的三项预检 step success，
-完整 gate 进行中；macOS `133343901229`、Ubuntu `133343901650` 也在完整 gate。
-新具体库存、293 项 Python、exclusive file 与 Job barrier 结果仍待终态原日志。
+新 Quality `43880245383` 已 completed/success；Windows `133343901451`、
+macOS `133343901229`、Ubuntu `133343901650` 的完整 gate 均 success，
+macOS／Ubuntu 真实 OpenSSH 也 success；watch `0/reaped/1893.751s`。
+
+| 平台 | 普通 Rust passed / failed / ignored | app passed / failed / ignored | Python run / skipped | rustdoc passed |
+| --- | --- | --- | --- | --- |
+| Windows | `3212 / 0 / 46` | `1330 / 0 / 2` | `293 / 34` | 14 |
+| macOS | `3225 / 0 / 48` | `1341 / 0 / 2` | `293 / 2` | 14 |
+| Ubuntu | `3218 / 0 / 49` | `1342 / 0 / 2` | `293 / 2` | 14 |
+
+各平台 92 个普通套件和全部 rustdoc 子运行的声明／唯一结果／摘要相等；
+CI app 无独立 `--list`，Python 无逐名 `-v`，不能补写这些不存在的证据。
+Windows codec／session 预检分别有独立 41／332 名库存，全部逐项相等。
+七类真实 tree 保持原句柄、身份先于 ACK、exit7 与完整清理；
+native nested Job barrier 保持前后两个 LIVE，拒绝后建子进程，最终两个原对象 TERMINAL，
+controller `0`、active `0`、pipes drained。share=0 新例由完整 discovery 覆盖，
+不另填单例逐名回执。[36 成员终态](testing/records/2026-11-16-windows-fixture-publication-evidence/ci-completion/README.md)
+验证 `0/reaped/6.699s`、零 mismatch；Parfit 独立重算批准终态证据，P0–P3 全 0，
+14 项原件哈希不变，没有 Cargo／测试／target 写入，已关闭。
 
 前一源码 `95813a76f0ec9b59fd043cd982e33cdc01dd69f8` 的 Quality `43873806902`
 已 completed/failure，watch `1/reaped/1576.244s`，未取消／重跑。
@@ -47,7 +63,7 @@ CI app 只核对运行声明数与逐名结果，独立 `--list` 库存来自宿
 [根发布终态](testing/records/2026-11-16-windows-archive-root-publication.md#精确-ci-终态)。
 原失败、UNKNOWN 与封存时点保持，不追溯修改成后续通过。
 
-## 活动批次：Windows 工装发布完成屏障
+## 本批工程收口：Windows 工装发布完成屏障
 
 ZIP 私有权限与 Zmodem 两新断言已在上述精确 Windows runner 通过；
 原 958 宿主完整门禁为普通 Rust `3225/0/48 ignored`、rustdoc `14/0/0`、
@@ -66,7 +82,8 @@ Ramanujan 补查 93 成员／719 Git 输入、r2 摘要及验收记录也限定 
 不将原 958 成绩移签为新 719 输入全量通过。
 新非作者 Boyle 限定 APPROVE、P0–P3 全 0，独立专项 `72 run/70 passed/2 skipped/exit 0`，
 unittest 6.134s／外层 6.203s，实际 waited；辅助检索诊断原文保留，已关闭。
-25 成员封存已随工程推送；新候选 Windows 的运行签署仍待当前精确 CI。
+25 成员封存已随工程推送；后续当前精确三平台完整 CI 已通过，
+原封存时 Windows 执行 0 的事实不重写。
 另有[26 成员交付补充](testing/records/2026-11-16-windows-fixture-publication-evidence/delivery/README.md)
 保存源码 push／三方读回、正常包摘要、清理与 CI 运行中快照；不含二进制或活动 watch。
 详见[ADR 0150](adr/0150-fixture-publication-readiness.md)和
@@ -74,10 +91,11 @@ unittest 6.134s／外层 6.203s，实际 waited；辅助检索诊断原文保留
 
 ## 下一步与资源
 
-1. 原 `43873806902` 三平台终态已收齐，工装片已复核、封存、推送和三方读回；
-   收取当前 `43880245383`，不重复未变 Rust 输入的宿主完整测试。
-2. 跟进当前精确 CI 的 293 项 Python 与 Windows 原七类 tree／实际 exclusive 文件反例，
-   以及完整三平台 gate／OpenSSH；已过的 codec、session 与两新断言按原精确输入保留。
+1. 当前 `43880245383` 三平台终态、原日志、独立窄复核及自有副本清理已完成；
+   本批工程／源码批准／CI 成功各自有精确记录，后续按当前路线继续产品验收。
+   不重复未变 Rust 输入的宿主完整测试，不重放当前成功 CI。
+2. Windows 源码完整质量门禁现已通过；继续真实桌面、协议 peer、远端平台及发行缺口，
+   不把 runner 测试和正常包结构扩大成原生桌面／完整产品验收。
 3. 桌面可用后复核英文工具栏 P2，再补主题／尺寸／双语／完整键盘／IME／辅助技术。
 4. 继续路线中的外部 AI、隧道、配置同步、高级传输和发行矩阵；不把阶段测试写成完整产品完成。
 5. 关闭自有 agent，核对持久原件后回收已无用途的副本；保留其他任务的工作树、分支和容器。
@@ -92,6 +110,18 @@ unittest 6.134s／外层 6.203s，实际 waited；辅助检索诊断原文保留
 已在精确 Git 封存核对后回收，共 58 文件／1,040,297 字节；
 保留必要交付和旧 CI 活动原件。Ramanujan、Boyle 均已收取并关闭；
 新报告副本已在精确 Git 核对后回收 4 文件／66,095 字节。
+纯文档 `ebefc90e850a4843475da01587b771ab1d244f11` 已推送、三方一致；
+新非作者 Beauvoir 限定批准 13 项文档／两个补充，P0–P3 全 0，已关闭。
+[17 成员后续补充](testing/records/2026-11-16-windows-fixture-publication-evidence/delivery/followup/README.md)
+保存原报告和文档交付；旧 Zmodem 活动目录及本次报告副本在 Git 原件核对后
+已回收 71 文件／9,100,899 字节，r3 解析器已复制到当前活动目录。
+旧 Zmodem 活动路径不可再使用；共享 target 和正常包保持。
+随后 Parfit 对当前精确 CI 限定 APPROVE、P0–P3 全 0，已关闭；
+[8 成员复核补充](testing/records/2026-11-16-windows-fixture-publication-evidence/ci-completion/independent-review/README.md)
+保存原报告和旧派生结果，本批副本再回收 98 文件／7,481,351 字节；
+共 169 文件／16,582,250 字节，正常包六文件前后摘要与共享 target 目录身份不变。
+活动目录现保留正常包及最后交付命令的工装／回执，r3 与其他解析器只从封存取用；
+CI watcher 已实际 reap，没有活动 Cargo 或自有 reviewer。
 没有新建用户 chat、worktree、分支或容器。
 
 本次再次原生 inventory 仍明确报告 Mac 锁屏且自动解锁失败；GUI 操作／截图 0。

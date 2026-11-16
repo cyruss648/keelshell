@@ -1,0 +1,68 @@
+{
+  "schema": "keelshell.windows-fixture-ci-review.v1",
+  "source": "ee3ad7320e90f40c9d777c500543cc6e909d0484",
+  "run": 43880245383,
+  "verdict": "APPROVE",
+  "finding_counts": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 0,
+    "P3": 0
+  },
+  "count": 8,
+  "archive_bytes": 264026,
+  "archive_sha256": "2dcb81581dedf5b5246b6bb43f8d1dd08490a2bebb6766a17aafac011b7dea15",
+  "uncompressed_bytes": 1589747,
+  "entries": [
+    {
+      "path": "review/REPORT.md",
+      "source_path": "work/windows-fixture-ci-review-20261116/REPORT.md",
+      "bytes": 8348,
+      "sha256": "76b22280377284ce8396a20968e61a27a42a07004b407c4b6bdfaa569b7218bd"
+    },
+    {
+      "path": "review/receipt.json",
+      "source_path": "work/windows-fixture-ci-review-20261116/receipt.json",
+      "bytes": 43568,
+      "sha256": "753a9f482ad713404011431bf0b8152a4022f1b238b4214d24d66a25b4bcf093"
+    },
+    {
+      "path": "derivation/docs-check-r2.json",
+      "source_path": "work/windows-fixture-publication-integration-20261116/docs-check-r2.json",
+      "bytes": 186,
+      "sha256": "201ebc2fd40949ece20ba46a53b0ace8cda7f89023c0c5c6d3eee18dfce1e279"
+    },
+    {
+      "path": "derivation/prior-source-macos-summary-r4.json",
+      "source_path": "work/windows-fixture-publication-integration-20261116/prior-source-macos-summary-r4.json",
+      "bytes": 719058,
+      "sha256": "c52508d413f2612d814d28c1c022b5634ddd22e891b9a7a1641682c9fa51b4f4"
+    },
+    {
+      "path": "derivation/prior-source-ubuntu-summary-r4.json",
+      "source_path": "work/windows-fixture-publication-integration-20261116/prior-source-ubuntu-summary-r4.json",
+      "bytes": 718140,
+      "sha256": "96e5b1168d01e6df1dc9ab22290a25a5ca62cff47e330f3a7084389c9c7d1e5f"
+    },
+    {
+      "path": "derivation/prior-source-windows-summary-r4.json",
+      "source_path": "work/windows-fixture-publication-integration-20261116/prior-source-windows-summary-r4.json",
+      "bytes": 95444,
+      "sha256": "40de4277c3eb87470a8bb6dbd7b3bd56b9756658c0e1befd648ddcee37a82c04"
+    },
+    {
+      "path": "derivation/seal_delivery.py",
+      "source_path": "work/windows-fixture-publication-integration-20261116/seal_delivery.py",
+      "bytes": 2466,
+      "sha256": "43afd16aacd8d10896439e471db7025905335cf0a094d648bd0bfdf40d8099b1"
+    },
+    {
+      "path": "tools/seal_ci_review.py",
+      "source_path": "work/windows-fixture-publication-integration-20261116/seal_ci_review.py",
+      "bytes": 2537,
+      "sha256": "8580fbf552c7666110304ed2da00466c56d489a95a9cea01c1a0f47989d6848a"
+    }
+  ],
+  "tests_replayed": 0,
+  "native_desktop_acceptance": false
+}

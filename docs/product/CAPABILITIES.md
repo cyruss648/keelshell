@@ -12,15 +12,26 @@ Two controlled counterexamples failed as expected, and independent review
 approved with no P0–P3 and a separate 72-case/two-skipped run. No unchanged full
 Rust suites were repeated or relabelled as new-input full-gate acceptance.
 
-Exact Quality `43880245383` is in progress. Windows' three preflight steps
-succeeded, but the new Python cases and full gate still await complete logs.
+Exact Quality `43880245383` completed with success on Windows, macOS and Ubuntu;
+macOS/Ubuntu real OpenSSH checks also succeeded. Ordinary Rust passed/failed/ignored
+counts are 3212/0/46, 3225/0/48 and 3218/0/49 respectively, with 14 doctests each.
+App counts are 1330/0/2, 1341/0/2 and 1342/0/2. Python discovery ran 293 cases on
+each platform, skipping 34 on Windows and two on each other platform.
+All seven actual Windows tree controls retained original handles, identity-before-ACK,
+exit7 and complete cleanup. The native nested Job barrier retained both original LIVE
+objects across admission closure, rejected late process creation and settled with both
+original objects TERMINAL, controller exit zero and drained pipes.
+The exclusive-file case is covered by full discovery; no separate per-case verbose
+receipt is claimed. The 36-member completion seal rederives all counts and binds the
+exact source; no tests were replayed for that verification.
 The prior `95813a7` run completed with the recorded Windows Python failure;
 macOS/Ubuntu full gates and real OpenSSH succeeded, with ordinary Rust
 3225/0/48 and 3218/0/49, plus 14 doctests each. CI app counts are declared runs
 matched to unique results, not an independent compiled `--list` inventory.
 The new arm64 macOS package passed structural checks only; native launch,
 desktop checks, installation, signing and notarization are not signed off.
-See the [fixture record](../testing/records/2026-11-16-windows-fixture-publication.md)
+See the [fixture record](../testing/records/2026-11-16-windows-fixture-publication.md),
+the [current completion](../testing/records/2026-11-16-windows-fixture-publication-evidence/ci-completion/README.md)
 and [prior CI completion](../testing/records/2026-11-16-windows-zmodem-test-contract-evidence/ci-completion/README.md).
 
 ## 2026-11-16: Windows Zmodem rename test contract

@@ -1,0 +1,127 @@
+{
+  "schema": "keelshell.windows-fixture-delivery-followup.v1",
+  "engineering_source": "ee3ad7320e90f40c9d777c500543cc6e909d0484",
+  "docs_source": "ebefc90e850a4843475da01587b771ab1d244f11",
+  "count": 17,
+  "archive_bytes": 17515,
+  "archive_sha256": "bf7581136d0706e00965fe9cf65149c0c3d70b9601d9b38739380f3584d94776",
+  "uncompressed_bytes": 80910,
+  "entries": [
+    {
+      "path": "delivery/docs-commit-r1.json",
+      "source_path": "work/windows-fixture-publication-integration-20261116/docs-commit-r1.json",
+      "bytes": 802,
+      "sha256": "47f01eda71d342f4a268645cc362695fe8af5c21ed8382a60dde761edffad1b5"
+    },
+    {
+      "path": "delivery/docs-commit-r1.log",
+      "source_path": "work/windows-fixture-publication-integration-20261116/docs-commit-r1.log",
+      "bytes": 1077,
+      "sha256": "56b3686e0caface9992dc106aa5bcbff295903ed0937b4396d3508dfd824bd88"
+    },
+    {
+      "path": "delivery/docs-push-r1.json",
+      "source_path": "work/windows-fixture-publication-integration-20261116/docs-push-r1.json",
+      "bytes": 775,
+      "sha256": "68e98153f991e9272f74159716a2bf37b4f1ab10796007d468c05c32faf5cd82"
+    },
+    {
+      "path": "delivery/docs-push-r1.log",
+      "source_path": "work/windows-fixture-publication-integration-20261116/docs-push-r1.log",
+      "bytes": 146,
+      "sha256": "976b77c6bf7022f22613df4aa149d6102ceca6b047b5ce7fecdb27ca302bf0b9"
+    },
+    {
+      "path": "delivery/docs-delivery-r1.json",
+      "source_path": "work/windows-fixture-publication-integration-20261116/docs-delivery-r1.json",
+      "bytes": 1271,
+      "sha256": "f557f6418b288c035342a4ce205602efdc6684f949eae4249706a50a816b1391"
+    },
+    {
+      "path": "delivery/docs-commit-binding-r1.json",
+      "source_path": "work/windows-fixture-publication-integration-20261116/docs-commit-binding-r1.json",
+      "bytes": 2910,
+      "sha256": "36665cb4c2717f2c592146261754941867d2c99c3f9d3ffa8d3a5e64756c3bbc"
+    },
+    {
+      "path": "delivery/docs-index-check-r1.json",
+      "source_path": "work/windows-fixture-publication-integration-20261116/docs-index-check-r1.json",
+      "bytes": 1645,
+      "sha256": "8c58810d1b042fd9981f232f2f2ef20fe083384575eda67b5493370fe9595fc4"
+    },
+    {
+      "path": "delivery/docs-check-r1.json",
+      "source_path": "work/windows-fixture-publication-integration-20261116/docs-check-r1.json",
+      "bytes": 230,
+      "sha256": "02d6e0a7735eeca2b2f4ec638895d866d87ea39cb918b84759702c0368ddce2e"
+    },
+    {
+      "path": "delivery/delivery-evidence-verify-r1.json",
+      "source_path": "work/windows-fixture-publication-integration-20261116/delivery-evidence-verify-r1.json",
+      "bytes": 802,
+      "sha256": "917afa4f09bc4e7a7d55b7964fcda4d566c53ed12776cf53ea827c3750afe079"
+    },
+    {
+      "path": "delivery/delivery-evidence-verify-r1.log",
+      "source_path": "work/windows-fixture-publication-integration-20261116/delivery-evidence-verify-r1.log",
+      "bytes": 665,
+      "sha256": "d6b825603a4decaad064cfa64d3f96de0b7244fccd7b6caed2f5177e1fe378da"
+    },
+    {
+      "path": "review/REPORT.md",
+      "source_path": "work/windows-fixture-delivery-review-20261116/REPORT.md",
+      "bytes": 12008,
+      "sha256": "246b7fbce9af536cebcf5b4c0019c79b740d394deb8f515f3003f26aba493164"
+    },
+    {
+      "path": "review/receipt.json",
+      "source_path": "work/windows-fixture-delivery-review-20261116/receipt.json",
+      "bytes": 38407,
+      "sha256": "6fdea7abfe9f376e01c00354c57c1f864a6fdfcbe0230cf4c41675c4684d8fe1"
+    },
+    {
+      "path": "retired-ci-snapshots/source-ci-snapshot-r2.json",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/source-ci-snapshot-r2.json",
+      "bytes": 808,
+      "sha256": "f7e23e24fa12f222d17ea34f2aa27953e0d00b8830f28d139c11a6c2d8bd0600"
+    },
+    {
+      "path": "retired-ci-snapshots/source-ci-snapshot-r2.log",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/source-ci-snapshot-r2.log",
+      "bytes": 7858,
+      "sha256": "62c7f75cc635d2e09f31c94b6ca074740be5f8e66d74f9079ceeda13a39dcade"
+    },
+    {
+      "path": "retired-ci-snapshots/source-ci-snapshot-r3.json",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/source-ci-snapshot-r3.json",
+      "bytes": 809,
+      "sha256": "574018225ea1b6b8bc6618b24943c93296d890887b0092e1fe13d4ecd3991636"
+    },
+    {
+      "path": "retired-ci-snapshots/source-ci-snapshot-r3.log",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/source-ci-snapshot-r3.log",
+      "bytes": 8065,
+      "sha256": "f525e4cf31241cf74d1abb4d777b6e8ec06f78408622e585ec663db05d71b216"
+    },
+    {
+      "path": "tools/seal_followup.py",
+      "source_path": "work/windows-fixture-publication-integration-20261116/seal_followup.py",
+      "bytes": 2632,
+      "sha256": "cbd969e8d683cae5a9daefd60129e19716d55ff2a0d21fda246bc1b1cfb12223"
+    }
+  ],
+  "review": {
+    "decision": "APPROVE",
+    "P0": 0,
+    "P1": 0,
+    "P2": 0,
+    "P3": 0
+  },
+  "ci_terminal_approved_by_review": false,
+  "excluded": [
+    "active CI watcher",
+    "Cargo target",
+    "binaries",
+    "other task resources"
+  ]
+}

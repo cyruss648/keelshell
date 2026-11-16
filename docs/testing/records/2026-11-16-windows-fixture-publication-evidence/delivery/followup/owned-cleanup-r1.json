@@ -1,0 +1,785 @@
+{
+  "engineering_source": "ee3ad7320e90f40c9d777c500543cc6e909d0484",
+  "docs_source": "ebefc90e850a4843475da01587b771ab1d244f11",
+  "pre_cleanup_git_tree": "790fb9be4e1f21a4311a36dcdcaa5ba6ace61e54",
+  "git_original_bytes_equal": true,
+  "deleted_files": 71,
+  "deleted_bytes": 9100899,
+  "entries": [
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/app-inventory-r1.json",
+      "bytes": 792,
+      "sha256": "0452545678a43a26de29fcc899db749c22a823dec167d70e5d10456ab11060ca",
+      "preserved": {
+        "sha256": "0452545678a43a26de29fcc899db749c22a823dec167d70e5d10456ab11060ca",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/originals.tar.gz",
+        "member": "batch/app-inventory-r1.json"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/app-inventory-r1.log",
+      "bytes": 143674,
+      "sha256": "f0adcda4d9e8d2419ac78567a578cf31adf0ec2ad214919984c45cd281834732",
+      "preserved": {
+        "sha256": "f0adcda4d9e8d2419ac78567a578cf31adf0ec2ad214919984c45cd281834732",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/originals.tar.gz",
+        "member": "batch/app-inventory-r1.log"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/candidate-baseline-r1.json",
+      "bytes": 395,
+      "sha256": "ca2251f2b1ff6ade5cb771fabd7bebe5f66c69817ebdb8f0aea0259ab91e1523",
+      "preserved": {
+        "sha256": "ca2251f2b1ff6ade5cb771fabd7bebe5f66c69817ebdb8f0aea0259ab91e1523",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/originals.tar.gz",
+        "member": "batch/candidate-baseline-r1.json"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/candidate-r1.diff",
+      "bytes": 5933,
+      "sha256": "e4ce938eba683b32bd71c673a2076c782559b390c58d42bebc719c519a93e15b",
+      "preserved": {
+        "sha256": "e4ce938eba683b32bd71c673a2076c782559b390c58d42bebc719c519a93e15b",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/originals.tar.gz",
+        "member": "batch/candidate-r1.diff"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/commit-bind-r1.json",
+      "bytes": 858,
+      "sha256": "9a525a0471559da180f95f5095bf9f55dbfb8623139867b9dc2091eb9e904c38",
+      "preserved": {
+        "sha256": "9a525a0471559da180f95f5095bf9f55dbfb8623139867b9dc2091eb9e904c38",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "blob": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/delivery/commit-bind-r1.json"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/commit-bind-r1.log",
+      "bytes": 300,
+      "sha256": "c95f72a17277f44d72c2ff6843a51be15c83c647f9229a331746d67ef62fc589",
+      "preserved": {
+        "sha256": "c95f72a17277f44d72c2ff6843a51be15c83c647f9229a331746d67ef62fc589",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "blob": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/delivery/commit-bind-r1.log"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/contract-checks-r1.json",
+      "bytes": 4278,
+      "sha256": "3d545b27a61881bc85433f9eb0158b3805ddd1d273e9f3d10edc3abbbfdadccf",
+      "preserved": {
+        "sha256": "3d545b27a61881bc85433f9eb0158b3805ddd1d273e9f3d10edc3abbbfdadccf",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/originals.tar.gz",
+        "member": "batch/contract-checks-r1.json"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/evidence-verify-r1.json",
+      "bytes": 795,
+      "sha256": "d5c1851c2959d5de9d25e8214e6a0ef0c7fcef4f212f8db1866c10905e230376",
+      "preserved": {
+        "sha256": "d5c1851c2959d5de9d25e8214e6a0ef0c7fcef4f212f8db1866c10905e230376",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "blob": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/delivery/evidence-verify-r1.json"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/evidence-verify-r1.log",
+      "bytes": 267,
+      "sha256": "a597a3f7df585fdfba9e2c3da67effd42b3fedd974e7c8542bc83013e743d15e",
+      "preserved": {
+        "sha256": "a597a3f7df585fdfba9e2c3da67effd42b3fedd974e7c8542bc83013e743d15e",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "blob": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/delivery/evidence-verify-r1.log"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/format-r1.json",
+      "bytes": 727,
+      "sha256": "6e1be58194fa6a98fa1c30910b42cd2b4064a20f11b37c3c0b97d2fec4915297",
+      "preserved": {
+        "sha256": "6e1be58194fa6a98fa1c30910b42cd2b4064a20f11b37c3c0b97d2fec4915297",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/originals.tar.gz",
+        "member": "batch/format-r1.json"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/format-r1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "preserved": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/originals.tar.gz",
+        "member": "batch/format-r1.log"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/full-gate-r1.json",
+      "bytes": 733,
+      "sha256": "8b452d31d034052af67af5ecfb2699e70c1179b8f5849dde66b7f47ba8a1f336",
+      "preserved": {
+        "sha256": "8b452d31d034052af67af5ecfb2699e70c1179b8f5849dde66b7f47ba8a1f336",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/originals.tar.gz",
+        "member": "batch/full-gate-r1.json"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/full-gate-r1.log",
+      "bytes": 645815,
+      "sha256": "bb7a8f08dc723259b190283e95154648a33f9707ba1d2d3b98a9d906282a74d2",
+      "preserved": {
+        "sha256": "bb7a8f08dc723259b190283e95154648a33f9707ba1d2d3b98a9d906282a74d2",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/originals.tar.gz",
+        "member": "batch/full-gate-r1.log"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/full-gate-summary-r1.json",
+      "bytes": 329818,
+      "sha256": "f868e208ad1dc0602087af5157cff645ac5bfbd4b27c4e57d633297a417c09f3",
+      "preserved": {
+        "sha256": "f868e208ad1dc0602087af5157cff645ac5bfbd4b27c4e57d633297a417c09f3",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/originals.tar.gz",
+        "member": "batch/full-gate-summary-r1.json"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/inputs-freeze-r1.json",
+      "bytes": 116621,
+      "sha256": "baaa60405cef32b664a345d4a70801a916069a1502f0c26daa657b15b39721b5",
+      "preserved": {
+        "sha256": "baaa60405cef32b664a345d4a70801a916069a1502f0c26daa657b15b39721b5",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/originals.tar.gz",
+        "member": "batch/inputs-freeze-r1.json"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/integration-summary-r1.json",
+      "bytes": 498,
+      "sha256": "afd232e4abc8230323ed09e213f1a213c5403cd058be339d0ff26b6abe8ae8ed",
+      "preserved": {
+        "sha256": "afd232e4abc8230323ed09e213f1a213c5403cd058be339d0ff26b6abe8ae8ed",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/originals.tar.gz",
+        "member": "batch/integration-summary-r1.json"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/owned-cleanup-r1.json",
+      "bytes": 14214,
+      "sha256": "8cabd019f338bcab60c7b1e8c9c084b8b5446f734d64e02c8b6609c00c30d725",
+      "preserved": {
+        "sha256": "8cabd019f338bcab60c7b1e8c9c084b8b5446f734d64e02c8b6609c00c30d725",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "blob": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/delivery/owned-cleanup-r1.json"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/parsing-correction-r2.md",
+      "bytes": 1249,
+      "sha256": "6ca521270d8c202b8651e941461315379b7c861692ceb15dbbbb84eab31c7ecb",
+      "preserved": {
+        "sha256": "6ca521270d8c202b8651e941461315379b7c861692ceb15dbbbb84eab31c7ecb",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/originals.tar.gz",
+        "member": "batch/parsing-correction-r2.md"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/parsing-r2-early-rustdoc-diagnostic-r1.json",
+      "bytes": 304,
+      "sha256": "7e5d999310d2e4029cdde3aaf00911c1bbfcfbf00add0cdd779bffe0476cb77d",
+      "preserved": {
+        "sha256": "7e5d999310d2e4029cdde3aaf00911c1bbfcfbf00add0cdd779bffe0476cb77d",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/ci-completion/originals.tar.gz",
+        "member": "ci/parsing-r2-early-rustdoc-diagnostic-r1.json"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/prior-ci-final-r1.json",
+      "bytes": 809,
+      "sha256": "39b2c2738deae712302f4496c0bb3cd76ea11a96ef31bd4b74cdf40090b0b3cb",
+      "preserved": {
+        "sha256": "39b2c2738deae712302f4496c0bb3cd76ea11a96ef31bd4b74cdf40090b0b3cb",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/originals.tar.gz",
+        "member": "batch/prior-ci-final-r1.json"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/prior-ci-final-r1.log",
+      "bytes": 8277,
+      "sha256": "2f48c07b3ae18ac876981c4a406f65c61cf81ee3c5f68ba424b3018b2247250f",
+      "preserved": {
+        "sha256": "2f48c07b3ae18ac876981c4a406f65c61cf81ee3c5f68ba424b3018b2247250f",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/originals.tar.gz",
+        "member": "batch/prior-ci-final-r1.log"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/prior-ci-snapshot-r1.json",
+      "bytes": 809,
+      "sha256": "12264934704924f5274bfd4dba2d5bb750f08ba23b7028e2f309bcea58f65a77",
+      "preserved": {
+        "sha256": "12264934704924f5274bfd4dba2d5bb750f08ba23b7028e2f309bcea58f65a77",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/originals.tar.gz",
+        "member": "batch/prior-ci-snapshot-r1.json"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/prior-ci-snapshot-r1.log",
+      "bytes": 7858,
+      "sha256": "d51affbc204c0b31716a57c35575410a5698a22aca580836db7a64902fda4f2c",
+      "preserved": {
+        "sha256": "d51affbc204c0b31716a57c35575410a5698a22aca580836db7a64902fda4f2c",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/originals.tar.gz",
+        "member": "batch/prior-ci-snapshot-r1.log"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/prior-ci-summary-final-r1.json",
+      "bytes": 79701,
+      "sha256": "563ecfa6b5b6696683682aa66a5346030cfe858e7e66d9f77c48d4cd5d132474",
+      "preserved": {
+        "sha256": "563ecfa6b5b6696683682aa66a5346030cfe858e7e66d9f77c48d4cd5d132474",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/originals.tar.gz",
+        "member": "batch/prior-ci-summary-final-r1.json"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/prior-ci-summary-final-r2.json",
+      "bytes": 80926,
+      "sha256": "8cc91a67078e520d4c1e55ef8ae348b98201b6c4bd7c8da756d27e2e919708a4",
+      "preserved": {
+        "sha256": "8cc91a67078e520d4c1e55ef8ae348b98201b6c4bd7c8da756d27e2e919708a4",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/originals.tar.gz",
+        "member": "batch/prior-ci-summary-final-r2.json"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/prior-macos-job-r1.json",
+      "bytes": 808,
+      "sha256": "0e3c92d58c471f5176b90d9acb746bd9b7a8b332e7af8b2e1932d8debcf26d2b",
+      "preserved": {
+        "sha256": "0e3c92d58c471f5176b90d9acb746bd9b7a8b332e7af8b2e1932d8debcf26d2b",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/originals.tar.gz",
+        "member": "batch/prior-macos-job-r1.json"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/prior-macos-job-r1.log",
+      "bytes": 849750,
+      "sha256": "fd4e4675c123338719f7e929c704574e97819bd5fc05576cc10c0b4a0a75ac42",
+      "preserved": {
+        "sha256": "fd4e4675c123338719f7e929c704574e97819bd5fc05576cc10c0b4a0a75ac42",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/originals.tar.gz",
+        "member": "batch/prior-macos-job-r1.log"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/prior-macos-summary-r1.json",
+      "bytes": 482850,
+      "sha256": "9c88bfebc503bc21383b2525adf9381d2d81ec183cdd9bfc777419eb5754b53c",
+      "preserved": {
+        "sha256": "9c88bfebc503bc21383b2525adf9381d2d81ec183cdd9bfc777419eb5754b53c",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/originals.tar.gz",
+        "member": "batch/prior-macos-summary-r1.json"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/prior-macos-summary-r2.json",
+      "bytes": 484132,
+      "sha256": "996e68175a987355d6c9eabbc2fca4011915ed56f592532b6c3a678ee591d972",
+      "preserved": {
+        "sha256": "996e68175a987355d6c9eabbc2fca4011915ed56f592532b6c3a678ee591d972",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/originals.tar.gz",
+        "member": "batch/prior-macos-summary-r2.json"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/prior-source-windows-job-r1.json",
+      "bytes": 808,
+      "sha256": "eb78c7e55fb488d8aa69b5d0569b2b71afeecc9b757df1e3ac451e977b391ad1",
+      "preserved": {
+        "sha256": "eb78c7e55fb488d8aa69b5d0569b2b71afeecc9b757df1e3ac451e977b391ad1",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/originals.tar.gz",
+        "member": "batch/prior-source-windows-job-r1.json"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/prior-source-windows-job-r1.log",
+      "bytes": 172738,
+      "sha256": "86d46a6833c820a4d438f92bacba2b3fbef8a6700d2daf04bb31d4893e520218",
+      "preserved": {
+        "sha256": "86d46a6833c820a4d438f92bacba2b3fbef8a6700d2daf04bb31d4893e520218",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/originals.tar.gz",
+        "member": "batch/prior-source-windows-job-r1.log"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/prior-source-windows-summary-r1.json",
+      "bytes": 73975,
+      "sha256": "fd2bde86b50dba1e4bbad27c1f42d3c30b455a2ac2e013ca5a296bd132c308f5",
+      "preserved": {
+        "sha256": "fd2bde86b50dba1e4bbad27c1f42d3c30b455a2ac2e013ca5a296bd132c308f5",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/originals.tar.gz",
+        "member": "batch/prior-source-windows-summary-r1.json"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/prior-ubuntu-job-r1.json",
+      "bytes": 807,
+      "sha256": "a8f2d1c0c097cda8be2ea6e73c9fefe550f4c6c5574aade07149814f82223b45",
+      "preserved": {
+        "sha256": "a8f2d1c0c097cda8be2ea6e73c9fefe550f4c6c5574aade07149814f82223b45",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/originals.tar.gz",
+        "member": "batch/prior-ubuntu-job-r1.json"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/prior-ubuntu-job-r1.log",
+      "bytes": 869911,
+      "sha256": "6c818ccd176b2327655e45b17957402fe7c3226e370714359c320c70b04f8139",
+      "preserved": {
+        "sha256": "6c818ccd176b2327655e45b17957402fe7c3226e370714359c320c70b04f8139",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/originals.tar.gz",
+        "member": "batch/prior-ubuntu-job-r1.log"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/prior-ubuntu-summary-r1.json",
+      "bytes": 483355,
+      "sha256": "715b2a9055465ca50eb035d74b12612a13ca03631c9ac024ebd65891f36203c4",
+      "preserved": {
+        "sha256": "715b2a9055465ca50eb035d74b12612a13ca03631c9ac024ebd65891f36203c4",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/originals.tar.gz",
+        "member": "batch/prior-ubuntu-summary-r1.json"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/prior-ubuntu-summary-r2.json",
+      "bytes": 483158,
+      "sha256": "d13387b651d65ff7fd8183171a2a656ebccd4b32c5a2da4f244cbd76528573b1",
+      "preserved": {
+        "sha256": "d13387b651d65ff7fd8183171a2a656ebccd4b32c5a2da4f244cbd76528573b1",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/originals.tar.gz",
+        "member": "batch/prior-ubuntu-summary-r2.json"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/run_command.py",
+      "bytes": 1602,
+      "sha256": "a8e8f0b50f2c5d95342e36f1b8fffd4fdc5daeabbf4a382fa15300c747ce65fc",
+      "preserved": {
+        "sha256": "a8e8f0b50f2c5d95342e36f1b8fffd4fdc5daeabbf4a382fa15300c747ce65fc",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/originals.tar.gz",
+        "member": "batch/run_command.py"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/source-ci-final-r1.json",
+      "bytes": 809,
+      "sha256": "7d2c2ba764e50565fb66c34714fcd85af1dd6ba4dfd1a9754818715d5d6ee783",
+      "preserved": {
+        "sha256": "7d2c2ba764e50565fb66c34714fcd85af1dd6ba4dfd1a9754818715d5d6ee783",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/ci-completion/originals.tar.gz",
+        "member": "ci/source-ci-final-r1.json"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/source-ci-final-r1.log",
+      "bytes": 8277,
+      "sha256": "26852f5aea697bd754361ce4bdb3301b6453ff368b51fa8338b95b6db457a7d6",
+      "preserved": {
+        "sha256": "26852f5aea697bd754361ce4bdb3301b6453ff368b51fa8338b95b6db457a7d6",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/ci-completion/originals.tar.gz",
+        "member": "ci/source-ci-final-r1.log"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/source-ci-runs-r1.json",
+      "bytes": 895,
+      "sha256": "92c0a410fdf2fc0086b02b9fa4b33f18016b07130b55ce298b8958ffa4f81398",
+      "preserved": {
+        "sha256": "92c0a410fdf2fc0086b02b9fa4b33f18016b07130b55ce298b8958ffa4f81398",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "blob": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/delivery/source-ci-runs-r1.json"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/source-ci-runs-r1.log",
+      "bytes": 228,
+      "sha256": "fff0f4d8817fa5133cd2e2023fb0a53deea3b7c5926b266221166509cd31a560",
+      "preserved": {
+        "sha256": "fff0f4d8817fa5133cd2e2023fb0a53deea3b7c5926b266221166509cd31a560",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "blob": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/delivery/source-ci-runs-r1.log"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/source-ci-scope-notes-r3.md",
+      "bytes": 1502,
+      "sha256": "651277d7e546b5b63deb34357e5c5f780b6dcac2cfab419fc8d3d082805f4c42",
+      "preserved": {
+        "sha256": "651277d7e546b5b63deb34357e5c5f780b6dcac2cfab419fc8d3d082805f4c42",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/ci-completion/originals.tar.gz",
+        "member": "ci/source-ci-scope-notes-r3.md"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/source-ci-snapshot-r1.json",
+      "bytes": 809,
+      "sha256": "2772a8139920fae5feb4c533d9fd95e775bac729d927458cdeb7fa4dab57c761",
+      "preserved": {
+        "sha256": "2772a8139920fae5feb4c533d9fd95e775bac729d927458cdeb7fa4dab57c761",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "blob": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/delivery/source-ci-snapshot-r1.json"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/source-ci-snapshot-r1.log",
+      "bytes": 7642,
+      "sha256": "9b115ada23498584278283bc2243ab9a7892badff30c62c709bf4814a666fa14",
+      "preserved": {
+        "sha256": "9b115ada23498584278283bc2243ab9a7892badff30c62c709bf4814a666fa14",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "blob": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/delivery/source-ci-snapshot-r1.log"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/source-ci-snapshot-r2.json",
+      "bytes": 808,
+      "sha256": "f7e23e24fa12f222d17ea34f2aa27953e0d00b8830f28d139c11a6c2d8bd0600",
+      "preserved": {
+        "sha256": "f7e23e24fa12f222d17ea34f2aa27953e0d00b8830f28d139c11a6c2d8bd0600",
+        "ref": "790fb9be4e1f21a4311a36dcdcaa5ba6ace61e54",
+        "archive": "docs/testing/records/2026-11-16-windows-fixture-publication-evidence/delivery/followup/originals.tar.gz",
+        "member": "retired-ci-snapshots/source-ci-snapshot-r2.json"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/source-ci-snapshot-r2.log",
+      "bytes": 7858,
+      "sha256": "62c7f75cc635d2e09f31c94b6ca074740be5f8e66d74f9079ceeda13a39dcade",
+      "preserved": {
+        "sha256": "62c7f75cc635d2e09f31c94b6ca074740be5f8e66d74f9079ceeda13a39dcade",
+        "ref": "790fb9be4e1f21a4311a36dcdcaa5ba6ace61e54",
+        "archive": "docs/testing/records/2026-11-16-windows-fixture-publication-evidence/delivery/followup/originals.tar.gz",
+        "member": "retired-ci-snapshots/source-ci-snapshot-r2.log"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/source-ci-snapshot-r3.json",
+      "bytes": 809,
+      "sha256": "574018225ea1b6b8bc6618b24943c93296d890887b0092e1fe13d4ecd3991636",
+      "preserved": {
+        "sha256": "574018225ea1b6b8bc6618b24943c93296d890887b0092e1fe13d4ecd3991636",
+        "ref": "790fb9be4e1f21a4311a36dcdcaa5ba6ace61e54",
+        "archive": "docs/testing/records/2026-11-16-windows-fixture-publication-evidence/delivery/followup/originals.tar.gz",
+        "member": "retired-ci-snapshots/source-ci-snapshot-r3.json"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/source-ci-snapshot-r3.log",
+      "bytes": 8065,
+      "sha256": "f525e4cf31241cf74d1abb4d777b6e8ec06f78408622e585ec663db05d71b216",
+      "preserved": {
+        "sha256": "f525e4cf31241cf74d1abb4d777b6e8ec06f78408622e585ec663db05d71b216",
+        "ref": "790fb9be4e1f21a4311a36dcdcaa5ba6ace61e54",
+        "archive": "docs/testing/records/2026-11-16-windows-fixture-publication-evidence/delivery/followup/originals.tar.gz",
+        "member": "retired-ci-snapshots/source-ci-snapshot-r3.log"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/source-ci-summary-final-r3.json",
+      "bytes": 3874,
+      "sha256": "ab5d1cafcae3211341db081a1382b348866c7b0c966db09531141e9ea2052391",
+      "preserved": {
+        "sha256": "ab5d1cafcae3211341db081a1382b348866c7b0c966db09531141e9ea2052391",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/ci-completion/originals.tar.gz",
+        "member": "ci/source-ci-summary-final-r3.json"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/source-ci-watch-r1.json",
+      "bytes": 798,
+      "sha256": "f1880fe1ff5a18b7cfb6b8ad07f7ce23fd8a56b2743a149c09b94f644b92aa5f",
+      "preserved": {
+        "sha256": "f1880fe1ff5a18b7cfb6b8ad07f7ce23fd8a56b2743a149c09b94f644b92aa5f",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/ci-completion/originals.tar.gz",
+        "member": "ci/source-ci-watch-r1.json"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/source-ci-watch-r1.log",
+      "bytes": 147027,
+      "sha256": "68f8f683ee0197aeac69b9cf1faf26102004f0ddd9638c5a61b0cb1d73a21444",
+      "preserved": {
+        "sha256": "68f8f683ee0197aeac69b9cf1faf26102004f0ddd9638c5a61b0cb1d73a21444",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/ci-completion/originals.tar.gz",
+        "member": "ci/source-ci-watch-r1.log"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/source-delivery-r1.json",
+      "bytes": 1039,
+      "sha256": "c92665d8012f9a28686f219878986e73e9698303681365464df9abf5cf4c5be8",
+      "preserved": {
+        "sha256": "c92665d8012f9a28686f219878986e73e9698303681365464df9abf5cf4c5be8",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "blob": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/delivery/source-delivery-r1.json"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/source-macos-active-log-r1.json",
+      "bytes": 808,
+      "sha256": "808dc0435e8b90cf5940f2fdcbb5da3fc7cccb109eae1f7d337ddb41f94a0424",
+      "preserved": {
+        "sha256": "808dc0435e8b90cf5940f2fdcbb5da3fc7cccb109eae1f7d337ddb41f94a0424",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/ci-completion/originals.tar.gz",
+        "member": "ci/source-macos-active-log-r1.json"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/source-macos-active-log-r1.log",
+      "bytes": 851083,
+      "sha256": "5d4f5fda777b90492611b9cdac3e487e1dc7c28518f1588d5e783e64c83c9b9f",
+      "preserved": {
+        "sha256": "5d4f5fda777b90492611b9cdac3e487e1dc7c28518f1588d5e783e64c83c9b9f",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/ci-completion/originals.tar.gz",
+        "member": "ci/source-macos-active-log-r1.log"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/source-macos-summary-r3.json",
+      "bytes": 490436,
+      "sha256": "519e135cb6ea98b2eced7b6ba6d66ba345ed6717f697ed4a3b9c91e80893c844",
+      "preserved": {
+        "sha256": "519e135cb6ea98b2eced7b6ba6d66ba345ed6717f697ed4a3b9c91e80893c844",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/ci-completion/originals.tar.gz",
+        "member": "ci/source-macos-summary-r3.json"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/source-push-r1.json",
+      "bytes": 791,
+      "sha256": "40f3b963bd846c01a6b4201368dd0ade3a6e5e4e1a8e841fc49adb5e66a9a390",
+      "preserved": {
+        "sha256": "40f3b963bd846c01a6b4201368dd0ade3a6e5e4e1a8e841fc49adb5e66a9a390",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "blob": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/delivery/source-push-r1.json"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/source-push-r1.log",
+      "bytes": 113,
+      "sha256": "10a976d42c16a799877c6542ef2005fba783922658adb323ccc90fe407bdcad8",
+      "preserved": {
+        "sha256": "10a976d42c16a799877c6542ef2005fba783922658adb323ccc90fe407bdcad8",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "blob": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/delivery/source-push-r1.log"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/source-r1/.github/workflows/ci.yml",
+      "bytes": 4034,
+      "sha256": "22b7fc620bbb47592aa04fc57e4f6bbaffd5bffd571d74ddfea030e2c38c723b",
+      "preserved": {
+        "sha256": "22b7fc620bbb47592aa04fc57e4f6bbaffd5bffd571d74ddfea030e2c38c723b",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/originals.tar.gz",
+        "member": "batch/source-r1/.github/workflows/ci.yml"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/source-r1/crates/keelshell-session/src/zmodem/local_windows/tests.rs",
+      "bytes": 38296,
+      "sha256": "487f0b03530c66890d7d679cded3fae4d823472b5b6b1e45e37fd5f5726839cf",
+      "preserved": {
+        "sha256": "487f0b03530c66890d7d679cded3fae4d823472b5b6b1e45e37fd5f5726839cf",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/originals.tar.gz",
+        "member": "batch/source-r1/crates/keelshell-session/src/zmodem/local_windows/tests.rs"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/source-ubuntu-job-r1.json",
+      "bytes": 808,
+      "sha256": "77fa43c46506189b51ab0dec0702786e5564e626b846fb68e8889359c8eb0167",
+      "preserved": {
+        "sha256": "77fa43c46506189b51ab0dec0702786e5564e626b846fb68e8889359c8eb0167",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/ci-completion/originals.tar.gz",
+        "member": "ci/source-ubuntu-job-r1.json"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/source-ubuntu-job-r1.log",
+      "bytes": 870810,
+      "sha256": "fd0e0624d059d96f0c2b4833e0260db0255350babdae40a761de270b833fbfbd",
+      "preserved": {
+        "sha256": "fd0e0624d059d96f0c2b4833e0260db0255350babdae40a761de270b833fbfbd",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/ci-completion/originals.tar.gz",
+        "member": "ci/source-ubuntu-job-r1.log"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/source-ubuntu-summary-r2.json",
+      "bytes": 483158,
+      "sha256": "d1c48fa4101694e13209470fb00d792e1e888b578b924e64bd5348400b63bc31",
+      "preserved": {
+        "sha256": "d1c48fa4101694e13209470fb00d792e1e888b578b924e64bd5348400b63bc31",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/ci-completion/originals.tar.gz",
+        "member": "ci/source-ubuntu-summary-r2.json"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/source-ubuntu-summary-r3.json",
+      "bytes": 489450,
+      "sha256": "b56a673a8f7e4ff2d2080ece7089e3d1a66abfa50cfe06df4c8a6434cc5c95c2",
+      "preserved": {
+        "sha256": "b56a673a8f7e4ff2d2080ece7089e3d1a66abfa50cfe06df4c8a6434cc5c95c2",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/ci-completion/originals.tar.gz",
+        "member": "ci/source-ubuntu-summary-r3.json"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/source-windows-job-r1.json",
+      "bytes": 807,
+      "sha256": "c450ab7f75226631609367fdfbadb8e1ab1b0d5f5e7b9f52e5eb3d2fe8541cc0",
+      "preserved": {
+        "sha256": "c450ab7f75226631609367fdfbadb8e1ab1b0d5f5e7b9f52e5eb3d2fe8541cc0",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/ci-completion/originals.tar.gz",
+        "member": "ci/source-windows-job-r1.json"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/source-windows-job-r1.log",
+      "bytes": 184360,
+      "sha256": "2dc66cd5ffca0b6c3a8a9c2fea01adef7e58afbf1d6381022b864176fd949c6b",
+      "preserved": {
+        "sha256": "2dc66cd5ffca0b6c3a8a9c2fea01adef7e58afbf1d6381022b864176fd949c6b",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/ci-completion/originals.tar.gz",
+        "member": "ci/source-windows-job-r1.log"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/source-windows-summary-r1.json",
+      "bytes": 80801,
+      "sha256": "1e17a93564acf47376c657a4ddbf8bf0951648fd1f41a8096fadc8d868454f8c",
+      "preserved": {
+        "sha256": "1e17a93564acf47376c657a4ddbf8bf0951648fd1f41a8096fadc8d868454f8c",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/ci-completion/originals.tar.gz",
+        "member": "ci/source-windows-summary-r1.json"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/summarize_ci_r2.py",
+      "bytes": 5434,
+      "sha256": "ef5932231b3042b45372db02d19abf0bd4368fc6795b295817b2af57a1b87177",
+      "preserved": {
+        "sha256": "ef5932231b3042b45372db02d19abf0bd4368fc6795b295817b2af57a1b87177",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/originals.tar.gz",
+        "member": "batch/summarize_ci_r2.py"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/summarize_ci_r3.py",
+      "bytes": 5815,
+      "sha256": "2c9dff40e07f0d4c5fd95d17bed1f0980b7bd9bfca99e7da8559a37b733f1702",
+      "preserved": {
+        "sha256": "2c9dff40e07f0d4c5fd95d17bed1f0980b7bd9bfca99e7da8559a37b733f1702",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/ci-completion/originals.tar.gz",
+        "member": "tools/summarize_ci_r3.py"
+      }
+    },
+    {
+      "path": "work/windows-zmodem-rename-integration-20261116/validate_full_gate.py",
+      "bytes": 3495,
+      "sha256": "0893fa5e642ef5bd57e77d2cdb1e89df98146132d1ecaffe418add3abfad7b41",
+      "preserved": {
+        "sha256": "0893fa5e642ef5bd57e77d2cdb1e89df98146132d1ecaffe418add3abfad7b41",
+        "ref": "ebefc90e850a4843475da01587b771ab1d244f11",
+        "archive": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/originals.tar.gz",
+        "member": "batch/validate_full_gate.py"
+      }
+    },
+    {
+      "path": "work/windows-fixture-delivery-review-20261116/REPORT.md",
+      "bytes": 12008,
+      "sha256": "246b7fbce9af536cebcf5b4c0019c79b740d394deb8f515f3003f26aba493164",
+      "preserved": {
+        "sha256": "246b7fbce9af536cebcf5b4c0019c79b740d394deb8f515f3003f26aba493164",
+        "ref": "790fb9be4e1f21a4311a36dcdcaa5ba6ace61e54",
+        "archive": "docs/testing/records/2026-11-16-windows-fixture-publication-evidence/delivery/followup/originals.tar.gz",
+        "member": "review/REPORT.md"
+      }
+    },
+    {
+      "path": "work/windows-fixture-delivery-review-20261116/receipt.json",
+      "bytes": 38407,
+      "sha256": "6fdea7abfe9f376e01c00354c57c1f864a6fdfcbe0230cf4c41675c4684d8fe1",
+      "preserved": {
+        "sha256": "6fdea7abfe9f376e01c00354c57c1f864a6fdfcbe0230cf4c41675c4684d8fe1",
+        "ref": "790fb9be4e1f21a4311a36dcdcaa5ba6ace61e54",
+        "archive": "docs/testing/records/2026-11-16-windows-fixture-publication-evidence/delivery/followup/originals.tar.gz",
+        "member": "review/receipt.json"
+      }
+    }
+  ],
+  "shared_target_directory_identity_unchanged": true,
+  "other_task_resources_touched": false,
+  "agents_closed": [
+    "Beauvoir"
+  ],
+  "parser_copied_to_active_batch": true
+}

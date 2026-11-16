@@ -24,10 +24,17 @@
 
 - 当前工程源码 `ee3ad7320e90f40c9d777c500543cc6e909d0484` 已普通推送、
   本地／tracking／远端三方一致，读回干净。25 成员／719 输入精确 Git 绑定通过。
-  新 Quality `43880245383` 运行中；Windows `133343901451` 三项预检 step success，
-  macOS `133343901229`、Ubuntu `133343901650` 和 Windows 的完整 gate 均进行中。
-  新 293 项 Python、Windows exclusive 文件反例及完整 gate 的逐名结果仍待终态原件，
-  不用 step 状态或前一源码结果代签。
+  新 Quality `43880245383` 已 completed/success；Windows `133343901451`、
+  macOS `133343901229`、Ubuntu `133343901650` 的完整 gate 均 success，
+  macOS／Ubuntu 真实 OpenSSH 均 success，watch `0/reaped/1893.751s`。
+  三平台普通 Rust 分别 `3212/0/46`、`3225/0/48`、`3218/0/49`，
+  app 分别 `1330/0/2`、`1341/0/2`、`1342/0/2`，各 14 项 rustdoc；
+  Python 均 293 run，Windows 34 skipped、另两平台 2 skipped。
+  Windows 七类真实 tree 和 native Job barrier 实际终态通过，保持 exit7、原句柄与 ACK。
+  [36 成员终态](testing/records/2026-11-16-windows-fixture-publication-evidence/ci-completion/README.md)
+  重新派生并精确源码绑定通过 `0/reaped/6.699s`，Parfit 独立窄证据复核 APPROVE、P0–P3 全 0，
+  已关闭；运行副本和 reviewer 原件清理有逐项 Git 绑定。
+  CI app 只有运行声明数／唯一逐名结果，Python 只有完整 discovery 计数；不补写独立库存或单例回执。
 - 原 `95813a76f0ec9b59fd043cd982e33cdc01dd69f8` 的 Quality `43873806902`
   已 completed/failure，未取消／重跑。Windows filesystem `70/0/0`、codec `41/0/0`、
   session `329/0/3 ignored`，332 名独立编译库存逐项相等；Zmodem 为 `43/0/2 ignored`。
@@ -68,7 +75,7 @@
   其余 718 输入与 958 相等。限定 gate `0/reaped/15.369s`，Python 293 run／2 skipped、
   fmt／严格 Clippy／x.y 通过，两项受控负例精确失败；Boyle 限定 APPROVE、P0–P3 全 0，
   独立专项 72 run／70 passed／2 skipped、退出 0；
-  25 成员原件已随当前工程推送；新 Windows 运行待当前精确 CI，
+  25 成员原件已随当前工程推送；当前精确 Windows／macOS／Ubuntu 完整 gate 现已通过，
   见[发布屏障记录](testing/records/2026-11-16-windows-fixture-publication.md)。
 - 当前正常 macOS arm64 包绑定 `ee3ad73` 与 719 冻结；release build
   `0/reaped/150.274s`，包结构／minos 15.0 检查通过；未启动、安装、签名或公证。
@@ -79,10 +86,11 @@
 
 ## 接续顺序
 
-1. 收取已推送 `ee3ad73` 的 `43880245383` 三平台终态，验证新 Windows 293 项 Python、
-   exclusive 文件反例、原七类 tree／Job barrier 及完整 gate／OpenSSH；
-   旧 958 终态已收齐，不重复未变 Rust 输入的宿主完整测试。
-2. 根据新 Windows 实际结果处理缺口；已通过的四项 app 范围保持，
+1. `ee3ad73` 的 `43880245383` 三平台完整 gate、Windows 293 项 Python／七类真实 tree／Job barrier，
+   以及 macOS／Ubuntu OpenSSH 均已收齐终态，证据窄复核批准、副本清理完成；
+   后续继续下列产品／桌面／发行验收。
+   旧 958 失败保持，不重放当前成功 CI 或未变 Rust 输入的宿主完整测试。
+2. 源码质量门禁通过后继续处理产品验收缺口；已通过的四项 app 范围保持，
    不清空 UNKNOWN/quarantine、不重放不确定写入、不放宽审核、权限、完整字节和发布后重验。
 3. 桌面可用后，以保留正常包的精确身份复核英文工具栏 P2，再补主题、尺寸、双语与完整键盘流程；
    当前保持锁屏阻塞，不把 headless 几何或旧包观察改签为新原生通过。
@@ -98,8 +106,8 @@
   缺握手警告、逐文件已验证保存、peer 退出 0、pipe relay 对照分别记录，均不能补签严格完成；
   继续独立 peer、真实 SSH PTY、取消／尾部恢复及同一 shell 新输入的可重复矩阵，见[收尾记录](testing/records/2026-11-15-bounded-zmodem-farewell.md)。
 - Windows 来源／私有 staging／安全发布后端与 UI 已接入，前批后端预检和完整 app 通过；
-  新 ZIP codec 41 项及 session 的两项祖先替换断言已通过，完整 gate 停在独立 Python 工装；
-  发布标记修订已复核、封存、推送，新候选待当前精确 CI，原生桌面仍待验。
+  新 ZIP codec 41 项及 session 两项祖先替换断言已通过；原 958 完整 gate 的 Python 工装失败保持。
+  发布标记修订已复核、封存、推送，当前 ee3 三平台完整 gate 已通过，原生桌面仍待验。
   以[根目录发布记录](testing/records/2026-11-16-windows-archive-root-publication.md)接续，不回退成“Windows 从未执行”。
 - 既有 Linux arm64 本地后端／codec 专项只覆盖原冻结；不代签 Linux x64、GUI、独立 peer 或当前输入，
   见[本地后端记录](testing/records/2026-11-15-windows-local-backend.md)。更广远端 Linux 权限与旧 Python runtime 仍需覆盖。
@@ -137,7 +145,7 @@
 
 | 范围 | 记录与边界 |
 | --- | --- |
-| 当前 Windows 发布／Quality | [根目录发布终态](testing/records/2026-11-16-windows-archive-root-publication.md#精确-ci-终态)、[ZIP 终态](testing/records/2026-11-16-portable-zip-metadata.md#精确-ci-终态补充)、[Zmodem 测试契约](testing/records/2026-11-16-windows-zmodem-test-contract.md)、[工装发布屏障](testing/records/2026-11-16-windows-fixture-publication.md)；原四项 app、新 codec 与 session 修订已按各自精确源码通过，当前工装修订的完整 gate 待终态。 |
+| 当前 Windows 发布／Quality | [根目录发布终态](testing/records/2026-11-16-windows-archive-root-publication.md#精确-ci-终态)、[ZIP 终态](testing/records/2026-11-16-portable-zip-metadata.md#精确-ci-终态补充)、[Zmodem 测试契约](testing/records/2026-11-16-windows-zmodem-test-contract.md)、[工装发布屏障](testing/records/2026-11-16-windows-fixture-publication.md)；原四项 app、新 codec 与 session 修订按各自精确源码通过，当前 ee3 三平台完整 gate 及 macOS／Ubuntu OpenSSH 已成功，桌面／发行仍开放。 |
 | Kit 0.10 与三主题 | [指定源码 CI／限定原生](testing/records/2026-11-16-kit010-native-ci.md)；旧包观察不代签后续源码或英文工具栏 P2。 |
 | 文件列表与命令框焦点 | [列表键盘](testing/records/2026-11-16-file-browser-keyboard.md)、[双向焦点补验](testing/records/2026-11-16-archive-diagnostics-and-native-focus.md)；双侧各一文件的 Frost 限定路径不等于完整 IME／辅助技术。 |
 | 编辑器原生 | [键盘及 UTF-16／GBK](testing/records/2026-11-16-editor-keyboard-native.md)；Frost 仅限定片段，Graphite HOLD、Lavender NOT_RUN，其他平台仍开放。 |
