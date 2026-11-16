@@ -15,6 +15,8 @@ use russh::keys::{HashAlg, PublicKey};
 
 type TestResult<T = ()> = Result<T, Box<dyn Error + Send + Sync>>;
 
+#[path = "support/openssh_editor_backup.rs"]
+mod editor_backup;
 #[path = "support/openssh_editor_encoding.rs"]
 mod editor_encoding;
 

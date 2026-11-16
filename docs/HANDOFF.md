@@ -5,7 +5,19 @@
 旧计数不覆盖当前授权。旧入口可从 `2f29744:docs/HANDOFF.md` 的 Git blob 读取；
 更早原文见[交接历史](HANDOFF_HISTORY_2026-11-16.md)与[路线历史](ROADMAP_HISTORY_2026-11-16.md)。
 
-当前功能批新增远端 macOS 账户可见的 TCP LISTEN 列表，使用已有 lsof，
+当前在做编辑器备份完整读回：30 session 新例和 5 GPUI 新例、标准 OpenSSH
+18 项已通过；长状态详情移入／滚动 P2 已修复，两位独立追加复核均 APPROVE、
+P0–P3 全 0。功能复核使用父级 prebuilt，独立 app/editor `88/0/0`；
+源码复核仅签静态差分。作者和两位 reviewer 均已关闭。
+r4 冻结 727 输入，aggregate `78d8a0c0000ce0afb661d8af0c6712a266cd44fa168b801d37c1672c39ddc4c2`，
+一次集中完整门禁 `0/reaped/701.469s`：普通 Rust `3307/0/52 ignored`、
+app `1372/0/2`、14 rustdoc、Python 293/2 skipped，helper 另列 30。
+准确 app 的 1374 库存与逐名执行相等，35 新例全部 ok；工程输入前后不变。
+正常 release build 和 arm64／minos 15.0 包结构通过；
+未启动或安装，锁屏使原生仍待验收。提交推送与精确来源包待交付回执。从
+[本批记录](testing/records/2026-11-17-editor-backup-readback.md)接续，不重放未知写入。
+
+上一功能批新增远端 macOS 账户可见的 TCP LISTEN 列表，使用已有 lsof，
 独立于 Python 资源采集；UDP、主动探测、进程核对／终止保持不支持。
 基线 `8d95d71cfa08181d5d44b689c108edcad7d995c4`，最终 r4 冻结 724 输入、
 aggregate `baae8aaab5903ad60509c23341b91a23553fac47ea7d1b0ff9ac993031c2e6ef`。
@@ -27,8 +39,14 @@ app `1367/0/2 ignored`、14 rustdoc，Python discovery 293/2 skipped、helper �
 GUI `f94ecc51…`、MCP `bb415f3a…`，打包／结构检查通过。
 已按精确 Git 原件回收 301 文件／88,633,128 字节；当前和上一正常包六文件摘要、
 共享 target 目录身份前后相等。
-新 Quality `43916079699` 的 Ubuntu `133470463980`、macOS `133470464468`、
-Windows `133470464623` 均 in_progress，尚无当前源码三平台终态；无活动 watcher。
+Quality `43916079699` 的 Ubuntu `133470463980`、macOS `133470464468`、
+Windows `133470464623` 已全部 completed/success；watch `0/reaped/100.277s`，
+无活动 watcher。Windows／macOS／Ubuntu 普通 Rust 为 `3259/0/49`、
+`3272/0/51`、`3265/0/52`，app 为 `1356/0/2`、`1367/0/2`、`1368/0/2`，
+各 14 rustdoc；Python 293 项分别 34／2／2 skipped。
+macOS／Ubuntu 标准 OpenSSH success。31 成员
+[精确终态](testing/records/2026-11-17-darwin-tcp-listeners-evidence/ci-completion/README.md)
+重算通过，724 Git 输入绑定通过；不代签当前编辑器工作差分。
 新非作者 Locke 对原指定文档／封存独立重算并限定 APPROVE，P0–P3 全 0，
 两个文档验证器 exit 0；已关闭，本批四位自有 agent 均已关闭。
 [43 成员交付补充](testing/records/2026-11-17-darwin-tcp-listeners-evidence/delivery/README.md)
@@ -131,8 +149,10 @@ unittest 6.134s／外层 6.203s，实际 waited；辅助检索诊断原文保留
 
 ## 下一步与资源
 
-1. 本批 Darwin TCP 工程 `bd198a8` 已普通推送、三方一致；
-   接续当前 `43916079699` 的精确 CI 终态，再按当前路线继续产品验收，不重放未变宿主 gate。
+1. 编辑器备份批的专项、两位独立复核和一次完整门禁已通过；
+   封存后普通提交推送并读回三方 SHA，核对精确 Git 输入和来源包，不重复成功测试。
+   Darwin TCP 工程 `bd198a8` 已普通推送、三方一致，`43916079699` 三平台终态已收齐，
+   不重放未变的监听宿主 gate 或 CI。
    上批 `43901863960` 与更早 `43880245383` 的终态分别记录，不能代签当前源码。
 2. Windows 源码完整质量门禁现已通过；继续真实桌面、协议 peer、远端平台及发行缺口，
    不把 runner 测试和正常包结构扩大成原生桌面／完整产品验收。
@@ -143,7 +163,9 @@ unittest 6.134s／外层 6.203s，实际 waited；辅助检索诊断原文保留
 唯一 Cargo target 为 `work/recovery-batch-integration-20261115/target`，
 `CARGO_BUILD_JOBS=2`、`MACOSX_DEPLOYMENT_TARGET=15.0`。同一 checkout 连续使用，归属未切换，
 不反复 clean；换归属前遵循[共享 target 合同](testing/SHARED_TARGET.md)。
-当前活动目录为 `work/darwin-tcp-listeners-20261117/`；
+当前活动目录为 `work/editor-backup-verification-20261117/`；
+编辑器原件包含原失败、r4 正例、两位 reviewer 的原审与追加签署；
+`work/darwin-tcp-listeners-20261117/` 是上一批保留正常包和交付回执。
 本批与上一活动副本按封存／Git blob 核对后已回收 301 文件；只保留当前必要正常包、
 交付工装与最后回执。上一隧道活动目录仅保留精确 `6f28f5c` 正常包；
 原日志和解析器从 docs 封存读取，不再使用旧活动路径。

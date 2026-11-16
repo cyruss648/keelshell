@@ -20,7 +20,17 @@
 
 ## 当前交付快照
 
-2026-11-17 当前功能批为远端 macOS 账户可见 TCP LISTEN 列表，设计见
+当前编辑器备份完整读回批的 30 session／5 app 新例、标准 OpenSSH 18 项已通过。
+长状态详情移入／滚动 P2 已修复，两位新非作者追加复核均 APPROVE、P0–P3 全 0；
+源码复核只签静态差分，功能复核以父级 prebuilt 独立执行 app/editor `88/0/0`。
+三位自有 agent 已关闭。727 输入冻结后一次完整门禁 `0/reaped/701.469s`：
+普通 Rust `3307/0/52 ignored`、app `1372/0/2`、14 rustdoc、Python293/2 skipped，
+helper 另列 30；准确 app1374 库存与逐名执行相等，35 新例均 ok，输入前后未变。
+正常 release build／包结构通过，未启动、未安装，原生仍待验收。
+提交推送及精确来源包以交付回执接续；
+见[备份记录](testing/records/2026-11-17-editor-backup-readback.md)。
+
+2026-11-17 上一功能批为远端 macOS 账户可见 TCP LISTEN 列表，设计见
 [ADR 0152](adr/0152-darwin-tcp-listeners.md)。724 输入冻结后，一次完整宿主 gate
 `0/reaped/794.954s`，普通 Rust `3272/0/51 ignored`、app `1367/0/2`、14 rustdoc；
 293 项 Python／2 skipped，archive helper 另列 30。1369 app 独立库存和逐名执行
@@ -31,7 +41,12 @@
 依赖 37 包／113 声明官方复查通过，manifest／lock 未改。
 工程 `bd198a8ef2578ea9b96e0a603cd705bb2eadca13` 已普通推送、三方一致，
 255 成员／724 输入精确 Git 绑定 `0/reaped/6.972s`、零 mismatch。
-新 Quality `43916079699` 三平台进行中，尚无当前源码终态。
+Quality `43916079699` 已三平台 completed/success。Windows／macOS／Ubuntu
+普通 Rust `3259/0/49`、`3272/0/51`、`3265/0/52`，app `1356/0/2`、
+`1367/0/2`、`1368/0/2`，各 14 rustdoc；Python 293 项分别 34／2／2 skipped，
+macOS／Ubuntu 标准 OpenSSH success。31 成员
+[精确 CI 终态](testing/records/2026-11-17-darwin-tcp-listeners-evidence/ci-completion/README.md)
+及 724 Git 输入绑定通过，不代签当前编辑器工作差分。
 精确正常包／结构检查通过；301 文件／88,633,128 字节自有副本已按 Git 原件回收，
 两个保留正常包和共享 target 身份不变。
 
@@ -108,8 +123,10 @@ app 为 `1351/0/2`、`1362/0/2`、`1363/0/2`；各 14 rustdoc，Python 293 项�
 
 ## 接续顺序
 
-0. 当前 Darwin TCP 功能的专项、独立复核、真实 SSH 与一次最终完整门禁均已通过；
-   工程 `bd198a8` 已普通推送并三方读回，接续 `43916079699` 精确 CI 终态。
+0. 当前编辑器备份批的长详情 P2 已关闭，完整门禁和准确库存均通过；
+   封存、普通提交推送并核对精确 Git 输入及来源包，不重复成功测试。
+   Darwin TCP 功能的专项、独立复核、真实 SSH 与一次最终完整门禁均已通过；
+   工程 `bd198a8` 已普通推送并三方读回，`43916079699` 精确三平台 CI 已全部成功。
    上一隧道源码的三平台 CI 已全部成功；不重复宿主全量或重放已成功 CI。
    两批原生桌面、完整产品及六目标发行仍待验。
 

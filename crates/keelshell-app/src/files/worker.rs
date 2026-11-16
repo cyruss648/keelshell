@@ -867,7 +867,17 @@ async fn operate_inner(
                         format,
                         &|| !stop.load(Ordering::Acquire),
                     )
-                    .await?;
+                    .await
+                    .map_err(|error| {
+                        // The editor's authority check can observe cancellation
+                        // before the outer cancellation timer. Preserve its
+                        // meaning without obscuring UNKNOWN mutation outcomes.
+                        if matches!(error, SessionError::Closed) && stop.load(Ordering::Acquire) {
+                            FileFailure::Cancelled
+                        } else {
+                            FileFailure::from(error)
+                        }
+                    })?;
                 let saved = sftp
                     .read_regular_snapshot(&path, 1024 * 1024)
                     .await

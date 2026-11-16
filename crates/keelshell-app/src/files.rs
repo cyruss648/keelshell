@@ -714,6 +714,7 @@ enum FileFailure {
     TextDocument(keelshell_core::TextDocumentError),
     EditorFormatChanged,
     TextEdit(keelshell_core::TextEditError),
+    BackupReadback,
     SavedReadback(String),
     Symlink,
     Cleanup,
@@ -753,6 +754,7 @@ impl From<SessionError> for FileFailure {
             SessionError::MutationBusy => Self::IsolationBusy,
             SessionError::MutationQuarantined => Self::IsolationUnknown,
             SessionError::MutationUncertain => Self::OutcomeUncertain(error.to_string()),
+            SessionError::EditorBackupUnverified => Self::BackupReadback,
             _ => Self::Transport(error.to_string()),
         }
     }
@@ -782,6 +784,7 @@ impl std::fmt::Display for FileFailure {
                 f.write_str("Remote encoding, BOM or line-ending format changed; read and review again")
             }
             Self::TextEdit(error) => write!(f,"{error}"),
+            Self::BackupReadback => f.write_str("original backup could not be fully verified; this target replacement was not started"),
             Self::SavedReadback(error) => write!(f,"publication acknowledged but content readback failed: {error}"),
             Self::Symlink => f.write_str("Permission changes on symbolic links are disabled"),
             Self::Cleanup => f.write_str("Operation completed but SFTP cleanup failed"),
@@ -876,6 +879,10 @@ impl FileFailure {
                 "文本审核未完成，草稿已保留",
                 "Text review incomplete; draft retained",
                 error,
+            ),
+            Self::BackupReadback => Message::new(
+                "原内容备份的完整读回未通过，本次目标替换尚未发起。草稿和旧基线已保留；请检查备份与远端文件，再重新审核，不自动重试。",
+                "Full readback of the original backup failed; this target replacement was not started. Draft and old baseline retained. Inspect the backup and remote file, then review again; no automatic retry.",
             ),
             Self::SavedReadback(error) => Message::detail(
                 "已收到原子发布确认，但完整读回未通过；保留旧基线和草稿，请读取远端确认，不自动重试",
@@ -1939,13 +1946,13 @@ impl FilesPanel {
                             view.diff_preview = None;
                             view.status = if dirty {
                                 Message::new(
-                                    format!("已保存审核版本；后续编辑尚未保存。原内容备份：{backup}"),
-                                    format!("Saved the reviewed version; newer edits remain unsaved. Original backup: {backup}"),
+                                    format!("已保存审核版本；后续编辑尚未保存。已完整核验的原内容备份：{backup}"),
+                                    format!("Saved the reviewed version; newer edits remain unsaved. Fully verified original backup: {backup}"),
                                 )
                             } else {
                                 Message::new(
-                                    format!("远程文件已原子保存并完整读回。原内容备份：{backup}"),
-                                    format!("Remote file atomically saved and fully read back. Original backup: {backup}"),
+                                    format!("远程文件已原子保存并完整读回。已完整核验的原内容备份：{backup}"),
+                                    format!("Remote file atomically saved and fully read back. Fully verified original backup: {backup}"),
                                 )
                             };
                         }

@@ -1,5 +1,30 @@
 # Capability ledger
 
+## 2026-11-17: complete editor backup verification
+
+Reviewed editor saves now keep the backup mutation scope through full checked
+readback of the original raw bytes, known size, regular private mode, metadata,
+EOF and readonly CLOSE. Target replacement starts only after that verification;
+the original target review and complete post-publication target readback remain.
+Failed backup verification has a separate non-retryable result and bilingual
+status from failed readback after target publication. Drafts, the old baseline,
+surviving backups and UNKNOWN isolation are retained.
+
+Compact status messages expose full live text through a themed hoverable native
+tooltip and accessibility label, with bounded scrolling and live language changes.
+The 727-input batch passed its host full gate: ordinary Rust 3307/0/52 ignored,
+app 1372/0/2, 14 doctests, Python discovery 293/two skipped and a separate
+30-test archive helper. All 1374 app inventory names matched execution; the new
+30 session and five app tests passed. Standard OpenSSH passed 18/0/0, separately
+from its default ignored suite. Independent source and parent-prebuilt functional
+follow-ups approved with no P0–P3; the latter independently ran 88/0/0 editor
+tests without recompiling. Initial failures and REQUEST_CHANGES remain recorded.
+Normal macOS GUI/MCP build and package structure passed; native desktop,
+exact-source three-platform CI and release acceptance remain separate.
+Historical backup-ACK limitations below describe their original scopes. See
+[ADR 0153](../adr/0153-editor-backup-readback.md) and the
+[batch record](../testing/records/2026-11-17-editor-backup-readback.md).
+
 ## 2026-11-17: remote macOS TCP listeners
 
 The existing port control can read account-visible TCP LISTEN sockets using the
@@ -20,6 +45,15 @@ Independent source and prebuilt functional reviews approved with no P0–P3.
 Initial failures remain recorded. Normal macOS GUI/MCP build and package
 structure checks passed; no desktop launch, installation or release is signed off.
 See the [listener record](../testing/records/2026-11-17-darwin-tcp-listeners.md).
+
+Exact source `bd198a8ef2578ea9b96e0a603cd705bb2eadca13` subsequently completed
+Quality `43916079699` successfully on all three platforms. Windows/macOS/Ubuntu
+ordinary Rust counts are 3259/0/49, 3272/0/51 and 3265/0/52; app counts are
+1356/0/2, 1367/0/2 and 1368/0/2, with 14 doctests each. Python ran 293 tests
+with 34/two/two skipped, and macOS/Ubuntu OpenSSH steps succeeded.
+The [31-member terminal record](../testing/records/2026-11-17-darwin-tcp-listeners-evidence/ci-completion/README.md)
+rederives the exact results and preserves original in-progress snapshots.
+That sign-off does not cover the later editor working diff or native desktop.
 
 ## 2026-11-16: tunnel configuration reload and completed source CI
 

@@ -1,5 +1,18 @@
 # 2026-11-17 远端 macOS TCP 监听端口
 
+## 精确 CI 终态补充
+
+工程 `bd198a8ef2578ea9b96e0a603cd705bb2eadca13` 的 Quality `43916079699`
+已三平台 completed/success。Windows／macOS／Ubuntu 普通 Rust 为
+`3259/0/49`、`3272/0/51`、`3265/0/52`，app 为 `1356/0/2`、
+`1367/0/2`、`1368/0/2`，各 14 rustdoc。Python 各运行 293 项，
+分别 34／2／2 skipped；macOS／Ubuntu 标准 OpenSSH success。
+31 成员[终态封存](2026-11-17-darwin-tcp-listeners-evidence/ci-completion/README.md)
+包含逐名派生和精确 Git 绑定，验证器 exit 0、零 mismatch、测试重放 0。
+下方旧 in_progress 保留为捕获时点；终态不代签后续编辑器批、桌面或发行。
+
+## 原批次记录
+
 本批在 `8d95d71cfa08181d5d44b689c108edcad7d995c4` 上开发。
 源码／专项、两位非作者复核、一次最终完整门禁和真实 SSH 互操作均已通过；
 完整产品、原生桌面与发行仍开放。

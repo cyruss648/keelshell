@@ -1,5 +1,18 @@
 # Hallmark 与原生 GPUI 界面
 
+## 2026-11-17 编辑器备份与状态详情
+
+保存反馈区明确区分备份完整验证失败与目标发布后验证失败；成功状态说明原内容
+备份已完整核验。完整消息沿用当前双语状态与 AX 名称，紧凑行按 chrome 状态栏
+高度约束，并提供 Kit 可悬停 tooltip；正常换行、有界高度、可移入滚动，已打开
+的内容随当前语言重绘。主题切换不读取文件或
+创建 SSH 请求。实现只使用现有 registry、Palette 和组件 token。
+
+本片是原生组件增量，Web render 不适用；几何／行为回归、真实传输及原生桌面
+分别验收，不用 headless 检查代签 native finish，见
+[ADR 0153](../adr/0153-editor-backup-readback.md)及
+[测试记录](../testing/records/2026-11-17-editor-backup-readback.md)。
+
 ## 2026-11-17 远端 TCP 监听列表
 
 复用监控区的端口按钮、紧凑行和功能能力状态，不新增装饰或主题分支。

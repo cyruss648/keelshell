@@ -139,12 +139,18 @@ BOM/EOL 时，保留草稿、撤销旧合并与保存路径，必须显式成功
 
 | 阶段 | 当前保证与限制 |
 | --- | --- |
-| 原始备份 | 复核原 snapshot 后，把原始字节写入同目录 `.{name}.keelshell-backup-{uuid}.txt`；备份写入成功 ACK 后才继续目标替换。生产流程没有独立完整读回该备份，ACK不等于备份内容或崩溃耐久性验证。 |
+| 原始备份 | 复核原 snapshot 后，把原始字节写入同目录 `.{name}.keelshell-backup-{uuid}.txt`。发布 ACK 后仍持有备份 reservation，检查父链、普通文件／私有 `0600` mode、句柄前后与最终 leaf 元数据、精确大小、完整 EOF 和 CLOSE ACK，并逐字节等于原始内容；全部通过才继续目标替换。失败保留备份、旧基线和草稿，明确本次目标替换尚未发起。 |
 | 目标发布 | 沿用独占 staging、当前授权及发布前完整基线复核，使用 POSIX 原子替换。发布 ACK 只表示服务端确认，不能直接更新编辑基线。 |
 | 目标完整读回 | app 在发布 ACK 后完整读取目标，并将全部字节与已审核出站字节逐字节比较；只有完全一致才采用保存基线。失败或任一字节不符时保留旧基线与当前草稿，提示检查，已完成的备份留在远端。 |
 
-测试会独立读取合成备份并断言原始字节正确；这项测试观察不能扩大生产备份 ACK
-合同。备份不是版本历史、自动恢复或事务回滚。未知目标写入继续保留既有隔离；
+备份读回覆盖原有整个备份 deadline；撤权或关闭仍返回原有类型，备份发布
+UNKNOWN 继续隔离，不误标为普通读回失败。已发布目标的读回失败使用另一条明确
+状态。紧凑状态行的悬停详情展示当前完整消息，并随界面语言重绘。
+设计和实际验证见[ADR 0153](../adr/0153-editor-backup-readback.md)与
+[本批记录](../testing/records/2026-11-17-editor-backup-readback.md)。
+
+完整备份读回是生产保存流程的一步；这是一轮有界观察，不是持续身份锁或崩溃
+耐久性验证。备份不是版本历史、自动恢复或事务回滚。未知目标写入继续保留既有隔离；
 普通 SFTP 观察不是远端 CAS，最终复核与 rename 之间仍有服务端竞争窗口。
 只保留普通 rwx，不承诺 owner、ACL、特殊 mode 或崩溃耐久性。
 
@@ -165,9 +171,12 @@ the editable Unicode body and retains the original uniform LF/CRLF save policy.
 Mixed/CR-only drafts stay verbatim.
 Exact outbound bytes drive dirty state, review, limits and confirmation. An incompatible
 format observation requires an explicit successful reread and a fresh review.
-Backup ACK, target publication ACK and complete target readback are distinct:
-production does not independently reread the backup; only complete target byte equality
-permits baseline adoption. Cancellation is not rollback, and SFTP is not remote CAS.
+Backup publication ACK, complete checked backup readback, target publication ACK and
+complete target readback are distinct. Production verifies all original backup bytes
+before starting target replacement, within the existing deadline and mutation scope.
+A failed backup check retains the draft and old baseline; only complete target byte
+equality permits baseline adoption. These are bounded observations, not continuous
+identity locks or crash durability. Cancellation is not rollback, and SFTP is not remote CAS.
 The existing 1 MiB / 4096-line limits remain, including the decoded-body and UTF-16
 encoded-byte budgets. A new macOS package has scoped native
 BOM/CRLF cancel/save observations; inline merge accessibility and complete native

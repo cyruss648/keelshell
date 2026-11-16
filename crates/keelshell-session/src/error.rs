@@ -73,6 +73,10 @@ pub enum SessionError {
     /// be verified. The caller must refresh the entry before retrying.
     #[error("remote mutation acknowledged but verification failed: {0}")]
     UnverifiedMutation(&'static str),
+    /// An acknowledged editor backup failed complete checked readback.
+    /// This editor save has not started replacing its reviewed target.
+    #[error("backup could not be fully verified; this target replacement was not started")]
+    EditorBackupUnverified,
 }
 
 impl SessionError {
@@ -102,6 +106,7 @@ impl SessionError {
             | Self::OutputLimit(_)
             | Self::EntryLimit(_)
             | Self::UnverifiedMutation(_)
+            | Self::EditorBackupUnverified
             | Self::MutationBusy
             | Self::MutationQuarantined
             | Self::MutationUncertain => false,

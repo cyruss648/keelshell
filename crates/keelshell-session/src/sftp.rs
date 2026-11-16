@@ -24,6 +24,13 @@ mod control;
 pub use archive_transfer::{ArchiveTransferPlan, ArchiveTransferReceipt, ArchiveTransferRequest};
 mod directory;
 #[cfg(test)]
+#[allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    reason = "Controlled test fixtures fail immediately when their required state is missing"
+)]
+mod editor_backup_tests;
+#[cfg(test)]
 mod editor_encoding_tests;
 mod file_resume;
 mod file_transfer;
@@ -613,6 +620,9 @@ impl SftpSession {
     /// SFTP supplies observations rather than an atomic compare-and-swap lock.
     /// This compatibility entry point accepts only Unicode; explicitly selected
     /// legacy formats require [`Self::write_editor_reviewed_with_format_authorized`].
+    /// The returned backup path has completed checked readback of the original
+    /// bytes before target replacement starts. An acknowledged backup that fails
+    /// this check returns [`SessionError::EditorBackupUnverified`].
     pub async fn write_editor_reviewed_authorized(
         &self,
         reviewed: &RegularFileSnapshot,
@@ -650,7 +660,8 @@ impl SftpSession {
     /// Raw bytes, decoded bodies and final bytes are bounded to 1 MiB. The
     /// 4096-line save bound applies to the replacement, not the unchanged source.
     ///
-    /// Returns the acknowledged backup path containing the original raw bytes.
+    /// Returns the backup path after complete checked readback of the original
+    /// raw bytes and acknowledged target replacement.
     /// Authority checks, complete snapshot revalidation, shared mutation
     /// quarantine and mandatory POSIX rename follow the Unicode editor path.
     /// The caller still needs a complete target readback to verify the result;
@@ -659,7 +670,9 @@ impl SftpSession {
     /// # Errors
     /// Returns a content-free [`SessionError::Invalid`] for invalid, lossy or
     /// mismatched text/format, and [`SessionError::OutputLimit`] for oversized
-    /// raw input. Backup, authorization and replacement failures retain the
+    /// raw input. An acknowledged backup that fails checked readback returns
+    /// [`SessionError::EditorBackupUnverified`] before target replacement starts.
+    /// Backup publication, authorization and replacement failures retain the
     /// existing typed transport and mutation errors.
     pub async fn write_editor_reviewed_with_format_authorized(
         &self,
@@ -733,6 +746,7 @@ impl SftpSession {
         authorized: &(dyn Fn() -> bool + Sync),
     ) -> Result<String> {
         let scope = self.reserve_remote(&[backup], true, authorized).await?;
+        let mut published = false;
         let result = deadline(self.timeout, "SFTP editor backup", async {
             self.verify_regular_snapshot(reviewed).await?;
             self.replace_from_reader_checked(
@@ -745,9 +759,44 @@ impl SftpSession {
             )
             .await
             .map_err(transfer_session_error)?;
+            published = true;
+            scope.revalidate().await?;
+            // Reuse the checked reader without taking another mutation scope:
+            // the acknowledged backup stays reserved until readback completes.
+            let observed =
+                Box::pin(self.read_regular_snapshot(backup, reviewed.content.len())).await;
+            if self.is_closed() || !authorized() {
+                return Err(SessionError::Closed);
+            }
+            let observed = observed.map_err(|error| match error {
+                SessionError::Closed
+                | SessionError::MutationBusy
+                | SessionError::MutationQuarantined
+                | SessionError::MutationUncertain => error,
+                _ => SessionError::EditorBackupUnverified,
+            })?;
+            scope.revalidate().await?;
+            if observed.content != reviewed.content
+                || observed.entry.size != Some(reviewed.content.len() as u64)
+                || observed.entry.permissions != Some(0o100600)
+            {
+                return Err(SessionError::EditorBackupUnverified);
+            }
             Ok(backup.to_owned())
         })
         .await;
+        // The original whole-backup deadline also bounds readback. A timeout
+        // after publication does not imply that target replacement was sent.
+        let result = match result {
+            Err(SessionError::Timeout(_)) if published => {
+                if self.is_closed() || !authorized() {
+                    Err(SessionError::Closed)
+                } else {
+                    Err(SessionError::EditorBackupUnverified)
+                }
+            }
+            result => result,
+        };
         scope.complete(result).await
     }
 

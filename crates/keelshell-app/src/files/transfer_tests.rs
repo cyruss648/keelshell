@@ -35,6 +35,8 @@ mod browser_tests;
 mod conflict_merge_tests;
 #[path = "drop_tests.rs"]
 mod drop_tests;
+#[path = "editor_backup_tests.rs"]
+mod editor_backup_tests;
 #[path = "editor_encoding_tests.rs"]
 mod editor_encoding_tests;
 #[path = "fixture_isolation_tests.rs"]

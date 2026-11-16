@@ -914,10 +914,40 @@ impl Render for FilesPanel {
                             .id("file-operation-status")
                             .flex_1()
                             .min_w_0()
-                            .text_ellipsis()
+                            .max_h(px(crate::design::chrome(cx).status_bar_height))
+                            .truncate()
+                            .line_clamp(1)
                             .text_color(rgb(visual.muted))
                             .role(accesskit::Role::Label)
                             .aria_label(self.status.render(cx))
+                            .hoverable_tooltip({
+                                let owner = cx.entity().downgrade();
+                                move |window, cx| {
+                                    let owner = owner.clone();
+                                    gpui_kit::component::tooltip::Tooltip::element(move |_, cx| {
+                                        let text = owner
+                                            .upgrade()
+                                            .map(|view| view.read(cx).status.render(cx))
+                                            .unwrap_or_default();
+                                        div()
+                                            .id("file-operation-status-detail")
+                                            .max_w(px(480.))
+                                            .max_h(px(220.))
+                                            .overflow_y_scroll()
+                                            .whitespace_normal()
+                                            .role(accesskit::Role::Tooltip)
+                                            .aria_label(text.clone())
+                                            .child(
+                                                div()
+                                                    .id("file-operation-status-detail-content")
+                                                    .child(text)
+                                                    .test_support(),
+                                            )
+                                            .test_support()
+                                    })
+                                    .build(window, cx)
+                                }
+                            })
                             .child(self.status.render(cx))
                             .test_support(),
                     )

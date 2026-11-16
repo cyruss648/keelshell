@@ -109,6 +109,13 @@ inputs retain their own shortcuts. UTF-16 save reviews describe final LF/CR
 characters. Engineering, native keys and complete byte readback have separate
 scope in the [batch record](docs/testing/records/2026-11-16-editor-keyboard-native.md).
 
+Reviewed saves completely reread and compare the original backup before replacing
+the target. A failed backup check retains the draft and old baseline and states
+that this target replacement has not started. Failed readback after target
+publication has a separate message; hover the compact status for full details.
+Design, engineering and native boundaries are in the
+[backup verification record](docs/testing/records/2026-11-17-editor-backup-readback.md).
+
 [Reviewed traceroute](docs/product/TRACEROUTE_DIAGNOSTICS.md) exposes explicit UDP/ICMP, IPv4/IPv6 and bounded probe options with complete target and command review. Missing hops and stars remain unknown. The same package's real SSH UI returned one-hop replies for UDP loopback in both IP families. Scoped native coverage, incomplete merge acceptance and the footer-action accessibility issue are tracked in the [native record](docs/testing/records/2026-11-06-editor-traceroute-native.md); engineering evidence is in the [combined record](docs/testing/records/2026-11-06-editor-traceroute-integration.md).
 
 Text merging and patches first produce a local draft. Saving remotely requires complete review and a fresh baseline check. File reviews can expand while keeping confirmation and cancellation visible; drafts and patch inputs have explicit editing controls. See [review and editing](docs/product/FILE_REVIEW_AND_FOCUS.md) and the [text merge guide](docs/product/TEXT_CONFLICT_MERGE.md). Two macOS draft/save sequences against an owned SSH/SFTP fixture completed with full-content readback; complete UI and cross-platform acceptance remain open in the [limited native record](docs/testing/records/2026-10-07-text-merge-patch-native.md).
