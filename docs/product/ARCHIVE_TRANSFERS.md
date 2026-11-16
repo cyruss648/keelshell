@@ -38,8 +38,14 @@
 在创建时设置私有 DACL，完整验证私有目录树后以无覆盖方式发布；只接纳满足
 对象身份、权限和 NT 发布契约的本地 drive 文件系统。UNC、设备路径、重解析、
 多硬链接与不可移植名称均拒绝。界面已启用 Windows 下载解包入口。
-Windows platform/session 严格交叉 Clippy 和四个 AMD64 PE32+ 测试 target 链接
-通过，原生文件系统和桌面实际执行仍为 `0 / NOT_RUN`。最终 Linux arm64
+历史 Windows platform/session 交叉 Clippy 和四个 AMD64 PE32+ 测试 target 链接
+通过。后续真实 Windows 源码 `8527cf2` 的文件系统预检 `70/0/0`，
+归档后端 `25/3/1 ignored`，含嵌套树发布拒绝访问；完整应用门禁未运行，
+Windows 桌面仍为 `NOT_RUN`。新的
+[根目录发布观察生命周期](../adr/0148-windows-archive-root-publication.md)
+实现候选仅在发布根目录前关闭已完成写入的 staging 后代观察句柄，
+保留根与审核祖先；发布后仍完整核对身份、权限、清单、digest 和全部 bytes。
+此候选尚未在 Windows 实际通过，不能签署完整解包验收。最终 Linux arm64
 后端/codec 专项 `252 passed / 0 failed / 0 ignored` 仅覆盖本地后端与编解码，
 不代签 Linux GUI、x64 或独立 peer；实际输入与验证范围见
 [本地后端记录](../testing/records/2026-11-15-windows-local-backend.md)。
@@ -107,8 +113,16 @@ Windows. Windows retains every ancestor handle, creates objects with a private
 DACL and verifies the complete staged tree before publication. Only supported
 local drive filesystems are admitted; UNC/device paths, reparse points, multiple
 hard links and nonportable names are rejected. Windows extraction controls are
-enabled. Windows platform/session strict cross Clippy and four AMD64 PE32+ test
-links passed; native filesystem and desktop execution remains 0 / NOT_RUN.
+enabled. Historical Windows platform/session cross Clippy and four AMD64 PE32+
+test links passed. Later real Windows source `8527cf2` passed all 70 filesystem
+preflight cases, while its archive backend finished 25/3/1 ignored, including
+access denied during nested-tree publication. The full app gate did not run;
+Windows desktop acceptance remains NOT_RUN. The new
+[root-publication observation lifecycle](../adr/0148-windows-archive-root-publication.md)
+candidate closes completed staging descendant observations before the root-only
+rename, retaining the exact root and reviewed ancestors. Acceptance still
+requires complete post-publication identity, permissions, inventory, digest and
+byte validation. This candidate has not passed real Windows execution.
 The final Linux arm64 selection passed 252 local backend/codec tests with no
 failures or ignores; it does not establish Linux GUI, x64 or independent peer
 acceptance. See the

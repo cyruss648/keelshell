@@ -42,6 +42,7 @@ jobs:
           foreach ($case in @(
             'sftp::archive_transfer::local::tests::windows_archive_private_nested_tree_publishes_after_child_creation_handles_close',
             'sftp::archive_transfer::local::tests::windows_archive_empty_private_tree_publishes_with_exact_root_identity'
+            'sftp::archive_transfer::local::tests::windows_archive_same_content_replacement_after_release_fails_published_readback'
           )) {
             if ($listing -cnotcontains "${case}: test") {
               throw "Required Windows archive test was not compiled: $case"

@@ -302,28 +302,66 @@ async fn windows_archive_manifest_clone_retains_every_original_ancestor_capabili
         std::fs::write(&source, b"original")?;
         let stop = AtomicBool::new(false);
         let (manifest, members) = scan_blocking(vec![source.clone()], &stop)?;
+        let original_ancestors: Vec<_> = manifest
+            .ancestors
+            .iter()
+            .map(|(path, ancestor)| (path.clone(), ancestor.stamp.clone()))
+            .collect();
+        assert_eq!(manifest.entries.len(), 1);
+        let original_identity = manifest.entries[0].stamp.identity;
         let retained = manifest.clone();
         assert_eq!(
             retained.ancestors.len(),
             source.parent().ok_or_else(changed)?.ancestors().count()
         );
         drop(manifest);
-        let moved = fixture.root.join("moved");
-        std::fs::rename(&outer, &moved)?;
-        std::fs::create_dir_all(&inner)?;
+        // Snapshots above own no handles; only the clone retains this review.
+        let verify_retained_ancestors = || -> Result<()> {
+            assert_eq!(retained.ancestors.len(), original_ancestors.len());
+            for (path, original_stamp) in &original_ancestors {
+                let ancestor = retained.ancestors.get(path).ok_or_else(changed)?;
+                assert_eq!(&ancestor.stamp, original_stamp);
+                assert_eq!(
+                    &ancestor_stamp(metadata(ancestor.held.as_file())?)?,
+                    original_stamp
+                );
+            }
+            Ok(())
+        };
+        verify_retained_ancestors()?;
+        verify_sources(&retained, &members, &stop)?;
+
+        // Renaming a directory with open descendants is forbidden on Windows.
+        // Keep every capability alive and replace only the shared-delete leaf.
+        let moved = inner.join("retained-file");
+        std::fs::rename(&source, &moved)?;
         std::fs::write(&source, b"replacement")?;
-        std::fs::write(moved.join("retained-only"), b"evidence")?;
-        assert!(
-            retained
-                .ancestors
-                .get(&outer)
-                .ok_or_else(changed)?
-                .held
-                .entries()?
-                .iter()
-                .any(|name| name == "retained-only")
+        verify_retained_ancestors()?;
+        let parent = &retained.ancestors.get(&inner).ok_or_else(changed)?.held;
+        assert_eq!(
+            metadata(&parent.open_file("retained-file")?)?.identity,
+            original_identity
         );
-        assert!(verify_sources(&retained, &members, &stop).is_err());
+        assert_ne!(
+            metadata(&parent.open_file("file")?)?.identity,
+            original_identity
+        );
+        assert_eq!(std::fs::read(&source)?, b"replacement");
+        let entry = &retained.entries[0];
+        let held_stamp = metadata(entry.held.as_file())?;
+        assert_eq!(held_stamp.identity, original_identity);
+        // Rename may change timestamps. Observe them for this read only;
+        // the reviewed stamp and digest remain immutable for verify_sources.
+        let (bytes, digest) = read_file(entry.held.as_file(), &held_stamp, 8, &stop)?;
+        assert_eq!(bytes, b"original");
+        assert_eq!(Some(digest), entry.digest);
+        assert_eq!(members[0].bytes(), b"original");
+        assert!(matches!(
+            verify_sources(&retained, &members, &stop),
+            Err(SessionError::Invalid(
+                "archive source, destination or ancestors changed; review again"
+            ))
+        ));
         Ok(())
     })
     .await
@@ -596,6 +634,97 @@ async fn windows_archive_changed_staging_content_is_not_published_or_deleted() -
         );
         assert!(!fixture.destination.exists());
         assert_eq!(std::fs::read(fixture.staging.join("file"))?, b"tampered");
+        assert!(lease.quarantined());
+        Ok(())
+    })
+    .await
+}
+
+#[tokio::test]
+async fn windows_archive_same_content_replacement_after_release_fails_published_readback()
+-> Result<()> {
+    let fixture = native(Fixture::new).await?;
+    let lease = Lease::new(&fixture).await?;
+    native(move || {
+        let members = vec![
+            ArchiveMember::new_file("file", b"reviewed".to_vec()).map_err(|_| invalid_archive())?,
+        ];
+        let worker = lease.worker();
+        let stage = build_stage(
+            &fixture.reviewed,
+            &members,
+            &fixture.destination,
+            &fixture.staging,
+            &worker,
+        )?;
+        let original = stage.tree.entries.get("file").ok_or_else(changed)?;
+        let original_identity = original.stamp.identity;
+        let original_digest = original.digest;
+        let root_identity = metadata(stage.entry.as_file())?.identity;
+        // Exercise the new transition window, after pre-publication handles
+        // have closed. Existing tests cover changes before this transition.
+        let baseline = release_tree_for_publication(stage.tree);
+        let evidence = fixture.root.join("original-evidence");
+        std::fs::rename(fixture.staging.join("file"), &evidence)?;
+        let parent = stage.entry.as_directory()?;
+        let mut replacement = parent.create_file("file")?;
+        replacement.write_all(b"reviewed")?;
+        replacement.sync_all()?;
+        verify_private(replacement.as_file(), false)?;
+        let replacement_identity = metadata(replacement.as_file())?.identity;
+        assert_ne!(replacement_identity, original_identity);
+        // Close the exclusive creation writer before the real publication readback.
+        drop(replacement);
+        drop(parent);
+
+        // The root rename itself must succeed. Complete private bytes and the
+        // same inventory still cannot authorize the substituted child object.
+        let current = verify_ancestors(&fixture.reviewed.ancestors, &worker.stop)?;
+        let parent = parent_in(&current, &fixture.destination)?;
+        parent.rename_no_replace(&stage.entry, basename(&fixture.destination)?)?;
+        parent.require_absent(basename(&fixture.staging)?)?;
+        let published = named_stage(parent, basename(&fixture.destination)?, &stage.entry)?;
+        assert_eq!(metadata(published.as_file())?.identity, root_identity);
+        let actual = capture_tree(
+            published,
+            &expected_tree(&fixture.staging, &members)?,
+            &worker.stop,
+        )?;
+        let replaced = actual.entries.get("file").ok_or_else(changed)?;
+        assert_eq!(replaced.stamp.identity, replacement_identity);
+        assert_eq!(replaced.digest, original_digest);
+        assert_eq!(
+            actual.entries.get("").ok_or_else(changed)?.children,
+            baseline.get("").ok_or_else(changed)?.children
+        );
+        assert!(matches!(
+            compare_published_observations(&baseline, &actual),
+            Err(SessionError::Invalid(
+                "archive source, destination or ancestors changed; review again"
+            ))
+        ));
+        // No owner accepted this changed readback: dropping its original guard
+        // must retain both published evidence and the reservation quarantine.
+        drop(stage.unverified);
+        assert!(fixture.destination.is_dir());
+        assert_eq!(
+            std::fs::read(fixture.destination.join("file"))?,
+            b"reviewed"
+        );
+        assert_eq!(std::fs::read(&evidence)?, b"reviewed");
+        let parent = &fixture
+            .reviewed
+            .ancestors
+            .get(&fixture.root)
+            .ok_or_else(changed)?
+            .held;
+        let published = parent.open_directory(basename(&fixture.destination)?)?;
+        let replacement = published.open_file("file")?;
+        let original = parent.open_file("original-evidence")?;
+        verify_private(&replacement, false)?;
+        verify_private(&original, false)?;
+        assert_eq!(metadata(&replacement)?.identity, replacement_identity);
+        assert_eq!(metadata(&original)?.identity, original_identity);
         assert!(lease.quarantined());
         Ok(())
     })

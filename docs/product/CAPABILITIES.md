@@ -1,5 +1,24 @@
 # Capability ledger
 
+## 2026-11-16: Windows archive root publication candidate
+
+Exact source `8527cf2` completed Quality `43854113236` with macOS/Ubuntu
+success and real OpenSSH checks. Windows passed 70 filesystem cases; its early
+archive backend actually ran 29 names, with 25 passed, three failed and one
+ignored. Nested-tree failure was localized to publication with typed access
+denied; the full Windows app gate did not run.
+
+The next candidate releases only completed staging descendant observations
+before the retained-root rename, then requires full identity, permissions,
+metadata, inventory, digest and byte readback. Reviewed source/ancestor handles
+and unknown-result guards remain. It explicitly does not guarantee continuous
+staging descendant identity pinning across rename. Host session and archive
+focused tests passed 301 cases with four ignored, matching all 305 inventory
+names; independent static review approved the three-file scope with no P0–P3.
+Windows type checking and native execution remain pending. See
+[ADR 0148](../adr/0148-windows-archive-root-publication.md) and the
+[batch record](../testing/records/2026-11-16-windows-archive-root-publication.md).
+
 ## 2026-11-16: archive diagnostics and Windows preflight
 
 Exact source `8c07d61009dba14f989dd0c00a2a370dc7a2d37b`, Quality `43848390542`,

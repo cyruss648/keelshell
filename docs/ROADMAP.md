@@ -6,6 +6,20 @@
 读取本地、tracking 和远端 SHA。下列历史批次“不 push”仅描述原时点，
 后续按[当前交接](HANDOFF.md)及实际交付回执继续。
 
+## 2026-11-16 Windows 归档根目录发布
+
+前批精确 Quality `43854113236` 已 failure：macOS/Ubuntu 的完整 gate 与
+真实 OpenSSH success；Windows platform `70/0/0`、归档后端 `25/3/1 ignored`，
+29 名逐项相等，完整 Windows gate NOT_RUN。三平台完整原件已收取。
+本批三个工程文件消费新 staging 的后代观察后只改名保留根，再完整读回
+bytes/identity/ACL/metadata/inventory；不释放 source review 或祖先，也不清空隔离。
+新增句柄释放后同内容换对象的拒绝回归、保留 clone 的原对象/祖先证明，
+CI 必须编译出新完整用例名。宿主 scoped gate `0/reaped/19.678s`，session
+`288/0/4`、app 归档 `13/0/0`，305 名逐项匹配，719 输入零漂移。
+新非作者静态批准、P0–P3 全 0、独立运行 0，已关闭；Windows 类型/native
+仍待实际 CI。62 成员证据 current 绑定零 mismatch。见
+[本批记录](testing/records/2026-11-16-windows-archive-root-publication.md)。
+
 ## 2026-11-16 Windows 私有归档预检
 
 源码 `8c07d61` 的精确 Quality `43848390542` 已终态 failure：macOS/Ubuntu

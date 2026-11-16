@@ -651,6 +651,39 @@ struct Tree {
     entries: BTreeMap<String, TreeEntry>,
 }
 
+struct PublishedObservation {
+    stamp: FileInfo,
+    digest: Option<[u8; 32]>,
+    children: Vec<String>,
+}
+
+fn release_tree_for_publication(tree: Tree) -> BTreeMap<String, PublishedObservation> {
+    // Windows refuses a directory rename while a descendant has an open link,
+    // including read-only handles that share DELETE. All child writes are done.
+    // Consume only staging observations; the caller still retains its exact
+    // PrivateEntry root and every reviewed ancestor across the root-only rename.
+    tree.entries
+        .into_iter()
+        .map(|(relative, entry)| {
+            let TreeEntry {
+                stamp,
+                digest,
+                children,
+                held,
+            } = entry;
+            drop(held);
+            (
+                relative,
+                PublishedObservation {
+                    stamp,
+                    digest,
+                    children,
+                },
+            )
+        })
+        .collect()
+}
+
 fn split_member(member: &str) -> (&str, &str) {
     member.rsplit_once('/').unwrap_or(("", member))
 }
@@ -775,23 +808,42 @@ fn capture_tree(
     Ok(tree)
 }
 
-fn compare_tree(expected: &Tree, actual: &Tree, published: bool) -> Result<()> {
+fn compare_tree(expected: &Tree, actual: &Tree) -> Result<()> {
     if expected.entries.len() != actual.entries.len() {
         return Err(changed());
     }
     for (relative, before) in &expected.entries {
         let after = actual.entries.get(relative).ok_or_else(changed)?;
-        let same_stamp = if relative.is_empty() && published {
-            ancestor_stamp(before.stamp.clone())? == ancestor_stamp(after.stamp.clone())?
-        } else {
-            before.stamp == after.stamp
-        };
-        if !same_stamp || before.digest != after.digest || before.children != after.children {
+        if before.stamp != after.stamp
+            || before.digest != after.digest
+            || before.children != after.children
+        {
             return Err(changed());
         }
         // The original read handles prevent identity reuse between the two
         // observations; namespace readback must still identify those objects.
         if metadata(before.held.as_file())? != after.stamp {
+            return Err(changed());
+        }
+    }
+    Ok(())
+}
+
+fn compare_published_observations(
+    expected: &BTreeMap<String, PublishedObservation>,
+    actual: &Tree,
+) -> Result<()> {
+    if expected.len() != actual.entries.len() {
+        return Err(changed());
+    }
+    for (relative, before) in expected {
+        let after = actual.entries.get(relative).ok_or_else(changed)?;
+        let same_stamp = if relative.is_empty() {
+            ancestor_stamp(before.stamp.clone())? == ancestor_stamp(after.stamp.clone())?
+        } else {
+            before.stamp == after.stamp
+        };
+        if !same_stamp || before.digest != after.digest || before.children != after.children {
             return Err(changed());
         }
     }
@@ -987,12 +1039,14 @@ fn publish_stage(
         &expected,
         &worker.stop,
     )?;
-    compare_tree(&stage.tree, &actual, false)?;
+    compare_tree(&stage.tree, &actual)?;
     drop(actual);
     let current = verify_ancestors(&reviewed.ancestors, &worker.stop)?;
     let parent = parent_in(&current, destination)?;
     named_stage(parent, basename(staging)?, &stage.entry)?;
     parent.require_absent(basename(destination)?)?;
+    worker.check()?;
+    let baseline = release_tree_for_publication(stage.tree);
     worker.check()?;
     parent.rename_no_replace(&stage.entry, basename(destination)?)?;
     worker.check()?;
@@ -1001,7 +1055,10 @@ fn publish_stage(
     parent.require_absent(basename(staging)?)?;
     let published = named_stage(parent, basename(destination)?, &stage.entry)?;
     let actual = capture_tree(published, &expected, &worker.stop)?;
-    compare_tree(&stage.tree, &actual, true)?;
+    // Descendants cannot remain open across the Windows root rename. Reopen
+    // through the retained root and compare every original observation, digest
+    // and complete byte sequence before considering publication verified.
+    compare_published_observations(&baseline, &actual)?;
     let current = verify_ancestors(&reviewed.ancestors, &worker.stop)?;
     let parent = parent_in(&current, destination)?;
     parent.require_unique_name(basename(destination)?)?;

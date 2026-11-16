@@ -30,38 +30,40 @@
 - 用户已授权提交推送、标签触发跨平台 Release、本地 Podman 联调；不含覆盖
   安装现有应用、遥测上传或跳过尚未完成的发行验证。
 
-## 活动批次：Windows 私有归档早期预检
+## 活动批次：Windows 归档根目录发布
 
-上一源码 `8c07d61009dba14f989dd0c00a2a370dc7a2d37b` 的 Quality
-`43848390542 / attempt 1` 已终态 failure，三平台完整原日志已收取。
-macOS/Ubuntu success，app 分别 `1341/0/2 ignored`、`1342/0/2 ignored`，
-真实 OpenSSH 均成功。Windows preflight `70/0/0`，app `1326/4/2 ignored`：
-解包确认后 mutation-uncertain，三项续传确认后 Failed/0/None，根因仍 UNKNOWN。
-“解包隔离导致后续续传拒绝”仍只是待验证假设，不能由旧脱敏信息确认。
+前批源码 `8527cf2af581e50ac0e1f795176ab69737730e18` 已推送，随后文档提交
+`d4714c02c25f59861cfaa82b057161a9f484837c` 的三方 SHA 也已实际相等；
+后一次读回时本批候选已 dirty，不能写成干净交付。Quality `43854113236`
+已终态 failure，watch `1/reaped/1285.532s`；macOS/Ubuntu success，app
+`1341/0/2`、`1342/0/2`，真实 OpenSSH 均成功。Windows platform `70/0/0`，
+归档后端实际 `25/3/1 ignored`，29 名与精确源码和执行逐项相等，完整 gate
+NOT_RUN。嵌套树 publish-stage 返回 typed Io/PermissionDenied/raw 5；
+其他失败为 source clone 外层目录改名、未观察成功发布。旧 app 四败不移签。
 
-当前三文件增量仅修改测试和 CI：Windows 完整 gate 前先编译库存并核对两精确
-归档名，再串行执行私有后端模块；既有 nested-tree 用例增加 build/publish 固定
-阶段诊断，app 测试增加固定 quarantine 分类。没有生产、安全断言或隔离改动。
-719 项冻结 `a86f82425764c4fcec2341c2bf47dc4e91be486039d60eb1a60c50256688606a`。
-本机 scoped gate 实际 `0/reaped/29.208s`：fmt/x.y、严格 workspace Clippy、
-app 归档 `13/0/0`、宿主发布 `1/0/0`，14 名逐项相等、输入零漂移。
-Windows session cross-Clippy 实际 `101/reaped/6.879s`，依赖缺 Windows SDK
-`windows.h`；Windows 类型检查未完成、实际执行 0，须由新精确 CI 验证。
-新非作者三文件静态 APPROVE、P0–P3 全 0、36/36 静态核验通过，
-独立 Rust/PowerShell/native 执行 0，已关闭，未签 Windows 通过。
-三文件及 46 成员证据已在 `8527cf2af581e50ac0e1f795176ab69737730e18` 推送，三方一致；
-精确源码绑定实际 `0/reaped/6.583s`，719 输入/46 成员零 mismatch。
-新 Quality `43854113236` 运行中，Windows `133253865501` 执行新归档预检；
-旧四败保持，不能将当前启动状态签成通过。已核对后回收 67 文件/5,974,402 字节。
-见[本批记录](testing/records/2026-11-16-windows-archive-preflight.md)。
+本批三个工程文件只调整 Windows 新 staging 的发布观察生命周期、测试与
+CI 新名 guard。完整 precompare 后消费 Tree 关闭后代观察，保留每项完整基线；
+根 PrivateEntry 和已审核祖先持续保留，原 source Manifest 不变。之后只有根
+no-replace rename，全部 bytes/identity/ACL/metadata/inventory 与最终链接重验
+仍必须成功。明确不承诺跨 rename 连续固定 staging 后代；任何失败或未观察
+结果继续由原 guard/pending/reservation 隔离。见
+[ADR 0148](adr/0148-windows-archive-root-publication.md)。
 
-工具栏 1800 紧凑断点、五文件诊断与 44 成员证据已在 `8c07d61` 推送；
-该批完整本机 gate `3224/0/48 ignored`、rustdoc `14/0`，非作者批准。
-本轮原生 inventory 再次报告 Mac 锁屏，未启动应用、GUI/截图均 0；
-英文顶栏原生 P2 保持开放，正常包仍保留供解锁后复核，不能签当前已验收。
-此前三主题正常包的 19 图/21 AX、真实 SSH/SFTP 和两份独立结果已在
-[111 成员证据](testing/records/2026-11-16-kit010-native-ci-evidence/README.md)
-持久保存。原生范围、旧失败及清理记录见各批记录，不移签。
+719 项冻结 `56ba4c7b46f7fe7b03b789639db84a997c41f7363b9d856b6148af44086ac83a`。
+宿主 scoped gate `0/reaped/19.678s`：fmt/x.y/严格 workspace Clippy、session
+`288/0/4 ignored`、app 归档 `13/0/0`；305 名逐项相等、工程输入零漂移。
+新非作者三文件静态 APPROVE、P0–P3 全 0，14 自动/8 人工审查完成，独立
+Rust/PowerShell/native 执行 0，已关闭。Windows 类型检查未完成，旧 SDK
+缺失失败保持；新 Windows 实际执行待精确 CI。静态 Windows 库存为 30 名，
+含原 1 ignored，新增后验替换拒绝用例不冒充完整 publish_stage 端到端。
+62 成员原件已封存，current 绑定 `0/reaped/0.273s`；见
+[当前批次](testing/records/2026-11-16-windows-archive-root-publication.md)。
+
+英文工具栏修订已在 `8c07d61` 推送；正常包 app SHA 为
+`3b127956723c187943236537c9c49814e99866834a9d01a2468d85cf751dd19f`。
+Mac 原生 inventory 最近仍锁屏，GUI/截图 0；原生 P2 未关闭。该包保留给
+手动解锁后的工具栏复核，其他平台桌面、完整输入/辅助技术及发行仍开放。
+三主题继续共用 registry/Palette/token，没有主题 ID 业务分支。
 
 ## 已交付：Windows 目录发布短期句柄与 Kit 0.10
 
@@ -301,7 +303,7 @@ Python `290 run / 1 skip`；app 1,341 名逐项一致。源码 `76b8253` 与后�
 所测三主题/macOS 范围见新记录；不能用该包代签后续工作区修订。
 本批与游标批次原目录已在持久归档和精确 Git 树绑定后回收，不能再依赖。
 前批交付/CI、正常包、原生复核、Windows 库存及封存目录均已持久绑定后清理。
-当前活动目录为 `work/windows-archive-preflight-integration-20261116/`，
+当前活动目录为 `work/windows-archive-publication-integration-20261116/`，
 新旧作者和非作者材料已封存，67 份重复文件已核对后回收；无活动 agent。
 `work/workbench-fit-20261116/package-r1/` 的正常包仍保留供解锁后的原生复核，
 SHA 为 `3b127956723c187943236537c9c49814e99866834a9d01a2468d85cf751dd19f`。
