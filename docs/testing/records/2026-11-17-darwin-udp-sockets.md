@@ -1,6 +1,7 @@
 # 远端 macOS UDP 端口 — 2026-11-17
 
-状态：专项、真实 SSH、两位独立复核、集中完整门禁与正常包结构通过；提交交付进行中，
+状态：专项、真实 SSH、两位独立复核、集中完整门禁与正常包结构通过；工程已推送，
+新精确CI进行中，
 完整产品仍未完成。
 基线 `e1f7359a975726dc6cf110fb12edcbb8a582cd95`；
 活动目录 `work/darwin-udp-20261117/`。
@@ -116,3 +117,30 @@ MCP为`bb415f3ae3ae7ca62bdb78abe752b50f5a3a796dc65ec99490f54ee28cb3f693`。
 `0/reaped/0.182444s`、729输入零mismatch，不重放测试。
 最初193成员封存因回执误入目录排除条件失败，原archive／manifest／脚本及失败
 均在diagnostics保留；只修封存过滤规则后重新封存，不修改生产或重跑功能测试。
+
+## 提交、来源正常包与清理
+
+工程 `16703293012d798f885e1590f02c348c47e81a10` 已普通commit／push，
+分别为`0/reaped/0.124313s`、`0/reaped/4.165023s`。
+`2026-11-16T20:05:04.804446Z` 读回本地／tracking／远端三方一致，工作区干净。
+主199成员与729工程输入从该提交的Git blob核对为
+`0/reaped/2.004278s`、零mismatch，不重放测试。
+
+以已有r3 release产物生成提交来源的
+`work/darwin-udp-20261117/package-r1/KeelShell.app`，打包和arm64/minos15.0
+结构检查分别为`0/reaped/0.311835s`、`0/reaped/0.173312s`。
+五个应用文件与提交前包逐字节相等，GUI／MCP SHA保持上文值，
+只有package-manifest的`build.commit`从null变为精确工程SHA。
+没有重新构建、启动、安装、签名或公证。
+
+主199成员与上一a1 CI的27成员从工程Git blob逐项核对后，回收235文件、
+70,913,865字节，包含旧活动原件副本、已替代的提交前正常包、下载手册和自有
+Python缓存。共享target目录device／inode及当前正常包六文件SHA前后相等。
+原失败和独立复核从docs封存读取，不再依赖旧活动路径；
+`work/editor-backup-ci-20261117/`已回收。
+
+新Quality `43945988599` 绑定本工程；初始排队，随后Windows／Ubuntu完整gate
+运行中、macOS排队。该快照不是终态，上一a1的绿色CI不代签UDP输入。
+交付／CI工装在`work/darwin-udp-delivery-20261117/`；watch结束后再记录终态。
+[25成员交付补充](2026-11-17-darwin-udp-sockets-evidence/delivery/README.md)
+保存上述原件，重算`0/reaped/0.106333s`、零mismatch，测试重放0。

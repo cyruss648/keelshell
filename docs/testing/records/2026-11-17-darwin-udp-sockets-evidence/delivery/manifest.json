@@ -1,0 +1,137 @@
+{
+  "sealed_utc": "2026-11-16T20:11:09.143515+00:00",
+  "count": 25,
+  "archive_bytes": 56555,
+  "archive_sha256": "d4f4d246fa7a8a2b34cefc093032c2f2335a0ef9e02451d65492941f9296ff57",
+  "entries": [
+    {
+      "path": "ci-current-r1.json",
+      "bytes": 874,
+      "sha256": "cc1b8abc16c3d16b0f39f2768ed0b0499e62b4a2e06753b5450356a33ae5b069"
+    },
+    {
+      "path": "ci-current-r1.log",
+      "bytes": 5544,
+      "sha256": "d3bb5ffb135e559bfe4013218e7b45dfda4900b656e7de3bebb51ddf48818623"
+    },
+    {
+      "path": "ci-initial-r1.json",
+      "bytes": 969,
+      "sha256": "00ab19ccad1ce2f9a2a65b81a218d6b2fd26e8a6ad747cbdaac5c5bf3f8ac7a0"
+    },
+    {
+      "path": "ci-initial-r1.log",
+      "bytes": 258,
+      "sha256": "50d4dcdc2a2e18d2f905ca590d21cb133b80ac916cd9bc28803d52ee05be56ff"
+    },
+    {
+      "path": "cleanup-r1.json",
+      "bytes": 59115,
+      "sha256": "6286818951bbd25a60e13c06d5fa3bb363657f4182c5afe65f17f8cc9ae1b959"
+    },
+    {
+      "path": "commit-inputs-before-r1.json",
+      "bytes": 134314,
+      "sha256": "9478a95d15334439b70563f793f8f7c8b5308eceb5a5c0d22463a32ebedc4125"
+    },
+    {
+      "path": "feature-commit-r1.json",
+      "bytes": 791,
+      "sha256": "11e522d744560c3dd4d1be030551d51512c0d478adc480cb79b9e76f4d3d9b95"
+    },
+    {
+      "path": "feature-commit-r1.log",
+      "bytes": 2249,
+      "sha256": "bc0114a5796af0cf911f4cf98501ef6ce0b0a93428a1a360436dede4f520c64b"
+    },
+    {
+      "path": "feature-git-binding-r1.json",
+      "bytes": 813,
+      "sha256": "0fd8d425c3607758703b794e388337be20687e2b6b8993a6dab41e4c97761868"
+    },
+    {
+      "path": "feature-git-binding-r1.log",
+      "bytes": 475,
+      "sha256": "debb40d66a46e79780612584a98bc705aa5bab3da61d4bc41cf4d20e7b732c99"
+    },
+    {
+      "path": "feature-push-r1.json",
+      "bytes": 790,
+      "sha256": "7258f658c83c5f5f37185e913cfca797731831ef727c23151636db8459b9f8f1"
+    },
+    {
+      "path": "feature-push-r1.log",
+      "bytes": 113,
+      "sha256": "df50fdc24b74b7966256282e0f0ab5bf3cfa15249115c5d64b1cb0586101b4ab"
+    },
+    {
+      "path": "feature-readback-r1.json",
+      "bytes": 269,
+      "sha256": "92652a77579526818bab491d810f77fa01a025e6224ddcd880935ef6f3d5b12b"
+    },
+    {
+      "path": "normal-package-r1.json",
+      "bytes": 2718,
+      "sha256": "141c4cceb2d0ab13c57f6a2af975f07d11f15a25eab6c39516f74e6e70cb4d00"
+    },
+    {
+      "path": "package-inspect-r1.json",
+      "bytes": 876,
+      "sha256": "cb3186e660a5ded57a43dcf80d270b312f8543ef11630e8b6301b49e4b2314c6"
+    },
+    {
+      "path": "package-inspect-r1.log",
+      "bytes": 3634,
+      "sha256": "adeca3092e4ac000de4fe6bf7d1c72af9e0cd5377f609e85338acd830fbfeb01"
+    },
+    {
+      "path": "package-manifest-r1.json",
+      "bytes": 1238,
+      "sha256": "5737046a137b360295011e11b4a60044c6c572d88d96ecab8c5ae420d2356bdd"
+    },
+    {
+      "path": "package-r1.json",
+      "bytes": 1042,
+      "sha256": "1aa5d1bea7fdefdfd647026aaeeae3bbda5c956e9a7b030ee1143adb9261c2e4"
+    },
+    {
+      "path": "package-r1.log",
+      "bytes": 206,
+      "sha256": "86fd9d4590224fdd2f3eba766011d6f1679c7698417d320bf1186c02d1ec3507"
+    },
+    {
+      "path": "run_command.py",
+      "bytes": 1602,
+      "sha256": "a8e8f0b50f2c5d95342e36f1b8fffd4fdc5daeabbf4a382fa15300c747ce65fc"
+    },
+    {
+      "path": "rust-environment-r1.json",
+      "bytes": 1537,
+      "sha256": "213f444cf2c5e111129ff501e8845bd21d65681ef4902a8f144da6de97c7a994"
+    },
+    {
+      "path": "rust-environment-r1.log",
+      "bytes": 472,
+      "sha256": "dbf91737713e90b4195de7e9a3be91031cee1a2d2c0ba2ab1b7ad7bcc6c2a001"
+    },
+    {
+      "path": "seal_delivery_r1.py",
+      "bytes": 2160,
+      "sha256": "6fe7fcb9d869135497aeb11774fe873def36d59806639d485a2280d7101ca419"
+    },
+    {
+      "path": "sealed-verify-r2.json",
+      "bytes": 786,
+      "sha256": "fc4adad19c17797f8c579a9c89ff890fbce1d7af7b014027bbe1ae78189e03d8"
+    },
+    {
+      "path": "sealed-verify-r2.log",
+      "bytes": 483,
+      "sha256": "e1946cd6a6aec416c559982ae7ccd574383e55cf99dd8e5628a44747e2cd56e5"
+    }
+  ],
+  "excluded": [
+    "Active CI watch",
+    "Application packages and binaries"
+  ]
+}

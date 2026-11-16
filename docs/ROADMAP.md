@@ -20,6 +20,17 @@
 
 ## 当前交付快照
 
+当前UDP与缓存端口分页批已推送
+`16703293012d798f885e1590f02c348c47e81a10`，三方SHA一致、读回干净。
+729工程输入、199成员精确Git绑定通过；专项、真实Darwin SSH15项、
+两位独立复核和最终完整宿主gate均通过，普通Rust3325/0/58 ignored、
+14rustdoc、Python293/2 skipped。正常release及arm64/minos15.0包结构通过，
+五个应用文件与提交前逐字节相等；未启动／安装，原生另验。
+Quality43945988599已触发，Windows／Ubuntu完整gate在运行、macOS排队；
+依赖在线复查UNKNOWN，不沿用旧CI或旧依赖回执代签。
+235文件／70,913,865字节自有副本按Git原件回收，共享target与保留正常包不变。
+见[UDP记录](testing/records/2026-11-17-darwin-udp-sockets.md)。
+
 当前编辑器备份完整读回批的 30 session／5 app 新例、标准 OpenSSH 18 项已通过。
 长状态详情移入／滚动 P2 已修复，两位新非作者追加复核均 APPROVE、P0–P3 全 0；
 源码复核只签静态差分，功能复核以父级 prebuilt 独立执行 app/editor `88/0/0`。
@@ -36,7 +47,9 @@ session343库存与执行相等、339/0/4、新30项ok，fmt／严格 Clippy／�
 Banach新静态窄复核APPROVE、P0–P3全0，独立编译／执行0，四位自有agent均关闭。
 修复 `a1a97b3b2ee0f0ccf91ea53ca96623aa8867fe8d` 已普通推送、三方一致；
 60成员／727输入精确Git绑定通过。新 Quality43934041540 的Windows133533978752
-已通过session backend预检，三平台完整质量门禁仍在运行；旧run全局cancelled，
+已通过session backend预检，三平台完整质量门禁现已全部completed/success；
+[精确CI终态](testing/records/2026-11-17-editor-backup-readback-evidence/ci-completion/README.md)
+保留计数及727输入绑定，不代签UDP源码。旧run全局cancelled，
 其中Windows为原failure、macOS／Ubuntu为cancelled，不补签成功。
 累计300文件／70,938,741字节副本清理及目录恢复诊断完整保留；
 当前正常包六文件不变，不把 r4 宿主完整成绩改签 r5；
@@ -135,9 +148,11 @@ app 为 `1351/0/2`、`1362/0/2`、`1363/0/2`；各 14 rustdoc，Python 293 项�
 
 ## 接续顺序
 
-0. 编辑器备份及一行Windows测试修复已推送，当前精确源码 `a1a97b3` 的
-   Quality43934041540已通过Windows session预检；收取三平台完整门禁终态，
-   不重复未变宿主完整测试或重跑旧CI，不把运行中状态写成成功。
+0. UDP工程 `1670329` 已推送，收取Quality43945988599三平台终态；
+   当前Windows／Ubuntu完整gate运行中、macOS排队，不把进行中写成成功。
+   编辑器备份及一行Windows测试修复已推送，源码 `a1a97b3` 的
+   Quality43934041540三平台完整gate现已全部成功，
+   不重复未变宿主完整测试或重跑旧CI。
    Darwin TCP 功能的专项、独立复核、真实 SSH 与一次最终完整门禁均已通过；
    工程 `bd198a8` 已普通推送并三方读回，`43916079699` 精确三平台 CI 已全部成功。
    上一隧道源码的三平台 CI 已全部成功；不重复宿主全量或重放已成功 CI。

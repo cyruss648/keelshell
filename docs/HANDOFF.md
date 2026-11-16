@@ -7,7 +7,13 @@
 
 当前在做远端 macOS UDP 端口与缓存分页：生产／测试已实现，专项 session36、
 app12 与真实 Darwin SSH15全部通过；两位独立复核及最终集中门禁已通过，
-正常release构建及arm64/minos15.0包结构通过，提交交付进行中。
+正常release构建及arm64/minos15.0包结构通过。工程
+`16703293012d798f885e1590f02c348c47e81a10` 已普通提交／推送，
+本地／tracking／远端三方一致，读回工作区干净；
+199成员／729工程输入精确Git绑定 `0/reaped/2.004278s`、零mismatch。
+提交来源正常包的五个应用文件与提交前逐字节相等，仅来源manifest改变。
+Quality `43945988599` 已触发，最新快照Windows／Ubuntu完整gate在运行、
+macOS排队；不能以旧a1的CI代签本批。
 最终 r3 冻结729输入，aggregate
 `e94405c2858d9796d9256dfd44eb277914c18fedd14e258e8025c747528e9a0e`。
 完整gate为0/reaped/754.599981s，普通Rust3325/0/58 ignored、app1375/0/2、
@@ -114,7 +120,9 @@ CI 无独立 app 库存，不把该批成功移签为当前 724 输入。
 - UNKNOWN、quarantine、pending mutation 与 close hold 保持；不自动重放不确定写入。
 - 直接 registry 依赖仅用 `x.y`，保留 Cargo.lock 的 patch 解析；不 pin 工具链、不设 `rust-version`。
   本机现场默认 stable Rust/Cargo 为 1.100.0，不将本机版本转成产品 MSRV。
-  本轮官方查询 37 包／113 声明全部通过；[实际回执](testing/records/2026-11-16-route-and-dependency-followup.md)保留旧 UNKNOWN。
+  上轮官方查询 37 包／113 声明通过；当前UDP批在线请求失败及有界超时，
+  最新版本完整复查仍为UNKNOWN；manifest／lock未改，确定性x.y策略通过。
+  [上一轮回执](testing/records/2026-11-16-route-and-dependency-followup.md)不代签本轮在线状态。
 - 按批次实现、专项、新非作者复核，再集中完整门禁；源代码、CI、真实联调、原生桌面和发行分别验收。
 - 用户已授权及时提交推送、标签触发跨平台 Release、本地 Podman 联调；不含覆盖安装或遥测。
   当前分支 `feature/editor-unicode-codec-20261114`，普通 push，不强推；读回本地／tracking／远端 SHA。
@@ -188,8 +196,9 @@ unittest 6.134s／外层 6.203s，实际 waited；辅助检索诊断原文保留
 
 ## 下一步与资源
 
-1. 继续UDP功能批的集中门禁、独立复核、正常包结构与提交推送，
-   保留依赖在线UNKNOWN和原生未验边界。
+1. UDP功能批的专项、集中门禁、独立复核、正常包结构与提交推送已完成；
+   收取精确源码 `1670329` 的Quality `43945988599` 终态，
+   保留依赖在线UNKNOWN和原生未验边界，不重复未变宿主测试。
    编辑器备份及Windows测试修复已推送；精确源码 `a1a97b3` 的
    Quality43934041540三平台完整门禁已成功，不重放未变的宿主测试或旧CI。
    Darwin TCP 工程 `bd198a8` 已普通推送、三方一致，`43916079699` 三平台终态已收齐，
@@ -231,6 +240,14 @@ unittest 6.134s／外层 6.203s，实际 waited；辅助检索诊断原文保留
 活动目录现保留正常包及最后交付命令的工装／回执，r3 与其他解析器只从封存取用；
 CI watcher 已实际 reap，没有活动 Cargo 或自有 reviewer。
 没有新建用户 chat、worktree、分支或容器。
+
+UDP当前正常包为 `work/darwin-udp-20261117/package-r1/KeelShell.app`，
+绑定工程 `1670329` 与729输入；交付／CI工装在
+`work/darwin-udp-delivery-20261117/`。
+本批199成员和上一CI27成员均从上述工程的Git blob逐项核对后，
+回收235文件／70,913,865字节，含已被精确正常包替代的提交前包及下载手册；
+共享target目录身份和当前正常包六文件摘要前后相等。
+旧 `work/editor-backup-ci-20261117/` 已回收，主证据和旧CI终态从docs封存读取。
 
 上一发布批的原生 inventory 明确报告 Mac 锁屏且自动解锁失败；GUI 操作／截图 0。
 该批正常包原位于 `work/windows-fixture-publication-integration-20261116/package-r1/KeelShell.app`，

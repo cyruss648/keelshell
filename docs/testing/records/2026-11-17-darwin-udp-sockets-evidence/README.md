@@ -3,6 +3,8 @@
 最终 r3：729 工程输入，aggregate
 `e94405c2858d9796d9256dfd44eb277914c18fedd14e258e8025c747528e9a0e`。
 基线为 `e1f7359a975726dc6cf110fb12edcbb8a582cd95` 加本批工作差分。
+该差分现已作为 `16703293012d798f885e1590f02c348c47e81a10` 普通推送；
+199成员与729工程输入的精确Git绑定通过，不重放测试。
 
 `originals.tar.gz` 的199成员与 `manifest.json` 保存：
 
@@ -33,3 +35,6 @@ python3 docs/testing/records/2026-11-17-darwin-udp-sockets-evidence/verify.py --
 及失败回执保留在 `verification-diagnostics/initial-seal-r1/`。
 只修正目录过滤条件，199成员完整重封存后验证通过；没有重跑功能测试。
 最新在线依赖仍UNKNOWN，三平台桌面及发行仍开放。
+提交后正常包绑定该工程，五个应用文件与提交前逐字节相等；旧活动副本在
+逐项核对Git原件后回收，当前正常包和共享target保持。
+交付及新CI状态见[本批记录](../2026-11-17-darwin-udp-sockets.md)。
