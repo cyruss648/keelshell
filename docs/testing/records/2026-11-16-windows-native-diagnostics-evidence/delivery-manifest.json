@@ -1,0 +1,120 @@
+{
+  "source_commit": "878f13b4cb58a45dfe96f32fc1c389ac7799366d",
+  "archive": "delivery.tar.gz",
+  "archive_bytes": 19759,
+  "archive_sha256": "451cf368d6c9e9f015337603bff55c93317eec5f520f198c26ffff7c8df26f4e",
+  "count": 22,
+  "original_bytes": 101293,
+  "files": [
+    {
+      "path": "diagnosis-derivation-r1-error.json",
+      "bytes": 279,
+      "sha256": "455cd891532b2e330da4c5d91cc0a9a69f64260bf2750b7e8e89a823581003be"
+    },
+    {
+      "path": "feature-commit-r1.json",
+      "bytes": 798,
+      "sha256": "4df438133abe0881f55af850f49231deff73b0fc8589ed209ef5f0eff2a8c1f6"
+    },
+    {
+      "path": "feature-commit-r1.log",
+      "bytes": 1219,
+      "sha256": "f063a87de4ea4ffa8cbd32cebfb3110e8e053061055071ff0a0dbaf1ed257f57"
+    },
+    {
+      "path": "previous-delivery-cleanup-r1.json",
+      "bytes": 191,
+      "sha256": "2a9767112b90f90ce606ad383593e522186248148261ccf233b9cd27fceaac44"
+    },
+    {
+      "path": "source-ci-initial-r1.json",
+      "bytes": 813,
+      "sha256": "e99d515a9f6e16cf7baf8003fd75a4787dd2913b906768ca2ff773f705cbe943"
+    },
+    {
+      "path": "source-ci-initial-r1.log",
+      "bytes": 6727,
+      "sha256": "503f419cd31401f7580a1466badeb623e91dd5f68b9b74e88c4d439b909a9042"
+    },
+    {
+      "path": "source-delivery-readback-r1.json",
+      "bytes": 2059,
+      "sha256": "d36570520222119255b2f5a316e88eb79c0c18294a49e8e3c767e98a54bb4c4f"
+    },
+    {
+      "path": "source-push-r1.json",
+      "bytes": 790,
+      "sha256": "a5787f8d0d84a0d9730d0ba4bc5bdf644f4a617fdfa6c533717c735fa4b9c6cf"
+    },
+    {
+      "path": "source-push-r1.log",
+      "bytes": 113,
+      "sha256": "651134cd9fbbfac7bf193c103fa24a2e125e28e5c84d814fb6e9d492704ea7f2"
+    },
+    {
+      "path": "temporary-branch-absent-r1.json",
+      "bytes": 1034,
+      "sha256": "7724b8230420faa0e3a5ab4214f4ab28cd2b8b922fd2d752c35fd83df5828bd3"
+    },
+    {
+      "path": "temporary-branch-delete-local-r1.json",
+      "bytes": 775,
+      "sha256": "53687dab02b0d52cecf3f29504f9c868494041c65487ea5cc5f42473077b6c3f"
+    },
+    {
+      "path": "temporary-branch-delete-local-r1.log",
+      "bytes": 70,
+      "sha256": "813d70a0495c6d5daf0affc35dfc1a79958f46991a43dff78e03aaa16b5f1767"
+    },
+    {
+      "path": "temporary-branch-delete-remote-r1.json",
+      "bytes": 793,
+      "sha256": "f33c8cb7f32768c98c1c0316b54863146c7bf98b6b314858fe1f6a65bda60b76"
+    },
+    {
+      "path": "temporary-branch-delete-remote-r1.log",
+      "bytes": 107,
+      "sha256": "fad0b54a627deac3ce87f1632b2a70f8bff3f91c75c69710aab0782c824b3f02"
+    },
+    {
+      "path": "temporary-branch-retire-precondition-r1.json",
+      "bytes": 994,
+      "sha256": "aebffed08c173cd0f888fb8c03374fa6f43cd38c3b2f57663fd8283c39d9b018"
+    },
+    {
+      "path": "windows-native-diagnosis-r2.json",
+      "bytes": 7346,
+      "sha256": "532d21c174deed028033a3fc18719b19a6f2d553f7fe07b860c9d0b6de3c0136"
+    },
+    {
+      "path": "windows-native-job-log-r1.json",
+      "bytes": 776,
+      "sha256": "0b7e9daa7918c80d7d08ad4f9d28988fb607530b2480fefd0f359d37a0b273da"
+    },
+    {
+      "path": "windows-native-job-log-r1.log",
+      "bytes": 99,
+      "sha256": "8b6407b2fdbca54bf3d53fb93e79a3560dbe59567fa5044cfee4bed1b5b6e467"
+    },
+    {
+      "path": "windows-native-job-log-r2.json",
+      "bytes": 811,
+      "sha256": "22cbfd99e0c3e53169b36ef1ed5aa86aa3c264fcb625ea64bcd6645f6560760a"
+    },
+    {
+      "path": "windows-native-job-log-r2.log",
+      "bytes": 72320,
+      "sha256": "955d86d6b266c69108844757391dd8766e89837be5ebea936b66ed3da07ccf6b"
+    },
+    {
+      "path": "windows-native-job-r1.json",
+      "bytes": 855,
+      "sha256": "0e560d78258cdad20ddbb85f86cb0e0458a96e163b36c1526def092391272088"
+    },
+    {
+      "path": "windows-native-job-r1.log",
+      "bytes": 2324,
+      "sha256": "5d371183d607d1c7fc7bad1598e5d43deb381cc6e47f2006f74c0055f8ab5c69"
+    }
+  ]
+}

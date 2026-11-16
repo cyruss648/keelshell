@@ -25,10 +25,16 @@ Python `290 run / 1 skip`，fmt/严格 Clippy/x.y/三组 controller 均通过。
 app 1,341 名及 session 归档 40 名逐项相等，platform `18/0/0` 包含两新例。
 Windows cross-Clippy 通过，不是 Windows 原生执行。新非作者静态复核 APPROVE，
 P0–P3 全 0、22/22 静态检查通过、独立 Rust/UI 执行 0，reviewer 已关闭。
-补充件已读回父完整门禁。随后推送原功能分支，并清理已终态临时 CI 分支。
+补充件已读回父完整门禁。源码及首批证据在 `878f13b` 推送原功能分支，三方 SHA
+读回一致；临时本地/tracking/远端分支均已删除。
 已核对副本并回收 646 个重复临时文件、6,626,866 字节。
 详见[本批记录](testing/records/2026-11-16-windows-native-diagnostics.md)；
 真实 Windows 修复、三平台桌面及完整产品继续开放。
+新精确 Quality `43815115588` 的 Windows job `133125296042` 已 failure：
+platform `48/16/0 / 0.50s`，原完整 gate NOT_RUN；16 组共同错误已定位为
+目录游标的 NtCreateFile、InvalidFilename、raw code 123、NTSTATUS `0xc0000033`。
+最小修复另片开发，不能代签八项 app 归档恢复。macOS/Ubuntu 当时仍运行。
+前批 11 份交付回执/23,386 字节也已在提交中归档后回收。
 
 ## 2026-11-16 归档固定截止时间测试
 

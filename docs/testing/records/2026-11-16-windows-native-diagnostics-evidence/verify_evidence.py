@@ -21,11 +21,46 @@ def git(*arguments):
     return subprocess.check_output(["git", *arguments], cwd=ROOT, timeout=30)
 
 
+def verify_delivery(read):
+    manifest = json.loads(read("delivery-manifest.json"))
+    packed = read(manifest["archive"])
+    assert len(packed) == manifest["archive_bytes"]
+    assert digest(packed) == manifest["archive_sha256"]
+    rows = manifest["files"]
+    assert len(rows) == manifest["count"] == len({row["path"] for row in rows})
+    assert sum(row["bytes"] for row in rows) == manifest["original_bytes"]
+    with tarfile.open(fileobj=io.BytesIO(packed), mode="r:gz") as archive:
+        members = archive.getmembers()
+        assert len(members) == len(rows) and all(member.isfile() for member in members)
+        assert {member.name for member in members} == {row["path"] for row in rows}
+        for row in rows:
+            name = row["path"]
+            assert not PurePosixPath(name).is_absolute() and ".." not in PurePosixPath(name).parts
+            data = archive.extractfile(name).read()
+            assert len(data) == row["bytes"] and digest(data) == row["sha256"], name
+        delivery = json.loads(archive.extractfile("source-delivery-readback-r1.json").read())
+        assert set(delivery["shas"].values()) == {manifest["source_commit"]}
+        retired = json.loads(archive.extractfile("temporary-branch-absent-r1.json").read())
+        assert retired["local_tracking_remote_absent"]
+        diagnosis = json.loads(archive.extractfile("windows-native-diagnosis-r2.json").read())
+        assert diagnosis["source"] == manifest["source_commit"]
+        assert diagnosis["preflight"] == {
+            "passed": 48, "failed": 16, "ignored": 0, "seconds": 0.5,
+        }
+        assert diagnosis["full_gate"] == "NOT_RUN" and len(diagnosis["failures"]) == 16
+        log = archive.extractfile(diagnosis["raw_log"]["path"]).read()
+        assert len(log) == diagnosis["raw_log"]["bytes"]
+        assert digest(log) == diagnosis["raw_log"]["sha256"]
+        assert manifest["source_commit"].encode() in log
+    return {"originals": len(rows), "source": manifest["source_commit"], "mismatches": []}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--index", action="store_true")
     parser.add_argument("--source")
     parser.add_argument("--evidence")
+    parser.add_argument("--delivery-only", action="store_true")
     args = parser.parse_args()
     for name in ("source", "evidence"):
         value = getattr(args, name)
@@ -37,6 +72,10 @@ def main():
 
     def read(name):
         return git("show", revision + PREFIX + name) if revision else (BASE / name).read_bytes()
+
+    if args.delivery_only:
+        print(json.dumps({"delivery": verify_delivery(read)}))
+        return
 
     manifest = json.loads(read("archive-manifest.json"))
     packed = read(manifest["archive"])

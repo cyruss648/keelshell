@@ -9,12 +9,12 @@
 - 用户已确认远端恢复，完成的功能批次及时提交并推送，读取本地、tracking、
   远端 SHA；不强推。当前分支为 `feature/editor-unicode-codec-20261114`。
   最近已实际读回三方相等的提交是
-  `5c23396c3cfcc6dd021fb870a7007373c25475d1`。
+  `878f13b4cb58a45dfe96f32fc1c389ac7799366d`。
   `origin/main` 另有独立状态文档，不能直接覆盖。
-- 当前 HEAD 为 `64ce892428ad67ea70c1377c21f6d361db36497d`，已推送到
-  `feature/archive-deadline-clock-20261116`，该分支本地/tracking/远端相等。
-  原分支远端暂留 `5c23396`；两个旧 CI 均已终态，无须再为保留日志延后 push。
-  本批验证及复核后同步原分支，并删除已被替代的临时分支。
+- 本批源码及证据已在 `878f13b` 推送原功能分支；临时
+  `feature/archive-deadline-clock-20261116` 已删除，本地/tracking/远端均 absent。
+  新精确 Quality 为 `43815115588 / attempt 1`。Windows 预检已失败并取得
+  原生阶段，macOS/Ubuntu 完整 gate 仍运行；不移签旧 run。
 - 保持原生 GPUI Kit 的 UI/core/session/AI 分层，阻塞 I/O 离开 UI 线程。
   只管理远程 SSH；本地终端、RDP、串口不在范围。
 - 三主题霜白、曜石、雾紫全部保留，通过 registry、Palette、组件形状和
@@ -32,9 +32,9 @@
 
 ## 活动批次：Windows 原生阶段诊断与 CI 预检
 
-基线为上述 `64ce892`，四个工程文件提供 test-only 的固定 native 操作标签，
+基线 `64ce892428ad67ea70c1377c21f6d361db36497d`，四个工程文件提供 test-only 的固定 native 操作标签，
 原样保留 typed `io::Error`；正常依赖库不输出诊断。没有更改访问权、FFI 参数、
-句柄生命周期、审核、枚举或发布语义。Windows 根因仍 UNKNOWN。
+句柄生命周期、审核、枚举或发布语义。诊断已交付；下一片修复候选尚未集成。
 见[本批记录](testing/records/2026-11-16-windows-native-diagnostics.md)。
 
 - 新 host 诊断 `2/0/0`；Windows platform 全 target 交叉严格 Clippy 通过，
@@ -52,6 +52,13 @@
   独立 Rust/UI 执行 0。补充件读回父完整门禁，原报告不改写，reviewer 已关闭。
 - 当前实时依赖查询 37 包/113 声明：19 包核实最新，18 包请求失败 UNKNOWN，
   整体 exit 1；没有 manifest、lock 或 Rust 工具链变更。
+- 新 Windows job `133125296042` 已 completed/failure，platform
+  `48/16/0 / 0.50s`；完整 gate `NOT_RUN`。16 组失败均为
+  `nt-create-file / InvalidFilename / raw_os_error=123 / NTSTATUS=0xc0000033`，
+  紧随同一错误的 `open-directory-cursor` 阶段。
+  对应代码 `open_child(parent, ".", true)`；已定位平台共同失败阶段，
+  不能据此声称八项 app 归档已修复。新候选作者只写
+  `work/windows-directory-cursor-candidate-20261116/`，不运行 Cargo。
 
 ## 已交付：归档固定截止时间测试
 
@@ -139,9 +146,9 @@ Python `290 run / 1 skip`；app 1,341 名逐项一致。源码 `76b8253` 与后�
 
 ## 接续顺序与资源归属
 
-1. 本批完整门禁及非作者复核已通过，归档必要原件；不因文档或摘要再跑全量。
-2. 提交并推送原功能分支，读回精确新 CI；删除已被替代的临时本地/远端分支。
-   根据真实 Windows 预检决定修复，不能把诊断签成修复。
+1. 已交付诊断，收尾后续 CI/清理证据和 docs push；不因文档或摘要再跑全量。
+2. 依据真实 Windows 游标失败集成最小候选及回归；新非作者复核、集中验证后
+   及时推送。不得放宽原安全断言、原生权限或将 app 未运行范围改成成功。
 3. 更新本批记录/路线、归档必要原件，完成 feature commit 和普通 push，
    实际读回本地、tracking 和远端 SHA。当前源码/归档提交身份分别绑定。
 4. 及时关闭自有 agents，回收已持久化的重复临时文件；不清理其他任务的
@@ -156,7 +163,8 @@ Python `290 run / 1 skip`；app 1,341 名逐项一致。源码 `76b8253` 与后�
 `3e9270c84f3aad14f331b06cb3f15e77f2d2a40602dcd61e90dd39b5b939ed4b`。
 不能再用 target 中 MCP 代签上一批程序；当前不签新正常包或新桌面验收。
 当前批次目录为 `work/windows-native-phases-integration-20261116/`；
-前批父命令回执目录 `work/archive-deadline-delivery-20261116/` 尚待归档回收。
+前批父命令回执目录 `work/archive-deadline-delivery-20261116/` 的 11 文件、
+23,386 字节已在 `878f13b` 归档后回收。
 旧 Windows 调查及 CI 作者两个目录共 646 文件/6,626,866 字节已逐项核对后回收。
 旧 `work/archive-deadline-integration-20261116/`、
 `work/archive-diagnostics-ci-20261116/` 也已回收，原件从持久证据读取。

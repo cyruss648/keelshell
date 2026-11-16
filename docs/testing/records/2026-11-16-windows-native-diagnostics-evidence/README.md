@@ -26,3 +26,26 @@ python3 -B docs/testing/records/2026-11-16-windows-native-diagnostics-evidence/v
 检查所有成员、父门禁原日志和退出/回收、reviewer SHA256SUMS，以及完整工程
 输入的路径集合及字节，不只核对四个改动文件或测试数量。
 该检查不重跑编译，不签署 Windows 原生执行或新桌面验收。
+
+## 后续推送、清理及真实 Windows 失败
+
+`delivery.tar.gz` 无损保存 22 份后续原件、101,293 原字节，
+压缩后 19,759 字节，SHA-256 为
+`451cf368d6c9e9f015337603bff55c93317eec5f520f198c26ffff7c8df26f4e`。
+逐文件清单见 `delivery-manifest.json`。
+它绑定源码 `878f13b4cb58a45dfe96f32fc1c389ac7799366d` 的三方 SHA、
+新 CI、临时分支删除/absence、前批目录清理、两次日志获取、派生错误及修订摘要。
+
+新 Windows job `133125296042` 的原始日志完整保留，platform 实际
+`48/16/0`，原完整 gate `NOT_RUN`；16 组错误定位到目录游标 NtCreateFile，
+kind 为 InvalidFilename、raw code 123、NTSTATUS `0xc0000033`。
+它不是 app 归档恢复或 Windows 桌面通过证明。
+不必重跑 CI 即可验证所有原件、读回身份、16 组派生摘要及原日志：
+
+```sh
+python3 -B docs/testing/records/2026-11-16-windows-native-diagnostics-evidence/verify_evidence.py --delivery-only
+```
+
+同样支持 `--index` 或 `--evidence` 完整提交 SHA。
+后续文档提交不能自称包含其自身推送后才取得的回执；源码、初始归档与交付归档
+分别使用实际保存它们的精确 Git 树。

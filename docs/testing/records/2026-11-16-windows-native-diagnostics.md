@@ -5,7 +5,8 @@
 本批基线为 `64ce892428ad67ea70c1377c21f6d361db36497d`，包含四个工程文件：
 平台库模块、私有诊断模块、Windows native 调用点及 Windows-only CI 预检。
 该改动提供失败阶段，不更改文件访问、审核、发布或隔离语义。
-Windows 归档根因仍为 `UNKNOWN`，本机没有实际执行 Windows 程序。
+本机没有实际执行 Windows 程序。推送后的真实 Windows 预检已定位共同失败到
+目录游标的 `NtCreateFile`；归档 app 的恢复仍须修复后单独验证，见下节。
 
 完整门禁 `full-gate-r1` 实际为 `exit 0 / reaped / 750.798s`：
 Rust `3222 passed / 0 failed / 48 ignored`，rustdoc `14/0`，
@@ -103,5 +104,36 @@ reviewer 已关闭。原报告 SHA-256 为
 
 本批原件和冻结的完整绑定入口为
 [诊断证据](2026-11-16-windows-native-diagnostics-evidence/README.md)。
-提交推送当前功能分支后，精确 CI 和三方 SHA 另记实际回执。
-旧临时 CI 已终态，不需要取消；原分支交付后删除自有临时远端及本地分支。
+源码及首批证据已在 `878f13b4cb58a45dfe96f32fc1c389ac7799366d` 提交推送到
+`feature/editor-unicode-codec-20261114`，本地、tracking、实际远端 SHA 读回一致，
+719 项工程 blob 与精确提交绑定零 mismatch。
+旧临时 CI 已终态，无需取消；自有临时分支
+`feature/archive-deadline-clock-20261116` 已删除，本地、tracking、远端均 absent。
+前批 11 份交付回执、23,386 字节已在精确源码提交中归档后回收。
+
+## 推送后的真实 Windows 预检
+
+精确源码 `878f13b` 的 Quality `43815115588 / attempt 1` 中，
+Windows job `133125296042` 于 `2026-11-16T06:14:52Z` 完成并失败。
+platform lib 为 `48 passed / 16 failed / 0 ignored / 0.50s`；
+后续完整 Rust quality gate 为 `skipped / NOT_RUN`，不能填为成功。
+
+16 项失败的捕获正文均包含成对原生诊断：
+
+```text
+native-files operation=nt-create-file kind=InvalidFilename raw_os_error=Some(123) nt_status=0xc0000033
+native-files operation=open-directory-cursor kind=InvalidFilename raw_os_error=Some(123) nt_status=None
+```
+
+前者来自实际失败的 NT 调用，后者是同一错误通过外层游标阶段的观察，
+不是两个独立故障。该证据把共同平台失败点定位到独立目录枚举游标打开；
+对应候选源码仍是 `open_child(parent, ".", true)`。修复候选另行开发，
+本记录不把定位提升为 Windows 归档已修复，八项 app 回归在本 run 为 NOT_RUN。
+macOS、Ubuntu 此时仍运行完整 gate，后续终态另记。
+
+原日志 72,320 字节，SHA-256 为
+`955d86d6b266c69108844757391dd8766e89837be5ebea936b66ed3da07ccf6b`，
+含精确源码身份。首个日志获取因 gh 的转义序列输出保护退出 1；
+明确允许原样保存后获取成功，未重跑 job。
+派生摘要首版因贪婪正则误取一组而失败，错误保留，修订版逐项核对 16 组。
+两项数据获取/摘要失败不覆盖原始日志，也不更改 CI 失败事实。
