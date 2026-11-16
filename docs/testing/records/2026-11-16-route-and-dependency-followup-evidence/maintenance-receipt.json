@@ -1,0 +1,42 @@
+{
+  "schema": "keelshell.route-maintenance.v1",
+  "observed_at_utc": "2026-11-16T12:01:22.806725+00:00",
+  "history_source": "9ad1cd92148ed3498a3e9882e707128e9c84b1b7:docs/ROADMAP.md",
+  "history_bytes": 98769,
+  "history_sha256": "5b7681c41a80f9a2800ed84587aff3091a465caaf22d283814e196129276ba3a",
+  "history_byte_mismatches": 0,
+  "history_lines": 1311,
+  "new_route_lines": 105,
+  "author": "Wegener",
+  "author_closed": true,
+  "parent_refinements": "Removed agent-specific transient instructions; linked the live dependency follow-up.",
+  "rust_tests_replayed": 0,
+  "native_gui_operations": 0,
+  "evidence": [
+    {
+      "path": "dependencies-live-r2.json",
+      "bytes": 911,
+      "sha256": "3cd80f10b9a30020afbd2560e44df61864b4ee64728cd2dff8bea4ffc3fce22b"
+    },
+    {
+      "path": "dependencies-live-r2.log",
+      "bytes": 84,
+      "sha256": "ab64b915bbbe059dbaca438c3b8ebad9d4d8681f89e7278a84aa08fb6dd393c4"
+    },
+    {
+      "path": "dependencies-report-r2.json",
+      "bytes": 60807,
+      "sha256": "40b0e9489c692560ac40ff4570653eb29f9edb82f7f54aa53d7eaba19cdb8e2d"
+    },
+    {
+      "path": "toolchain-live-r1.json",
+      "bytes": 744,
+      "sha256": "d007704950ce9873d01f3ac337a3d9c8730323cee244f2c024e0f893ad7aff4f"
+    },
+    {
+      "path": "native-access-blocked-r4.json",
+      "bytes": 426,
+      "sha256": "074abdeac5769641b62b537209f527415fdc85c18de41da46285312e2c9b0d08"
+    }
+  ]
+}

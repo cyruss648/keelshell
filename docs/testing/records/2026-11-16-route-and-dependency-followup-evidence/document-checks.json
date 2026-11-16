@@ -1,0 +1,26 @@
+{
+  "docs/ROADMAP.md": {
+    "lines": 105,
+    "local_links": 36,
+    "sha256": "29b0f1c3888d49b6d1d223d8b52fa51194ade4e1120972f11086ef23d875f4ca"
+  },
+  "docs/ROADMAP_HISTORY_2026-11-16.md": {
+    "lines": 1311,
+    "local_links": 116,
+    "sha256": "5b7681c41a80f9a2800ed84587aff3091a465caaf22d283814e196129276ba3a"
+  },
+  "docs/HANDOFF.md": {
+    "lines": 341,
+    "local_links": 28,
+    "sha256": "0733ca6cce46717d0f524c0ec74a2bf17d2420cabfff418f1fdad8512fe0d248"
+  },
+  "docs/testing/records/2026-11-16-route-and-dependency-followup.md": {
+    "lines": 51,
+    "local_links": 4,
+    "sha256": "e06ed700dc0c55948ea2d87398d998ba0acca2461ca5d479da0fc3fcf4ff3814"
+  },
+  "engineering_inputs": {
+    "count": 719,
+    "mismatches": []
+  }
+}

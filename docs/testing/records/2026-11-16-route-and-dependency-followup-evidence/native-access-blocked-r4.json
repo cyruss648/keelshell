@@ -1,0 +1,11 @@
+{
+  "observed_at_utc": "2026-11-16T11:55:25.721424+00:00",
+  "tool": "mcp__cua_repl.js",
+  "operation": "cua.getState",
+  "native_apps_error": "The Mac is locked and automatic unlock could not unlock it. Ask the user to unlock the Mac manually before continuing.",
+  "application_launched": false,
+  "gui_operations": 0,
+  "screenshots": 0,
+  "unrelated_browser_inventory_persisted": false,
+  "outcome": "BLOCKED_MAC_LOCKED"
+}

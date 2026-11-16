@@ -1,0 +1,32 @@
+{
+  "observed_exit": 0,
+  "controller_exit": 0,
+  "timed_out": false,
+  "interrupted": false,
+  "terminal": {
+    "direct_reaped": true,
+    "active_processes": 0,
+    "pipes_drained": true,
+    "errors": []
+  },
+  "errors": [],
+  "command": [
+    "python3",
+    "-B",
+    "scripts/check_dependencies.py",
+    "--timeout",
+    "4",
+    "--jobs",
+    "8",
+    "--json-report",
+    "work/windows-archive-publication-integration-20261116/dependencies-report-r2.json"
+  ],
+  "seconds": 9.58602724999946,
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "cargo_target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target",
+  "cargo_owner_checkout_unchanged": true,
+  "wrapper_stdout": "",
+  "wrapper_stderr": "",
+  "log_bytes": 84,
+  "log_sha256": "ab64b915bbbe059dbaca438c3b8ebad9d4d8681f89e7278a84aa08fb6dd393c4"
+}
