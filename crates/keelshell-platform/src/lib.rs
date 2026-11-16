@@ -12,6 +12,9 @@ pub use path::{MAX_WINDOWS_PATH_BYTES, WindowsPath, filename_alias, validate_win
 #[cfg(any(windows, test))]
 mod directory_records;
 
+#[cfg(any(windows, test))]
+mod native_diagnostics;
+
 #[cfg(windows)]
 #[allow(unsafe_code)]
 mod windows;

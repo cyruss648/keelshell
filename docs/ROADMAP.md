@@ -6,6 +6,30 @@
 读取本地、tracking 和远端 SHA。下列历史批次“不 push”仅描述原时点，
 后续按[当前交接](HANDOFF.md)及实际交付回执继续。
 
+## 2026-11-16 Windows 原生阶段诊断与 CI 预检
+
+已确认 `76b8253` 的 Quality `43806549649` 终态 failure：macOS/Ubuntu
+success，Windows app `1320/8/2 ignored`，八项均在 review-error，
+显示后缀 123 不证明 typed error、NTSTATUS 或 syscall，根因仍 UNKNOWN。
+640 份原件已完整归档并绑定 18 份精确源码，调查 agent 已关闭；
+截止测试源码 `bc9ebd6` 的 run `43809777642` 同样 macOS/Ubuntu success、
+Windows failure，原始三平台日志另存，不移签计数。
+
+本片只增加 test-only 原生阶段诊断和 Windows platform lib 顺序预检，
+不改文件行为；原 typed error、FFI、权限和生命周期保留。
+预检失败即 job failure，完整 gate 为 NOT_RUN；预检成功再走原 gate。
+719 项工程输入冻结
+`774b46416b9c1ef424d89d7d3cb49799563d1c00237d1e52bcd4598677dd8f29`；
+完整门禁 0/reaped/750.798s：Rust `3222/0/48 ignored`、rustdoc `14/0`、
+Python `290 run / 1 skip`，fmt/严格 Clippy/x.y/三组 controller 均通过。
+app 1,341 名及 session 归档 40 名逐项相等，platform `18/0/0` 包含两新例。
+Windows cross-Clippy 通过，不是 Windows 原生执行。新非作者静态复核 APPROVE，
+P0–P3 全 0、22/22 静态检查通过、独立 Rust/UI 执行 0，reviewer 已关闭。
+补充件已读回父完整门禁。随后推送原功能分支，并清理已终态临时 CI 分支。
+已核对副本并回收 646 个重复临时文件、6,626,866 字节。
+详见[本批记录](testing/records/2026-11-16-windows-native-diagnostics.md)；
+真实 Windows 修复、三平台桌面及完整产品继续开放。
+
 ## 2026-11-16 归档固定截止时间测试
 
 基线 `5c23396`，只调整 session 测试和 Tokio dev feature，生产实现不变。

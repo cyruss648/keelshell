@@ -32,6 +32,7 @@ use windows_sys::Win32::System::IO::IO_STATUS_BLOCK;
 use super::security::PrivateSecurity;
 use super::{FileInfo, Identity, invalid, security};
 use crate::directory_records;
+use crate::native_diagnostics::{Operation, observe};
 
 const STATUS_SUCCESS: NTSTATUS = 0;
 const STATUS_NO_MORE_FILES: NTSTATUS = 0x8000_0006_u32 as i32;
@@ -169,7 +170,7 @@ fn open(
         )
     };
     if status < 0 {
-        return Err(nt_error(status));
+        return Err(nt_error(Operation::NtCreateFile, status));
     }
     if handle.is_null() {
         return Err(invalid("native open returned no owned handle"));
@@ -203,7 +204,7 @@ fn local_device(file: &File) -> io::Result<()> {
         )
     };
     if status != STATUS_SUCCESS {
-        return Err(nt_error(status));
+        return Err(nt_error(Operation::NtQueryVolume, status));
     }
     if device.DeviceType != FILE_DEVICE_DISK
         || device.Characteristics & (FILE_REMOTE_DEVICE | FILE_REMOTE_DEVICE_VSMB) != 0
@@ -216,7 +217,7 @@ fn local_device(file: &File) -> io::Result<()> {
     Ok(())
 }
 
-fn query<T: Default>(file: &File, class: i32) -> io::Result<T> {
+fn query<T: Default>(file: &File, class: i32, operation: Operation) -> io::Result<T> {
     let mut output = T::default();
     // SAFETY: private callers pair each information class with its documented
     // repr(C) output structure. The API receives its exact writable byte count.
@@ -229,7 +230,7 @@ fn query<T: Default>(file: &File, class: i32) -> io::Result<T> {
         )
     };
     if result == 0 {
-        Err(io::Error::last_os_error())
+        Err(observe(operation, io::Error::last_os_error(), None))
     } else {
         Ok(output)
     }
@@ -238,11 +239,15 @@ fn query<T: Default>(file: &File, class: i32) -> io::Result<T> {
 pub(super) fn metadata(file: &File) -> io::Result<FileInfo> {
     // SAFETY: the borrowed File keeps this handle valid for the synchronous call.
     if unsafe { GetFileType(file.as_raw_handle()) } != FILE_TYPE_DISK {
-        return Err(invalid("local object is not a disk file"));
+        return Err(observe(
+            Operation::CheckDiskFile,
+            invalid("local object is not a disk file"),
+            None,
+        ));
     }
-    let basic: FILE_BASIC_INFO = query(file, FileBasicInfo)?;
-    let standard: FILE_STANDARD_INFO = query(file, FileStandardInfo)?;
-    let identity: FILE_ID_INFO = query(file, FileIdInfo)?;
+    let basic: FILE_BASIC_INFO = query(file, FileBasicInfo, Operation::QueryBasicInfo)?;
+    let standard: FILE_STANDARD_INFO = query(file, FileStandardInfo, Operation::QueryStandardInfo)?;
+    let identity: FILE_ID_INFO = query(file, FileIdInfo, Operation::QueryFileId)?;
     if basic.FileAttributes & FILE_ATTRIBUTE_REPARSE_POINT != 0
         || standard.DeletePending
         || (!standard.Directory && standard.NumberOfLinks != 1)
@@ -268,14 +273,16 @@ pub(super) fn metadata(file: &File) -> io::Result<FileInfo> {
         created: basic.CreationTime,
         modified: basic.LastWriteTime,
         changed: basic.ChangeTime,
-        security: security::observation(file)?,
+        security: security::observation(file)
+            .map_err(|error| observe(Operation::ObserveSecurity, error, None))?,
     })
 }
 
 pub(super) fn entries(parent: &File) -> io::Result<Vec<String>> {
     // A fresh synchronous file object owns this enumeration cursor. Duplicate
     // handles share directory scan state and would race independent observers.
-    let cursor = open_child(parent, ".", true)?;
+    let cursor = open_child(parent, ".", true)
+        .map_err(|error| observe(Operation::OpenDirectoryCursor, error, None))?;
     let mut storage = vec![0u64; 8192];
     let mut names = Vec::new();
     let mut restart = true;
@@ -302,7 +309,7 @@ pub(super) fn entries(parent: &File) -> io::Result<Vec<String>> {
             return Ok(names);
         }
         if status != STATUS_SUCCESS {
-            return Err(nt_error(status));
+            return Err(nt_error(Operation::NtQueryDirectory, status));
         }
         let length = status_block.Information;
         if length == 0 || length > storage.len() * size_of::<u64>() {
@@ -336,7 +343,11 @@ pub(super) fn directory_rename_handle(source: &File) -> io::Result<File> {
         )
     };
     if handle.is_null() || handle == INVALID_HANDLE_VALUE {
-        return Err(io::Error::last_os_error());
+        return Err(observe(
+            Operation::ReopenDirectoryRename,
+            io::Error::last_os_error(),
+            None,
+        ));
     }
     // SAFETY: ReOpenFile succeeded with a new, exclusively owned handle.
     let file = unsafe { File::from_raw_handle(handle) };
@@ -389,12 +400,16 @@ pub(super) fn rename_no_replace(source: &File, parent: &File, name: &str) -> io:
     if status == STATUS_SUCCESS {
         Ok(())
     } else {
-        Err(nt_error(status))
+        Err(nt_error(Operation::NtRename, status))
     }
 }
 
-fn nt_error(status: NTSTATUS) -> io::Error {
+fn nt_error(operation: Operation, status: NTSTATUS) -> io::Error {
     // SAFETY: this pure native conversion accepts any NTSTATUS value.
     let code = unsafe { RtlNtStatusToDosError(status) };
-    io::Error::from_raw_os_error(code as i32)
+    observe(
+        operation,
+        io::Error::from_raw_os_error(code as i32),
+        Some(status as u32),
+    )
 }

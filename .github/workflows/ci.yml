@@ -29,6 +29,9 @@ jobs:
       - uses: ./.github/actions/setup-build
       - name: Packaging regression tests
         run: python -m unittest discover -s packaging -p "test_*.py" -v
+      - name: Windows native filesystem preflight
+        if: runner.os == 'Windows'
+        run: cargo test --locked -p keelshell-platform --lib -- --test-threads=1
       - name: Rust quality gate
         run: python scripts/check.py
       - name: Prepare Linux OpenSSH interoperability server

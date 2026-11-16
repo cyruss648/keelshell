@@ -1,0 +1,292 @@
+{
+  "base_commit": "64ce892428ad67ea70c1377c21f6d361db36497d",
+  "archive": "originals.tar.gz",
+  "archive_bytes": 637500,
+  "archive_sha256": "1832515e4ed819e53bc65a8c7f5811a91ecb08e87e657cdc31690ef2cd1f563d",
+  "count": 56,
+  "original_bytes": 4169804,
+  "engineering_inputs": 719,
+  "engineering_sha256": "774b46416b9c1ef424d89d7d3cb49799563d1c00237d1e52bcd4598677dd8f29",
+  "files": [
+    {
+      "path": "batch/ci-author-copy.json",
+      "bytes": 1056,
+      "sha256": "fa3c168701c0214ee2c898d395dff5a55dd7db62e92680f2a2f5109680ce1155"
+    },
+    {
+      "path": "batch/ci-author/candidate/.github/workflows/ci.yml",
+      "bytes": 2101,
+      "sha256": "02f483acb5b0d4ce02c44971d98e17e51e8d2da018d8db9672a4ea5516bc87db"
+    },
+    {
+      "path": "batch/ci-author/originals/.github/workflows/ci.yml",
+      "bytes": 1796,
+      "sha256": "9a1093af5660890adb1eb5619d928205fa4207bf082777f88b05704a02f9dfb1"
+    },
+    {
+      "path": "batch/ci-author/originals/baseline.json",
+      "bytes": 580,
+      "sha256": "9e1d5b63c41a04e4edf16010834c7a126589f253dd1ed2c5b79cf94144b5b8f9"
+    },
+    {
+      "path": "batch/ci-author/report/README.md",
+      "bytes": 4617,
+      "sha256": "00037be6216153a35dfac28612e3fa921944f2362b729021cf287437221faf05"
+    },
+    {
+      "path": "batch/ci-author/report/static-checks.json",
+      "bytes": 3658,
+      "sha256": "d87a2eed0f0b268d0dc166c0c54c9e1434670a9ae1d20af71437298b4a1fb8bd"
+    },
+    {
+      "path": "batch/ci-author/report/windows-native-preflight.patch",
+      "bytes": 717,
+      "sha256": "409d7e8c0f7ef1207304681e383574dee3ef93bab7e6ca17cdc030df9aec2c36"
+    },
+    {
+      "path": "batch/ci-parent-adjustment-r2.md",
+      "bytes": 807,
+      "sha256": "fb82f35e315bd640c61c01afac23e50c92ab7337c56f07342facc9187cb2b7f5"
+    },
+    {
+      "path": "batch/dependencies-live-r1.json",
+      "bytes": 914,
+      "sha256": "31ebb96fb141324b278095fb6fde566874477fed01bdcac2d883ae5ab40bc88e"
+    },
+    {
+      "path": "batch/dependencies-live-r1.log",
+      "bytes": 3235,
+      "sha256": "1cd093bc8616d3d4fc8327d328db2138c43659bc866a27dd9b1f8012f4dde35f"
+    },
+    {
+      "path": "batch/dependencies-live-report-r1.json",
+      "bytes": 56544,
+      "sha256": "abf968898acf273d50a34e596c6379cd8b511465a645a1fb5228b273db9674bf"
+    },
+    {
+      "path": "batch/final-gate-summary-r1.json",
+      "bytes": 2726,
+      "sha256": "a52295f5d52f608b288b46a0383e9f5421e30f46fbb19d3211cacb381a7cc243"
+    },
+    {
+      "path": "batch/freeze.py",
+      "bytes": 910,
+      "sha256": "0a57b9f74d6d9c592459ce3a0594a96c27dffecb469717dad331ce7868494ff1"
+    },
+    {
+      "path": "batch/full-gate-r1.json",
+      "bytes": 734,
+      "sha256": "43b16f3252846a2c43f161be7adf00672cca8d69615fe98a2d7ca6a5fc0b2f99"
+    },
+    {
+      "path": "batch/full-gate-r1.log",
+      "bytes": 646121,
+      "sha256": "bb3c830ed5b2312cc1edd38499993b80ffb61317a585475e61f27b3e7bf4c658"
+    },
+    {
+      "path": "batch/inputs-freeze-r1.json",
+      "bytes": 116621,
+      "sha256": "cd2453833ce750acf4639df638d577535b83ba56f8a6696919ecf3ee0b333aa7"
+    },
+    {
+      "path": "batch/native-diagnostics-focused-r1.json",
+      "bytes": 830,
+      "sha256": "ec817dd7f1166f06993c685591c3e4edb96ea3395e709395c0978c6f8e138bb7"
+    },
+    {
+      "path": "batch/native-diagnostics-focused-r1.log",
+      "bytes": 702,
+      "sha256": "6140045f3ab9ea31b2ae0833718bca80ed46f34eb9498dee4041060835624459"
+    },
+    {
+      "path": "batch/predecessor-cleanup-r1.json",
+      "bytes": 348,
+      "sha256": "681fa4a9e824580dd0197816d8b060393ed9e0989fe6e1a9b2ecc27c502c5616"
+    },
+    {
+      "path": "batch/retire_predecessor.py",
+      "bytes": 2366,
+      "sha256": "d749ee6ed9cea4c768956486e1595f15e3ef07a3eeca7de00f5126494fd443e3"
+    },
+    {
+      "path": "batch/reviewer/README.md",
+      "bytes": 15317,
+      "sha256": "5d62a526cae184859b12b66d5083d40d6cc5fcba3aee82b7895dd48da7d4fc84"
+    },
+    {
+      "path": "batch/reviewer/SHA256SUMS",
+      "bytes": 698,
+      "sha256": "4ef05f4e9345e37826ab5f2b814182c225f2cf64fd070ada47757380f3305a91"
+    },
+    {
+      "path": "batch/reviewer/candidate.diff",
+      "bytes": 10527,
+      "sha256": "3099f06feb4dab9f069d4ba0ec193b4c9514620a9d5c954220014fb8383b8d3e"
+    },
+    {
+      "path": "batch/reviewer/ci-static-checks.json",
+      "bytes": 1350,
+      "sha256": "55bd901678548644fba16d3f998d2e1207f4f9122e3d212ad1e1a1cb6f280692"
+    },
+    {
+      "path": "batch/reviewer/inputs-end.json",
+      "bytes": 2452,
+      "sha256": "5258ea9c91269a25662e4e2c61e0b936a81e16df6d1343fce5975211263c3593"
+    },
+    {
+      "path": "batch/reviewer/inputs-start.json",
+      "bytes": 3363,
+      "sha256": "63e4c14a560dba47eb8e313c5b788d2519feb8f2c00f9a0eda569671192f062e"
+    },
+    {
+      "path": "batch/reviewer/parent-completed-evidence.json",
+      "bytes": 2746,
+      "sha256": "b34b9223444000a54d74ecbb7e351741a2f8d8340591b3a1fdb855037fe62f6a"
+    },
+    {
+      "path": "batch/reviewer/parent-final-gate-readback.json",
+      "bytes": 4826,
+      "sha256": "9538d1f0f3911acacbb7d4d0880382fccb15634f30f0cde4b76ccdfe93c32fae"
+    },
+    {
+      "path": "batch/reviewer/source-static-checks.json",
+      "bytes": 1782,
+      "sha256": "017e14a7b2967c690e9f363a482aba702b624a1ffaf7c18121fad820e186859f"
+    },
+    {
+      "path": "batch/run_command.py",
+      "bytes": 1602,
+      "sha256": "a8e8f0b50f2c5d95342e36f1b8fffd4fdc5daeabbf4a382fa15300c747ce65fc"
+    },
+    {
+      "path": "batch/summarize_gate.py",
+      "bytes": 5135,
+      "sha256": "b1ee38041c0df2426adcbcf78fc23c59c7091424c0706cb0683defffc7c0f98d"
+    },
+    {
+      "path": "batch/temporary-macos-log-r1.json",
+      "bytes": 794,
+      "sha256": "eb7adf890829919a57f8a3bb9d6b216448225a508aadc9c544ee14610ebab9e7"
+    },
+    {
+      "path": "batch/temporary-macos-log-r1.log",
+      "bytes": 1218743,
+      "sha256": "2682f0d3c62f8aa65e8d1aa9772e35afaf8e495fdd69cf39d595ece743962cbc"
+    },
+    {
+      "path": "batch/temporary-source-ci-r1.json",
+      "bytes": 813,
+      "sha256": "b8c20c745ce68586b232880c3fb4fe6d285418c418fc830b9589eafb33a024e2"
+    },
+    {
+      "path": "batch/temporary-source-ci-r1.log",
+      "bytes": 6795,
+      "sha256": "cad8afff0595d7c54f7a98668839894e904cb85feadf766757b82f2d8d2c3004"
+    },
+    {
+      "path": "batch/temporary-ubuntu-log-r1.json",
+      "bytes": 794,
+      "sha256": "6c78ee3fcf6ac4d74e76aa8252047857a0810930fd9de1d1c9776c99fd13737c"
+    },
+    {
+      "path": "batch/temporary-ubuntu-log-r1.log",
+      "bytes": 1302149,
+      "sha256": "5b0291264deb06f81c7d5bb7673843cf77a2e4f63030eaa1e163ec92ccbcf67a"
+    },
+    {
+      "path": "batch/temporary-windows-log-r1.json",
+      "bytes": 792,
+      "sha256": "959028de1e59078e7fe98db1355d7c8d91d94e6c1556793791f120b46e1f04e9"
+    },
+    {
+      "path": "batch/temporary-windows-log-r1.log",
+      "bytes": 694121,
+      "sha256": "3b15cb3d4e23b77ee2f78f47b83e21ce4fdd66628788ee12083861567b322693"
+    },
+    {
+      "path": "batch/windows-cross-clippy-r1.json",
+      "bytes": 875,
+      "sha256": "d63bce459b667fe6c8f835dd2c0561c4d33fdaf9484ecb3417d622f6c74367c8"
+    },
+    {
+      "path": "batch/windows-cross-clippy-r1.log",
+      "bytes": 389,
+      "sha256": "4c5950a08f2fdce8e9a6a428fa5c5037a89da3ba34aaedc6dc4f3829c8792b4b"
+    },
+    {
+      "path": "previous-delivery/delivery-doc-commit-r1.json",
+      "bytes": 801,
+      "sha256": "c934688814469d8a4b7cda8a799fd336270fab1b36b272e00c8a25c69f0256b4"
+    },
+    {
+      "path": "previous-delivery/delivery-doc-commit-r1.log",
+      "bytes": 3323,
+      "sha256": "60e24a58e9ba9fb0ec84bdc6c8a2860b1e72765d8b5eeaccb8624e3a764acc2d"
+    },
+    {
+      "path": "previous-delivery/delivery-doc-parallel-push-r1.json",
+      "bytes": 814,
+      "sha256": "c7ca4a3b06fbcb43cdf94854bd6f7960b6c9b1b6398069c490c7885effcebcda"
+    },
+    {
+      "path": "previous-delivery/delivery-doc-parallel-push-r1.log",
+      "bytes": 150,
+      "sha256": "de52acafa5c8189880bc7e0b25c3566a0cac2fc3e261a0f368c39be31a3a77f8"
+    },
+    {
+      "path": "previous-delivery/delivery-doc-readback-r1.json",
+      "bytes": 2160,
+      "sha256": "12b061d72aaef83228a1702e9e1781251c07b9c1562d4f9711a8407afa934108"
+    },
+    {
+      "path": "previous-delivery/delivery-doc-readback-r1.log",
+      "bytes": 691,
+      "sha256": "48e6184fb608e520832509d8292fe461ed37ae81b82e1f16eb2e1fb263b6bdbd"
+    },
+    {
+      "path": "previous-delivery/parallel-doc-ref-advance-r1.json",
+      "bytes": 791,
+      "sha256": "8425fab1eeca91f1d65d4ed1762b0d453ec220246f02fb58d9af9ab15458f1ad"
+    },
+    {
+      "path": "previous-delivery/parallel-doc-ref-advance-r1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "previous-delivery/run_command.py",
+      "bytes": 1602,
+      "sha256": "a8e8f0b50f2c5d95342e36f1b8fffd4fdc5daeabbf4a382fa15300c747ce65fc"
+    },
+    {
+      "path": "previous-delivery/source-ci-after-doc-push-r1.json",
+      "bytes": 801,
+      "sha256": "0b366cc45f5f66c950e30a386ac48931c62ca9c705dff3b5d4bbaae6562aadf6"
+    },
+    {
+      "path": "previous-delivery/source-ci-after-doc-push-r1.log",
+      "bytes": 12253,
+      "sha256": "0bfff98098260b6106634da96059056df94b3e91a221e00be2962e849264aafb"
+    },
+    {
+      "path": "source/.github/workflows/ci.yml",
+      "bytes": 1962,
+      "sha256": "4ea05107549aa3333c5cb6c1c9846c0e6b46131605c8d4e42f8d236d54dbfc32"
+    },
+    {
+      "path": "source/crates/keelshell-platform/src/lib.rs",
+      "bytes": 865,
+      "sha256": "8cb4d4b72d6bc251bd38be1dbae4475951dc2b068cf0195c9e1db4caa5384c7b"
+    },
+    {
+      "path": "source/crates/keelshell-platform/src/native_diagnostics.rs",
+      "bytes": 4554,
+      "sha256": "f9a1066dec7ce6b7125809048d1bf56c670b67d947b8ea86371f4fea9c24c8e9"
+    },
+    {
+      "path": "source/crates/keelshell-platform/src/windows/native.rs",
+      "bytes": 15591,
+      "sha256": "1e439a8de27af7f8a46ea1d3fdcc454c7752cd7f50328b52f8532d7c519bd7d3"
+    }
+  ]
+}
