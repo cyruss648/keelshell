@@ -20,8 +20,21 @@ app `1367/0/2 ignored`、14 rustdoc，Python discovery 293/2 skipped、helper �
 依赖官方复查 37 包／113 声明通过，本批 manifest／lock 未改。
 正常 release build `0/reaped/151.594s`，arm64／minos 15.0 包结构检查通过；
 没有启动或安装。最新 native 可用性观察仍为锁屏，GUI 操作／截图 0。
-按[本批记录](testing/records/2026-11-17-darwin-tcp-listeners.md)完成源码提交／普通推送
-并读回三方 SHA；完整产品、原生和发行仍开放。
+工程 `bd198a8ef2578ea9b96e0a603cd705bb2eadca13` 已普通提交／推送，
+`2026-11-16T17:14:08Z` 本地／tracking／远端一致、工作区干净。
+255 成员与 724 输入从该提交真实 Git blob 验证 `0/reaped/6.972s`、零 mismatch。
+精确提交正常包位于 `work/darwin-tcp-listeners-20261117/package-r1/KeelShell.app`，
+GUI `f94ecc51…`、MCP `bb415f3a…`，打包／结构检查通过。
+已按精确 Git 原件回收 301 文件／88,633,128 字节；当前和上一正常包六文件摘要、
+共享 target 目录身份前后相等。
+新 Quality `43916079699` 的 Ubuntu `133470463980`、macOS `133470464468`、
+Windows `133470464623` 均 in_progress，尚无当前源码三平台终态；无活动 watcher。
+新非作者 Locke 对原指定文档／封存独立重算并限定 APPROVE，P0–P3 全 0，
+两个文档验证器 exit 0；已关闭，本批四位自有 agent 均已关闭。
+[43 成员交付补充](testing/records/2026-11-17-darwin-tcp-listeners-evidence/delivery/README.md)
+保存报告与实际交付／清理；该复核不签署父级后续补记或当前进行中的 CI。
+按[本批记录](testing/records/2026-11-17-darwin-tcp-listeners.md)接续；
+完整产品、原生和发行仍开放。
 
 上一工程 `6f28f5c424752a221746fbfb621e319c20ff38b9` 的 Quality `43901863960`
 已三平台 completed/success，watch 已 `0/reaped/1258.244s`，无活动 watcher。
@@ -118,8 +131,8 @@ unittest 6.134s／外层 6.203s，实际 waited；辅助检索诊断原文保留
 
 ## 下一步与资源
 
-1. 本批 Darwin TCP 功能的专项、独立复核、真实 SSH 和一次完整宿主 gate 已通过；
-   优先完成普通提交／推送和精确 CI 终态，再按当前路线继续产品验收，不重放未变宿主 gate。
+1. 本批 Darwin TCP 工程 `bd198a8` 已普通推送、三方一致；
+   接续当前 `43916079699` 的精确 CI 终态，再按当前路线继续产品验收，不重放未变宿主 gate。
    上批 `43901863960` 与更早 `43880245383` 的终态分别记录，不能代签当前源码。
 2. Windows 源码完整质量门禁现已通过；继续真实桌面、协议 peer、远端平台及发行缺口，
    不把 runner 测试和正常包结构扩大成原生桌面／完整产品验收。
@@ -131,7 +144,9 @@ unittest 6.134s／外层 6.203s，实际 waited；辅助检索诊断原文保留
 `CARGO_BUILD_JOBS=2`、`MACOSX_DEPLOYMENT_TARGET=15.0`。同一 checkout 连续使用，归属未切换，
 不反复 clean；换归属前遵循[共享 target 合同](testing/SHARED_TARGET.md)。
 当前活动目录为 `work/darwin-tcp-listeners-20261117/`；
-本批原件按封存与 Git blob 核对后回收，保留必要正常包与最后交付回执。
+本批与上一活动副本按封存／Git blob 核对后已回收 301 文件；只保留当前必要正常包、
+交付工装与最后回执。上一隧道活动目录仅保留精确 `6f28f5c` 正常包；
+原日志和解析器从 docs 封存读取，不再使用旧活动路径。
 上一发布批活动目录为 `work/windows-fixture-publication-integration-20261116/`；
 旧 publication、两个已完成 reviewer 目录及稳定测试副本在精确 Git 原件核对后
 已回收 88 文件／13,465,970 字节，三个自有 agent 均已关闭。

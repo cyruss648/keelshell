@@ -108,5 +108,34 @@ gate app 是 workspace feature 的独立产物，其 `--list` 来自同一个准
 
 上一隧道源码 `6f28f5c` 的 Quality `43901863960` 已三平台成功；其
 [25 成员终态](2026-11-16-tunnel-configuration-reload-evidence/ci-completion/README.md)
-绑定原 721 输入，不能移签为本批。当前代码及时普通提交／推送，
-不强推、不覆盖 origin/main 的独立文档；交付后读回本地／tracking／远端 SHA。
+绑定原 721 输入，不能移签为本批。
+
+工程 **`bd198a8ef2578ea9b96e0a603cd705bb2eadca13`** 已普通提交／推送，
+push 实际 `0/reaped/4.760s`，`2026-11-16T17:14:08Z` 读回本地、tracking、
+远端三方相同且工作区干净。没有强推或覆盖 origin/main 的独立文档。
+255 原件和 724 输入从该提交真实 Git blob 验证 **`0/reaped/6.972s`**，
+零 mismatch，测试重放 0。
+
+精确标识该提交的正常包位于本地
+`work/darwin-tcp-listeners-20261117/package-r1/KeelShell.app`，
+完整文件与提交前 manifest 逐项相等，GUI／MCP 摘要同上；打包和结构检查均 exit 0。
+原 `build.commit=null` 未改写，提交前重复包在核验后回收。
+
+已实际回收本批与上一活动副本 **301 文件、88,633,128 字节**，
+每项先匹配该提交 Git 中的原文或 manifest。包括稳定测试副本、提交前重复包和
+旧 CI 运行副本；当前与上一正常包各六文件摘要前后相同，共享 target 的目录
+身份不变。上一隧道活动目录仅保留正常包；原件从 docs 封存读取。
+
+新 Quality **`43916079699`** 绑定本批工程；最新快照 Ubuntu `133470463980`、
+macOS `133470464468`、Windows `133470464623` 均 in_progress，
+尚无当前源码三平台终态。状态快照原文保留，没有活动 watcher，
+没有把上一批成功或宿主门禁替代当前 CI 结果。
+
+新非作者 Locke 对源提交时点的指定 11 项文档／封存限定 **APPROVE，P0–P3 全 0**；
+两个文档验证器分别实际 `0/reaped/0.094828s`、`0/reaped/7.331875s`，
+独立重算 92 套件、26 新例、主与 helper Python 及旧 CI，724 Git 输入零差异。
+原计数／报告派生诊断保留，没有 Cargo、功能测试或 target 写入；
+结论不覆盖父级此后的交付／清理补记。Locke 已关闭，本批四位自有 agent 均关闭。
+[43 成员交付补充](2026-11-17-darwin-tcp-listeners-evidence/delivery/README.md)
+保存原报告、实际推送、包身份、清理和 CI 捕获时点；补充提交并核对 Git 后
+回收活动原件，不重复未变输入的宿主完整门禁。
