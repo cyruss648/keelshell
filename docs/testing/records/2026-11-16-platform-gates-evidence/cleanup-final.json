@@ -1,0 +1,27 @@
+{
+  "recorded_utc": "2026-11-16T03:19:31.928410+00:00",
+  "source_commit": "80647edca4baa1a07532f328849f24d43819e864",
+  "source_push_confirmed": true,
+  "git_blob_and_archive_binding_verified": true,
+  "removed_files": 221,
+  "removed_logical_bytes": 7651429,
+  "removed_path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/focus-navigation-20261116",
+  "raw_originals": 221,
+  "normal_binaries_preserved": [
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target/debug/keelshell-app",
+      "bytes": 199098288,
+      "sha256": "5ae23593849a5027e71f1a9461dd0fe3129d7adc54b1f22b110694d67464ca9b"
+    },
+    {
+      "path": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target/debug/keelshell-mcp",
+      "bytes": 14548464,
+      "sha256": "0e5efdcbe2069fb4ea3c809a99419c557d11ba0ba18e7ba8e5fc6ea0e9bde816"
+    }
+  ],
+  "sole_effective_cargo_target_preserved": true,
+  "other_task_resources_preserved": true,
+  "next_batch_artifacts_preserved": "work/composer-focus-integration-20261116",
+  "new_ci_followup_preserved": "work/platform-ci-followup-20261116",
+  "path_absent": true
+}

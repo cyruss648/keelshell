@@ -1,0 +1,28 @@
+{
+  "observed_exit": 0,
+  "controller_exit": 0,
+  "timed_out": false,
+  "interrupted": false,
+  "terminal": {
+    "direct_reaped": true,
+    "active_processes": 0,
+    "pipes_drained": true,
+    "errors": []
+  },
+  "errors": [],
+  "command": [
+    "/opt/homebrew/bin/gh",
+    "api",
+    "--method",
+    "GET",
+    "repos/cyruss648/keelshell/actions/runs/43797131194/attempts/1/jobs?per_page=100"
+  ],
+  "seconds": 0.7881579169998076,
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "cargo_target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target",
+  "cargo_owner_checkout_unchanged": true,
+  "wrapper_stdout": "",
+  "wrapper_stderr": "",
+  "log_bytes": 7401,
+  "log_sha256": "9b51193475f84b5fdc51e1f3352cb5477f7cc353b9dcf62bcb69498199824a31"
+}

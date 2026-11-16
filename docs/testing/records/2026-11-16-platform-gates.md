@@ -116,6 +116,21 @@ session 包 r1 专项 `exit 0 / reaped / 221.500s`，绑定当时 archive 候选
 集成、编译、实际红绿或新非作者评审，不在本批冻结中。
 原生反向 Tab 及完整平台/输入法/辅助技术状态继续保持原边界。
 
+## 提交、远端与清理
+
+源码与 221 份无损原件提交为
+`80647edca4baa1a07532f328849f24d43819e864`，已实际 push。
+`source-push-r1.json` 记录 `exit 0 / reaped / 4.260s`，本地、tracking
+和远端 SHA 读回一致。Git index、精确源码提交与清理后工程/原件绑定均零
+mismatch。随后回收 221 个临时文件、逻辑 `7,651,429` 字节，原批次目录 absent，
+正常 GUI/MCP 摘要和唯一 Cargo target 保持；没有清理其他任务资源。
+
+新 Quality run `43797131194 / attempt 1 / push` 精确绑定上述源码提交。
+初始 run 和 job 快照已实际捕获，三平台均 in_progress；不是新 CI 通过。
+后续原件在 `work/platform-ci-followup-20261116/`，待终态归档再回收。
+后补提交/清理回执只涉及 docs，按新过滤不会取消或重复启动这次代码检查。
+新平台和原生桌面仍按其真实结果单独验收。
+
 唯一 Cargo target 继续归父 checkout，无来源切换。
 集中集成、专项修复、新非作者复核后运行最终门禁；
 工程输入不变的旧完整门禁不重复执行。

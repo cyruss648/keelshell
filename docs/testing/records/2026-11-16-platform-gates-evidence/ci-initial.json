@@ -1,0 +1,16 @@
+{
+  "id": 43797131194,
+  "name": "Quality",
+  "head_sha": "80647edca4baa1a07532f328849f24d43819e864",
+  "event": "push",
+  "head_branch": "feature/editor-unicode-codec-20261114",
+  "status": "in_progress",
+  "conclusion": null,
+  "run_attempt": 1,
+  "created_at": "2026-11-16T03:15:58Z",
+  "updated_at": "2026-11-16T03:16:10Z",
+  "observed_utc": "2026-11-16T03:18:23.870614+00:00",
+  "raw_sha256": "f59bdd997a9866f18a3844e5b61f9d95e8f4cea03af13f7fe0b15c16ba359546",
+  "raw_bytes": 12277,
+  "actual_platform_pass_claimed": false
+}

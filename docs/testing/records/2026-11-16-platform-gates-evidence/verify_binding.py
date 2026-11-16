@@ -65,7 +65,11 @@ def main():
     assert {
         path.relative_to(ROOT).as_posix() for path in (EVIDENCE / "raw").rglob("*") if path.is_file()
     } == set(artifacts)
-    metadata = {prefix + "/" + name for name in ("README.md", "archive-manifest.json", "verify_binding.py")}
+    metadata = {
+        path.relative_to(ROOT).as_posix()
+        for path in EVIDENCE.iterdir()
+        if path.is_file() and path.resolve() != args.output.resolve()
+    }
     wanted = set(engineering) | set(artifacts) | metadata
     assert wanted.issubset(objects), sorted(wanted - set(objects))
     ids = list(dict.fromkeys(objects[name] for name in sorted(wanted)))
@@ -117,6 +121,7 @@ def main():
         "engineering_inputs": len(engineering),
         "engineering_sha256": freeze["aggregate_sha256"],
         "raw_originals": archive["count"],
+        "delivery_metadata": len(metadata),
         "git_blobs_current_files_and_lossless_sources_match": True,
         "complete_engineering_path_sets_match": True, "mismatches": [],
     }

@@ -36,3 +36,17 @@
 Git index 或精确提交的 blob；可用 `--source-commit` 额外核对源码与后续文档
 树的工程 blob 完全相同。提交、推送、三方 SHA 读回和临时数据清理各自单列，
 以实际 JSON 回执为准。原生反向 Tab、真实平台/IME/辅助技术和完整产品仍开放。
+
+源码及无损原件提交
+`80647edca4baa1a07532f328849f24d43819e864` 已推送，`source-push-r1.json`
+实际三方 SHA 一致。`index-input-binding.json`、`commit-input-binding.json`
+和 `post-cleanup-binding.json` 均零 mismatch；后续文档树应通过
+`--commit <文档提交> --source-commit <源码提交>` 同时绑定两棵树。
+verifier 同时核对本目录所有交付元数据的 Git blob，输出放在新的 ignored 路径
+或尚不存在的指定文件，不覆盖旧回执。
+
+`cleanup-final.json` 记录回收 221 个临时文件、逻辑 `7,651,429` 字节，
+原批次目录 absent，正常程序、唯一有效 target 及其他任务资源保持。
+`ci-initial-raw.json` 与 `ci-initial.json` 是新精确源码 Quality run
+`43797131194 / attempt 1` 的初始快照及摘要；不代签终态。
+后续 CI 原件仍在独立的活动工作目录，待实际终态后再归档。

@@ -1,0 +1,27 @@
+{
+  "observed_exit": 0,
+  "controller_exit": 0,
+  "timed_out": false,
+  "interrupted": false,
+  "terminal": {
+    "direct_reaped": true,
+    "active_processes": 0,
+    "pipes_drained": true,
+    "errors": []
+  },
+  "errors": [],
+  "command": [
+    "git",
+    "push",
+    "origin",
+    "HEAD:refs/heads/feature/editor-unicode-codec-20261114"
+  ],
+  "seconds": 4.260231624999506,
+  "recorded_utc": "2026-11-16T03:15:56.305317+00:00",
+  "stdout": "",
+  "stderr": "To https://github.com/cyruss648/keelshell.git\n   4fd1932..80647ed  HEAD -> feature/editor-unicode-codec-20261114\n",
+  "local": "80647edca4baa1a07532f328849f24d43819e864",
+  "tracking": "80647edca4baa1a07532f328849f24d43819e864",
+  "remote": "80647edca4baa1a07532f328849f24d43819e864",
+  "three_way_equal": true
+}
