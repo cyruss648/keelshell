@@ -128,3 +128,55 @@ precommit 包的 build.commit 为 null，不伪造精确提交来源；六文件
 GUI SHA-256 `e5afb6f779725cefbe15e1564ab484934aeb01aae2983a3b73bb223cf484f847`，
 MCP `bb415f3ae3ae7ca62bdb78abe752b50f5a3a796dc65ec99490f54ee28cb3f693`。
 正常构建、包结构和未启动／未安装事实不构成本批原生桌面验收。
+
+## 精确交付与 Windows 测试编译补全
+
+工程 `f810f674c57b2c25dac5b987d77bf38656e3af56` 已普通提交／推送。
+`2026-11-16T18:32:32Z` 本地、tracking 与实际远端三方一致，工作区干净；
+精确 Git blob 的 206 成员／727 输入验证 `0/reaped/6.981018s`、零 mismatch，
+测试重放 0。正常包位于
+`work/editor-backup-verification-20261117/package-r1/KeelShell.app`，
+build.commit 绑定该源码；全部应用文件与 r4 precommit 包逐字节相等，
+仅 package manifest 的提交来源改变。打包／结构检查通过，没有重编未变的
+release 二进制、启动或安装。
+
+精确 Quality `43929740313` 的 Windows job `133518648598` 在 session lib
+预检编译时报 E0004：Windows 专用归档测试的脱敏错误分类器遗漏新
+`EditorBackupUnverified` 分支。此前 filesystem `70/0/0`、archive codec
+`41/0/0` 已通过；session 库存／执行及完整 gate 未开始，不能补写成功。
+macOS／Ubuntu 在保存快照时仍运行中；原 run 没有重跑。
+首次下载被 gh 的终端转义输出保护拒绝，exit 1；随后只向文件保存 raw 日志，
+`--allow-escape-sequences` 下载退出 0，不把原始 ANSI 输出到终端。
+
+修复仅在 `local_windows/tests.rs` 的穷尽 match 增加明确固定字符串分支；
+不使用 wildcard，不格式化错误或 payload，不改变原 typed 结果。
+727 输入的 r5 aggregate 为
+`5c93cae03daaf370227820a815ad969623a0fb6bef1afb0d6e5362f09816528b`，
+其余 726 输入逐项等于 r4，包括全部生产实现、manifest 和 lock。
+限定宿主 gate `0/reaped/26.865652s`，依赖策略、fmt、严格 Clippy、diff 全过；
+准确 session binary 的 343 名库存与 r4 及实际执行逐项相等，
+`339/0/4 ignored`，本批新 30 项全部 ok。实际二进制路径与 SHA 单独保存；
+不把不同 Cargo feature 组合的产物路径混用。
+
+该修复只影响 Windows 条件编译的测试辅助函数，因此不重复未变 app／Python／
+controller 的宿主完整测试，也不把 r4 完整成绩改签成 r5 全量通过。
+新非作者 Banach 的窄静态复核为 APPROVE，P0–P3 全0；核对21个变体与21个
+显式分支，并搜索644个tracked Rust文件中的28处相关匹配，未发现同类遗漏。
+独立编译、测试、网络和target写入均0，只签这一行修复，不签并行及后续docs。
+已实际收取并关闭，本功能批及后续共四位自有agent均已关闭。
+修复后的精确 Windows CI 另行验收。
+最初限定 gate 解析器漏掉 Python helper stderr 同行前缀后的三个 Rust 结果，
+派生退出 1；修订解析后343名逐项相等，派生退出 0。原解析器与诊断保留，
+没有为解析问题重放测试。
+
+## 已验证副本清理
+
+精确 Git 原件核对后，已回收 242 文件／70,086,612 字节，包含主206成员中除
+保留 runner 外的205份副本、上一 CI 的31份副本及 precommit 包6文件。
+首轮清理在全部文件验证／删除后，因 `previous-ci` 还存在未封存辅助脚本而
+目录删除退出 1；该辅助脚本没有被删除，原诊断保留。
+恢复轮逐项对照精确 Git 原件与242项缺席事实，清理剩余空目录，退出 0；
+当前正常包六文件与删除前来源回执相等，恢复轮共享 target 目录身份前后相等。
+首轮没有完成 target 前后比较回执，不补造该证据。
+辅助脚本保留待交付补充封存后回收。未操作其他任务资源或旧正常包。
+详见[交付补充](2026-11-17-editor-backup-readback-evidence/delivery/README.md)。

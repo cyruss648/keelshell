@@ -1,0 +1,26 @@
+{
+  "observed_exit": 1,
+  "controller_exit": 1,
+  "timed_out": false,
+  "interrupted": false,
+  "terminal": {
+    "direct_reaped": true,
+    "active_processes": 0,
+    "pipes_drained": true,
+    "errors": []
+  },
+  "errors": [],
+  "command": [
+    "python3",
+    "-B",
+    "docs/testing/records/2026-11-17-editor-backup-readback-evidence/delivery/verify.py"
+  ],
+  "seconds": 0.19199945800210116,
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "cargo_target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target",
+  "cargo_owner_checkout_unchanged": true,
+  "wrapper_stdout": "",
+  "wrapper_stderr": "",
+  "log_bytes": 606,
+  "log_sha256": "a1b313f995e452d4902df2d325403c2eccc20d2a0879e0ebe580fcfe9695d595"
+}

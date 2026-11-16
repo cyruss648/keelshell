@@ -14,7 +14,18 @@ r4 冻结 727 输入，aggregate `78d8a0c0000ce0afb661d8af0c6712a266cd44fa168b80
 app `1372/0/2`、14 rustdoc、Python 293/2 skipped，helper 另列 30。
 准确 app 的 1374 库存与逐名执行相等，35 新例全部 ok；工程输入前后不变。
 正常 release build 和 arm64／minos 15.0 包结构通过；
-未启动或安装，锁屏使原生仍待验收。提交推送与精确来源包待交付回执。从
+未启动或安装，锁屏使原生仍待验收。工程
+`f810f674c57b2c25dac5b987d77bf38656e3af56` 已普通推送、三方一致，
+206 成员／727 输入精确 Git 绑定通过；提交来源正常包结构通过。
+新 Quality `43929740313` 的 Windows session 预检因测试错误分类器漏新 variant
+而编译失败，filesystem70／archive41通过，完整 gate 未开始。
+当前只补该 Windows 测试 helper 的一行穷尽分支；r5其余726输入不变，
+aggregate `5c93cae03daaf370227820a815ad969623a0fb6bef1afb0d6e5362f09816528b`。
+限定 gate `0/reaped/26.866s`，session343库存／执行相等、`339/0/4`，
+新30项 ok，fmt／严格 Clippy／策略通过；Banach新静态窄复核APPROVE、P0–P3全0，
+独立编译／执行0，已关闭，四位自有agent均关闭；修复后的精确 Windows CI 另验。
+242文件／70,086,612字节副本已按Git原件回收；首轮目录删除诊断、
+后续恢复和保留 helper 明确记录，不补造首轮 target 前后证据。从
 [本批记录](testing/records/2026-11-17-editor-backup-readback.md)接续，不重放未知写入。
 
 上一功能批新增远端 macOS 账户可见的 TCP LISTEN 列表，使用已有 lsof，
@@ -149,8 +160,9 @@ unittest 6.134s／外层 6.203s，实际 waited；辅助检索诊断原文保留
 
 ## 下一步与资源
 
-1. 编辑器备份批的专项、两位独立复核和一次完整门禁已通过；
-   封存后普通提交推送并读回三方 SHA，核对精确 Git 输入和来源包，不重复成功测试。
+1. 编辑器备份工程 `f810f67` 已推送，宿主完整门禁通过但精确 Windows CI 发现
+   测试 helper 穷尽匹配缺失；一行修复的限定 gate 与新静态复核已通过，
+   封存／普通提交推送，跟进新精确 CI，不重放未变的宿主完整测试。
    Darwin TCP 工程 `bd198a8` 已普通推送、三方一致，`43916079699` 三平台终态已收齐，
    不重放未变的监听宿主 gate 或 CI。
    上批 `43901863960` 与更早 `43880245383` 的终态分别记录，不能代签当前源码。
@@ -164,7 +176,8 @@ unittest 6.134s／外层 6.203s，实际 waited；辅助检索诊断原文保留
 `CARGO_BUILD_JOBS=2`、`MACOSX_DEPLOYMENT_TARGET=15.0`。同一 checkout 连续使用，归属未切换，
 不反复 clean；换归属前遵循[共享 target 合同](testing/SHARED_TARGET.md)。
 当前活动目录为 `work/editor-backup-verification-20261117/`；
-编辑器原件包含原失败、r4 正例、两位 reviewer 的原审与追加签署；
+编辑器原失败、r4正例及两位reviewer的原审／追加签署已移至docs主封存；
+活动目录保留精确f810f67正常包和后续交付／Windows修复工装。
 `work/darwin-tcp-listeners-20261117/` 是上一批保留正常包和交付回执。
 本批与上一活动副本按封存／Git blob 核对后已回收 301 文件；只保留当前必要正常包、
 交付工装与最后回执。上一隧道活动目录仅保留精确 `6f28f5c` 正常包；

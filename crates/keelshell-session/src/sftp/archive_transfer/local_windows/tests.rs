@@ -40,6 +40,7 @@ fn extraction_stage_error(stage: ExtractionStage, error: &SessionError) {
         SessionError::MutationBusy => "MutationBusy",
         SessionError::MutationQuarantined => "MutationQuarantined",
         SessionError::MutationUncertain => "MutationUncertain",
+        SessionError::EditorBackupUnverified => "EditorBackupUnverified",
         SessionError::UnverifiedMutation(_) => "UnverifiedMutation",
     };
     let (io_kind, raw_os_error) = match error {

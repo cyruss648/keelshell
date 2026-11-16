@@ -25,6 +25,17 @@ Historical backup-ACK limitations below describe their original scopes. See
 [ADR 0153](../adr/0153-editor-backup-readback.md) and the
 [batch record](../testing/records/2026-11-17-editor-backup-readback.md).
 
+Source `f810f674c57b2c25dac5b987d77bf38656e3af56` was pushed and its exact
+Git inputs and normal macOS package provenance verified. Its Windows CI found a
+missing exhaustive match arm in a Windows-only test diagnostic helper, before
+session inventory or the full gate could run. A one-line follow-up adds the fixed
+variant label; all 726 other engineering inputs remain equal. The scoped host
+gate passed with 343 session inventory names matching 339 passed/four ignored,
+including all 30 new backup tests. A new independent static review approved the
+one-line fix with no P0–P3 and zero independent compilation/test runs.
+Actual Windows compilation remains a separate
+pending CI check; the earlier full host result is not relabelled as a new full run.
+
 ## 2026-11-17: remote macOS TCP listeners
 
 The existing port control can read account-visible TCP LISTEN sockets using the
