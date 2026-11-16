@@ -1,6 +1,7 @@
 //! Compact local controls share the remote browser's fixed vertical budget.
 
 use super::browser::SortColumn;
+use super::browser_keyboard::BrowserSide;
 use super::local_catalog::LocalEntryKind;
 use super::*;
 use crate::i18n::LocalizedTooltipExt;
@@ -139,14 +140,14 @@ impl FilesPanel {
     pub(super) fn local_browser_view(&self, cx: &mut Context<Self>) -> AnyElement {
         let visual = crate::design::palette(cx);
         let mut list = div()
-            .id("local-files")
+            .id("local-file-rows")
             .flex_1()
             .min_h_0()
             .overflow_y_scroll()
+            .track_scroll(self.browser_scroll_handle(BrowserSide::Local))
             .restrict_scroll_to_axis()
             .flex()
-            .flex_col()
-            .test_support();
+            .flex_col();
         if let Some(listing) = &self.local_browser.listing {
             for index in browser::local_indices(
                 &listing.entries,
@@ -155,6 +156,14 @@ impl FilesPanel {
             ) {
                 let entry = &listing.entries[index];
                 let selected = self.local_browser.selection.contains(&entry.path);
+                let cursor = self.local_browser.selection.cursor() == Some(&entry.path);
+                let background = if selected {
+                    visual.selected
+                } else if index % 2 == 0 {
+                    visual.surface
+                } else {
+                    visual.canvas
+                };
                 let directory = listing.directory.clone();
                 let check_directory = listing.directory.clone();
                 let check_path = entry.path.clone();
@@ -181,13 +190,13 @@ impl FilesPanel {
                         .px_1()
                         .gap_1()
                         .min_w_0()
-                        .bg(rgb(if selected {
-                            visual.selected
-                        } else if index % 2 == 0 {
-                            visual.surface
-                        } else {
-                            visual.canvas
-                        }))
+                        .bg(rgb(background))
+                        .border_l_2()
+                        .border_color(rgb(if cursor { visual.accent } else { background }))
+                        .role(accesskit::Role::ListBoxOption)
+                        .aria_label(name.clone())
+                        .aria_selected(selected)
+                        .when(cursor, |row| row.aria_active_descendant())
                         .cursor_pointer()
                         .on_click(cx.listener(move |panel, event: &ClickEvent, _, cx| {
                             panel.select_local_entry(
@@ -208,8 +217,9 @@ impl FilesPanel {
                                     t(cx, "选择本地项", "Select local entry"),
                                     name
                                 ))
-                                .on_click(cx.listener(move |panel, _, _, cx| {
+                                .on_click(cx.listener(move |panel, _, window, cx| {
                                     cx.stop_propagation();
+                                    panel.browser_focus(BrowserSide::Local).focus(window, cx);
                                     panel.select_local_entry(
                                         &check_path,
                                         &check_directory,
@@ -282,6 +292,8 @@ impl FilesPanel {
                     .id("local-browser-status")
                     .p_2()
                     .text_color(rgb(visual.muted))
+                    .role(accesskit::Role::Label)
+                    .aria_label(self.local_browser.status.render(cx))
                     .child(self.local_browser.status.render(cx)),
             );
         }
@@ -354,7 +366,10 @@ impl FilesPanel {
                             })),
                     ),
             )
-            .child(list)
+            .child(
+                self.browser_keyboard_scope(list, BrowserSide::Local, cx)
+                    .test_support(),
+            )
             .test_support()
             .into_any_element()
     }

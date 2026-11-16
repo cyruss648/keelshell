@@ -71,7 +71,6 @@ impl LocalBrowser {
         self.cancel_read();
     }
 
-    #[cfg(test)]
     pub(super) fn reading(&self) -> bool {
         self.active.is_some()
     }
@@ -124,17 +123,36 @@ impl FilesPanel {
             &self.local,
             &self.archive_name,
         ] {
+            let name_input = input.entity_id() == self.name.entity_id();
             self._browser_subscriptions.push(cx.subscribe_in(
                 input,
                 window,
-                |panel, _, event: &InputEvent, _, cx| {
+                move |panel, _, event: &InputEvent, _, cx| {
                     if matches!(event, InputEvent::Change) {
+                        if !name_input {
+                            panel.browser_rename_intent = None;
+                        }
                         panel.withdraw_browser_review();
                         cx.notify();
                     }
                 },
             ));
         }
+        self._browser_subscriptions.push(cx.subscribe_in(
+            &self.name,
+            window,
+            |panel, _, event: &InputEvent, window, cx| {
+                if matches!(
+                    event,
+                    InputEvent::PressEnter {
+                        secondary: false,
+                        shift: false
+                    }
+                ) {
+                    panel.review_keyboard_rename(window, cx);
+                }
+            },
+        ));
         self._browser_subscriptions.push(cx.subscribe_in(
             &self.path,
             window,
@@ -344,6 +362,9 @@ impl FilesPanel {
                             panel.local_browser.listing = Some(listing);
                             panel.local_browser.selected = None;
                             panel.local_browser.selection.clear();
+                            panel
+                                .browser_scroll_handle(browser_keyboard::BrowserSide::Local)
+                                .set_offset(point(px(0.), px(0.)));
                             panel.local_browser.status = Message::new(
                                 format!("已读取 {count} 项（仅元数据）"),
                                 format!("Loaded {count} entries (metadata only)"),
@@ -476,6 +497,7 @@ impl FilesPanel {
                 "Select at most 32 entries; hidden or stale rows cannot join the selection.",
             );
         } else {
+            self.browser_rename_intent = None;
             self.local_browser.selected = self.local_browser.selection.single().cloned();
             self.withdraw_browser_review();
         }
@@ -510,6 +532,7 @@ impl FilesPanel {
                 "Select at most 32 entries; hidden or stale rows cannot join the selection.",
             );
         } else {
+            self.browser_rename_intent = None;
             self.selected = self
                 .remote_selection
                 .single()

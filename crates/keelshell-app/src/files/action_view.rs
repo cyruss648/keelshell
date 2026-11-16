@@ -60,6 +60,7 @@ impl FilesPanel {
                 } else {
                     Some(section)
                 };
+                view.browser_rename_intent = None;
                 // Retained input entities must not receive typing after their
                 // settings are unmounted. The visible trigger owns focus.
                 view.tool_section_focus[section.index()].focus(window, cx);

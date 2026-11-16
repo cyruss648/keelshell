@@ -40,6 +40,9 @@ mod archive_inspection;
 mod archive_validation;
 mod batch;
 mod browser;
+mod browser_keyboard;
+#[cfg(test)]
+mod browser_keyboard_tests;
 mod editor_encoding;
 mod editor_keyboard;
 #[cfg(test)]
@@ -234,6 +237,9 @@ pub struct FilesPanel {
     remote_sort: browser::BrowserSort,
     remote_selection: selection::Selection<String>,
     remote_show_hidden: bool,
+    browser_keyboard_focus: [FocusHandle; 2],
+    browser_scroll: [ScrollHandle; 2],
+    browser_rename_intent: Option<browser_keyboard::RenameIntent>,
     _browser_subscriptions: Vec<Subscription>,
     browser_review_revision: uuid::Uuid,
     editor: Entity<EditorState>,
@@ -1063,6 +1069,12 @@ impl FilesPanel {
             remote_sort: browser::BrowserSort::default(),
             remote_selection: selection::Selection::default(),
             remote_show_hidden: false,
+            browser_keyboard_focus: [
+                cx.focus_handle().tab_stop(true),
+                cx.focus_handle().tab_stop(true),
+            ],
+            browser_scroll: [ScrollHandle::new(), ScrollHandle::new()],
+            browser_rename_intent: None,
             _browser_subscriptions: Vec::new(),
             browser_review_revision: uuid::Uuid::new_v4(),
             editor: cx.new(|cx| {
@@ -1278,6 +1290,7 @@ impl FilesPanel {
         self.pending = None;
         self.confirmation_expanded = false;
         self.local_browser.retire_navigation();
+        self.browser_rename_intent = None;
         self.remote_selection.clear();
         self.selected = None;
         self.cancel_transfers();
@@ -1577,6 +1590,7 @@ impl FilesPanel {
             // do not change the current browser selection.
             self.remote_selection.clear();
             self.selected = None;
+            self.browser_rename_intent = None;
             self.withdraw_browser_review();
         }
         if let Some(probe) = &archive_probe {
@@ -1865,6 +1879,8 @@ impl FilesPanel {
                         view.directory = Some(path);
                         view.status = Message::new(format!("共 {} 项",entries.len()),format!("{} entries",entries.len()));
                         view.entries = entries;
+                        view.browser_scroll_handle(browser_keyboard::BrowserSide::Remote)
+                            .set_offset(point(px(0.), px(0.)));
                         view.selected = None;
                         view.remote_selection.clear();
                     }

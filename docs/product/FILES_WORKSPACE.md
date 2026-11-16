@@ -1,5 +1,20 @@
 # 文件工作区 / Files workspace
 
+## 2026-11-16 文件列表键盘
+
+双栏各自保留原生焦点、滚动与稳定路径游标，支持方向键、范围、翻页、首尾、
+全选/清空、打开、上级和刷新。超出 32 项的选区整次拒绝。
+远程 F2 后的名称 Enter 与 Delete 只提出完整审核，修改须独立确认。
+列表之外的控件保持自己的按键路由；实际状态和位置提供完整辅助技术文本。
+操作表见[键盘指南](FILE_BROWSER_KEYBOARD.md)，验证边界见
+[本批记录](../testing/records/2026-11-16-file-browser-keyboard.md)。
+
+Each list has its own native focus, scrolling and stable path cursor.
+Navigation follows the displayed order and oversized selections preserve the
+previous state. Remote rename/delete shortcuts propose a complete review and
+require separate confirmation. See the keyboard guide and batch record for
+the exact bindings, engineering results and native acceptance boundaries.
+
 ## 2026-11-15 远程文本读取编码
 
 远程文件标题旁提供读取编码，展开后选择 Unicode 自动或五种旧编码，

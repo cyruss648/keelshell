@@ -1,4 +1,5 @@
 //! Remote browser layout and explicit file-operation controls.
+use super::browser_keyboard::BrowserSide;
 use super::*;
 use crate::i18n::LocalizedTooltipExt;
 use gpui_kit::component::checkbox::Checkbox;
@@ -133,14 +134,14 @@ impl FilesPanel {
         // Both nested scrollers must keep their own axis; GPUI otherwise
         // remaps one wheel delta onto the rows and the columns simultaneously.
         let mut list = div()
-            .id("remote-files")
+            .id("remote-file-rows")
             .flex_1()
             .min_h_0()
             .overflow_y_scroll()
+            .track_scroll(self.browser_scroll_handle(BrowserSide::Remote))
             .restrict_scroll_to_axis()
             .flex()
-            .flex_col()
-            .test_support();
+            .flex_col();
         for (index, source_index) in
             browser::remote_indices(&self.entries, self.remote_show_hidden, self.remote_sort)
                 .into_iter()
@@ -150,6 +151,14 @@ impl FilesPanel {
             // selection captures the unchanged native entry/path instead.
             let entry = &self.entries[source_index];
             let selected = self.remote_selection.contains(&entry.path);
+            let cursor = self.remote_selection.cursor() == Some(&entry.path);
+            let background = if selected {
+                visual.selected
+            } else if index % 2 == 0 {
+                visual.surface
+            } else {
+                visual.canvas
+            };
             let item = entry.clone();
             let directory = self.directory.clone();
             let check_directory = self.directory.clone();
@@ -162,13 +171,13 @@ impl FilesPanel {
                     .flex_shrink_0()
                     .flex()
                     .items_center()
-                    .bg(rgb(if selected {
-                        visual.selected
-                    } else if index % 2 == 0 {
-                        visual.surface
-                    } else {
-                        visual.canvas
-                    }))
+                    .bg(rgb(background))
+                    .border_l_2()
+                    .border_color(rgb(if cursor { visual.accent } else { background }))
+                    .role(accesskit::Role::ListBoxOption)
+                    .aria_label(entry.name.clone())
+                    .aria_selected(selected)
+                    .when(cursor, |row| row.aria_active_descendant())
                     .cursor_pointer()
                     .on_click(cx.listener(move |view, event: &ClickEvent, window, cx| {
                         view.select_remote_entry(
@@ -192,6 +201,7 @@ impl FilesPanel {
                             ))
                             .on_click(cx.listener(move |view, _, window, cx| {
                                 cx.stop_propagation();
+                                view.browser_focus(BrowserSide::Remote).focus(window, cx);
                                 view.select_remote_entry(
                                     &check_path,
                                     &check_directory,
@@ -272,6 +282,9 @@ impl FilesPanel {
                 "This directory is empty",
             )));
         }
+        let list = self
+            .browser_keyboard_scope(list, BrowserSide::Remote, cx)
+            .test_support();
         let drop_binding = self.batch_binding();
         let drop_available = self.drop_upload_available();
         let table = div()
@@ -848,23 +861,35 @@ impl Render for FilesPanel {
                     }))
                     .child(
                         div()
+                            .id("file-location-status")
                             .max_w(px(220.))
                             .min_w_0()
                             .text_ellipsis()
                             .text_color(rgb(visual.muted))
+                            .role(accesskit::Role::Label)
+                            .aria_label(format!(
+                                "{} {}",
+                                t(cx, "当前位置：", "Location:"),
+                                self.directory.as_deref().unwrap_or("—")
+                            ))
                             .child(format!(
                                 "{} {}",
                                 t(cx, "当前位置：", "Location:"),
                                 self.directory.as_deref().unwrap_or("—")
-                            )),
+                            ))
+                            .test_support(),
                     )
                     .child(
                         div()
+                            .id("file-operation-status")
                             .flex_1()
                             .min_w_0()
                             .text_ellipsis()
                             .text_color(rgb(visual.muted))
-                            .child(self.status.render(cx)),
+                            .role(accesskit::Role::Label)
+                            .aria_label(self.status.render(cx))
+                            .child(self.status.render(cx))
+                            .test_support(),
                     )
                     .when(self.operation_id.is_some(), |view| {
                         view.child(

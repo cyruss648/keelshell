@@ -1,5 +1,27 @@
 # Capability ledger
 
+## 2026-11-16: focused file-list keyboard and status semantics
+
+Local and remote lists have separate focus, scrolling and stable path cursors.
+Arrow/Shift/Page/Home/End/Space/Escape and platform select-all follow the visible
+order; selections above 32 entries are rejected atomically. Enter opens a remote
+entry or uses a native local source path. Parent and refresh use the loaded
+directory. Remote F2/name Enter and Delete propose complete existing reviews;
+only the separate confirmation control can mutate remote files.
+Painted callbacks bind session, connection, listing metadata, sorting and hidden
+preferences. Other controls retain their native keys. Lists expose selection
+roles, instructions and full bilingual operation/location text.
+
+This batch uses the shared theme registry and semantic tokens. Its final
+717-input gate passed 3210 ordinary Rust tests, 14 doctests, formatting, strict
+Clippy, dependency policy and controller checks. Independent source review
+closed the missing Tab-stop defect; prebuilt execution is disclosed separately.
+Scoped macOS Frost observations include browsing, separate rename/delete
+confirmation with complete fixture readback, local paths and forward Tab.
+Reverse native Tab remains HOLD; other themes/platforms, IME, VoiceOver and the
+complete matrix remain open. The [batch record](../testing/records/2026-11-16-file-browser-keyboard.md)
+preserves failures and distinguishes the gate, reviews and native observations.
+
 ## 2026-11-16: focused editor keyboard and final-character review
 
 The visible draft area and its controls offer macOS Cmd+S/Cmd+F or

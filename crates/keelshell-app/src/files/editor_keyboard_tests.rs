@@ -13,11 +13,11 @@ use gpui_kit::{
     test::{TestAppContextExt, TestWindowExt},
 };
 
-struct KeyboardScene {
+pub(super) struct KeyboardScene {
     panel: Entity<FilesPanel>,
     terminal: Entity<TerminalView>,
-    other: Entity<InputState>,
-    show_files: bool,
+    pub(super) other: Entity<InputState>,
+    pub(super) show_files: bool,
 }
 
 impl Render for KeyboardScene {
@@ -34,20 +34,20 @@ impl Render for KeyboardScene {
     }
 }
 
-struct Harness {
-    window: AnyWindowHandle,
-    scene: Entity<KeyboardScene>,
-    panel: Entity<FilesPanel>,
-    server: Server,
-    session: SshSession,
-    runtime: Arc<tokio::runtime::Runtime>,
-    commands: mpsc::Receiver<TerminalCommand>,
+pub(super) struct Harness {
+    pub(super) window: AnyWindowHandle,
+    pub(super) scene: Entity<KeyboardScene>,
+    pub(super) panel: Entity<FilesPanel>,
+    pub(super) server: Server,
+    pub(super) session: SshSession,
+    pub(super) runtime: Arc<tokio::runtime::Runtime>,
+    pub(super) commands: mpsc::Receiver<TerminalCommand>,
     _output: mpsc::SyncSender<keelshell_session::SessionEvent>,
     _group: Arc<fixture_group::FixtureGroup>,
 }
 
 impl Harness {
-    fn new(cx: &mut TestAppContext) -> Self {
+    pub(super) fn new(cx: &mut TestAppContext) -> Self {
         let runtime = Arc::new(
             tokio::runtime::Builder::new_multi_thread()
                 .worker_threads(2)
@@ -115,7 +115,7 @@ impl Harness {
         }
     }
 
-    fn in_window<R>(
+    pub(super) fn in_window<R>(
         &self,
         cx: &mut TestAppContext,
         run: impl FnOnce(&mut Window, &mut App) -> R,
@@ -124,14 +124,20 @@ impl Harness {
             .checked("keyboard fixture window")
     }
 
-    async fn idle(&self, cx: &mut TestAppContext) {
+    pub(super) async fn idle(&self, cx: &mut TestAppContext) {
         cx.wait_for(self.window, Duration::from_secs(12), |_, cx| {
             !self.panel.read(cx).busy
         })
         .await;
     }
 
-    async fn open(&self, cx: &mut TestAppContext, path: &str, original: &[u8], draft: &str) {
+    pub(super) async fn open(
+        &self,
+        cx: &mut TestAppContext,
+        path: &str,
+        original: &[u8],
+        draft: &str,
+    ) {
         self.idle(cx).await;
         self.runtime.block_on(async {
             let sftp = self.session.sftp().await.checked("seed keyboard file");
@@ -177,7 +183,7 @@ impl Harness {
         });
     }
 
-    fn press(&self, cx: &mut TestAppContext, key: &str) {
+    pub(super) fn press(&self, cx: &mut TestAppContext, key: &str) {
         self.in_window(cx, |window, cx| {
             window.press(key, cx);
             window.render_frame(cx);
