@@ -60,8 +60,8 @@ jobs:
             'sftp::archive_transfer::local::tests::windows_archive_private_nested_tree_publishes_after_child_creation_handles_close',
             'sftp::archive_transfer::local::tests::windows_archive_empty_private_tree_publishes_with_exact_root_identity',
             'sftp::archive_transfer::local::tests::windows_archive_same_content_replacement_after_release_fails_published_readback',
-            'zmodem::local::tests::zmodem_upload_local_confirmation_rejects_replaced_ancestor_even_with_same_bytes',
-            'zmodem::local::tests::zmodem_windows_reviews_reject_replaced_grandparent_with_original_leaf_and_source',
+            'zmodem::local::tests::zmodem_windows_retained_source_blocks_ancestor_rename_and_preserves_review',
+            'zmodem::local::tests::zmodem_windows_retained_reviews_block_grandparent_rename_and_preserve_namespace',
             'zmodem::local::tests::zmodem_local_publication_rejects_a_replaced_parent_without_writing_either_tree'
           )) {
             if ($listing -cnotcontains "${case}: test") {

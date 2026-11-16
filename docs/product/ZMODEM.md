@@ -50,9 +50,16 @@ ZFIN、所有当前文件审核和保存均已处理、精确回复写出已确�
 本地文件观察和安全发布现已接入 macOS、Linux 与 Windows 后端。Windows
 使用完整祖先与来源句柄、实际对象身份、创建时私有 DACL、无覆盖发布及完整
 内容读回；仅接纳满足这些契约的本地 drive 文件系统。UNC、设备路径、重解析、
-多硬链接及不可移植名称均拒绝。文件选择入口已启用；Windows 原生运行仍为
-`NOT_RUN`，不能把交叉检查、PE 链接或测试定义表示为 Windows 文件传输验收。
-Linux 本地 Rust 后端的实际运行、最终源码范围与 Windows 原生缺口分别见
+多硬链接及不可移植名称均拒绝。文件选择入口已启用。
+精确源码 `01f6f6bd8272303fe049bc7b52976afefdb44c37` 的 Windows CI
+实际执行本地 Zmodem 45 项：41 passed、2 failed、2 ignored。
+失败的两例原先假设可替换仍有打开后代的祖先目录，系统返回
+`PermissionDenied / OS 5`；空父目录实际替换后的拒绝用例为 ok。
+新修订准确检验系统阻止替换、完整身份及原审核保持，保留另外 43 个测试块；
+宿主完整门禁与限定静态复核通过，新两例仍待精确 Windows CI。
+Windows 桌面、真实文件选择和端到端传输验收继续开放，详见
+[测试契约记录](../testing/records/2026-11-16-windows-zmodem-test-contract.md)。
+Linux 本地 Rust 后端的实际运行及此前 Windows 源码范围见
 [本地后端记录](../testing/records/2026-11-15-windows-local-backend.md)与
 [ADR 0138](../adr/0138-windows-handle-local-files.md)。
 三平台桌面、IME、辅助技术及发行验收继续列入路线图。

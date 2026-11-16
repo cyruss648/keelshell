@@ -1,0 +1,611 @@
+{
+  "schema": "keelshell.windows-zmodem-test-contract.v1",
+  "baseline_source": "b7d6e92a937b3ad994c13c37e19db0bd0d059c8f",
+  "prior_ci_source": "01f6f6bd8272303fe049bc7b52976afefdb44c37",
+  "engineering_sha256": "96753dee615c9cd7711a48ad769ec5b14f49c45c581b0bb67323bb51ba508766",
+  "changed_engineering_files": [
+    ".github/workflows/ci.yml",
+    "crates/keelshell-session/src/zmodem/local_windows/tests.rs"
+  ],
+  "count": 93,
+  "archive_bytes": 1173225,
+  "archive_sha256": "4a69f8a7772d25a617ff0826143746844b64016068e020e43aa2ede46b70e18a",
+  "uncompressed_bytes": 6422868,
+  "entries": [
+    {
+      "path": "batch/app-inventory-r1.json",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/app-inventory-r1.json",
+      "bytes": 792,
+      "sha256": "0452545678a43a26de29fcc899db749c22a823dec167d70e5d10456ab11060ca"
+    },
+    {
+      "path": "batch/app-inventory-r1.log",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/app-inventory-r1.log",
+      "bytes": 143674,
+      "sha256": "f0adcda4d9e8d2419ac78567a578cf31adf0ec2ad214919984c45cd281834732"
+    },
+    {
+      "path": "batch/candidate-baseline-r1.json",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/candidate-baseline-r1.json",
+      "bytes": 395,
+      "sha256": "ca2251f2b1ff6ade5cb771fabd7bebe5f66c69817ebdb8f0aea0259ab91e1523"
+    },
+    {
+      "path": "batch/candidate-r1.diff",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/candidate-r1.diff",
+      "bytes": 5933,
+      "sha256": "e4ce938eba683b32bd71c673a2076c782559b390c58d42bebc719c519a93e15b"
+    },
+    {
+      "path": "batch/contract-checks-r1.json",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/contract-checks-r1.json",
+      "bytes": 4278,
+      "sha256": "3d545b27a61881bc85433f9eb0158b3805ddd1d273e9f3d10edc3abbbfdadccf"
+    },
+    {
+      "path": "batch/format-r1.json",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/format-r1.json",
+      "bytes": 727,
+      "sha256": "6e1be58194fa6a98fa1c30910b42cd2b4064a20f11b37c3c0b97d2fec4915297"
+    },
+    {
+      "path": "batch/format-r1.log",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/format-r1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "batch/full-gate-r1.json",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/full-gate-r1.json",
+      "bytes": 733,
+      "sha256": "8b452d31d034052af67af5ecfb2699e70c1179b8f5849dde66b7f47ba8a1f336"
+    },
+    {
+      "path": "batch/full-gate-r1.log",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/full-gate-r1.log",
+      "bytes": 645815,
+      "sha256": "bb7a8f08dc723259b190283e95154648a33f9707ba1d2d3b98a9d906282a74d2"
+    },
+    {
+      "path": "batch/full-gate-summary-r1.json",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/full-gate-summary-r1.json",
+      "bytes": 329818,
+      "sha256": "f868e208ad1dc0602087af5157cff645ac5bfbd4b27c4e57d633297a417c09f3"
+    },
+    {
+      "path": "batch/inputs-freeze-r1.json",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/inputs-freeze-r1.json",
+      "bytes": 116621,
+      "sha256": "baaa60405cef32b664a345d4a70801a916069a1502f0c26daa657b15b39721b5"
+    },
+    {
+      "path": "batch/integration-summary-r1.json",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/integration-summary-r1.json",
+      "bytes": 498,
+      "sha256": "afd232e4abc8230323ed09e213f1a213c5403cd058be339d0ff26b6abe8ae8ed"
+    },
+    {
+      "path": "batch/parsing-correction-r2.md",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/parsing-correction-r2.md",
+      "bytes": 1249,
+      "sha256": "6ca521270d8c202b8651e941461315379b7c861692ceb15dbbbb84eab31c7ecb"
+    },
+    {
+      "path": "batch/prior-ci-final-r1.json",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/prior-ci-final-r1.json",
+      "bytes": 809,
+      "sha256": "39b2c2738deae712302f4496c0bb3cd76ea11a96ef31bd4b74cdf40090b0b3cb"
+    },
+    {
+      "path": "batch/prior-ci-final-r1.log",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/prior-ci-final-r1.log",
+      "bytes": 8277,
+      "sha256": "2f48c07b3ae18ac876981c4a406f65c61cf81ee3c5f68ba424b3018b2247250f"
+    },
+    {
+      "path": "batch/prior-ci-snapshot-r1.json",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/prior-ci-snapshot-r1.json",
+      "bytes": 809,
+      "sha256": "12264934704924f5274bfd4dba2d5bb750f08ba23b7028e2f309bcea58f65a77"
+    },
+    {
+      "path": "batch/prior-ci-snapshot-r1.log",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/prior-ci-snapshot-r1.log",
+      "bytes": 7858,
+      "sha256": "d51affbc204c0b31716a57c35575410a5698a22aca580836db7a64902fda4f2c"
+    },
+    {
+      "path": "batch/prior-ci-summary-final-r1.json",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/prior-ci-summary-final-r1.json",
+      "bytes": 79701,
+      "sha256": "563ecfa6b5b6696683682aa66a5346030cfe858e7e66d9f77c48d4cd5d132474"
+    },
+    {
+      "path": "batch/prior-ci-summary-final-r2.json",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/prior-ci-summary-final-r2.json",
+      "bytes": 80926,
+      "sha256": "8cc91a67078e520d4c1e55ef8ae348b98201b6c4bd7c8da756d27e2e919708a4"
+    },
+    {
+      "path": "batch/prior-macos-job-r1.json",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/prior-macos-job-r1.json",
+      "bytes": 808,
+      "sha256": "0e3c92d58c471f5176b90d9acb746bd9b7a8b332e7af8b2e1932d8debcf26d2b"
+    },
+    {
+      "path": "batch/prior-macos-job-r1.log",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/prior-macos-job-r1.log",
+      "bytes": 849750,
+      "sha256": "fd4e4675c123338719f7e929c704574e97819bd5fc05576cc10c0b4a0a75ac42"
+    },
+    {
+      "path": "batch/prior-macos-summary-r1.json",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/prior-macos-summary-r1.json",
+      "bytes": 482850,
+      "sha256": "9c88bfebc503bc21383b2525adf9381d2d81ec183cdd9bfc777419eb5754b53c"
+    },
+    {
+      "path": "batch/prior-macos-summary-r2.json",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/prior-macos-summary-r2.json",
+      "bytes": 484132,
+      "sha256": "996e68175a987355d6c9eabbc2fca4011915ed56f592532b6c3a678ee591d972"
+    },
+    {
+      "path": "batch/prior-source-windows-job-r1.json",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/prior-source-windows-job-r1.json",
+      "bytes": 808,
+      "sha256": "eb78c7e55fb488d8aa69b5d0569b2b71afeecc9b757df1e3ac451e977b391ad1"
+    },
+    {
+      "path": "batch/prior-source-windows-job-r1.log",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/prior-source-windows-job-r1.log",
+      "bytes": 172738,
+      "sha256": "86d46a6833c820a4d438f92bacba2b3fbef8a6700d2daf04bb31d4893e520218"
+    },
+    {
+      "path": "batch/prior-source-windows-summary-r1.json",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/prior-source-windows-summary-r1.json",
+      "bytes": 73975,
+      "sha256": "fd2bde86b50dba1e4bbad27c1f42d3c30b455a2ac2e013ca5a296bd132c308f5"
+    },
+    {
+      "path": "batch/prior-ubuntu-job-r1.json",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/prior-ubuntu-job-r1.json",
+      "bytes": 807,
+      "sha256": "a8f2d1c0c097cda8be2ea6e73c9fefe550f4c6c5574aade07149814f82223b45"
+    },
+    {
+      "path": "batch/prior-ubuntu-job-r1.log",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/prior-ubuntu-job-r1.log",
+      "bytes": 869911,
+      "sha256": "6c818ccd176b2327655e45b17957402fe7c3226e370714359c320c70b04f8139"
+    },
+    {
+      "path": "batch/prior-ubuntu-summary-r1.json",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/prior-ubuntu-summary-r1.json",
+      "bytes": 483355,
+      "sha256": "715b2a9055465ca50eb035d74b12612a13ca03631c9ac024ebd65891f36203c4"
+    },
+    {
+      "path": "batch/prior-ubuntu-summary-r2.json",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/prior-ubuntu-summary-r2.json",
+      "bytes": 483158,
+      "sha256": "d13387b651d65ff7fd8183171a2a656ebccd4b32c5a2da4f244cbd76528573b1"
+    },
+    {
+      "path": "batch/run_command.py",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/run_command.py",
+      "bytes": 1602,
+      "sha256": "a8e8f0b50f2c5d95342e36f1b8fffd4fdc5daeabbf4a382fa15300c747ce65fc"
+    },
+    {
+      "path": "batch/source-r1/.github/workflows/ci.yml",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/source-r1/.github/workflows/ci.yml",
+      "bytes": 4034,
+      "sha256": "22b7fc620bbb47592aa04fc57e4f6bbaffd5bffd571d74ddfea030e2c38c723b"
+    },
+    {
+      "path": "batch/source-r1/crates/keelshell-session/src/zmodem/local_windows/tests.rs",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/source-r1/crates/keelshell-session/src/zmodem/local_windows/tests.rs",
+      "bytes": 38296,
+      "sha256": "487f0b03530c66890d7d679cded3fae4d823472b5b6b1e45e37fd5f5726839cf"
+    },
+    {
+      "path": "batch/summarize_ci_r2.py",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/summarize_ci_r2.py",
+      "bytes": 5434,
+      "sha256": "ef5932231b3042b45372db02d19abf0bd4368fc6795b295817b2af57a1b87177"
+    },
+    {
+      "path": "batch/validate_full_gate.py",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/validate_full_gate.py",
+      "bytes": 3495,
+      "sha256": "0893fa5e642ef5bd57e77d2cdb1e89df98146132d1ecaffe418add3abfad7b41"
+    },
+    {
+      "path": "prepared-candidate/REPORT.md",
+      "source_path": "work/windows-zmodem-parent-rename-candidate-20261116/REPORT.md",
+      "bytes": 7089,
+      "sha256": "5697477bef0778f51a684092026acafa15b97db034e48c1c0f21b5c6aaee75af"
+    },
+    {
+      "path": "prepared-candidate/artifact-sha256.json",
+      "source_path": "work/windows-zmodem-parent-rename-candidate-20261116/artifact-sha256.json",
+      "bytes": 781,
+      "sha256": "fc4839d19a230f606ec188ad70fbc49780a768ccb1fc09ced3470f3b6dbc6886"
+    },
+    {
+      "path": "prepared-candidate/baseline/crates/keelshell-session/src/zmodem/local_windows.rs",
+      "source_path": "work/windows-zmodem-parent-rename-candidate-20261116/baseline/crates/keelshell-session/src/zmodem/local_windows.rs",
+      "bytes": 18377,
+      "sha256": "39cd38b4bb145ed55591e63f4016e479f38b06c5b0d5e8d41ce4d8e574ec2383"
+    },
+    {
+      "path": "prepared-candidate/baseline/crates/keelshell-session/src/zmodem/local_windows/tests.rs",
+      "source_path": "work/windows-zmodem-parent-rename-candidate-20261116/baseline/crates/keelshell-session/src/zmodem/local_windows/tests.rs",
+      "bytes": 37204,
+      "sha256": "125a148b0ea76d8483411c30e9daa08566534c5152f193e39f62ddd2320d48e3"
+    },
+    {
+      "path": "prepared-candidate/candidate.patch",
+      "source_path": "work/windows-zmodem-parent-rename-candidate-20261116/candidate.patch",
+      "bytes": 3514,
+      "sha256": "9f57f8dbf82d7609c3cd18d1395544d7879a3496d6bdc19314f1bc6d093006f4"
+    },
+    {
+      "path": "prepared-candidate/candidate/crates/keelshell-session/src/zmodem/local_windows/tests.rs",
+      "source_path": "work/windows-zmodem-parent-rename-candidate-20261116/candidate/crates/keelshell-session/src/zmodem/local_windows/tests.rs",
+      "bytes": 38302,
+      "sha256": "6ffd96fd35ace3a12324bc496ff7fcb678c3762f88d215e72355567fe3b80490"
+    },
+    {
+      "path": "prepared-candidate/source-receipt.json",
+      "source_path": "work/windows-zmodem-parent-rename-candidate-20261116/source-receipt.json",
+      "bytes": 2201,
+      "sha256": "c06b32ad8a56c8948ad94fd870a8dbfa71ebb8e33aaaff35692678bf5804ff14"
+    },
+    {
+      "path": "prepared-candidate/test-declarations.txt",
+      "source_path": "work/windows-zmodem-parent-rename-candidate-20261116/test-declarations.txt",
+      "bytes": 3278,
+      "sha256": "8777369e5301a51356f387e5c088b1af5e5aca7a2e0b8c88822a0b8e53421776"
+    },
+    {
+      "path": "previous-zip-activity/candidate-r2.diff",
+      "source_path": "work/zip-unix-metadata-integration-20261116/candidate-r2.diff",
+      "bytes": 6847,
+      "sha256": "3df18ffbab526856b0c9d9a691b4ff6ae1b524a5b6b7857f0f40ade780901234"
+    },
+    {
+      "path": "previous-zip-activity/candidate-source-r1.json",
+      "source_path": "work/zip-unix-metadata-integration-20261116/candidate-source-r1.json",
+      "bytes": 686,
+      "sha256": "bf9478a5ac156d65dbd1ca99355a1070f2174c5fe2f6ec4ff4a304afa3563a61"
+    },
+    {
+      "path": "previous-zip-activity/commit-bind-r1.json",
+      "source_path": "work/zip-unix-metadata-integration-20261116/commit-bind-r1.json",
+      "bytes": 851,
+      "sha256": "d306ee5f18f5221bbc1621635ef2a62c02558acf602c2e9d2f89975e0a3b585c"
+    },
+    {
+      "path": "previous-zip-activity/commit-bind-r1.log",
+      "source_path": "work/zip-unix-metadata-integration-20261116/commit-bind-r1.log",
+      "bytes": 186,
+      "sha256": "4ac6b5621d9bf535a5ab7226afe7ec15fe0f8c828265eea9c636dbb8ac98363e"
+    },
+    {
+      "path": "previous-zip-activity/core-archive-green-r1.json",
+      "source_path": "work/zip-unix-metadata-integration-20261116/core-archive-green-r1.json",
+      "bytes": 829,
+      "sha256": "64caf88d0a4c65ede09b67bb6f1f9c944757ea78a29da806f4df02587358117e"
+    },
+    {
+      "path": "previous-zip-activity/core-archive-green-r1.log",
+      "source_path": "work/zip-unix-metadata-integration-20261116/core-archive-green-r1.log",
+      "bytes": 3437,
+      "sha256": "90b559a75d95d8c89a50431222b462987acbe3f43e89bb489d729fc5260ad7d2"
+    },
+    {
+      "path": "previous-zip-activity/docs-delivery-r1.json",
+      "source_path": "work/zip-unix-metadata-integration-20261116/docs-delivery-r1.json",
+      "bytes": 587,
+      "sha256": "610f6de240d7034de2a267d0904c5bdfb6cd3ba4b8076033b05d322da473e726"
+    },
+    {
+      "path": "previous-zip-activity/docs-push-r1.json",
+      "source_path": "work/zip-unix-metadata-integration-20261116/docs-push-r1.json",
+      "bytes": 791,
+      "sha256": "1285dbffde052719d8d7450d1864e82d9e9091d8a8496354d37bd0bfa8d7a1a1"
+    },
+    {
+      "path": "previous-zip-activity/docs-push-r1.log",
+      "source_path": "work/zip-unix-metadata-integration-20261116/docs-push-r1.log",
+      "bytes": 113,
+      "sha256": "74d71747084add5f6f32ab87a9103e929c25ea241b32ba232a468b94b4e79135"
+    },
+    {
+      "path": "previous-zip-activity/dos-metadata-red-r1.json",
+      "source_path": "work/zip-unix-metadata-integration-20261116/dos-metadata-red-r1.json",
+      "bytes": 783,
+      "sha256": "906ba5a705fbfa392ac134976b883ff14009f2f07849e2d65358e410f3380756"
+    },
+    {
+      "path": "previous-zip-activity/dos-metadata-red-r1.log",
+      "source_path": "work/zip-unix-metadata-integration-20261116/dos-metadata-red-r1.log",
+      "bytes": 2863,
+      "sha256": "ae678e318b9215e9d780fd2e087b2bf3a710f18967fd63fc6aef117690e05571"
+    },
+    {
+      "path": "previous-zip-activity/dos_metadata_control.py",
+      "source_path": "work/zip-unix-metadata-integration-20261116/dos_metadata_control.py",
+      "bytes": 1868,
+      "sha256": "f3e87cc3b747e3245ae576b458f687bf0fdb70f7ff524c71a2e3b1736f46330d"
+    },
+    {
+      "path": "previous-zip-activity/evidence-verify-r1.json",
+      "source_path": "work/zip-unix-metadata-integration-20261116/evidence-verify-r1.json",
+      "bytes": 788,
+      "sha256": "a1287887dc402d0db0b2240a6b6d37791396d25bf4594245decf3bb4072c602d"
+    },
+    {
+      "path": "previous-zip-activity/evidence-verify-r1.log",
+      "source_path": "work/zip-unix-metadata-integration-20261116/evidence-verify-r1.log",
+      "bytes": 153,
+      "sha256": "138b39b54fcc83981c923566357cab45cf5a280508ec117fa15cea826c0c73e7"
+    },
+    {
+      "path": "previous-zip-activity/expected-windows-tests-r1.txt",
+      "source_path": "work/zip-unix-metadata-integration-20261116/expected-windows-tests-r1.txt",
+      "bytes": 3438,
+      "sha256": "caf106a54b22fdcc69c148b2af2ca78beb7af5817f86583e9c270d3f76e5ce1f"
+    },
+    {
+      "path": "previous-zip-activity/format-r1.json",
+      "source_path": "work/zip-unix-metadata-integration-20261116/format-r1.json",
+      "bytes": 726,
+      "sha256": "10f9e15503835581d762f25f041d2d1bff1c022a414fb3b3a06243dd276461eb"
+    },
+    {
+      "path": "previous-zip-activity/format-r1.log",
+      "source_path": "work/zip-unix-metadata-integration-20261116/format-r1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "previous-zip-activity/inputs-freeze-r1.json",
+      "source_path": "work/zip-unix-metadata-integration-20261116/inputs-freeze-r1.json",
+      "bytes": 116621,
+      "sha256": "85591a4f87760eaf507f617aee689d6d633c79187fea4648f36b9702e0c3f4cf"
+    },
+    {
+      "path": "previous-zip-activity/owned-cleanup-r1.json",
+      "source_path": "work/zip-unix-metadata-integration-20261116/owned-cleanup-r1.json",
+      "bytes": 23379,
+      "sha256": "308ed1a6ea0db8498b043f87e89a2e07129cb086fd2203297d041d55b1b5e725"
+    },
+    {
+      "path": "previous-zip-activity/prior-ci-evidence-verify-r1.json",
+      "source_path": "work/zip-unix-metadata-integration-20261116/prior-ci-evidence-verify-r1.json",
+      "bytes": 812,
+      "sha256": "2ac3410d686d14b07e8fb911bddd704120a83136ca4f296dc106174e1d513edd"
+    },
+    {
+      "path": "previous-zip-activity/prior-ci-evidence-verify-r1.log",
+      "source_path": "work/zip-unix-metadata-integration-20261116/prior-ci-evidence-verify-r1.log",
+      "bytes": 578,
+      "sha256": "3c2dca9bca69f23628636cb840b015cddb6ba9df976d124522f5f5a4d77ffcbd"
+    },
+    {
+      "path": "previous-zip-activity/review-binary-binding-r1.json",
+      "source_path": "work/zip-unix-metadata-integration-20261116/review-binary-binding-r1.json",
+      "bytes": 546,
+      "sha256": "b34be78500f7050f4da7c9848951a98ed2869cf77b67595150c44a2f13c05c00"
+    },
+    {
+      "path": "previous-zip-activity/run_command.py",
+      "source_path": "work/zip-unix-metadata-integration-20261116/run_command.py",
+      "bytes": 1602,
+      "sha256": "a8e8f0b50f2c5d95342e36f1b8fffd4fdc5daeabbf4a382fa15300c747ce65fc"
+    },
+    {
+      "path": "previous-zip-activity/scoped-gate-r1.json",
+      "source_path": "work/zip-unix-metadata-integration-20261116/scoped-gate-r1.json",
+      "bytes": 775,
+      "sha256": "7cf5c9afe2bd181a13904a0760b79635597e4a23b4b46c0be8f68ae50f4b3cf6"
+    },
+    {
+      "path": "previous-zip-activity/scoped-gate-r1.log",
+      "source_path": "work/zip-unix-metadata-integration-20261116/scoped-gate-r1.log",
+      "bytes": 75267,
+      "sha256": "8a787107ba2c70fc76a9d4ecd8abe6d9581dffcff1dd953a4de27fa6a3aa43cd"
+    },
+    {
+      "path": "previous-zip-activity/scoped-summary-r1.json",
+      "source_path": "work/zip-unix-metadata-integration-20261116/scoped-summary-r1.json",
+      "bytes": 73646,
+      "sha256": "dee519ae46dbba896b60b5bd2c6cc05eb14374187ed844ae9acb11bb406b538b"
+    },
+    {
+      "path": "previous-zip-activity/scoped_gate.py",
+      "source_path": "work/zip-unix-metadata-integration-20261116/scoped_gate.py",
+      "bytes": 837,
+      "sha256": "2a6e8f7f1cad85d09d05311caa2dc920c86308be80815b8da63412c3d46cc455"
+    },
+    {
+      "path": "previous-zip-activity/source-ci-runs-r1.json",
+      "source_path": "work/zip-unix-metadata-integration-20261116/source-ci-runs-r1.json",
+      "bytes": 901,
+      "sha256": "553c674f91977760fc32c1e09cdfb856d90f4d5a4e1a4015cbbd96e9fd1dda8e"
+    },
+    {
+      "path": "previous-zip-activity/source-ci-runs-r1.log",
+      "source_path": "work/zip-unix-metadata-integration-20261116/source-ci-runs-r1.log",
+      "bytes": 617,
+      "sha256": "f93603ecfc940d6794bdd3f3dc78f4d549211e186a62d5d1a8ca61bd42cf5d78"
+    },
+    {
+      "path": "previous-zip-activity/source-ci-snapshot-r1.json",
+      "source_path": "work/zip-unix-metadata-integration-20261116/source-ci-snapshot-r1.json",
+      "bytes": 809,
+      "sha256": "083a3d7f94541fdd51d317a1ea8116ccd77e69a71458dd424170513a7d4a0fbc"
+    },
+    {
+      "path": "previous-zip-activity/source-ci-snapshot-r1.log",
+      "source_path": "work/zip-unix-metadata-integration-20261116/source-ci-snapshot-r1.log",
+      "bytes": 7642,
+      "sha256": "5e7a5aba7d3b18b1ff72db9c112540ddf781541a60d32530e3f3d81eb255f2ee"
+    },
+    {
+      "path": "previous-zip-activity/source-ci-watch-r1.json",
+      "source_path": "work/zip-unix-metadata-integration-20261116/source-ci-watch-r1.json",
+      "bytes": 798,
+      "sha256": "3378607b1c6f3570ede8d8ff1a889488b158ae441ebe19539d44a77d0d687947"
+    },
+    {
+      "path": "previous-zip-activity/source-ci-watch-r1.log",
+      "source_path": "work/zip-unix-metadata-integration-20261116/source-ci-watch-r1.log",
+      "bytes": 147904,
+      "sha256": "9563e68cf6e27564af5df169c792b8ca07bc5ead0cc7d53cf018e0142a207f01"
+    },
+    {
+      "path": "previous-zip-activity/source-delivery-r1.json",
+      "source_path": "work/zip-unix-metadata-integration-20261116/source-delivery-r1.json",
+      "bytes": 587,
+      "sha256": "9d3ea3294d5a44dc27922ca5a290534ada990b72129ab3264757e0c988587f7e"
+    },
+    {
+      "path": "previous-zip-activity/source-push-r1.json",
+      "source_path": "work/zip-unix-metadata-integration-20261116/source-push-r1.json",
+      "bytes": 791,
+      "sha256": "21a5f6761edc9bfa26eb0dbfada97de05b5b5d93cd0344c0fe4c8a15bd377765"
+    },
+    {
+      "path": "previous-zip-activity/source-push-r1.log",
+      "source_path": "work/zip-unix-metadata-integration-20261116/source-push-r1.log",
+      "bytes": 113,
+      "sha256": "df257cd780a604eea9d07261672a34d51c98e15f0e7316844301de6030cc2db1"
+    },
+    {
+      "path": "previous-zip-activity/source-r1/.github/workflows/ci.yml",
+      "source_path": "work/zip-unix-metadata-integration-20261116/source-r1/.github/workflows/ci.yml",
+      "bytes": 4040,
+      "sha256": "d11a06dfd3862ac8a407b8729310e8399ae68e8b431a5ba28f4579e9bb22e753"
+    },
+    {
+      "path": "previous-zip-activity/source-r1/crates/keelshell-core/src/archive.rs",
+      "source_path": "work/zip-unix-metadata-integration-20261116/source-r1/crates/keelshell-core/src/archive.rs",
+      "bytes": 42043,
+      "sha256": "bc950cc74f339b37a7ddc87f5b2d50425a561133706140cf23788a40734cfdd0"
+    },
+    {
+      "path": "previous-zip-activity/source-r1/crates/keelshell-core/tests/archive.rs",
+      "source_path": "work/zip-unix-metadata-integration-20261116/source-r1/crates/keelshell-core/tests/archive.rs",
+      "bytes": 28280,
+      "sha256": "c86fb6a384e3d7684d7b980f395c93ae06e2014beda19d571679d50aaae1cefc"
+    },
+    {
+      "path": "previous-zip-activity/source-r2/.github/workflows/ci.yml",
+      "source_path": "work/zip-unix-metadata-integration-20261116/source-r2/.github/workflows/ci.yml",
+      "bytes": 4040,
+      "sha256": "d11a06dfd3862ac8a407b8729310e8399ae68e8b431a5ba28f4579e9bb22e753"
+    },
+    {
+      "path": "previous-zip-activity/source-r2/crates/keelshell-core/src/archive.rs",
+      "source_path": "work/zip-unix-metadata-integration-20261116/source-r2/crates/keelshell-core/src/archive.rs",
+      "bytes": 42043,
+      "sha256": "bc950cc74f339b37a7ddc87f5b2d50425a561133706140cf23788a40734cfdd0"
+    },
+    {
+      "path": "previous-zip-activity/source-r2/crates/keelshell-core/tests/archive.rs",
+      "source_path": "work/zip-unix-metadata-integration-20261116/source-r2/crates/keelshell-core/tests/archive.rs",
+      "bytes": 28326,
+      "sha256": "296783931f3d8284d39efe8e9e93f107076976cd41f7fc2ebc23babf4f377049"
+    },
+    {
+      "path": "previous-zip-activity/source-windows-job-r1.json",
+      "source_path": "work/zip-unix-metadata-integration-20261116/source-windows-job-r1.json",
+      "bytes": 808,
+      "sha256": "eb78c7e55fb488d8aa69b5d0569b2b71afeecc9b757df1e3ac451e977b391ad1"
+    },
+    {
+      "path": "previous-zip-activity/source-windows-job-r1.log",
+      "source_path": "work/zip-unix-metadata-integration-20261116/source-windows-job-r1.log",
+      "bytes": 172738,
+      "sha256": "86d46a6833c820a4d438f92bacba2b3fbef8a6700d2daf04bb31d4893e520218"
+    },
+    {
+      "path": "previous-zip-activity/source-windows-summary-r1.json",
+      "source_path": "work/zip-unix-metadata-integration-20261116/source-windows-summary-r1.json",
+      "bytes": 73975,
+      "sha256": "fd2bde86b50dba1e4bbad27c1f42d3c30b455a2ac2e013ca5a296bd132c308f5"
+    },
+    {
+      "path": "previous-zip-activity/summarize_ci.py",
+      "source_path": "work/zip-unix-metadata-integration-20261116/summarize_ci.py",
+      "bytes": 4864,
+      "sha256": "b72b82f98a220c999612041b6e3a89d3e6c260e668e32d6ecd3c594c343891f5"
+    },
+    {
+      "path": "previous-zip-activity/upstream-zip-receipt-r1.json",
+      "source_path": "work/zip-unix-metadata-integration-20261116/upstream-zip-receipt-r1.json",
+      "bytes": 1088,
+      "sha256": "2f6985ab4378d0e993085c6ad56d6581bfdcbe85618a4bf18121ace7df3125cc"
+    },
+    {
+      "path": "review/REPORT.md",
+      "source_path": "work/windows-zmodem-rename-review-20261116/REPORT.md",
+      "bytes": 18019,
+      "sha256": "0691797cf587a2ec847f4c41f5e8e88ffa8e16db772a132e204fea4fe0679338"
+    },
+    {
+      "path": "review/static-receipt.json",
+      "source_path": "work/windows-zmodem-rename-review-20261116/static-receipt.json",
+      "bytes": 22135,
+      "sha256": "0f42bec945c6cb91e96fbfc7ed6872569d0aad0ab37e981628a93e361544fb48"
+    },
+    {
+      "path": "tools/verify.py",
+      "source_path": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/verify.py",
+      "bytes": 6486,
+      "sha256": "f75019bad1e2a4f1bd8e0548cc49c7f8ac17539f04459d9ff3c8548430a27933"
+    }
+  ],
+  "host_gate": {
+    "ordinary": [
+      3225,
+      0,
+      48
+    ],
+    "doctests": [
+      14,
+      0,
+      0
+    ],
+    "app": [
+      1341,
+      0,
+      2
+    ],
+    "app_inventory": 1343,
+    "python_discovery_run": 290,
+    "python_discovery_skipped": 1,
+    "archive_helper_tests": 30
+  },
+  "review": {
+    "decision": "APPROVE",
+    "scope": "independent static two-file review",
+    "P0": 0,
+    "P1": 0,
+    "P2": 0,
+    "P3": 0,
+    "independent_windows_execution": 0
+  },
+  "windows_candidate_execution_at_seal": 0,
+  "excluded": [
+    "Cargo target",
+    "program/test binaries",
+    "unrelated worktrees/resources",
+    "Python bytecode"
+  ]
+}

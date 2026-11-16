@@ -246,7 +246,7 @@ fn zmodem_windows_confirmation_rejects_metadata_only_changes() -> TestResult {
 }
 
 #[test]
-fn zmodem_upload_local_confirmation_rejects_replaced_ancestor_even_with_same_bytes() -> TestResult {
+fn zmodem_windows_retained_source_blocks_ancestor_rename_and_preserves_review() -> TestResult {
     let (_temporary, root) = root()?;
     let directory = root.join("reviewed");
     std::fs::create_dir(&directory)?;
@@ -254,13 +254,21 @@ fn zmodem_upload_local_confirmation_rejects_replaced_ancestor_even_with_same_byt
     std::fs::write(&path, b"same bytes")?;
     let stop = AtomicBool::new(false);
     let plan = checked(UploadPlan::prepare(vec![path.clone()], &stop))?;
-    std::fs::rename(&directory, root.join("retained"))?;
-    std::fs::create_dir(&directory)?;
-    std::fs::write(&path, b"same bytes")?;
-    assert!(matches!(
-        plan.confirm(&stop),
-        Err(ZmodemFailure::SourceChanged)
-    ));
+    let retained = root.join("retained");
+    // The retained source is an open descendant, so Windows blocks this attack.
+    // This proves prevention, not SourceChanged after an ancestor replacement.
+    let error = std::fs::rename(&directory, &retained)
+        .err()
+        .ok_or("ancestor rename unexpectedly succeeded with an open source")?;
+    assert_eq!(error.kind(), std::io::ErrorKind::PermissionDenied);
+    assert_eq!(error.raw_os_error(), Some(5));
+    assert!(!retained.try_exists()?);
+    let current = checked(parents(&path))?;
+    assert_eq!(current.stamps, plan.sources[0].parent.stamps);
+    let named = checked(current.directory())?.open_file("source.txt")?;
+    assert_eq!(metadata(&named)?.identity, plan.sources[0].stamp.identity);
+    assert_eq!(checked(plan.confirm(&stop))?[0].bytes(), b"same bytes");
+    assert_eq!(std::fs::read(path)?, b"same bytes");
     Ok(())
 }
 
@@ -449,8 +457,7 @@ fn zmodem_windows_reviews_retain_every_original_ancestor() -> TestResult {
 }
 
 #[test]
-fn zmodem_windows_reviews_reject_replaced_grandparent_with_original_leaf_and_source() -> TestResult
-{
+fn zmodem_windows_retained_reviews_block_grandparent_rename_and_preserve_namespace() -> TestResult {
     let (_temporary, root) = root()?;
     let outer = root.join("outer");
     let leaf = outer.join("leaf");
@@ -461,23 +468,28 @@ fn zmodem_windows_reviews_reject_replaced_grandparent_with_original_leaf_and_sou
     let plan = checked(UploadPlan::prepare(vec![path.clone()], &stop))?;
     let destination = checked(Destination::prepare(leaf.join("new.bin"), &stop))?;
     let retained = root.join("retained");
-    std::fs::rename(&outer, &retained)?;
-    std::fs::create_dir(&outer)?;
-    std::fs::rename(retained.join("leaf"), &leaf)?;
+    // Both reviews retain the leaf; the upload also retains its source file.
+    // Windows blocks the outer rename before any replacement can occur.
+    let error = std::fs::rename(&outer, &retained)
+        .err()
+        .ok_or("grandparent rename unexpectedly succeeded with open descendants")?;
+    assert_eq!(error.kind(), std::io::ErrorKind::PermissionDenied);
+    assert_eq!(error.raw_os_error(), Some(5));
+    assert!(!retained.try_exists()?);
     let current = checked(parents(&path))?;
     let named = checked(current.directory())?.open_file("source.bin")?;
     assert_eq!(metadata(&named)?.identity, plan.sources[0].stamp.identity);
     assert_eq!(current.stamps.last(), plan.sources[0].parent.stamps.last());
-    assert!(matches!(
-        plan.confirm(&stop),
-        Err(ZmodemFailure::SourceChanged)
-    ));
-    let mutated = AtomicBool::new(false);
-    assert!(matches!(
-        destination.publish(b"never written".to_vec(), &stop, &mutated),
-        Err(ZmodemFailure::SourceChanged)
-    ));
-    assert!(!mutated.load(Ordering::Acquire));
+    assert_eq!(current.stamps, plan.sources[0].parent.stamps);
+    assert_eq!(current.stamps, destination.parent.stamps);
+    // The original namespace remains valid. Do not claim post-replacement refusal.
+    checked(destination.revalidate(&stop))?;
+    assert!(!destination.path.try_exists()?);
+    assert!(!destination.staging.try_exists()?);
+    assert_eq!(
+        checked(plan.confirm(&stop))?[0].bytes(),
+        b"unchanged identity and bytes"
+    );
     assert_eq!(std::fs::read(path)?, b"unchanged identity and bytes");
     assert_eq!(std::fs::read_dir(leaf)?.count(), 1);
     Ok(())

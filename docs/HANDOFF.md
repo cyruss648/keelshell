@@ -25,12 +25,17 @@
 
 ## 最近实际交付与精确 CI
 
-最近源码 `01f6f6bd8272303fe049bc7b52976afefdb44c37` 已推送，
-本地、tracking、远端 SHA 实际一致，读回时工作区干净。
-当前 Quality `43867112056` 绑定该源码，Windows filesystem／archive codec
-两个预检 step 已 success，完整 session library 正在执行；确切库存和计数待原日志。
-Windows `133298403995`、macOS `133298403996`、Ubuntu `133298403683`；
-新完整三平台门禁仍未终态，不将前批结果移签。
+最近源码 `01f6f6bd8272303fe049bc7b52976afefdb44c37` 和文档
+`b7d6e92a937b3ad994c13c37e19db0bd0d059c8f` 已推送，三方一致、读回干净。
+绑定该源码的 Quality `43867112056` 已 completed/failure；
+watch `1/reaped/1580.816s`，原日志已全部收取，没有取消或重跑。
+Windows `133298403995`：filesystem `70/0/0`、core archive `41/0/0`，
+session library `327/2/3 ignored`，332 名编译库存与执行逐项相等；
+其中 Zmodem 45 名为 `41/2/2 ignored`，完整 gate 未运行。
+macOS `133298403996`、Ubuntu `133298403683` 的完整 gate 与真实 OpenSSH 均 success，
+app 分别 `1341/0/2 ignored`、`1342/0/2 ignored`。两平台 core archive 均 `41/0/0`，
+新 ZIP 用例逐名 ok；r2 修正同行 stderr 导致的摘要误归属，原日志及错误 r1 保持，
+未重跑测试、未清理 target。详见[精确终态](testing/records/2026-11-16-windows-zmodem-test-contract.md)。
 
 前批源码 `f094de6ad2789d168f5a24bacb316c98b83608ac` 的 Quality `43859165104`
 已 completed/failure，watch `1/reaped/1600.284s`，没有取消或重跑。
@@ -48,39 +53,32 @@ Windows 新失败是危险来源权限重编码：读回 `0664`，安全断言�
 [81 成员原件](testing/records/2026-11-16-windows-archive-root-publication-evidence/ci-completion/README.md)
 独立于原封存时点；验证实际 `0/reaped/6.835s`，成员及 719 工程输入零 mismatch。
 
-## 活动批次：ZIP 权限元数据与早期后端门禁
+## 活动批次：Windows Zmodem 测试契约
 
-三个工程文件：core archive 编码器、core archive 集成测试、CI。
-719 项冻结 SHA-256 为 `bf46afc32603f312f3ff9e7edb5e48ea9bb4c3073b109c072e2f6ded44a8f4fd`。
-详见[ADR 0149](adr/0149-portable-zip-permission-metadata.md)和
-[本批记录](testing/records/2026-11-16-portable-zip-metadata.md)。
+ZIP 权限修订已在真实 Windows core archive 41 项通过，保持文件 `0600`、
+目录 `0700`，见[ADR 0149](adr/0149-portable-zip-permission-metadata.md)及
+[终态补充](testing/records/2026-11-16-portable-zip-metadata.md#精确-ci-终态补充)。
+接续只修改 Windows Zmodem 两个测试和 CI 对应库存名，生产改动 0：
+有打开后代时要求祖先 rename 精确 `PermissionDenied/OS 5`，完整身份、原审核与字节保持。
+原空父目录成功替换后的 `SourceChanged/mutated=false` 用例及另 42 块逐字节不变，
+模块仍为 45 名／2 ignored。两个新名准确描述预防，解决旧条件报告的名称误导 P2。
 
-ZIP 明确使用 Unix 权限元数据解释空间，文件继续 `0600`、目录继续 `0700`；
-不放宽来源、ACL、审核、无覆盖发布或未知结果。新增回归检查文件／目录的原始头字段和完整 roundtrip。
-Windows CI 先执行完整 core archive target，再执行完整 session library；均有精确库存 guard，
-成功才进入原完整 gate，避免每次等完整 app 长流程后才发现后端错误。
-
-宿主两项 DOS 受控负例均真实 Rust 101，新例 `Dos != Unix`，原例精确复现 `436 != 384`。
-生产字节精确恢复后重新编译，`scoped-gate-r1` 实际 `0/reaped/51.622s`：
-fmt、x.y、严格 workspace all-target Clippy；archive `41/0/0`、session library `288/0/4 ignored`、
-app archive `13/0/0`。346 个唯一库存名与结果逐项相等，342 ok／4 ignored；719 输入零漂移。
-本批没有重跑完整产品 gate，新的 Windows 执行须由后续精确 CI 取得。
-新非作者 Noether 已限定 APPROVE，P0–P3 全 0；独立稳定预构建副本
-`41/0/0 / exit 0 / reaped / 9.175s`，独立编译／Windows native／GUI 均 0，已关闭。
-
-另有尚未集成的 Windows Zmodem 两例候选，保存在
-`work/windows-zmodem-parent-rename-candidate-20261116/`。
-当前实际 CI 尚未执行到这些用例，不声称已经失败或修复。
-其独立静态报告 HOLD/P2=1：两个旧名字声称“替换后拒绝”，正文改为“OS 阻止替换”，
-采用前必须准确改名并更新 CI guard；第三个空目录替换拒绝用例保持。
-报告已随上述 CI 81 成员原件保存，reviewer 已关闭。
+719 项冻结 SHA-256 为 `96753dee615c9cd7711a48ad769ec5b14f49c45c581b0bb67323bb51ba508766`。
+集中完整门禁 `0/reaped/723.521s`：普通 Rust `3225/0/48 ignored`、rustdoc `14/0/0`，
+app `1341/0/2 ignored`，1343 名库存与执行逐项相等；Python 主 discovery
+290 run／1 skipped，独立 archive helper 30 tests；fmt、严格 Clippy、x.y 和三组 controller 全过。
+工程输入零漂移，同一 checkout／target 无 clean。
+新非作者 Turing 限定静态 APPROVE，P0–P3 全 0，12 次静态命令中的辅助脚本漂移诊断
+按原文保留；独立 Rust／Windows／GUI 执行 0，已关闭。
+本批新两例的实际 Windows 断言仍待推送后的精确 CI。
+详见[本批记录](testing/records/2026-11-16-windows-zmodem-test-contract.md)。
 
 ## 下一步与资源
 
-1. 本批源码已提交推送、三方读回一致，32 成员／719 输入精确 Git 绑定
-   `0/reaped/6.950s`；继续收取当前精确 CI，不重跑已通过且输入未变的专项。
-2. 跟进新精确 CI 的 Windows codec／完整 session 预检与三平台终态；只按实际失败接续。
-   若命中上述 Zmodem 两例，先保存原件，再审修订及准确命名，不机械改其他 rename。
+1. 封存本批门禁、库存、Turing 原件及前批三平台 CI，核对 719 输入后普通提交推送，
+   读回本地／tracking／远端完整 SHA。前批 run 已终态，可以推新工程输入。
+2. 跟进新精确 CI 的 Windows codec 41 名、完整 session 332 名及两个新 guard；
+   通过后收取完整三平台 gate／OpenSSH。只按真实失败接续，不提前写新断言通过。
 3. 桌面可用后复核英文工具栏 P2，再补主题／尺寸／双语／完整键盘／IME／辅助技术。
 4. 继续路线中的外部 AI、隧道、配置同步、高级传输和发行矩阵；不把阶段测试写成完整产品完成。
 5. 关闭自有 agent，核对持久原件后回收已无用途的副本；保留其他任务的工作树、分支和容器。
@@ -88,10 +86,11 @@ app archive `13/0/0`。346 个唯一库存名与结果逐项相等，342 ok／4 
 唯一 Cargo target 为 `work/recovery-batch-integration-20261115/target`，
 `CARGO_BUILD_JOBS=2`、`MACOSX_DEPLOYMENT_TARGET=15.0`。同一 checkout 连续使用，归属未切换，
 不反复 clean；换归属前遵循[共享 target 合同](testing/SHARED_TARGET.md)。
-当前活动目录为 `work/zip-unix-metadata-integration-20261116/`；
+当前活动目录为 `work/windows-zmodem-rename-integration-20261116/`；
 旧 publication、两个已完成 reviewer 目录及稳定测试副本在精确 Git 原件核对后
 已回收 88 文件／13,465,970 字节，三个自有 agent 均已关闭。
-旧 publication 路径不可再使用；尚有用途的 Zmodem 候选保留。
+旧 publication 路径不可再使用。ZIP 活动副本、Zmodem 准备候选与 Turing 目录
+在本批精确 Git 封存核对后回收；保留必要交付和新 CI 活动原件。
 没有新建用户 chat、worktree、分支或容器。
 
 最近原生 inventory 仍明确报告 Mac 锁屏且自动解锁失败；GUI 操作／截图 0。

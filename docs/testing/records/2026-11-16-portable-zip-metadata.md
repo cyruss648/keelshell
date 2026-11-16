@@ -88,3 +88,20 @@ macOS `133298403996`、Ubuntu `133298403683` 执行完整门禁，新终态待�
 中的归档／摘要后回收 88 文件、13,465,970 字节；三位自有 agent 均已关闭。
 当前 CI 原件、主 target、正常 GUI 包和待用 Zmodem 候选保留。
 没有新建或删除用户 chat、其他 worktree、分支、容器。
+
+## 精确 CI 终态补充
+
+Quality `43867112056` 已 completed/failure，绑定上述 `01f6f6b` 源码；
+watch 实际 `1/reaped/1580.816s`。Windows `133298403995` 的 filesystem
+为 `70/0/0`、core archive 为 `41/0/0`；编译库存与执行逐项相等。
+ZIP 私有权限新回归和原权限重编码断言均为 ok，本批权限缺陷已在该 Windows
+runner 验证。随后 session library 为 `327/2/3 ignored`，完整 gate 未运行。
+两失败来自此前未执行的 Windows Zmodem 祖先替换测试，原件及下一修订见
+[测试契约记录](2026-11-16-windows-zmodem-test-contract.md)。
+
+macOS `133298403996`、Ubuntu `133298403683` 的完整 gate 与真实 OpenSSH
+均 success，app 分别 `1341/0/2 ignored`、`1342/0/2 ignored`。
+两平台 core archive 均 `41/0/0`，新回归逐名为 ok；PAX 是另外的 `40/0/0`。
+原派生摘要漏掉与 stderr 同行的 PAX 头而误记 archive 为 40；r2 只纠正派生
+归属并验证两平台各 92 个普通 libtest 套件的声明、唯一结果名和摘要。
+原日志、r1 错误摘要及修订说明均封存在下一批证据，没有重跑测试或清理缓存。

@@ -22,9 +22,12 @@
 
 以下为 2026-11-16 的精确快照；后续 CI 终态记录在对应批次，不改写历史原件。
 
-- 工程源码已推送：`01f6f6bd8272303fe049bc7b52976afefdb44c37`，三方一致、读回干净。
-  新 Quality `43867112056` 的 Windows filesystem／archive codec step 已 success，
-  完整 session library 仍运行；新完整门禁和精确计数待后续实际原件。
+- 工程源码 `01f6f6bd8272303fe049bc7b52976afefdb44c37`、文档 `b7d6e92` 已推送，
+  三方一致、读回干净。精确 Quality `43867112056` 已 completed/failure：
+  Windows filesystem `70/0/0`、core archive `41/0/0`，session library `327/2/3 ignored`，
+  332 个编译库存名与执行逐项相等；Zmodem 是其中 `41/2/2 ignored`，完整 gate 未运行。
+  macOS／Ubuntu 完整 gate 与真实 OpenSSH 均 success，app 为 `1341/0/2`、`1342/0/2`。
+  两平台 core archive 均 `41/0/0`；r2 只修正同行 stderr 导致的派生摘要误归属，原件保持。
 - 此前文档提交 `2f29744a2615393bcc5bedb81cd2c425e7bc6372` 已读回本地、tracking、
   远端三方一致，读回时工作区干净。
 - 前批源码 `f094de6` 的精确 Quality `43859165104 / attempt 1`，Windows job `133271138956`
@@ -39,15 +42,21 @@
 - 后续 ZIP 修订统一私有权限元数据并提前 Windows codec／完整 session library 预检；
   宿主 scoped gate `0/reaped/51.622s`，342 passed／4 ignored，346 名逐项相等、
   719 输入零漂移；两项 DOS 负例均精确失败，恢复后重编译通过。
-  新非作者结果及新修订 Windows 执行见[本批记录](testing/records/2026-11-16-portable-zip-metadata.md)。
+  新非作者限定批准、精确 Windows 41 项通过见[本批记录](testing/records/2026-11-16-portable-zip-metadata.md)。
+- 当前只修订两项 Windows Zmodem 测试契约与 CI 库存名，生产改动 0、其余 43 块不变；
+  宿主完整门禁 `0/reaped/723.521s`，普通 Rust `3225/0/48 ignored`、rustdoc `14/0/0`，
+  app `1341/0/2 ignored` 且 1343 名逐项相等；Python discovery 290／1 skipped，
+  archive helper 单列 30 项。Turing 静态 APPROVE、P0–P3 全 0，Windows 新断言仍待精确 CI，
+  见[测试契约记录](testing/records/2026-11-16-windows-zmodem-test-contract.md)。
 - 英文工具栏修订已随 `8c07d61` 推送并有正常包；Mac 锁屏使 GUI／截图均为 0，原生 P2 仍开放。
   包身份、首轮失败和限定几何结果见[工具栏记录](testing/records/2026-11-16-workbench-fit-and-file-diagnostics.md)。
 
 ## 接续顺序
 
-1. ZIP 修订已完成限定非作者批准、推送和三方读回；收取新精确 CI 的早期 codec／session
-   与完整三平台门禁；上一 run 已封存，不取消或重跑来替换原失败。
-2. 根据新 Windows 实际结果处理尚未运行的后端／target；已通过的四项 app 范围保持，
+1. Windows Zmodem 测试修订已完成宿主完整门禁与限定非作者批准；封存并普通提交推送，
+   读回三方 SHA，随后收取新精确 CI 的早期 codec／session 和完整三平台门禁。
+   前 run 已终态并保存原件，不取消或重跑替换原失败。
+2. 根据新 Windows 实际结果处理后端／target；已通过的四项 app 范围保持，
    不清空 UNKNOWN/quarantine、不重放不确定写入、不放宽审核、权限、完整字节和发布后重验。
 3. 桌面可用后，以保留正常包的精确身份复核英文工具栏 P2，再补主题、尺寸、双语与完整键盘流程；
    当前保持锁屏阻塞，不把 headless 几何或旧包观察改签为新原生通过。
@@ -62,8 +71,8 @@
 - 独立 peer 的直接 PTY strict `OO` 兼容保持 `HOLD/PARTIAL`：严格 `Finished` 必须实际收到 `OO`。
   缺握手警告、逐文件已验证保存、peer 退出 0、pipe relay 对照分别记录，均不能补签严格完成；
   继续独立 peer、真实 SSH PTY、取消／尾部恢复及同一 shell 新输入的可重复矩阵，见[收尾记录](testing/records/2026-11-15-bounded-zmodem-farewell.md)。
-- Windows 来源／私有 staging／安全发布后端与 UI 已接入，最新后端预检和完整 app 通过；
-  整个 gate 在后续 codec 失败，新 ZIP 修订、剩余 session 和原生桌面仍待验。
+- Windows 来源／私有 staging／安全发布后端与 UI 已接入，前批后端预检和完整 app 通过；
+  新 ZIP codec 41 项已通过，最新 session 的两项祖先替换测试修订待新 CI，完整 gate 和原生桌面仍待验。
   以[根目录发布记录](testing/records/2026-11-16-windows-archive-root-publication.md)接续，不回退成“Windows 从未执行”。
 - 既有 Linux arm64 本地后端／codec 专项只覆盖原冻结；不代签 Linux x64、GUI、独立 peer 或当前输入，
   见[本地后端记录](testing/records/2026-11-15-windows-local-backend.md)。更广远端 Linux 权限与旧 Python runtime 仍需覆盖。
@@ -101,7 +110,7 @@
 
 | 范围 | 记录与边界 |
 | --- | --- |
-| 当前 Windows 发布／Quality | [根目录发布终态](testing/records/2026-11-16-windows-archive-root-publication.md#精确-ci-终态)、[ZIP 修订](testing/records/2026-11-16-portable-zip-metadata.md)；原四项 app 已通过，新的完整 gate 仍待实际结果。 |
+| 当前 Windows 发布／Quality | [根目录发布终态](testing/records/2026-11-16-windows-archive-root-publication.md#精确-ci-终态)、[ZIP 终态](testing/records/2026-11-16-portable-zip-metadata.md#精确-ci-终态补充)、[Zmodem 测试契约](testing/records/2026-11-16-windows-zmodem-test-contract.md)；原四项 app 与新 codec 已通过，新 session 修订与完整 gate 仍待实际结果。 |
 | Kit 0.10 与三主题 | [指定源码 CI／限定原生](testing/records/2026-11-16-kit010-native-ci.md)；旧包观察不代签后续源码或英文工具栏 P2。 |
 | 文件列表与命令框焦点 | [列表键盘](testing/records/2026-11-16-file-browser-keyboard.md)、[双向焦点补验](testing/records/2026-11-16-archive-diagnostics-and-native-focus.md)；双侧各一文件的 Frost 限定路径不等于完整 IME／辅助技术。 |
 | 编辑器原生 | [键盘及 UTF-16／GBK](testing/records/2026-11-16-editor-keyboard-native.md)；Frost 仅限定片段，Graphite HOLD、Lavender NOT_RUN，其他平台仍开放。 |

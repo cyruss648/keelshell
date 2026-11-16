@@ -1,5 +1,28 @@
 # Capability ledger
 
+## 2026-11-16: Windows Zmodem rename test contract
+
+Quality `43867112056` completed with failure at exact source
+`01f6f6bd8272303fe049bc7b52976afefdb44c37`. Windows passed filesystem
+70/0/0 and core archive 41/0/0, then session library finished 327/2/3.
+All 332 compiled names matched execution; Zmodem accounted for 41/2/2
+across 45 names. Both failures reported PermissionDenied/OS 5; the empty-parent
+replacement/refusal case passed. The full Windows gate did not run.
+macOS/Ubuntu complete gates and real OpenSSH passed, with app 1341/0/2
+and 1342/0/2. Both core archive targets passed 41/0/0, including the new
+metadata case. An r2 derived summary fixes an inline-header parsing error;
+original logs and r1 summaries remain, with no test rerun.
+
+The new tests-only candidate accurately checks blocked ancestor renames,
+unchanged identities and valid original reviews, with two synchronized CI
+names. Production code and the other 43 test blocks are unchanged.
+Its host full gate passed 3225 ordinary Rust tests (48 ignored), 14 doctests,
+290 Python discovery tests (one skipped), and the separate 30-test archive
+helper. The app's 1343 compiled names matched 1341 passed/two ignored.
+Independent static review approved with no P0–P3; independent Windows
+execution remains zero. New exact Windows CI and desktop acceptance are
+pending. See the [test-contract record](../testing/records/2026-11-16-windows-zmodem-test-contract.md).
+
 ## 2026-11-16: Windows archive root publication and ZIP metadata follow-up
 
 Exact source `8527cf2` completed Quality `43854113236` with macOS/Ubuntu
