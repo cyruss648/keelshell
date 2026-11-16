@@ -1,0 +1,12 @@
+{
+  "recorded_utc": "2026-11-16T01:53:46.980169+00:00",
+  "source_commit": "6d80c259b9a80facbf0f2fdeea986e18978c714f",
+  "evidence_commit": "e67266107e7493dc97235c97a759c1c6904b4c9a",
+  "git_index": false,
+  "engineering_inputs": 717,
+  "engineering_sha256": "d849a4fc427ef1b2abb114fabb88f5fa6c67a167b1e35d0021e7026e737e7166",
+  "raw_originals": 491,
+  "git_blobs_current_files_and_lossless_sources_match": true,
+  "complete_engineering_path_sets_match": true,
+  "mismatches": []
+}

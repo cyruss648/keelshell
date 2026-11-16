@@ -40,3 +40,15 @@
 `verify_binding.py` 核对所有原件、预览、717 项工程路径与字节，以及 Git index
 或精确源码提交的 blob。暂存、源码提交、推送及清理是否完成，以各实际 JSON 回执为准。
 例如可用 `gzip -dc raw/native-notes.md.gz` 阅读原件。
+
+源码提交 `6d80c259b9a80facbf0f2fdeea986e18978c714f` 与归档提交
+`e67266107e7493dc97235c97a759c1c6904b4c9a` 都已推送，分别读回本地、
+tracking 和远端一致。`index-input-binding.json`、`commit-input-binding.json`
+和 `post-cleanup-commit-binding.json` 均零 mismatch；后两份以
+`--commit <归档提交> --source-commit <源码提交>` 同时绑定两棵 Git 树，
+没有把后补原件误称为早先源码提交中的内容。
+
+`archive-push-r1.json` 保存归档推送的实际退出、reap 和三方 SHA。
+`cleanup-final.json` 记录归档推送与字节核验后回收 505 个临时文件、逻辑
+`1,067,658,510` 字节；正常 GUI/MCP 与唯一有效 target 保持，
+原批次工作目录已 absent。持久原件不依赖已删除的暂存包或测试副本。

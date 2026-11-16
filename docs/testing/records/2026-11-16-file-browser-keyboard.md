@@ -143,9 +143,23 @@ absent；147 条内核 birth 身份当前零活匹配。用户中断后原外层
 `6d80c25` 的全部 717 个工程 blob；源码先提交不代表当时已包含后续原件。
 归档绑定、归档推送与清理回执单列。后续只改文档时不重跑工程输入未变的完整门禁。
 
+归档文档提交 `e67266107e7493dc97235c97a759c1c6904b4c9a` 实际推送
+`exit 0 / reaped / 未超时 / 27.002s`，本地、tracking 和远端读回相同 SHA。
+`index-input-binding.json`、`commit-input-binding.json` 与
+`post-cleanup-commit-binding.json` 均核对 717 项完整工程集合、491 份原件和
+三个预览，零 mismatch；后两份同时核对源码 `6d80c25` 与归档 `e672661` 的
+所有工程 blob 相等。原签署报告、历史失败与原生 HOLD 未修改。
+
+在逐项核对全部源文件/遗漏派生产物摘要、原件无损字节、归档已推送和 lsof
+无打开文件后，父回收本批 505 个临时文件，逻辑字节数 `1,067,658,510`。
+`cleanup-final.json` 记录原批次目录 absent、正常 GUI/MCP 完整摘要不变、
+唯一有效 target 及其他任务资源保持；清理后再次运行上述 Git/blob 绑定成功。
+没有重跑工程输入未变的完整门禁。后续仅提交这些文档和清理/推送回执。
+
 设计见 [ADR 0145](../../adr/0145-file-browser-keyboard.md)，使用见
 [键盘指南](../../product/FILE_BROWSER_KEYBOARD.md)。
-批次工作目录 `work/file-browser-keyboard-20261116` 保存所有实际命令、失败与回执。
+原批次工作目录 `work/file-browser-keyboard-20261116` 已回收；所有实际命令、
+失败与回执从上述持久证据接续。
 本批 registry 依赖未新增；两轮官方最新检查均 45 秒超时，SIGTERM 后实际 reap，
 不能签所有依赖均为最新。Rust/Cargo 当前为默认 stable 1.100.0，无 toolchain pin
 或 rust-version。三主题继续共用 registry/Palette/token。

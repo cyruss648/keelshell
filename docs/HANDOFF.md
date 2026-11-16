@@ -41,7 +41,13 @@ Windows/Linux、IME/VoiceOver、完整焦点/尺寸矩阵和发行继续开放�
 预览已封存到[持久证据](testing/records/2026-11-16-file-browser-keyboard-evidence/README.md)；
 源码提交与归档文档树分开，使用 verifier 同时核对两树的 717 项工程 blob。
 从[本批记录](testing/records/2026-11-16-file-browser-keyboard.md)接续。
-完整产品目标保持 active；归档提交、绑定与临时产物回收按实际回执更新。
+归档提交 `e67266107e7493dc97235c97a759c1c6904b4c9a` 已推送并三方读回一致。
+Git index、源码/归档提交及清理后再次绑定均零 mismatch；回收本批 505 个临时文件、
+逻辑 `1,067,658,510` 字节，原工作目录 absent。正常 GUI/MCP 摘要和唯一有效
+target 保持，原件已持久化，不再依赖已删除工作目录。
+后续仅补文档回执不重跑工程输入未变的完整门禁。Rust/Cargo 默认 stable
+1.100.0，无 toolchain pin 或 rust-version；两轮官方最新依赖查询均超时并 reap，
+无新增依赖，不签全部最新。完整产品目标保持 active。
 
 ## 当前批次：编辑器键盘与原生文本流程（集中门禁与限定复核通过）
 

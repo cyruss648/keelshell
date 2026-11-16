@@ -1,0 +1,44 @@
+{
+  "recorded_utc": "2026-11-16T01:53:33.894892+00:00",
+  "source_commit": "6d80c259b9a80facbf0f2fdeea986e18978c714f",
+  "evidence_commit": "e67266107e7493dc97235c97a759c1c6904b4c9a",
+  "source_and_archive_push_readbacks_matched": true,
+  "lossless_archive_and_all_source_bytes_verified_before_removal": true,
+  "removed_root": "work/file-browser-keyboard-20261116",
+  "removed_regular_files": 505,
+  "removed_logical_bytes": 1067658510,
+  "removed_root_absent": true,
+  "archive_originals": 491,
+  "omitted_derived_files": 14,
+  "lsof": {
+    "command": [
+      "/usr/sbin/lsof",
+      "-n",
+      "-Fpn",
+      "+D",
+      "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/file-browser-keyboard-20261116"
+    ],
+    "exit_code": 1,
+    "stdout_empty": true,
+    "stderr_empty": true,
+    "open_files_observed": 0
+  },
+  "all_batch_agents_closed": true,
+  "author_worktree_absent": true,
+  "normal_program_bytes_unchanged": {
+    "keelshell-app": {
+      "path": "work/recovery-batch-integration-20261115/target/debug/keelshell-app",
+      "bytes": 199098288,
+      "sha256": "5ae23593849a5027e71f1a9461dd0fe3129d7adc54b1f22b110694d67464ca9b"
+    },
+    "keelshell-mcp": {
+      "path": "work/recovery-batch-integration-20261115/target/debug/keelshell-mcp",
+      "bytes": 14548464,
+      "sha256": "0e5efdcbe2069fb4ea3c809a99419c557d11ba0ba18e7ba8e5fc6ea0e9bde816"
+    }
+  },
+  "unique_valid_target_preserved": "work/recovery-batch-integration-20261115/target",
+  "other_task_resources_untouched": true,
+  "containers_created": 0,
+  "user_chats_created": 0
+}
