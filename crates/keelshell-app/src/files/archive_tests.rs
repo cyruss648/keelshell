@@ -90,15 +90,18 @@ async fn remote_selection(h: &Harness, path: &str, cx: &mut TestAppContext) {
     .checked("select the actual remote archive");
 }
 
-fn pending_kind(pending: &Option<(crate::i18n::Message, Operation)>) -> &'static str {
+pub(super) fn pending_kind(pending: &Option<(crate::i18n::Message, Operation)>) -> &'static str {
     let Some((_, operation)) = pending else {
         return "None";
     };
     match operation {
         Operation::PlanArchive(_) => "PlanArchive",
         Operation::TransferArchive(_) => "TransferArchive",
-        // Only archive admission matters here. Never format another operation,
-        // since its payload may contain private paths or document contents.
+        Operation::PlanResume(..) => "PlanResume",
+        Operation::ResumeFile(_) => "ResumeFile",
+        Operation::ResumeDirectory(_) => "ResumeDirectory",
+        // Never format an operation's payload: it may contain private paths
+        // or document contents.
         _ => "Other",
     }
 }
@@ -115,11 +118,23 @@ fn display_os_error(detail: &str) -> Option<u32> {
         .and_then(|digits| digits.parse::<u32>().ok())
 }
 
-fn safe_review_status(message: &crate::i18n::Message) -> String {
+pub(super) fn safe_review_status(message: &crate::i18n::Message) -> String {
     // Status details can contain paths or peer text. Only fixed classifications
     // and an optional numeric I/O display suffix may enter a failing CI log.
     let (_, en) = message.translations();
-    let Some(detail) = en.strip_prefix("Review incomplete; transfer not started: ") else {
+    let detail = en
+        .strip_prefix("Review incomplete; transfer not started: ")
+        .map(|detail| ("review-error", detail))
+        .or_else(|| {
+            en.strip_prefix("File operation failed: ")
+                .and_then(|detail| {
+                    detail.strip_suffix(
+                        ". Remote completion may be unknown; inspect before retrying.",
+                    )
+                })
+                .map(|detail| ("execution-error", detail))
+        });
+    let Some((stage, detail)) = detail else {
         let stage = match en {
             "Preparing the archive and complete manifest read-only; review is required…" => {
                 "preparing"
@@ -132,6 +147,21 @@ fn safe_review_status(message: &crate::i18n::Message) -> String {
                 "browser-review-expired"
             }
             "Wait for or cancel the active file operation" => "active-operation-blocked",
+            "Another file operation owns this target; review again after it finishes." => {
+                "mutation-busy"
+            }
+            "This target is isolated by an unknown mutation. Ordinary save or MCP approval cannot release it; inspect read-only and explicitly review its risk." => {
+                "mutation-quarantined"
+            }
+            "Transfer outcome unknown; destination isolated across reconnects. Inspect read-only, then explicitly review the unresolved risk" => {
+                "mutation-uncertain"
+            }
+            _ if en.starts_with("Transfer recovery metadata could not be saved safely; the transfer did not start: ") => {
+                "recovery-metadata-failed"
+            }
+            _ if en.starts_with("Transfer outcome unknown; destination isolated across reconnects. Inspect read-only, then explicitly review the unresolved risk: ") => {
+                "mutation-uncertain"
+            }
             "Select ordinary files or folders in the local list." => "local-selection-rejected",
             "Enter a portable new archive name ending in .zip."
             | "Enter a portable new archive name ending in .tar.gz." => "archive-name-rejected",
@@ -182,6 +212,16 @@ fn safe_review_status(message: &crate::i18n::Message) -> String {
             "invalid session option: archive remote destination already exists" => {
                 "remote-destination-exists"
             }
+            "invalid session option: resume file changed after review" => "resume-snapshot-changed",
+            "invalid session option: resume source or destination changed after review" => {
+                "resume-review-changed"
+            }
+            "invalid session option: resume destination changed before writing" => {
+                "resume-named-target-changed"
+            }
+            "invalid session option: local directory ancestor is a symlink or is not a directory" => {
+                "local-ancestor-rejected"
+            }
             _ if detail.starts_with("invalid session option: ") => "session-invalid",
             _ if detail.starts_with("operation timed out: ") => "timeout",
             _ if detail.starts_with("output exceeds ") => "output-limit",
@@ -194,7 +234,7 @@ fn safe_review_status(message: &crate::i18n::Message) -> String {
     };
     // This code is parsed from the existing display string, not a retained
     // typed io::Error or evidence of a specific failed native syscall.
-    format!("stage=review-error kind={kind} reason={reason} display_os_error={code:?}")
+    format!("stage={stage} kind={kind} reason={reason} display_os_error={code:?}")
 }
 
 #[test]
@@ -239,6 +279,36 @@ fn archive_review_status_diagnostics_redact_peer_and_path_text() {
         safe_review_status(&crate::i18n::Message::new("", "fixture-private-status")),
         "stage=other-redacted display_os_error=None"
     );
+}
+
+#[test]
+fn execution_status_diagnostics_redact_peer_and_path_text() {
+    for (detail, kind, reason, code) in [
+        (
+            "I/O: fixture-private-path (os error 5)",
+            "io",
+            "other-redacted",
+            "Some(5)",
+        ),
+        (
+            "invalid session option: resume file changed after review",
+            "resume-snapshot-changed",
+            "redacted",
+            "None",
+        ),
+        ("SSH: fixture-peer-text", "ssh", "redacted", "None"),
+    ] {
+        let message = crate::i18n::Message::new(
+            "fixture-private-translation",
+            format!(
+                "File operation failed: {detail}. Remote completion may be unknown; inspect before retrying."
+            ),
+        );
+        assert_eq!(
+            safe_review_status(&message),
+            format!("stage=execution-error kind={kind} reason={reason} display_os_error={code}")
+        );
+    }
 }
 
 #[test]
@@ -413,6 +483,11 @@ async fn archive_tar_gz_download_extract_reviews_empty_folders_and_publishes_new
     );
     h.click(cx, "confirm-file-operation");
     h.idle(cx).await;
+    assert!(
+        target.exists(),
+        "confirmed archive extraction did not publish its target: {}",
+        h.diagnostic(cx)
+    );
     assert_eq!(
         std::fs::read(target.join("nested/data.bin")).checked("extracted bytes"),
         [1, 0, 254]

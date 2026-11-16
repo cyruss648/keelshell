@@ -1756,9 +1756,10 @@ impl Workspace {
                 }
         };
         let active_id = self.tabs.get(self.active).map(Entity::entity_id);
-        // Keep the brand at the wide breakpoint, but use compact action labels
-        // at the breakpoint itself so every group remains inside the toolbar.
-        let compact_toolbar = viewport.width <= px(1280.);
+        // Native English labels need more room than the narrow test font.
+        // Keep the context and rightmost settings visible at laptop widths,
+        // while retaining the brand through its separate breakpoint.
+        let compact_toolbar = viewport.width <= px(1800.);
         let show_brand = viewport.width >= px(1280.);
         // Only reveal after selection or a layout change: continuous renders must
         // not undo a user's manual horizontal scroll through other sessions.

@@ -128,6 +128,12 @@ fn toolbar_groups_keep_action_order_and_accessible_names_at_workbench_widths(
     cx.update_window(fixture.window, |_, window, cx| {
         for (width, language) in [
             (1440., Language::ZhCn),
+            (1440., Language::En),
+            (1600., Language::En),
+            (1601., Language::En),
+            (1800., Language::En),
+            (1801., Language::En),
+            (1920., Language::En),
             (1280., Language::En),
             (900., Language::En),
         ] {
@@ -189,7 +195,7 @@ fn toolbar_groups_keep_action_order_and_accessible_names_at_workbench_widths(
             let context_label = window.find("workspace-session-context-label").bounds();
             let context_value = window.find("workspace-session-context-value").bounds();
             assert!(
-                context.size.width >= px(if width <= 1280. { 112. } else { 72. }),
+                context.size.width >= px(if width <= 1800. { 112. } else { 72. }),
                 "{language:?}/{width}: context width collapsed"
             );
             assert!(

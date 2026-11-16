@@ -89,9 +89,15 @@ async fn retained_window_keeps_admission_after_normal_harness_drop(cx: &mut Test
     })
     .checked("review retained-window existing-local continuation");
     download.idle(cx).await;
+    download.expect_resume_review(cx);
     download.server.filesystem.set_transfer_read_delay(75);
     download.click(cx, "confirm-file-operation");
     cx.wait_for(download.window, Duration::from_secs(8), |_, cx| {
+        assert!(
+            download.panel.read(cx).busy,
+            "confirmed retained-window continuation stopped before progress: {}",
+            download.diagnostic(cx)
+        );
         download
             .panel
             .read(cx)
@@ -282,6 +288,7 @@ async fn held_existing_local_resume_excludes_other_fixture_sync_without_mutation
     })
     .checked("review an existing local file in an independent SSH fixture");
     download.idle(cx).await;
+    download.expect_resume_review(cx);
     assert_eq!(
         std::fs::read(&destination).checked("review retained the original prefix"),
         bytes[..4096]
@@ -296,6 +303,11 @@ async fn held_existing_local_resume_excludes_other_fixture_sync_without_mutation
         .checked("own the resumed download's real nonzero READ reply");
     download.click(cx, "confirm-file-operation");
     cx.wait_for(download.window, Duration::from_secs(5), |_, cx| {
+        assert!(
+            download.panel.read(cx).busy,
+            "confirmed continuation stopped before the held READ: {}",
+            download.diagnostic(cx)
+        );
         hold.entered() > 0
             && download
                 .panel

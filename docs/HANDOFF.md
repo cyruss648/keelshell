@@ -48,7 +48,25 @@ macOS/Ubuntu success，app 分别 `1340/0/2 ignored`、`1341/0/2 ignored`；
 19 图、21 AX、三平台完整 CI 及两份非作者结果已形成
 [111 成员持久归档](testing/records/2026-11-16-kit010-native-ci-evidence/README.md)，
 精确 Git 树/成员/回执核对实际 0/reaped、零 mismatch。库存和原生证据 reviewer
-及封存 agent 均已关闭。详见[精确 CI 与原生记录](testing/records/2026-11-16-kit010-native-ci.md)。
+及封存 agent 均已关闭；文档提交 `67600170b4f92159135ca7573c094470b33cb3e0`
+已推送且三方一致。五处旧原件/包/封存重复目录已在逐字节复查后清理，
+共 137 文件/71,659,346 字节；不再依赖这些临时路径。
+详见[精确 CI 与原生记录](testing/records/2026-11-16-kit010-native-ci.md)。
+
+新五文件候选将工具栏紧凑断点改为 1800，补九组语言/宽度检查及 Windows
+文件测试失败的脱敏末态，未声称修复四项 Windows 失败。冻结 719 项集合
+`1a647ee1fbdfde06a8e9e664dce17a82246644aa5f5ef5008c10fc66236d2495`。
+工具栏专项及布局模块 `1/0/0`、`12/0/0`；编译库存 1,343 名逐项核对。
+新非作者五文件静态 APPROVE、P0–P3 全 0、独立执行 0，已关闭。
+完整门禁已实际 `0/reaped/764.801s`：Rust `3224/0/48 ignored`、rustdoc
+`14/0`，app `1341/0/2 ignored`；1,343 名逐项相等、719 项输入零漂移。
+fmt、严格 Clippy、x.y 及三组 controller 通过。正常 release 已从本冻结构建、
+打包和检查，app SHA 为
+`3b127956723c187943236537c9c49814e99866834a9d01a2468d85cf751dd19f`。
+CUA 报告 Mac 锁屏，GUI 操作和截图均 0；自有进程 SIGTERM 后
+`241/reaped/62.536s`，运行态已回收，包保留供解锁后复核。
+实际英文工具栏、新精确 Windows CI 仍待验证。
+见[当前批次](testing/records/2026-11-16-workbench-fit-and-file-diagnostics.md)。
 
 ## 已交付：Windows 目录发布短期句柄与 Kit 0.10
 
@@ -101,9 +119,8 @@ Windows filesystem preflight 70 名逐项全过，完整 app 仍有四败，其�
 三处原候选目录已逐字节核对持久原件后回收：本批、前批游标及 Kit 作者，合计
 5,200 文件/43,290,303 字节；另清理 5 份本轮自有 crash 原报告，故障线程与原 SHA
 已保全；两处自有调试临时目录此前已 absent。当前只使用
-`work/windows-directory-rename-delivery-20261116/` 保存推送/CI/清理回执，
-`work/kit010-native-20261116/` 已完成正常包构建和限定原生检查，运行资源已回收，
-必要原件已持久封存。原目录待本次归档提交绑定后回收。历史冻结、失败、作者与各窄范围评审均保持，见
+交付及原生目录的必要原件已持久封存，正常包和重复原目录已在精确提交绑定后回收。
+历史冻结、失败、作者与各窄范围评审均保持，见
 [本批记录](testing/records/2026-11-16-windows-directory-rename.md)。
 
 ## 已交付：Windows 独立目录游标修复
@@ -288,8 +305,9 @@ Python `290 run / 1 skip`；app 1,341 名逐项一致。源码 `76b8253` 与后�
 包内 MCP 为 `5166352519c48c15f2d02db8986c4d9301ccd8e0d055c736cf9471bd88ce584b`。
 所测三主题/macOS 范围见新记录；不能用该包代签后续工作区修订。
 本批与游标批次原目录已在持久归档和精确 Git 树绑定后回收，不能再依赖。
-当前交付/CI 在 `work/windows-directory-rename-delivery-20261116/`，原生包构建在
-`work/kit010-native-20261116/`；二者必要原件已持久归档，待本次提交绑定后清理。
+前批交付/CI、正常包、原生复核、Windows 库存及封存目录均已持久绑定后清理。
+当前活动目录为 `work/workbench-fit-20261116/`，新非作者原件为
+`work/workbench-fit-review-20261116/`；尚无活动 agent。
 旧 `work/windows-native-phases-integration-20261116/` 已回收。
 前批父命令回执目录 `work/archive-deadline-delivery-20261116/` 的 11 文件、
 23,386 字节已在 `878f13b` 归档后回收。

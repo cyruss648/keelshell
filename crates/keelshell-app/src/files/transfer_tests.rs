@@ -222,6 +222,41 @@ impl Harness {
         })
         .await;
     }
+    fn diagnostic(&self, cx: &impl AppContext) -> String {
+        // Failure evidence contains fixed labels and counts only. Neither
+        // operation payloads nor transfer paths may reach a shared CI log.
+        self.panel.read_with(cx, |panel, _| {
+            format!(
+                "busy={} operation_id_present={} pending_kind={} resume_mode={} \
+                 transfer={:?} isolation_present={} close_hold={} \
+                 recovery_loading={} recovery_records={} atomic_writes_started={} status=[{}]",
+                panel.busy,
+                panel.operation_id.is_some(),
+                archive_tests::pending_kind(&panel.pending),
+                panel.resume_mode,
+                panel
+                    .transfer
+                    .as_ref()
+                    .map(|state| (state.phase, state.transferred, state.total)),
+                panel.isolation_target.is_some(),
+                panel.window_close_busy(),
+                panel.recovery_loading,
+                panel.recovery_records.len(),
+                self.server.filesystem.atomic_writes_started(),
+                archive_tests::safe_review_status(&panel.status),
+            )
+        })
+    }
+    fn expect_resume_review(&self, cx: &impl AppContext) {
+        assert!(
+            self.panel.read_with(cx, |panel, _| matches!(
+                panel.pending,
+                Some((_, Operation::ResumeFile(_)))
+            )),
+            "file continuation did not produce an immutable review: {}",
+            self.diagnostic(cx)
+        );
+    }
     fn local_input(&self, cx: &mut TestAppContext, path: &std::path::Path) {
         cx.update_window(self.window, |_, window, cx| {
             self.panel.read(cx).local.clone().update(cx, |input, cx| {
@@ -1398,12 +1433,22 @@ async fn explicit_download_continuation_preserves_partial_bytes_until_confirmati
     })
     .checked("review selected download continuation");
     h.idle(cx).await;
+    h.expect_resume_review(cx);
     assert_eq!(
         std::fs::read(&destination).checked("partial local bytes"),
         bytes[..4096]
     );
     h.click(cx, "confirm-file-operation");
     h.idle(cx).await;
+    assert_eq!(
+        h.panel.read_with(cx, |panel, _| panel
+            .transfer
+            .as_ref()
+            .map(|state| state.phase)),
+        Some(TransferPhase::Completed),
+        "confirmed file continuation did not complete: {}",
+        h.diagnostic(cx)
+    );
     assert_eq!(
         std::fs::read(&destination).checked("completed local continuation"),
         bytes
