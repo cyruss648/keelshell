@@ -22,6 +22,11 @@
 
 以下为 2026-11-16 的精确快照；后续 CI 终态记录在对应批次，不改写历史原件。
 
+- 当前源码 `95813a76f0ec9b59fd043cd982e33cdc01dd69f8` 已普通推送、三方一致、读回干净；
+  93 成员／719 工程输入精确 Git 绑定通过。新 Quality `43873806902` 运行中，
+  Windows filesystem `70/0/0`、codec `41/0/0`、session `329/0/3 ignored`，
+  332 名逐项相等，两新 Zmodem 断言与空目录替换例均 ok。
+  完整 gate 停在 Python 工装读取身份记录错误；macOS／Ubuntu 完整门禁仍待终态。
 - 工程源码 `01f6f6bd8272303fe049bc7b52976afefdb44c37`、文档 `b7d6e92` 已推送，
   三方一致、读回干净。精确 Quality `43867112056` 已 completed/failure：
   Windows filesystem `70/0/0`、core archive `41/0/0`，session library `327/2/3 ignored`，
@@ -46,15 +51,20 @@
 - 当前只修订两项 Windows Zmodem 测试契约与 CI 库存名，生产改动 0、其余 43 块不变；
   宿主完整门禁 `0/reaped/723.521s`，普通 Rust `3225/0/48 ignored`、rustdoc `14/0/0`，
   app `1341/0/2 ignored` 且 1343 名逐项相等；Python discovery 290／1 skipped，
-  archive helper 单列 30 项。Turing 静态 APPROVE、P0–P3 全 0，Windows 新断言仍待精确 CI，
+  archive helper 单列 30 项。Turing 静态 APPROVE、P0–P3 全 0，新断言随后已在精确 Windows CI 通过，
   见[测试契约记录](testing/records/2026-11-16-windows-zmodem-test-contract.md)。
+- 接续仅修订 Python 工装的发布完成标记，保持身份、ACK、短预算及失败传播；
+  其余 718 输入与 958 相等。限定 gate `0/reaped/15.369s`，Python 293 run／2 skipped、
+  fmt／严格 Clippy／x.y 通过，两项受控负例精确失败；Boyle 限定 APPROVE、P0–P3 全 0，
+  独立专项 72 run／70 passed／2 skipped、退出 0；
+  新 Windows 运行待下一精确 CI，见[发布屏障记录](testing/records/2026-11-16-windows-fixture-publication.md)。
 - 英文工具栏修订已随 `8c07d61` 推送并有正常包；Mac 锁屏使 GUI／截图均为 0，原生 P2 仍开放。
   包身份、首轮失败和限定几何结果见[工具栏记录](testing/records/2026-11-16-workbench-fit-and-file-diagnostics.md)。
 
 ## 接续顺序
 
-1. Windows Zmodem 测试修订已完成宿主完整门禁与限定非作者批准；封存并普通提交推送，
-   读回三方 SHA，随后收取新精确 CI 的早期 codec／session 和完整三平台门禁。
+1. Windows Zmodem 测试修订已普通推送、三方一致，新的 Windows 332 项预检已过；
+   收齐 `43873806902` 三平台终态，完成 Python 工装片独立复核／封存后及时普通提交推送。
    前 run 已终态并保存原件，不取消或重跑替换原失败。
 2. 根据新 Windows 实际结果处理后端／target；已通过的四项 app 范围保持，
    不清空 UNKNOWN/quarantine、不重放不确定写入、不放宽审核、权限、完整字节和发布后重验。
@@ -72,7 +82,8 @@
   缺握手警告、逐文件已验证保存、peer 退出 0、pipe relay 对照分别记录，均不能补签严格完成；
   继续独立 peer、真实 SSH PTY、取消／尾部恢复及同一 shell 新输入的可重复矩阵，见[收尾记录](testing/records/2026-11-15-bounded-zmodem-farewell.md)。
 - Windows 来源／私有 staging／安全发布后端与 UI 已接入，前批后端预检和完整 app 通过；
-  新 ZIP codec 41 项已通过，最新 session 的两项祖先替换测试修订待新 CI，完整 gate 和原生桌面仍待验。
+  新 ZIP codec 41 项及 session 的两项祖先替换断言已通过，完整 gate 停在独立 Python 工装；
+  发布标记修订待下一精确 CI，原生桌面仍待验。
   以[根目录发布记录](testing/records/2026-11-16-windows-archive-root-publication.md)接续，不回退成“Windows 从未执行”。
 - 既有 Linux arm64 本地后端／codec 专项只覆盖原冻结；不代签 Linux x64、GUI、独立 peer 或当前输入，
   见[本地后端记录](testing/records/2026-11-15-windows-local-backend.md)。更广远端 Linux 权限与旧 Python runtime 仍需覆盖。

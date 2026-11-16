@@ -19,9 +19,15 @@ names. Production code and the other 43 test blocks are unchanged.
 Its host full gate passed 3225 ordinary Rust tests (48 ignored), 14 doctests,
 290 Python discovery tests (one skipped), and the separate 30-test archive
 helper. The app's 1343 compiled names matched 1341 passed/two ignored.
-Independent static review approved with no P0–P3; independent Windows
-execution remains zero. New exact Windows CI and desktop acceptance are
-pending. See the [test-contract record](../testing/records/2026-11-16-windows-zmodem-test-contract.md).
+Independent static review approved with no P0–P3; its independent Windows
+execution was zero. Exact source `95813a76f0ec9b59fd043cd982e33cdc01dd69f8`
+then passed all 332 Windows session preflight names (329 passed/three ignored),
+including both new cases and the retained empty-parent case. The 45 Zmodem names
+finished 43/0/2. The complete gate stopped in a separate Python fixture's
+identity-publication read (290 run/one failure/34 skipped), before full Rust tests.
+Desktop acceptance is open. See the
+[test-contract record](../testing/records/2026-11-16-windows-zmodem-test-contract.md)
+and [fixture follow-up](../testing/records/2026-11-16-windows-fixture-publication.md).
 
 ## 2026-11-16: Windows archive root publication and ZIP metadata follow-up
 

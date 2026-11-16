@@ -56,7 +56,11 @@ ZFIN、所有当前文件审核和保存均已处理、精确回复写出已确�
 失败的两例原先假设可替换仍有打开后代的祖先目录，系统返回
 `PermissionDenied / OS 5`；空父目录实际替换后的拒绝用例为 ok。
 新修订准确检验系统阻止替换、完整身份及原审核保持，保留另外 43 个测试块；
-宿主完整门禁与限定静态复核通过，新两例仍待精确 Windows CI。
+宿主完整门禁与限定静态复核通过。后续精确源码
+`95813a76f0ec9b59fd043cd982e33cdc01dd69f8` 的 Windows CI 实际执行
+45 名为 `43 passed / 0 failed / 2 ignored`，两新例与原空父目录替换例均 ok。
+完整 session 332 名为 `329/0/3 ignored`；后续完整 gate 停在独立 Python
+工装身份记录读取错误，全量 Rust 尚未运行。
 Windows 桌面、真实文件选择和端到端传输验收继续开放，详见
 [测试契约记录](../testing/records/2026-11-16-windows-zmodem-test-contract.md)。
 Linux 本地 Rust 后端的实际运行及此前 Windows 源码范围见

@@ -1,0 +1,28 @@
+{
+  "source": "95813a76f0ec9b59fd043cd982e33cdc01dd69f8",
+  "scope": "sealed evidence, corrected r2 logs and historical document boundaries",
+  "decision": "APPROVE",
+  "P0": 0,
+  "P1": 0,
+  "P2": 0,
+  "P3": 0,
+  "new_Windows_CI_reviewed": false,
+  "commands": {
+    "total": 18,
+    "exit_0": 16,
+    "exit_2": 2
+  },
+  "agent_closed": true,
+  "entries": [
+    {
+      "path": "REPORT.md",
+      "bytes": 14760,
+      "sha256": "25ec166ca9fecade9e462949085933b9619ea06ee2cae36d14e32c30598d29c9"
+    },
+    {
+      "path": "receipt.json",
+      "bytes": 16855,
+      "sha256": "57ea639528bfdccb1ed1f730e067b4a2a562ad85835683b31f95d776c1cfa89f"
+    }
+  ]
+}

@@ -467,8 +467,10 @@ def process_state(pid):
         api.CloseHandle(handle)
 
 
-def ready_pids(record, parent_pid):
-    """Existence is not readiness: only a complete, expected publication qualifies."""
+def ready_pids(record, parent_pid, published):
+    """Read only after the writer has closed and completed the record rename."""
+    if not published.exists():
+        return None
     try:
         pids = json.loads(record.read_text())
     except (FileNotFoundError, json.JSONDecodeError):
@@ -620,7 +622,7 @@ class PreparationTreeTests(unittest.TestCase):
                 if staged and partial_seen.exists() and not published.exists():
                     return
                 identity_observation["phase"] = "reading_publication"
-                pids = ready_pids(record, process.pid)
+                pids = ready_pids(record, process.pid, published)
                 if pids is None:
                     if staged and record.exists():
                         content = record.read_text()
@@ -665,7 +667,7 @@ class PreparationTreeTests(unittest.TestCase):
                         "stderr": result.stderr,
                     },
                 )
-                pids = ready_pids(record, owner.process.pid)
+                pids = ready_pids(record, owner.process.pid, published)
                 self.assertEqual(pids, bound_pids)
                 post_identity_elapsed = time.monotonic() - bound_at
                 native_states = identities.states() if identities is not None else None
@@ -812,18 +814,68 @@ class FixtureIdentityTests(unittest.TestCase):
     def test_missing_empty_and_partial_records_do_not_authorize_ack(self):
         with tempfile.TemporaryDirectory(prefix="owned-publication-states-") as temp:
             record = Path(temp) / "pids.json"
-            self.assertIsNone(ready_pids(record, 100))
+            published = Path(temp) / "published"
+            published.touch()
+            self.assertIsNone(ready_pids(record, 100, published))
             for content in ["", "{", '{"parent":100,']:
                 record.write_text(content)
-                self.assertIsNone(ready_pids(record, 100))
+                self.assertIsNone(ready_pids(record, 100, published))
             record.write_text('{"parent":100,"child":200}')
-            self.assertEqual(ready_pids(record, 100), {"parent": 100, "child": 200})
+            self.assertEqual(ready_pids(record, 100, published), {"parent": 100, "child": 200})
             for bad in [{"parent": 101, "child": 200}, {"parent": 100, "child": 100},
                         {"parent": 100, "child": True}, {"parent": 100, "child": 0},
                         {"parent": 100, "child": 0x100000000}, {"parent": 100}]:
                 record.write_text(json.dumps(bad))
                 with self.assertRaises(AssertionError):
-                    ready_pids(record, 100)
+                    ready_pids(record, 100, published)
+
+    def test_complete_record_is_not_read_before_writer_completion_marker(self):
+        with tempfile.TemporaryDirectory(prefix="owned-unpublished-record-") as temp:
+            record = Path(temp) / "pids.json"
+            published = Path(temp) / "published"
+            record.write_text('{"parent":100,"child":200}')
+            with patch.object(Path, "read_text", side_effect=PermissionError(13, "controlled read denial")) as read:
+                self.assertIsNone(ready_pids(record, 100, published))
+                read.assert_not_called()
+            published.touch()
+            self.assertEqual(ready_pids(record, 100, published), {"parent": 100, "child": 200})
+
+    def test_completed_publication_read_errors_still_fail_closed(self):
+        with tempfile.TemporaryDirectory(prefix="owned-published-read-error-") as temp:
+            record = Path(temp) / "pids.json"
+            published = Path(temp) / "published"
+            published.touch()
+            with patch.object(Path, "read_text", side_effect=PermissionError(13, "controlled read denial")):
+                with self.assertRaises(PermissionError):
+                    ready_pids(record, 100, published)
+
+    @unittest.skipUnless(os.name == "nt", "requires an actual Windows exclusive file handle")
+    def test_windows_exclusive_record_is_not_opened_until_completion_marker(self):
+        import ctypes
+        from ctypes import wintypes
+
+        api = ctypes.WinDLL("kernel32", use_last_error=True)
+        api.CreateFileW.argtypes = [
+            wintypes.LPCWSTR, wintypes.DWORD, wintypes.DWORD, ctypes.c_void_p,
+            wintypes.DWORD, wintypes.DWORD, wintypes.HANDLE,
+        ]
+        api.CreateFileW.restype = wintypes.HANDLE
+        api.CloseHandle.argtypes = [wintypes.HANDLE]
+        api.CloseHandle.restype = wintypes.BOOL
+        with tempfile.TemporaryDirectory(prefix="owned-exclusive-publication-") as temp:
+            record = Path(temp) / "pids.json"
+            published = Path(temp) / "published"
+            record.write_text('{"parent":100,"child":200}')
+            handle = api.CreateFileW(str(record), 0x80000000, 0, None, 3, 0x80, None)
+            self.assertNotIn(handle, (None, ctypes.c_void_p(-1).value), ctypes.get_last_error())
+            try:
+                with self.assertRaises(PermissionError):
+                    record.read_text()
+                self.assertIsNone(ready_pids(record, 100, published))
+            finally:
+                self.assertTrue(api.CloseHandle(handle), ctypes.get_last_error())
+            published.touch()
+            self.assertEqual(ready_pids(record, 100, published), {"parent": 100, "child": 200})
 
     def api(self, child_member=True):
         class ModelApi:
@@ -1468,6 +1520,7 @@ class NativeJobBarrierTests(unittest.TestCase):
             directory = Path(temp)
             helper = directory / "parent.py"
             record, ack, late_record = (directory / name for name in ("pids.json", "ack", "late.json"))
+            published = directory / "published"
             marker = directory / "late-process-must-not-execute"
             child_source = "import time;time.sleep(30)"
             late_source = f"from pathlib import Path;Path({str(marker)!r}).touch()"
@@ -1501,6 +1554,7 @@ class NativeJobBarrierTests(unittest.TestCase):
                               f"pending=Path({str(record)!r}+'.pending')\n"
                               "pending.write_text(json.dumps({'parent':os.getpid(),'child':child.pid}))\n"
                               f"os.replace(pending,{str(record)!r})\n"
+                              f"Path({str(published)!r}).touch()\n"
                               "phase('await_ack')\n"
                               f"while not Path({str(ack)!r}).exists():time.sleep(0.001)\n"
                               "late={'nested_child_membership':True,'creation_rejected':False}\n"
@@ -1527,7 +1581,7 @@ class NativeJobBarrierTests(unittest.TestCase):
                 nonlocal bound, barrier, observer_phase
                 if bound is not None:
                     return
-                pids = ready_pids(record, process.pid)
+                pids = ready_pids(record, process.pid, published)
                 if pids is None:
                     return
                 observer_phase = "binding_original_handles"

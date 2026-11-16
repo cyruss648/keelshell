@@ -1,0 +1,82 @@
+{
+  "schema": "keelshell.windows-zmodem-test-contract.delivery.v1",
+  "source": "95813a76f0ec9b59fd043cd982e33cdc01dd69f8",
+  "three_way_equal": true,
+  "clean_at_readback": true,
+  "commit_binding": {
+    "exit": 0,
+    "reaped": true,
+    "seconds": 7.115579,
+    "members": 93,
+    "engineering_inputs": 719
+  },
+  "ci_run": 43873806902,
+  "ci_at_snapshot": "in_progress",
+  "windows_candidate_runtime_counts_at_snapshot": "PENDING_RAW_LOG",
+  "cleanup": {
+    "files": 58,
+    "bytes": 1040297
+  },
+  "entries": [
+    {
+      "path": "evidence-verify-r1.json",
+      "bytes": 795,
+      "sha256": "d5c1851c2959d5de9d25e8214e6a0ef0c7fcef4f212f8db1866c10905e230376"
+    },
+    {
+      "path": "evidence-verify-r1.log",
+      "bytes": 267,
+      "sha256": "a597a3f7df585fdfba9e2c3da67effd42b3fedd974e7c8542bc83013e743d15e"
+    },
+    {
+      "path": "commit-bind-r1.json",
+      "bytes": 858,
+      "sha256": "9a525a0471559da180f95f5095bf9f55dbfb8623139867b9dc2091eb9e904c38"
+    },
+    {
+      "path": "commit-bind-r1.log",
+      "bytes": 300,
+      "sha256": "c95f72a17277f44d72c2ff6843a51be15c83c647f9229a331746d67ef62fc589"
+    },
+    {
+      "path": "source-push-r1.json",
+      "bytes": 791,
+      "sha256": "40f3b963bd846c01a6b4201368dd0ade3a6e5e4e1a8e841fc49adb5e66a9a390"
+    },
+    {
+      "path": "source-push-r1.log",
+      "bytes": 113,
+      "sha256": "10a976d42c16a799877c6542ef2005fba783922658adb323ccc90fe407bdcad8"
+    },
+    {
+      "path": "source-delivery-r1.json",
+      "bytes": 1039,
+      "sha256": "c92665d8012f9a28686f219878986e73e9698303681365464df9abf5cf4c5be8"
+    },
+    {
+      "path": "owned-cleanup-r1.json",
+      "bytes": 14214,
+      "sha256": "8cabd019f338bcab60c7b1e8c9c084b8b5446f734d64e02c8b6609c00c30d725"
+    },
+    {
+      "path": "source-ci-runs-r1.json",
+      "bytes": 895,
+      "sha256": "92c0a410fdf2fc0086b02b9fa4b33f18016b07130b55ce298b8958ffa4f81398"
+    },
+    {
+      "path": "source-ci-runs-r1.log",
+      "bytes": 228,
+      "sha256": "fff0f4d8817fa5133cd2e2023fb0a53deea3b7c5926b266221166509cd31a560"
+    },
+    {
+      "path": "source-ci-snapshot-r1.json",
+      "bytes": 809,
+      "sha256": "2772a8139920fae5feb4c533d9fd95e775bac729d927458cdeb7fa4dab57c761"
+    },
+    {
+      "path": "source-ci-snapshot-r1.log",
+      "bytes": 7642,
+      "sha256": "9b115ada23498584278283bc2243ab9a7892badff30c62c709bf4814a666fa14"
+    }
+  ]
+}

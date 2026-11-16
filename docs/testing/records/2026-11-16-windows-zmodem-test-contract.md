@@ -96,3 +96,34 @@ Unix 测试没有变化；不为了让攻击先成功而释放生产能力句柄
 当前 ZIP 修订的 Windows 41 项通过已实测，见
 [上一批记录](2026-11-16-portable-zip-metadata.md)。
 完整产品、FILE-05/M4、strict OO 独立 peer、三平台桌面和发行仍开放。
+
+## 实际交付与新 CI
+
+本批在 `95813a76f0ec9b59fd043cd982e33cdc01dd69f8` 提交并普通推送；
+本地、tracking、远端完整 SHA 一致，读回时工作区干净。
+93 成员／719 输入的精确 Git 绑定验证为 `0/reaped/7.116s`、零 mismatch，
+测试重放 0；[交付回执](2026-11-16-windows-zmodem-test-contract-evidence/delivery/manifest.json)
+保存 push、SHA 读回、绑定、新 CI 初始快照与回收明细。
+
+新 Quality `43873806902` 绑定该源码，当前 in_progress。
+Windows `133321520130` 已 failure。实际 filesystem `70/0/0`、core archive `41/0/0`，
+session `329/0/3 ignored`，332 名库存与执行逐项相等；其中 Zmodem 45 名为
+`43/0/2 ignored`，两个新名与原空父目录替换例均为 ok，本批断言已在该 runner 验证。
+随后完整 gate 停在 Python 身份记录读取错误：290 run／1 failure／34 skipped，
+全量 Rust 尚未运行。原失败和下一片修订见
+[发布屏障记录](2026-11-16-windows-fixture-publication.md)；不签整个 Windows gate 或桌面。
+macOS `133321519808`、Ubuntu `133321520197` 的完整 gate 正在运行。
+
+已直接核对精确提交内的归档与清单字节，然后回收前批 ZIP 活动目录、
+准备候选和 Turing 活动目录，共 58 文件／1,040,297 字节。
+主 target、正常 GUI 包、当前 CI 活动原件和其他任务资源保留。
+没有新建用户 chat、worktree、分支或容器；Turing 已关闭。
+本次重新检查的桌面通道仍明确报告 Mac 锁屏，GUI／截图仍为 0。
+
+新的非作者 Ramanujan 补查固定 `95813a7` 的封存、r2 解析及历史记录边界，
+限定 APPROVE、P0–P3 全 0；独立实际封存验证退出 0，
+93 成员／719 Git 输入零 mismatch。两平台各 92 个普通套件与其独立解析逐项相等。
+18 次命令中 16 个 exit 0、2 个不存在路径检索 exit 2，原文保留于
+[补充报告](2026-11-16-windows-zmodem-test-contract-evidence/independent-evidence-review/REPORT.md)。
+未重复 Turing 源码评审、未执行测试／Cargo、未查询新 CI；不代签后续 Windows
+结果或 Python 新片。已收取并关闭。

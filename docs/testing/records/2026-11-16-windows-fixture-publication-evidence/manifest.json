@@ -1,0 +1,206 @@
+{
+  "schema": "keelshell.windows-fixture-publication.v1",
+  "baseline_source": "95813a76f0ec9b59fd043cd982e33cdc01dd69f8",
+  "engineering_sha256": "1a516c0280487e62157ad3ee470206ef91c12a08501f12214ef7348c688cfc3a",
+  "changed_engineering_files": [
+    "scripts/test_windows_native_crash.py"
+  ],
+  "count": 25,
+  "archive_bytes": 159544,
+  "archive_sha256": "3b37819297c2c50d8ac3273c77bb3041a490edc83592e84981956ea01489a1f9",
+  "uncompressed_bytes": 702712,
+  "entries": [
+    {
+      "path": "batch/baseline-r1.json",
+      "source_path": "work/windows-fixture-publication-integration-20261116/baseline-r1.json",
+      "bytes": 256,
+      "sha256": "d8c5101fa55e9f1722211c6907394e4e42a2e9dde73b45a63abaade6f454e7df"
+    },
+    {
+      "path": "batch/baseline/scripts/test_windows_native_crash.py",
+      "source_path": "work/windows-fixture-publication-integration-20261116/baseline/scripts/test_windows_native_crash.py",
+      "bytes": 91445,
+      "sha256": "77b09044196d604c02b78a8cc068c25f9497949cb318c80ae996f7d548c6744b"
+    },
+    {
+      "path": "batch/candidate-r1.diff",
+      "source_path": "work/windows-fixture-publication-integration-20261116/candidate-r1.diff",
+      "bytes": 7513,
+      "sha256": "7b204afd21234efc586bc245fa4c291f8e362a4a71714d139a58ce7a9278a851"
+    },
+    {
+      "path": "batch/gate-summary-r1.json",
+      "source_path": "work/windows-fixture-publication-integration-20261116/gate-summary-r1.json",
+      "bytes": 1291,
+      "sha256": "af430b6e17cd641f0e17cd51f7d880a02cffb503a8d96c001c5df4815664b3f2"
+    },
+    {
+      "path": "batch/inputs-freeze-r1.json",
+      "source_path": "work/windows-fixture-publication-integration-20261116/inputs-freeze-r1.json",
+      "bytes": 116621,
+      "sha256": "5cae5edfa126f3c00a1806f8111956b9f74a75cbf856fc74ec9e4a27d11fa602"
+    },
+    {
+      "path": "batch/negative-controls-r1.json",
+      "source_path": "work/windows-fixture-publication-integration-20261116/negative-controls-r1.json",
+      "bytes": 791,
+      "sha256": "fcf902469a678ce054a166c6cdafdd4605d1c268cf77ab570b81145a4fd255aa"
+    },
+    {
+      "path": "batch/negative-controls-r1.log",
+      "source_path": "work/windows-fixture-publication-integration-20261116/negative-controls-r1.log",
+      "bytes": 267,
+      "sha256": "d869db6872badebea71dbefde5e19a2bd8591a841380f46c3cc56bb3239c1b96"
+    },
+    {
+      "path": "batch/negative-early-read-r1.log",
+      "source_path": "work/windows-fixture-publication-integration-20261116/negative-early-read-r1.log",
+      "bytes": 1966,
+      "sha256": "ed35379080078fda02a4a96eb93af2b95f08d8e00d09c8ee7b13a5c89e504d76"
+    },
+    {
+      "path": "batch/negative-summary-r1.json",
+      "source_path": "work/windows-fixture-publication-integration-20261116/negative-summary-r1.json",
+      "bytes": 324,
+      "sha256": "2e8430fd1840cef74fb097268870fef7e05b51d737a9cd21dc51919dc1cc0f3d"
+    },
+    {
+      "path": "batch/negative-swallowed-error-r1.log",
+      "source_path": "work/windows-fixture-publication-integration-20261116/negative-swallowed-error-r1.log",
+      "bytes": 950,
+      "sha256": "94d383523bbfb87557f00050b904d488089d931d89fe52ec39632d078ecdd87e"
+    },
+    {
+      "path": "batch/negative_controls.py",
+      "source_path": "work/windows-fixture-publication-integration-20261116/negative_controls.py",
+      "bytes": 2313,
+      "sha256": "34466ca74a27303aa8b1f860e7fa364c79eb40305c1ce7167d1da5aa2b757f55"
+    },
+    {
+      "path": "batch/prior-source-windows-job-r1.json",
+      "source_path": "work/windows-fixture-publication-integration-20261116/prior-source-windows-job-r1.json",
+      "bytes": 807,
+      "sha256": "c450ab7f75226631609367fdfbadb8e1ab1b0d5f5e7b9f52e5eb3d2fe8541cc0"
+    },
+    {
+      "path": "batch/prior-source-windows-job-r1.log",
+      "source_path": "work/windows-fixture-publication-integration-20261116/prior-source-windows-job-r1.log",
+      "bytes": 184360,
+      "sha256": "2dc66cd5ffca0b6c3a8a9c2fea01adef7e58afbf1d6381022b864176fd949c6b"
+    },
+    {
+      "path": "batch/prior-source-windows-summary-r1.json",
+      "source_path": "work/windows-fixture-publication-integration-20261116/prior-source-windows-summary-r1.json",
+      "bytes": 80801,
+      "sha256": "1e17a93564acf47376c657a4ddbf8bf0951648fd1f41a8096fadc8d868454f8c"
+    },
+    {
+      "path": "batch/run_command.py",
+      "source_path": "work/windows-fixture-publication-integration-20261116/run_command.py",
+      "bytes": 1602,
+      "sha256": "a8e8f0b50f2c5d95342e36f1b8fffd4fdc5daeabbf4a382fa15300c747ce65fc"
+    },
+    {
+      "path": "batch/scope-binding-r1.json",
+      "source_path": "work/windows-fixture-publication-integration-20261116/scope-binding-r1.json",
+      "bytes": 664,
+      "sha256": "65ef7ae3485e4ad52396a93d306f923e48715698df3fa8ded4e5287cfe24cc9e"
+    },
+    {
+      "path": "batch/scoped-gate-r1.json",
+      "source_path": "work/windows-fixture-publication-integration-20261116/scoped-gate-r1.json",
+      "bytes": 786,
+      "sha256": "0fe72450e1ea8582b7634466b96f412c8452561d452b566ced16bddde84a3d08"
+    },
+    {
+      "path": "batch/scoped-gate-r1.log",
+      "source_path": "work/windows-fixture-publication-integration-20261116/scoped-gate-r1.log",
+      "bytes": 55460,
+      "sha256": "03bfafdf60836da1bc3946bd404eb695ce702c03739aca974f1c150c97b1f1c8"
+    },
+    {
+      "path": "batch/scoped-tests-r1.json",
+      "source_path": "work/windows-fixture-publication-integration-20261116/scoped-tests-r1.json",
+      "bytes": 832,
+      "sha256": "fb3a94ba3aa4002c09033bafa8212a86eebd0c11eb2fa80e204135f688e11735"
+    },
+    {
+      "path": "batch/scoped-tests-r1.log",
+      "source_path": "work/windows-fixture-publication-integration-20261116/scoped-tests-r1.log",
+      "bytes": 19048,
+      "sha256": "32b97652f01fccb27eb8d9a9188243747b6bbf8535442338d7ac8bc8c020b79a"
+    },
+    {
+      "path": "batch/scoped_gate.py",
+      "source_path": "work/windows-fixture-publication-integration-20261116/scoped_gate.py",
+      "bytes": 630,
+      "sha256": "15379d1ed0ba76afa9b698448b872570e1f5b2d6cc2c7a0609c12fb0c275bcb6"
+    },
+    {
+      "path": "batch/source-r1/scripts/test_windows_native_crash.py",
+      "source_path": "work/windows-fixture-publication-integration-20261116/source-r1/scripts/test_windows_native_crash.py",
+      "bytes": 94431,
+      "sha256": "909ae16f90086c82a09dda8b366475d885146c3ea849d1900d781d79ca97b232"
+    },
+    {
+      "path": "review/REPORT.md",
+      "source_path": "work/windows-fixture-publication-review-20261116/REPORT.md",
+      "bytes": 15835,
+      "sha256": "a6f1a4393d08bd3c4b42799f45ec1a33a195353ff2669a30ff21786a67e1d812"
+    },
+    {
+      "path": "review/receipt.json",
+      "source_path": "work/windows-fixture-publication-review-20261116/receipt.json",
+      "bytes": 18645,
+      "sha256": "a162d0da25f4d526e7eda27cf9fd15059f39720d1eb1d576e245dbcfc1eeb4de"
+    },
+    {
+      "path": "tools/verify.py",
+      "source_path": "docs/testing/records/2026-11-16-windows-fixture-publication-evidence/verify.py",
+      "bytes": 5074,
+      "sha256": "7324bc9e0a50ad9937e259bb7f8de027dadb6212a1b32fa74df0238f67b4b099"
+    }
+  ],
+  "host_gate": {
+    "scoped_python_run": 72,
+    "scoped_skipped": 2,
+    "python_discovery_run": 293,
+    "python_discovery_skipped": 2,
+    "strict_clippy_fmt_policy_diff": "PASS",
+    "whole_Rust_tests_repeated": false
+  },
+  "review": {
+    "decision": "APPROVE",
+    "P0": 0,
+    "P1": 0,
+    "P2": 0,
+    "P3": 0,
+    "independent_python_run": 72,
+    "passed": 70,
+    "skipped": 2,
+    "exit": 0,
+    "unittest_seconds": 6.134,
+    "outer_seconds": 6.203172,
+    "independent_Windows": 0
+  },
+  "prior_windows_preflight": {
+    "source": "95813a76f0ec9b59fd043cd982e33cdc01dd69f8",
+    "run": 43873806902,
+    "job": 133321520130,
+    "session_counts": [
+      329,
+      0,
+      3
+    ],
+    "full_gate": "FAILED_PYTHON_DISCOVERY"
+  },
+  "other_platforms_at_seal": "IN_PROGRESS_NOT_SIGNED",
+  "candidate_windows_execution_at_seal": 0,
+  "excluded": [
+    "Cargo target",
+    "binaries",
+    "Python bytecode",
+    "active CI watcher output",
+    "other task resources"
+  ]
+}

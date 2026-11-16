@@ -1,0 +1,363 @@
+{
+  "source": "95813a76f0ec9b59fd043cd982e33cdc01dd69f8",
+  "archive_git_bytes_equal": true,
+  "deleted_files": 58,
+  "deleted_bytes": 1040297,
+  "folders": [
+    "work/zip-unix-metadata-integration-20261116",
+    "work/windows-zmodem-parent-rename-candidate-20261116",
+    "work/windows-zmodem-rename-review-20261116"
+  ],
+  "entries": [
+    {
+      "path": "work/zip-unix-metadata-integration-20261116/__pycache__/summarize_ci.cpython-315.pyc",
+      "bytes": 7981,
+      "sha256": "0e3603236e7fca2b62494eb0d48d85b1e865874c8132b7764d59ffd6042ddc95",
+      "python_bytecode": true
+    },
+    {
+      "path": "work/zip-unix-metadata-integration-20261116/candidate-r2.diff",
+      "bytes": 6847,
+      "sha256": "3df18ffbab526856b0c9d9a691b4ff6ae1b524a5b6b7857f0f40ade780901234",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/zip-unix-metadata-integration-20261116/candidate-source-r1.json",
+      "bytes": 686,
+      "sha256": "bf9478a5ac156d65dbd1ca99355a1070f2174c5fe2f6ec4ff4a304afa3563a61",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/zip-unix-metadata-integration-20261116/commit-bind-r1.json",
+      "bytes": 851,
+      "sha256": "d306ee5f18f5221bbc1621635ef2a62c02558acf602c2e9d2f89975e0a3b585c",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/zip-unix-metadata-integration-20261116/commit-bind-r1.log",
+      "bytes": 186,
+      "sha256": "4ac6b5621d9bf535a5ab7226afe7ec15fe0f8c828265eea9c636dbb8ac98363e",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/zip-unix-metadata-integration-20261116/core-archive-green-r1.json",
+      "bytes": 829,
+      "sha256": "64caf88d0a4c65ede09b67bb6f1f9c944757ea78a29da806f4df02587358117e",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/zip-unix-metadata-integration-20261116/core-archive-green-r1.log",
+      "bytes": 3437,
+      "sha256": "90b559a75d95d8c89a50431222b462987acbe3f43e89bb489d729fc5260ad7d2",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/zip-unix-metadata-integration-20261116/docs-delivery-r1.json",
+      "bytes": 587,
+      "sha256": "610f6de240d7034de2a267d0904c5bdfb6cd3ba4b8076033b05d322da473e726",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/zip-unix-metadata-integration-20261116/docs-push-r1.json",
+      "bytes": 791,
+      "sha256": "1285dbffde052719d8d7450d1864e82d9e9091d8a8496354d37bd0bfa8d7a1a1",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/zip-unix-metadata-integration-20261116/docs-push-r1.log",
+      "bytes": 113,
+      "sha256": "74d71747084add5f6f32ab87a9103e929c25ea241b32ba232a468b94b4e79135",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/zip-unix-metadata-integration-20261116/dos-metadata-red-r1.json",
+      "bytes": 783,
+      "sha256": "906ba5a705fbfa392ac134976b883ff14009f2f07849e2d65358e410f3380756",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/zip-unix-metadata-integration-20261116/dos-metadata-red-r1.log",
+      "bytes": 2863,
+      "sha256": "ae678e318b9215e9d780fd2e087b2bf3a710f18967fd63fc6aef117690e05571",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/zip-unix-metadata-integration-20261116/dos_metadata_control.py",
+      "bytes": 1868,
+      "sha256": "f3e87cc3b747e3245ae576b458f687bf0fdb70f7ff524c71a2e3b1736f46330d",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/zip-unix-metadata-integration-20261116/evidence-verify-r1.json",
+      "bytes": 788,
+      "sha256": "a1287887dc402d0db0b2240a6b6d37791396d25bf4594245decf3bb4072c602d",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/zip-unix-metadata-integration-20261116/evidence-verify-r1.log",
+      "bytes": 153,
+      "sha256": "138b39b54fcc83981c923566357cab45cf5a280508ec117fa15cea826c0c73e7",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/zip-unix-metadata-integration-20261116/expected-windows-tests-r1.txt",
+      "bytes": 3438,
+      "sha256": "caf106a54b22fdcc69c148b2af2ca78beb7af5817f86583e9c270d3f76e5ce1f",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/zip-unix-metadata-integration-20261116/format-r1.json",
+      "bytes": 726,
+      "sha256": "10f9e15503835581d762f25f041d2d1bff1c022a414fb3b3a06243dd276461eb",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/zip-unix-metadata-integration-20261116/format-r1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/zip-unix-metadata-integration-20261116/inputs-freeze-r1.json",
+      "bytes": 116621,
+      "sha256": "85591a4f87760eaf507f617aee689d6d633c79187fea4648f36b9702e0c3f4cf",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/zip-unix-metadata-integration-20261116/owned-cleanup-r1.json",
+      "bytes": 23379,
+      "sha256": "308ed1a6ea0db8498b043f87e89a2e07129cb086fd2203297d041d55b1b5e725",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/zip-unix-metadata-integration-20261116/prior-ci-evidence-verify-r1.json",
+      "bytes": 812,
+      "sha256": "2ac3410d686d14b07e8fb911bddd704120a83136ca4f296dc106174e1d513edd",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/zip-unix-metadata-integration-20261116/prior-ci-evidence-verify-r1.log",
+      "bytes": 578,
+      "sha256": "3c2dca9bca69f23628636cb840b015cddb6ba9df976d124522f5f5a4d77ffcbd",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/zip-unix-metadata-integration-20261116/review-binary-binding-r1.json",
+      "bytes": 546,
+      "sha256": "b34be78500f7050f4da7c9848951a98ed2869cf77b67595150c44a2f13c05c00",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/zip-unix-metadata-integration-20261116/run_command.py",
+      "bytes": 1602,
+      "sha256": "a8e8f0b50f2c5d95342e36f1b8fffd4fdc5daeabbf4a382fa15300c747ce65fc",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/zip-unix-metadata-integration-20261116/scoped-gate-r1.json",
+      "bytes": 775,
+      "sha256": "7cf5c9afe2bd181a13904a0760b79635597e4a23b4b46c0be8f68ae50f4b3cf6",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/zip-unix-metadata-integration-20261116/scoped-gate-r1.log",
+      "bytes": 75267,
+      "sha256": "8a787107ba2c70fc76a9d4ecd8abe6d9581dffcff1dd953a4de27fa6a3aa43cd",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/zip-unix-metadata-integration-20261116/scoped-summary-r1.json",
+      "bytes": 73646,
+      "sha256": "dee519ae46dbba896b60b5bd2c6cc05eb14374187ed844ae9acb11bb406b538b",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/zip-unix-metadata-integration-20261116/scoped_gate.py",
+      "bytes": 837,
+      "sha256": "2a6e8f7f1cad85d09d05311caa2dc920c86308be80815b8da63412c3d46cc455",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/zip-unix-metadata-integration-20261116/source-ci-runs-r1.json",
+      "bytes": 901,
+      "sha256": "553c674f91977760fc32c1e09cdfb856d90f4d5a4e1a4015cbbd96e9fd1dda8e",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/zip-unix-metadata-integration-20261116/source-ci-runs-r1.log",
+      "bytes": 617,
+      "sha256": "f93603ecfc940d6794bdd3f3dc78f4d549211e186a62d5d1a8ca61bd42cf5d78",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/zip-unix-metadata-integration-20261116/source-ci-snapshot-r1.json",
+      "bytes": 809,
+      "sha256": "083a3d7f94541fdd51d317a1ea8116ccd77e69a71458dd424170513a7d4a0fbc",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/zip-unix-metadata-integration-20261116/source-ci-snapshot-r1.log",
+      "bytes": 7642,
+      "sha256": "5e7a5aba7d3b18b1ff72db9c112540ddf781541a60d32530e3f3d81eb255f2ee",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/zip-unix-metadata-integration-20261116/source-ci-watch-r1.json",
+      "bytes": 798,
+      "sha256": "3378607b1c6f3570ede8d8ff1a889488b158ae441ebe19539d44a77d0d687947",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/zip-unix-metadata-integration-20261116/source-ci-watch-r1.log",
+      "bytes": 147904,
+      "sha256": "9563e68cf6e27564af5df169c792b8ca07bc5ead0cc7d53cf018e0142a207f01",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/zip-unix-metadata-integration-20261116/source-delivery-r1.json",
+      "bytes": 587,
+      "sha256": "9d3ea3294d5a44dc27922ca5a290534ada990b72129ab3264757e0c988587f7e",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/zip-unix-metadata-integration-20261116/source-push-r1.json",
+      "bytes": 791,
+      "sha256": "21a5f6761edc9bfa26eb0dbfada97de05b5b5d93cd0344c0fe4c8a15bd377765",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/zip-unix-metadata-integration-20261116/source-push-r1.log",
+      "bytes": 113,
+      "sha256": "df257cd780a604eea9d07261672a34d51c98e15f0e7316844301de6030cc2db1",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/zip-unix-metadata-integration-20261116/source-r1/.github/workflows/ci.yml",
+      "bytes": 4040,
+      "sha256": "d11a06dfd3862ac8a407b8729310e8399ae68e8b431a5ba28f4579e9bb22e753",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/zip-unix-metadata-integration-20261116/source-r1/crates/keelshell-core/src/archive.rs",
+      "bytes": 42043,
+      "sha256": "bc950cc74f339b37a7ddc87f5b2d50425a561133706140cf23788a40734cfdd0",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/zip-unix-metadata-integration-20261116/source-r1/crates/keelshell-core/tests/archive.rs",
+      "bytes": 28280,
+      "sha256": "c86fb6a384e3d7684d7b980f395c93ae06e2014beda19d571679d50aaae1cefc",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/zip-unix-metadata-integration-20261116/source-r2/.github/workflows/ci.yml",
+      "bytes": 4040,
+      "sha256": "d11a06dfd3862ac8a407b8729310e8399ae68e8b431a5ba28f4579e9bb22e753",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/zip-unix-metadata-integration-20261116/source-r2/crates/keelshell-core/src/archive.rs",
+      "bytes": 42043,
+      "sha256": "bc950cc74f339b37a7ddc87f5b2d50425a561133706140cf23788a40734cfdd0",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/zip-unix-metadata-integration-20261116/source-r2/crates/keelshell-core/tests/archive.rs",
+      "bytes": 28326,
+      "sha256": "296783931f3d8284d39efe8e9e93f107076976cd41f7fc2ebc23babf4f377049",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/zip-unix-metadata-integration-20261116/source-windows-job-r1.json",
+      "bytes": 808,
+      "sha256": "eb78c7e55fb488d8aa69b5d0569b2b71afeecc9b757df1e3ac451e977b391ad1",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/zip-unix-metadata-integration-20261116/source-windows-job-r1.log",
+      "bytes": 172738,
+      "sha256": "86d46a6833c820a4d438f92bacba2b3fbef8a6700d2daf04bb31d4893e520218",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/zip-unix-metadata-integration-20261116/source-windows-summary-r1.json",
+      "bytes": 73975,
+      "sha256": "fd2bde86b50dba1e4bbad27c1f42d3c30b455a2ac2e013ca5a296bd132c308f5",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/zip-unix-metadata-integration-20261116/summarize_ci.py",
+      "bytes": 4864,
+      "sha256": "b72b82f98a220c999612041b6e3a89d3e6c260e668e32d6ecd3c594c343891f5",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/zip-unix-metadata-integration-20261116/upstream-zip-receipt-r1.json",
+      "bytes": 1088,
+      "sha256": "2f6985ab4378d0e993085c6ad56d6581bfdcbe85618a4bf18121ace7df3125cc",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/windows-zmodem-parent-rename-candidate-20261116/REPORT.md",
+      "bytes": 7089,
+      "sha256": "5697477bef0778f51a684092026acafa15b97db034e48c1c0f21b5c6aaee75af",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/windows-zmodem-parent-rename-candidate-20261116/artifact-sha256.json",
+      "bytes": 781,
+      "sha256": "fc4839d19a230f606ec188ad70fbc49780a768ccb1fc09ced3470f3b6dbc6886",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/windows-zmodem-parent-rename-candidate-20261116/baseline/crates/keelshell-session/src/zmodem/local_windows/tests.rs",
+      "bytes": 37204,
+      "sha256": "125a148b0ea76d8483411c30e9daa08566534c5152f193e39f62ddd2320d48e3",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/windows-zmodem-parent-rename-candidate-20261116/baseline/crates/keelshell-session/src/zmodem/local_windows.rs",
+      "bytes": 18377,
+      "sha256": "39cd38b4bb145ed55591e63f4016e479f38b06c5b0d5e8d41ce4d8e574ec2383",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/windows-zmodem-parent-rename-candidate-20261116/candidate/crates/keelshell-session/src/zmodem/local_windows/tests.rs",
+      "bytes": 38302,
+      "sha256": "6ffd96fd35ace3a12324bc496ff7fcb678c3762f88d215e72355567fe3b80490",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/windows-zmodem-parent-rename-candidate-20261116/candidate.patch",
+      "bytes": 3514,
+      "sha256": "9f57f8dbf82d7609c3cd18d1395544d7879a3496d6bdc19314f1bc6d093006f4",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/windows-zmodem-parent-rename-candidate-20261116/source-receipt.json",
+      "bytes": 2201,
+      "sha256": "c06b32ad8a56c8948ad94fd870a8dbfa71ebb8e33aaaff35692678bf5804ff14",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/windows-zmodem-parent-rename-candidate-20261116/test-declarations.txt",
+      "bytes": 3278,
+      "sha256": "8777369e5301a51356f387e5c088b1af5e5aca7a2e0b8c88822a0b8e53421776",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/windows-zmodem-rename-review-20261116/REPORT.md",
+      "bytes": 18019,
+      "sha256": "0691797cf587a2ec847f4c41f5e8e88ffa8e16db772a132e204fea4fe0679338",
+      "python_bytecode": false
+    },
+    {
+      "path": "work/windows-zmodem-rename-review-20261116/static-receipt.json",
+      "bytes": 22135,
+      "sha256": "0f42bec945c6cb91e96fbfc7ed6872569d0aad0ab37e981628a93e361544fb48",
+      "python_bytecode": false
+    }
+  ],
+  "shared_target_touched": false,
+  "other_resources_touched": false
+}

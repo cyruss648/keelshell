@@ -1,0 +1,448 @@
+{
+  "schema": "keelshell.windows-zmodem-evidence-review.v1",
+  "created_at_utc": "2026-11-16T13:26:38.895777+00:00",
+  "workspace": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "source": "95813a76f0ec9b59fd043cd982e33cdc01dd69f8",
+  "prior_ci_source": "01f6f6bd8272303fe049bc7b52976afefdb44c37",
+  "decision": "APPROVE_SCOPED_EVIDENCE_REVIEW",
+  "non_author": true,
+  "turing_source_review_repeated": false,
+  "findings": {
+    "P0": 0,
+    "P1": 0,
+    "P2": 0,
+    "P3": 0
+  },
+  "finding_details": [],
+  "initial_three_way_sha": {
+    "local": "95813a76f0ec9b59fd043cd982e33cdc01dd69f8",
+    "tracking": "95813a76f0ec9b59fd043cd982e33cdc01dd69f8",
+    "remote": "95813a76f0ec9b59fd043cd982e33cdc01dd69f8"
+  },
+  "pinned_git_files": {
+    "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/manifest.json": "e6f18334107ee943d8d901e949a1b6e5998e29e9ddb5463ece44612258c05106",
+    "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/originals.tar.gz": "4a69f8a7772d25a617ff0826143746844b64016068e020e43aa2ede46b70e18a",
+    "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/verify.py": "f75019bad1e2a4f1bd8e0548cc49c7f8ac17539f04459d9ff3c8548430a27933",
+    "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/README.md": "0e7d457a3146d0b200b1f9ce52332e3f178d41e32f60df5d71ba5d38f89ab1a8",
+    "docs/HANDOFF.md": "30d7cb109c7564fab4b508be5add8a2f58e4beb257509bf16e981bbcdf362f27",
+    "docs/ROADMAP.md": "7873bf113f5852e8a279c3ba0b4460c0e77590eedb9b90a26ba12710b527c865",
+    "docs/product/ZMODEM.md": "abeeaa25b9b2ba6fb6b5622cbfda840c488641fb7e4b06f2e47916aa4e068002",
+    "docs/testing/records/2026-11-16-windows-zmodem-test-contract.md": "5ef2bb62a1cbab5e542c58be53f4e870e924a3c74fa83533097979a4338b8f5e",
+    "docs/testing/records/2026-11-16-portable-zip-metadata.md": "b8ea9c3b91a0a2fb72e9d6a6e6f267b4278dbcdd18cdf32f78b8e41bada3a10c"
+  },
+  "verify": {
+    "argv": [
+      "python3",
+      "-B",
+      "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/verify.py",
+      "--source",
+      "95813a76f0ec9b59fd043cd982e33cdc01dd69f8"
+    ],
+    "observed_exit": 0,
+    "controller_session_id": 88490,
+    "terminal_reaped": true,
+    "engineering_inputs": 719,
+    "members": 93,
+    "mismatches": 0,
+    "tests_replayed": 0
+  },
+  "seal": {
+    "members": 93,
+    "unique_members": 93,
+    "archive_bytes": 1173225,
+    "uncompressed_bytes": 6422868,
+    "sha256": "4a69f8a7772d25a617ff0826143746844b64016068e020e43aa2ede46b70e18a",
+    "engineering_sha256": "96753dee615c9cd7711a48ad769ec5b14f49c45c581b0bb67323bb51ba508766",
+    "all_member_sizes_and_sha256_matched": true,
+    "verifier_matches_sealed_tools_copy": true,
+    "extracted_to_disk": false
+  },
+  "host_evidence": {
+    "observed_exit": 0,
+    "controller_exit": 0,
+    "direct_reaped": true,
+    "timed_out": false,
+    "seconds": 723.520796458004,
+    "ordinary_suites": 92,
+    "ordinary": [
+      3225,
+      0,
+      48
+    ],
+    "doctests": [
+      14,
+      0,
+      0
+    ],
+    "app": [
+      1341,
+      0,
+      2
+    ],
+    "app_inventory": 1343,
+    "app_inventory_executed_counter_equal": true,
+    "python_main_run": 290,
+    "python_main_skipped": 1,
+    "archive_helper_tests": 30,
+    "custom_harness_targets_excluded": [
+      "local_agent_process.rs",
+      "local_agent_directory_process.rs"
+    ],
+    "controller_groups_separate": [
+      "--readiness-error-tests",
+      "--observer-io-error-tests",
+      "--controller-small-stack"
+    ],
+    "log_sha256": "bb7a8f08dc723259b190283e95154648a33f9707ba1d2d3b98a9d906282a74d2",
+    "fresh_execution_by_this_reviewer": false
+  },
+  "prior_macos": {
+    "job": 133298403996,
+    "log_sha256": "fd4e4675c123338719f7e929c704574e97819bd5fc05576cc10c0b4a0a75ac42",
+    "ordinary_suites": 92,
+    "ordinary": [
+      3225,
+      0,
+      48
+    ],
+    "doctests": [
+      14,
+      0,
+      0
+    ],
+    "archive": [
+      41,
+      0,
+      0
+    ],
+    "pax": [
+      40,
+      0,
+      0
+    ],
+    "app": [
+      1341,
+      0,
+      2
+    ],
+    "all_r2_names_outcomes_and_counts_equal_raw": true,
+    "r1_archive_results_exact_archive_plus_pax": true,
+    "r1_archive_summary_exact_pax": true,
+    "headers_before_previous_summary": 13,
+    "inline_pax_header_raw_line": 3188,
+    "zip_new_case_raw_line": 3171,
+    "zip_original_security_case_raw_line": 3159,
+    "archive_summary_raw_line": 3186,
+    "pax_summary_raw_line": 3232,
+    "checkout_sha_raw_line": 112
+  },
+  "prior_ubuntu": {
+    "job": 133298403683,
+    "log_sha256": "6c818ccd176b2327655e45b17957402fe7c3226e370714359c320c70b04f8139",
+    "ordinary_suites": 92,
+    "ordinary": [
+      3218,
+      0,
+      49
+    ],
+    "doctests": [
+      14,
+      0,
+      0
+    ],
+    "archive": [
+      41,
+      0,
+      0
+    ],
+    "pax": [
+      40,
+      0,
+      0
+    ],
+    "app": [
+      1342,
+      0,
+      2
+    ],
+    "all_r2_names_outcomes_and_counts_equal_raw": true,
+    "r1_archive_results_exact_archive_plus_pax": true,
+    "r1_archive_summary_exact_pax": true,
+    "headers_before_previous_summary": 3,
+    "inline_pax_header_raw_line": 3387,
+    "zip_new_case_raw_line": 3370,
+    "zip_original_security_case_raw_line": 3358,
+    "archive_summary_raw_line": 3385,
+    "pax_summary_raw_line": 3431,
+    "checkout_sha_raw_line": 111
+  },
+  "prior_windows": {
+    "run": 43867112056,
+    "job": 133298403995,
+    "log_bytes": 172738,
+    "log_sha256": "86d46a6833c820a4d438f92bacba2b3fbef8a6700d2daf04bb31d4893e520218",
+    "filesystem": [
+      70,
+      0,
+      0
+    ],
+    "archive": [
+      41,
+      0,
+      0
+    ],
+    "archive_inventory": 41,
+    "session": [
+      327,
+      2,
+      3
+    ],
+    "session_inventory": 332,
+    "all_inventory_names_and_outcomes_equal_raw": true,
+    "zmodem": [
+      41,
+      2,
+      2
+    ],
+    "zmodem_inventory": 45,
+    "both_failures_permission_denied_os5": true,
+    "independent_syscall_localization_in_raw": false,
+    "empty_parent_replacement_case": "ok",
+    "full_gate": "NOT_RUN",
+    "quality_gate_step": "skipped",
+    "checkout_sha_raw_line": 98
+  },
+  "document_boundaries": {
+    "pinned_source_only": true,
+    "old_windows_distinguished": true,
+    "new_candidate_zero_is_seal_time_only": true,
+    "gui_unverified_distinguished": true,
+    "latest_mutable_docs_signed": false,
+    "strict_direct_pty_hold_preserved": true,
+    "later_parent_work_not_freeze_requirement": true
+  },
+  "execution_counts": {
+    "cargo": 0,
+    "fmt": 0,
+    "clippy": 0,
+    "build": 0,
+    "rust_tests_including_prebuilt": 0,
+    "python_unittest": 0,
+    "scripts_check_py": 0,
+    "windows_execution": 0,
+    "gui_actions": 0,
+    "screenshots": 0,
+    "ci_queries": 0,
+    "ci_waits": 0,
+    "ci_cancellations": 0,
+    "ci_reruns": 0,
+    "target_operations": 0,
+    "commits": 0,
+    "pushes": 0,
+    "cleanup": 0,
+    "new_worktrees": 0,
+    "new_chats": 0,
+    "new_branches": 0,
+    "new_containers": 0
+  },
+  "excluded_followup_ci": {
+    "run": 43873806902,
+    "job": 133321520130,
+    "queried": false,
+    "signed": false,
+    "parent_status_updates_used_as_acceptance": false
+  },
+  "mutable_checkout_observed_modified": [
+    "docs/HANDOFF.md",
+    "docs/ROADMAP.md",
+    "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/README.md",
+    "docs/testing/records/2026-11-16-windows-zmodem-test-contract.md",
+    "scripts/test_windows_native_crash.py",
+    "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/delivery/"
+  ],
+  "commands": [
+    {
+      "id": "C01",
+      "shell_entrypoint_or_verbatim_command": "pwd",
+      "observed_exit": 0,
+      "tool_output": "10bee2",
+      "purpose": "确认用户指定 checkout",
+      "inline_python_stdin": false
+    },
+    {
+      "id": "C02",
+      "shell_entrypoint_or_verbatim_command": "cat AGENTS.md /Users/hdh/.codex/RTK.md docs/HANDOFF.md docs/testing/SHARED_TARGET.md",
+      "observed_exit": 0,
+      "tool_output": "28bdc1",
+      "purpose": "先读四份必读约束",
+      "inline_python_stdin": false
+    },
+    {
+      "id": "C03",
+      "shell_entrypoint_or_verbatim_command": "rg -n 'KeelShell|keelshell|严格只读|independent|read.only' /Users/hdh/.codex/memories/MEMORY.md",
+      "observed_exit": 0,
+      "tool_output": "4cef95",
+      "purpose": "只读报告惯例查询，不取历史测试数作当前证据",
+      "inline_python_stdin": false
+    },
+    {
+      "id": "C04",
+      "shell_entrypoint_or_verbatim_command": "git status --short --untracked-files=normal\ngit rev-parse HEAD refs/remotes/origin/feature/editor-unicode-codec-20261114\ngit log -1 --format=fuller\ngit ls-remote --exit-code origin refs/heads/feature/editor-unicode-codec-20261114",
+      "observed_exit": 0,
+      "tool_output": "364916",
+      "purpose": "四项 Git 只读；三方 SHA 一致，初始 status 无输出",
+      "inline_python_stdin": false
+    },
+    {
+      "id": "C05",
+      "shell_entrypoint_or_verbatim_command": "rg --files -g AGENTS.md -g '*zmodem*' -g '*ZMODEM*' -g '*portable-zip*' -g '*windows-archive-root*' docs work/windows-zmodem-evidence-review-20261116",
+      "observed_exit": 2,
+      "tool_output": "cf4a67",
+      "purpose": "首次检索的报告目录尚不存在；保留实际退出 2",
+      "inline_python_stdin": false
+    },
+    {
+      "id": "C06",
+      "shell_entrypoint_or_verbatim_command": "sed -n '413,470p' /Users/hdh/.codex/memories/MEMORY.md\nrg --files -g AGENTS.md -g '!work/**' -g '!target/**' docs .agents",
+      "observed_exit": 2,
+      "tool_output": "c9a881",
+      "purpose": "sed 成功；.agents 不存在令 rg/整体退出 2",
+      "inline_python_stdin": false
+    },
+    {
+      "id": "C07",
+      "shell_entrypoint_or_verbatim_command": "cat docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/README.md docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/manifest.json docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/verify.py",
+      "observed_exit": 0,
+      "tool_output": "a0f37a",
+      "purpose": "先读验证器，确认只读取归档/Git、不写 target/临时解包",
+      "inline_python_stdin": false
+    },
+    {
+      "id": "C08",
+      "shell_entrypoint_or_verbatim_command": "cat docs/testing/records/2026-11-16-windows-zmodem-test-contract.md docs/testing/records/2026-11-16-portable-zip-metadata.md docs/product/ZMODEM.md docs/ROADMAP.md",
+      "observed_exit": 0,
+      "tool_output": "0b81a3",
+      "purpose": "初始文档阅读；最终依据改用固定 SHA Git blob",
+      "inline_python_stdin": false
+    },
+    {
+      "id": "C09",
+      "shell_entrypoint_or_verbatim_command": "PYTHONDONTWRITEBYTECODE=1 python3 -B docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/verify.py --source 95813a76f0ec9b59fd043cd982e33cdc01dd69f8",
+      "observed_exit": 0,
+      "tool_output": "9cfcb7 + 96da6f",
+      "purpose": "session 88490 经一次空 poll 实际回收 exit 0；719/93/0 mismatch，重放 0",
+      "inline_python_stdin": false
+    },
+    {
+      "id": "C10",
+      "shell_entrypoint_or_verbatim_command": "PYTHONDONTWRITEBYTECODE=1 python3 -B -",
+      "observed_exit": 0,
+      "tool_output": "48266e",
+      "purpose": "stdin: 内存读取归档字段、原解析器/门禁验证器、修订说明与历史终态；未调用其写文件入口",
+      "inline_python_stdin": true
+    },
+    {
+      "id": "C11",
+      "shell_entrypoint_or_verbatim_command": "PYTHONDONTWRITEBYTECODE=1 python3 -B -",
+      "observed_exit": 0,
+      "tool_output": "b1044b",
+      "purpose": "stdin: 从固定 Git 归档独立解析 host/macOS/Ubuntu 原日志，逐套件比较 r2，核对 host app 库存与结果",
+      "inline_python_stdin": true
+    },
+    {
+      "id": "C12",
+      "shell_entrypoint_or_verbatim_command": "PYTHONDONTWRITEBYTECODE=1 python3 -B -",
+      "observed_exit": 0,
+      "tool_output": "866730",
+      "purpose": "stdin: 独立核对 93 唯一成员/总字节/哈希；r1 结果恰为 archive+PAX，定位下一头早于上一摘要",
+      "inline_python_stdin": true
+    },
+    {
+      "id": "C13",
+      "shell_entrypoint_or_verbatim_command": "PYTHONDONTWRITEBYTECODE=1 python3 -B -",
+      "observed_exit": 0,
+      "tool_output": "209e3b",
+      "purpose": "stdin: 原 Windows 41/332 编译库存与执行逐项对齐；45 Zmodem 子集、两项 OS5、旧 gate skipped",
+      "inline_python_stdin": true
+    },
+    {
+      "id": "C14",
+      "shell_entrypoint_or_verbatim_command": "PYTHONDONTWRITEBYTECODE=1 python3 -B -",
+      "observed_exit": 0,
+      "tool_output": "218d80",
+      "purpose": "stdin: 固定 Git 文档行号/哈希及 engineering name-only diff；能力台账邻接检索未扩展为完整能力评审",
+      "inline_python_stdin": true
+    },
+    {
+      "id": "C15",
+      "shell_entrypoint_or_verbatim_command": "PYTHONDONTWRITEBYTECODE=1 python3 -B -",
+      "observed_exit": 0,
+      "tool_output": "fb18a6",
+      "purpose": "stdin: 固定文档关键段、host controller/Python 原日志、Turing 原报告的签署范围/命令事实",
+      "inline_python_stdin": true
+    },
+    {
+      "id": "C16",
+      "shell_entrypoint_or_verbatim_command": "PYTHONDONTWRITEBYTECODE=1 python3 -B -",
+      "observed_exit": 0,
+      "tool_output": "f514c0",
+      "purpose": "stdin: 三平台原日志均直接含旧完整源码 SHA；当前 status 仅观察父的并行改动，不要求工作副本冻结",
+      "inline_python_stdin": true
+    },
+    {
+      "id": "C17",
+      "shell_entrypoint_or_verbatim_command": "PYTHONDONTWRITEBYTECODE=1 python3 -B -",
+      "inline_python_stdin": true,
+      "purpose": "仅创建授权的 REPORT.md 和 receipt.json",
+      "observed_exit": 0,
+      "tool_output": "2eac05"
+    },
+    {
+      "id": "C18",
+      "shell_entrypoint_or_verbatim_command": "PYTHONDONTWRITEBYTECODE=1 python3 -B -",
+      "inline_python_stdin": true,
+      "purpose": "回读两文件、JSON、报告 SHA 和签署边界；内层只读 Python 实际回收 exit 0，写入本读回结果",
+      "observed_exit": 0,
+      "child_argv": [
+        "/opt/homebrew/opt/python@3.15/bin/python3.15",
+        "-B",
+        "-c",
+        "import hashlib,json\nfrom pathlib import Path\nout=Path('/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-zmodem-evidence-review-20261116')\nr=json.loads((out/'receipt.json').read_text())\nreport=(out/'REPORT.md').read_bytes()\nassert r['source']=='95813a76f0ec9b59fd043cd982e33cdc01dd69f8'\nassert r['report_sha256']==hashlib.sha256(report).hexdigest()\nassert r['findings']=={'P0':0,'P1':0,'P2':0,'P3':0}\nassert {p.name for p in out.iterdir()}=={'REPORT.md','receipt.json'}\nassert len(r['commands'])==16 and [c['observed_exit'] for c in r['commands']].count(2)==2\nassert r['verify']['observed_exit']==0 and r['verify']['engineering_inputs']==719 and r['seal']['members']==93\nassert all(v==0 for v in r['execution_counts'].values())\nassert not r['excluded_followup_ci']['signed']\nprint(json.dumps({'readback':'PASS','report_bytes':len(report),'report_sha256':r['report_sha256'],'authorized_files_only':True}))\n"
+      ],
+      "child_stdout": "{\"readback\": \"PASS\", \"report_bytes\": 14760, \"report_sha256\": \"25ec166ca9fecade9e462949085933b9619ea06ee2cae36d14e32c30598d29c9\", \"authorized_files_only\": true}\n",
+      "child_stderr": ""
+    }
+  ],
+  "command_accounting": {
+    "total_exec_calls": 18,
+    "readonly_audit_calls_before_artifact_io": 16,
+    "artifact_io_calls": 2,
+    "exits": {
+      "0": 16,
+      "2": 2
+    },
+    "session_poll_calls": 1,
+    "poll_is_new_command": false,
+    "known_nonzero_diagnostics_preserved": [
+      "C05 missing initial review directory",
+      "C06 missing .agents directory"
+    ]
+  },
+  "authorized_write_paths": [
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-zmodem-evidence-review-20261116/REPORT.md",
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/windows-zmodem-evidence-review-20261116/receipt.json"
+  ],
+  "report_sha256": "25ec166ca9fecade9e462949085933b9619ea06ee2cae36d14e32c30598d29c9",
+  "recommendation": "Accept only fixed-source sealed evidence and r2/record correctness; parent collects and closes this reviewer. New Windows CI, mutable Python fixture changes, GUI and full product acceptance remain outside this signature.",
+  "artifact_readback": {
+    "observed_exit": 0,
+    "captured_stdout": {
+      "readback": "PASS",
+      "report_bytes": 14760,
+      "report_sha256": "25ec166ca9fecade9e462949085933b9619ea06ee2cae36d14e32c30598d29c9",
+      "authorized_files_only": true
+    },
+    "completed_at_utc": "2026-11-16T13:27:11.256498+00:00",
+    "report_sha256_rechecked": true
+  }
+}

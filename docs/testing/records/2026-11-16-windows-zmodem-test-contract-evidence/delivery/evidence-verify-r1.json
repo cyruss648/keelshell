@@ -1,0 +1,25 @@
+{
+  "observed_exit": 0,
+  "controller_exit": 0,
+  "timed_out": false,
+  "interrupted": false,
+  "terminal": {
+    "direct_reaped": true,
+    "active_processes": 0,
+    "pipes_drained": true,
+    "errors": []
+  },
+  "errors": [],
+  "command": [
+    "python3",
+    "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/verify.py"
+  ],
+  "seconds": 0.2970811249979306,
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "cargo_target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target",
+  "cargo_owner_checkout_unchanged": true,
+  "wrapper_stdout": "",
+  "wrapper_stderr": "",
+  "log_bytes": 267,
+  "log_sha256": "a597a3f7df585fdfba9e2c3da67effd42b3fedd974e7c8542bc83013e743d15e"
+}

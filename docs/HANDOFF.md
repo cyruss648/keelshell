@@ -25,6 +25,14 @@
 
 ## 最近实际交付与精确 CI
 
+当前源码 `95813a76f0ec9b59fd043cd982e33cdc01dd69f8` 已普通推送，三方一致、读回干净。
+93 成员／719 工程输入的精确 Git 绑定 `0/reaped/7.116s`、零 mismatch。
+新 Quality `43873806902` 正在运行。Windows `133321520130` 已 failure：
+filesystem `70/0/0`、codec `41/0/0`、session `329/0/3 ignored`；
+332 名库存与执行相等，Zmodem 45 名为 `43/0/2 ignored`，两新例与空目录替换例均 ok。
+完整 gate 停在 Python discovery 的身份记录读取错误，290 run／1 failure／34 skipped，
+全量 Rust 未运行；macOS `133321519808`、Ubuntu `133321520197` 仍在完整 gate。
+
 最近源码 `01f6f6bd8272303fe049bc7b52976afefdb44c37` 和文档
 `b7d6e92a937b3ad994c13c37e19db0bd0d059c8f` 已推送，三方一致、读回干净。
 绑定该源码的 Quality `43867112056` 已 completed/failure；
@@ -53,32 +61,35 @@ Windows 新失败是危险来源权限重编码：读回 `0664`，安全断言�
 [81 成员原件](testing/records/2026-11-16-windows-archive-root-publication-evidence/ci-completion/README.md)
 独立于原封存时点；验证实际 `0/reaped/6.835s`，成员及 719 工程输入零 mismatch。
 
-## 活动批次：Windows Zmodem 测试契约
+## 活动批次：Windows 工装发布完成屏障
 
-ZIP 权限修订已在真实 Windows core archive 41 项通过，保持文件 `0600`、
-目录 `0700`，见[ADR 0149](adr/0149-portable-zip-permission-metadata.md)及
-[终态补充](testing/records/2026-11-16-portable-zip-metadata.md#精确-ci-终态补充)。
-接续只修改 Windows Zmodem 两个测试和 CI 对应库存名，生产改动 0：
-有打开后代时要求祖先 rename 精确 `PermissionDenied/OS 5`，完整身份、原审核与字节保持。
-原空父目录成功替换后的 `SourceChanged/mutated=false` 用例及另 42 块逐字节不变，
-模块仍为 45 名／2 ignored。两个新名准确描述预防，解决旧条件报告的名称误导 P2。
+ZIP 私有权限与 Zmodem 两新断言已在上述精确 Windows runner 通过；
+原 958 宿主完整门禁为普通 Rust `3225/0/48 ignored`、rustdoc `14/0/0`、
+app `1341/0/2 ignored`，1343 名逐项相等。Turing 限定静态批准，
+Ramanujan 补查 93 成员／719 Git 输入、r2 摘要及验收记录也限定 APPROVE、P0–P3 全 0；
+两位均已关闭，原静态检索诊断与未验边界保持，详见
+[Zmodem 记录](testing/records/2026-11-16-windows-zmodem-test-contract.md)。
 
-719 项冻结 SHA-256 为 `96753dee615c9cd7711a48ad769ec5b14f49c45c581b0bb67323bb51ba508766`。
-集中完整门禁 `0/reaped/723.521s`：普通 Rust `3225/0/48 ignored`、rustdoc `14/0/0`，
-app `1341/0/2 ignored`，1343 名库存与执行逐项相等；Python 主 discovery
-290 run／1 skipped，独立 archive helper 30 tests；fmt、严格 Clippy、x.y 和三组 controller 全过。
-工程输入零漂移，同一 checkout／target 无 clean。
-新非作者 Turing 限定静态 APPROVE，P0–P3 全 0，12 次静态命令中的辅助脚本漂移诊断
-按原文保留；独立 Rust／Windows／GUI 执行 0，已关闭。
-本批新两例的实际 Windows 断言仍待推送后的精确 CI。
-详见[本批记录](testing/records/2026-11-16-windows-zmodem-test-contract.md)。
+接续只修改 `scripts/test_windows_native_crash.py`，其余 718 工程输入不变。
+普通 tree 与 native Job barrier helper 都先等待写者关闭及 rename 后的发布标记，
+再读取并校验身份；发布后 PermissionError 仍失败关闭。原始句柄、ACK、预算与清理断言保持。
+719 冻结为 `1a516c0280487e62157ad3ee470206ef91c12a08501f12214ef7348c688cfc3a`。
+专项 72 run／2 skipped；集中限定 gate `0/reaped/15.369s`，Python 主 discovery
+293 run／2 skipped，fmt、严格 Clippy、x.y 和 diff 全过；两项受控负例精确失败，
+工程输入零漂移。Rust 源码／manifest／lock 未变，本片不重复原完整 Rust 和三组 controller，
+不将原 958 成绩移签为新 719 输入全量通过。
+新非作者 Boyle 限定 APPROVE、P0–P3 全 0，独立专项 `72 run/70 passed/2 skipped/exit 0`，
+unittest 6.134s／外层 6.203s，实际 waited；辅助检索诊断原文保留，已关闭。
+候选 Windows 实际执行 0。
+详见[ADR 0150](adr/0150-fixture-publication-readiness.md)和
+[测试记录](testing/records/2026-11-16-windows-fixture-publication.md)。
 
 ## 下一步与资源
 
-1. 封存本批门禁、库存、Turing 原件及前批三平台 CI，核对 719 输入后普通提交推送，
-   读回本地／tracking／远端完整 SHA。前批 run 已终态，可以推新工程输入。
-2. 跟进新精确 CI 的 Windows codec 41 名、完整 session 332 名及两个新 guard；
-   通过后收取完整三平台 gate／OpenSSH。只按真实失败接续，不提前写新断言通过。
+1. 收齐原 `43873806902` 三平台终态；新工装片完成非作者复核并封存后普通提交推送，
+   读回三方 SHA。工程 push 不取消尚有价值的原 run。
+2. 跟进下一精确 CI 的 293 项 Python 与 Windows 原七类 tree／实际 exclusive 文件反例，
+   以及完整三平台 gate／OpenSSH；已过的 codec、session 与两新断言按原精确输入保留。
 3. 桌面可用后复核英文工具栏 P2，再补主题／尺寸／双语／完整键盘／IME／辅助技术。
 4. 继续路线中的外部 AI、隧道、配置同步、高级传输和发行矩阵；不把阶段测试写成完整产品完成。
 5. 关闭自有 agent，核对持久原件后回收已无用途的副本；保留其他任务的工作树、分支和容器。
@@ -86,11 +97,13 @@ app `1341/0/2 ignored`，1343 名库存与执行逐项相等；Python 主 discov
 唯一 Cargo target 为 `work/recovery-batch-integration-20261115/target`，
 `CARGO_BUILD_JOBS=2`、`MACOSX_DEPLOYMENT_TARGET=15.0`。同一 checkout 连续使用，归属未切换，
 不反复 clean；换归属前遵循[共享 target 合同](testing/SHARED_TARGET.md)。
-当前活动目录为 `work/windows-zmodem-rename-integration-20261116/`；
+当前活动目录为 `work/windows-fixture-publication-integration-20261116/`；
 旧 publication、两个已完成 reviewer 目录及稳定测试副本在精确 Git 原件核对后
 已回收 88 文件／13,465,970 字节，三个自有 agent 均已关闭。
 旧 publication 路径不可再使用。ZIP 活动副本、Zmodem 准备候选与 Turing 目录
-在本批精确 Git 封存核对后回收；保留必要交付和新 CI 活动原件。
+已在精确 Git 封存核对后回收，共 58 文件／1,040,297 字节；
+保留必要交付和旧 CI 活动原件。Ramanujan、Boyle 均已收取并关闭；
+新报告副本在精确 Git 封存核对后回收。
 没有新建用户 chat、worktree、分支或容器。
 
 最近原生 inventory 仍明确报告 Mac 锁屏且自动解锁失败；GUI 操作／截图 0。

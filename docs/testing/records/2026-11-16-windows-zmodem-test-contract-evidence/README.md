@@ -23,3 +23,15 @@ Turing 只签两文件静态代码／功能复核，APPROVE、P0–P3 全 0；
 可验证当前输入；增加 `--source` 与完整 40 位提交 SHA 可核对精确 Git 输入。
 实际 current 验证 `0/reaped/0.297s`，93 成员、719 输入零 mismatch，测试重放 0。
 逐成员大小、原始路径与摘要见 `manifest.json`。后续提交／CI 回执另存，不改写本次封存。
+
+源码交付为 `95813a76f0ec9b59fd043cd982e33cdc01dd69f8`，三方一致、读回干净。
+精确 Git 绑定 `0/reaped/7.116s`，93 成员与 719 输入零 mismatch。
+[delivery](delivery/manifest.json)保存 push、读回、绑定、新 CI 初始快照和
+58 文件／1,040,297 字节的归档核对后回收；它不改写封存时 Windows 执行 0。
+
+新的[独立证据复核](independent-evidence-review/manifest.json)固定于 `95813a7`：
+Ramanujan 直接核对 93 成员／719 Git 输入、宿主计数、两平台原日志与 r2、
+旧 Windows 库存及历史文档边界，限定 APPROVE，P0–P3 全 0。
+18 次命令为 16 个 exit 0、2 个不存在检索路径的 exit 2，原诊断保留。
+未执行测试／Cargo、未查询后续 CI、未签署 Python 新片或 GUI，已关闭。
+该补充不改写 Turing 的原静态签署或 93 成员归档。

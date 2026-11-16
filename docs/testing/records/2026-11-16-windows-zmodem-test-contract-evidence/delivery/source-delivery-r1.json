@@ -1,0 +1,49 @@
+{
+  "source": "95813a76f0ec9b59fd043cd982e33cdc01dd69f8",
+  "three_way_equal": true,
+  "clean": true,
+  "results": [
+    {
+      "label": "local",
+      "command": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "stdout": "95813a76f0ec9b59fd043cd982e33cdc01dd69f8\n",
+      "exit": 0
+    },
+    {
+      "label": "tracking",
+      "command": [
+        "git",
+        "rev-parse",
+        "origin/feature/editor-unicode-codec-20261114"
+      ],
+      "stdout": "95813a76f0ec9b59fd043cd982e33cdc01dd69f8\n",
+      "exit": 0
+    },
+    {
+      "label": "remote",
+      "command": [
+        "git",
+        "ls-remote",
+        "--heads",
+        "origin",
+        "refs/heads/feature/editor-unicode-codec-20261114"
+      ],
+      "stdout": "95813a76f0ec9b59fd043cd982e33cdc01dd69f8\trefs/heads/feature/editor-unicode-codec-20261114\n",
+      "exit": 0
+    },
+    {
+      "label": "status",
+      "command": [
+        "git",
+        "status",
+        "--porcelain=v1"
+      ],
+      "stdout": "",
+      "exit": 0
+    }
+  ]
+}
