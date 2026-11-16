@@ -121,3 +121,30 @@ current 绑定 `0/reaped/0.273s`；精确提交绑定 `0/reaped/6.703s`，
 精确重建核对。正常包及当前活动 CI 材料保留，未触碰其他 checkout 或容器。
 本轮原生 inventory 再次报告 Mac 锁屏，GUI/截图 0、未启动应用，不保存无关
 浏览器 inventory；英文工具栏的原生 P2 仍待手动解锁后复核。
+
+## 精确 CI 终态
+
+Quality `43859165104` 已 completed/failure；watch `1/reaped/1600.284s`，
+没有超时、取消或重跑。三平台完整原日志均已收取。
+
+| 平台 | Job | 终态 | app | 后续 core archive |
+| --- | --- | --- | --- | --- |
+| Windows | `133271138956` | failure | `1330/0/2 ignored` | `39/1/0` |
+| macOS | `133271139049` | success | `1341/0/2 ignored` | `40/0/0` |
+| Ubuntu | `133271138662` | success | `1342/0/2 ignored` | `40/0/0` |
+
+Windows 文件系统预检 `70/0/0 / 1.04s`；archive backend `29/0/1 ignored / 0.72s`，
+30 个编译库存名与预期和执行逐项相等，包括新后验替换回归。
+原 tar.gz 解包未知结果、显式续传、held READ 隔离、retained-window 四例
+在完整 app 中均逐名 ok。这关闭的是上述精确源码中的后端和应用测试失败，
+不代签 Windows GUI 或整个产品。
+
+Windows 进入后续 core archive 后，危险权限重编码安全断言读回 `0664`
+而要求 `0600`；这是本次唯一实际 Rust 失败。完整 gate 随即失败，
+后续 session 和 target 尚未运行，不提前集成尚未命中的 Zmodem 候选。
+修订接续于[ZIP 元数据记录](2026-11-16-portable-zip-metadata.md)。
+macOS／Ubuntu 的真实 OpenSSH 步骤均 success，仍只归属本页精确源码。
+
+[81 成员终态原件](2026-11-16-windows-archive-root-publication-evidence/ci-completion/README.md)
+已独立封存；验证 `0/reaped/6.835s`，包含逐成员与原 719 输入的精确 Git 绑定，
+零 mismatch、测试重放 0。上级封存时的 NOT_RUN 原文保持。

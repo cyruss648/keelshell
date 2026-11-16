@@ -636,6 +636,39 @@ fn decoding_enforces_entry_and_full_manifest_limits_in_both_formats() {
 }
 
 #[test]
+fn zip_records_private_file_and_directory_modes_in_unix_metadata() {
+    let bundle = ArchiveBundle::new(vec![
+        ArchiveMember::new_directory("private").unwrap(),
+        ArchiveMember::new_file("private/data.bin", b"\0\xffdata".to_vec()).unwrap(),
+        ArchiveMember::new_directory("private/empty").unwrap(),
+    ])
+    .unwrap();
+    let encoded = bundle.encode(ArchiveFormat::Zip).unwrap();
+    let mut archive = zip::ZipArchive::new(Cursor::new(&encoded)).unwrap();
+    assert_eq!(archive.len(), bundle.members().len());
+    for index in 0..archive.len() {
+        let entry = archive.by_index(index).unwrap();
+        let expected = if entry.is_dir() { 0o40700 } else { 0o100600 };
+        assert_eq!(
+            entry.system(),
+            zip::System::Unix,
+            "{}",
+            entry.name().unwrap()
+        );
+        assert_eq!(entry.unix_mode(), Some(expected));
+        let header = usize::try_from(entry.central_header_start()).unwrap();
+        assert_eq!(&encoded[header..header + 4], b"PK\x01\x02");
+        assert_eq!(encoded[header + 5], 3, "central-directory creator OS");
+        let attributes = u32::from_le_bytes(encoded[header + 38..header + 42].try_into().unwrap());
+        assert_eq!(attributes >> 16, expected, "raw Unix mode and file type");
+    }
+    assert_eq!(
+        ArchiveBundle::decode(ArchiveFormat::Zip, &encoded).unwrap(),
+        bundle
+    );
+}
+
+#[test]
 fn reencoding_discards_dangerous_incoming_permissions_and_ownership() {
     let mut member = ZipFixture::file(b"file", b"data");
     member.mode = 0o107777;

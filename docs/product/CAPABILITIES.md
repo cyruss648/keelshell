@@ -1,6 +1,6 @@
 # Capability ledger
 
-## 2026-11-16: Windows archive root publication candidate
+## 2026-11-16: Windows archive root publication and ZIP metadata follow-up
 
 Exact source `8527cf2` completed Quality `43854113236` with macOS/Ubuntu
 success and real OpenSSH checks. Windows passed 70 filesystem cases; its early
@@ -15,9 +15,23 @@ and unknown-result guards remain. It explicitly does not guarantee continuous
 staging descendant identity pinning across rename. Host session and archive
 focused tests passed 301 cases with four ignored, matching all 305 inventory
 names; independent static review approved the three-file scope with no P0–P3.
-Windows type checking and native execution remain pending. See
+Exact source `f094de6ad2789d168f5a24bacb316c98b83608ac` later completed Quality
+`43859165104`: Windows passed 70 filesystem cases and 29 archive backend cases
+with one ignored, matching all 30 compiled archive names. Its app passed 1,330
+cases with two ignored; all four prior extraction/continuation failures passed.
+The subsequent core archive target failed one permission-reencoding assertion
+(`0664` read back instead of required `0600`), so the remaining Windows session
+gate did not run. macOS and Ubuntu passed their complete gates and real OpenSSH.
+These results remain bound to that source; Windows desktop acceptance is open.
+The ZIP follow-up explicitly uses Unix permission metadata on every creator OS
+and adds raw-header/file/directory regressions and earlier Windows codec/session
+checks. Its host scoped gate passed 342 cases with four ignored, matching 346
+inventory names; two controlled DOS negative cases failed as expected before
+exact restoration and recompilation. New Windows execution remains pending. See
 [ADR 0148](../adr/0148-windows-archive-root-publication.md) and the
-[batch record](../testing/records/2026-11-16-windows-archive-root-publication.md).
+[root-publication record](../testing/records/2026-11-16-windows-archive-root-publication.md),
+[ADR 0149](../adr/0149-portable-zip-permission-metadata.md) and the
+[ZIP follow-up](../testing/records/2026-11-16-portable-zip-metadata.md).
 
 ## 2026-11-16: archive diagnostics and Windows preflight
 

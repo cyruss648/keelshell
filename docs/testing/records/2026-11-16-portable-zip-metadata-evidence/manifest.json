@@ -1,0 +1,213 @@
+{
+  "schema": "keelshell.portable-zip-metadata.v1",
+  "baseline_source": "f094de6ad2789d168f5a24bacb316c98b83608ac",
+  "engineering_sha256": "bf46afc32603f312f3ff9e7edb5e48ea9bb4c3073b109c072e2f6ded44a8f4fd",
+  "count": 32,
+  "archive_bytes": 121622,
+  "archive_sha256": "09d557db11c14309f8ff06f9e9c167e08d805564abe776c6b3e2816722984fa3",
+  "uncompressed_bytes": 485703,
+  "entries": [
+    {
+      "path": "batch/candidate-r2.diff",
+      "source_path": "work/zip-unix-metadata-integration-20261116/candidate-r2.diff",
+      "bytes": 6847,
+      "sha256": "3df18ffbab526856b0c9d9a691b4ff6ae1b524a5b6b7857f0f40ade780901234"
+    },
+    {
+      "path": "batch/candidate-source-r1.json",
+      "source_path": "work/zip-unix-metadata-integration-20261116/candidate-source-r1.json",
+      "bytes": 686,
+      "sha256": "bf9478a5ac156d65dbd1ca99355a1070f2174c5fe2f6ec4ff4a304afa3563a61"
+    },
+    {
+      "path": "batch/core-archive-green-r1.json",
+      "source_path": "work/zip-unix-metadata-integration-20261116/core-archive-green-r1.json",
+      "bytes": 829,
+      "sha256": "64caf88d0a4c65ede09b67bb6f1f9c944757ea78a29da806f4df02587358117e"
+    },
+    {
+      "path": "batch/core-archive-green-r1.log",
+      "source_path": "work/zip-unix-metadata-integration-20261116/core-archive-green-r1.log",
+      "bytes": 3437,
+      "sha256": "90b559a75d95d8c89a50431222b462987acbe3f43e89bb489d729fc5260ad7d2"
+    },
+    {
+      "path": "batch/dos-metadata-red-r1.json",
+      "source_path": "work/zip-unix-metadata-integration-20261116/dos-metadata-red-r1.json",
+      "bytes": 783,
+      "sha256": "906ba5a705fbfa392ac134976b883ff14009f2f07849e2d65358e410f3380756"
+    },
+    {
+      "path": "batch/dos-metadata-red-r1.log",
+      "source_path": "work/zip-unix-metadata-integration-20261116/dos-metadata-red-r1.log",
+      "bytes": 2863,
+      "sha256": "ae678e318b9215e9d780fd2e087b2bf3a710f18967fd63fc6aef117690e05571"
+    },
+    {
+      "path": "batch/dos_metadata_control.py",
+      "source_path": "work/zip-unix-metadata-integration-20261116/dos_metadata_control.py",
+      "bytes": 1868,
+      "sha256": "f3e87cc3b747e3245ae576b458f687bf0fdb70f7ff524c71a2e3b1736f46330d"
+    },
+    {
+      "path": "batch/format-r1.json",
+      "source_path": "work/zip-unix-metadata-integration-20261116/format-r1.json",
+      "bytes": 726,
+      "sha256": "10f9e15503835581d762f25f041d2d1bff1c022a414fb3b3a06243dd276461eb"
+    },
+    {
+      "path": "batch/format-r1.log",
+      "source_path": "work/zip-unix-metadata-integration-20261116/format-r1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "batch/inputs-freeze-r1.json",
+      "source_path": "work/zip-unix-metadata-integration-20261116/inputs-freeze-r1.json",
+      "bytes": 116621,
+      "sha256": "85591a4f87760eaf507f617aee689d6d633c79187fea4648f36b9702e0c3f4cf"
+    },
+    {
+      "path": "batch/prior-ci-evidence-verify-r1.json",
+      "source_path": "work/zip-unix-metadata-integration-20261116/prior-ci-evidence-verify-r1.json",
+      "bytes": 812,
+      "sha256": "2ac3410d686d14b07e8fb911bddd704120a83136ca4f296dc106174e1d513edd"
+    },
+    {
+      "path": "batch/prior-ci-evidence-verify-r1.log",
+      "source_path": "work/zip-unix-metadata-integration-20261116/prior-ci-evidence-verify-r1.log",
+      "bytes": 578,
+      "sha256": "3c2dca9bca69f23628636cb840b015cddb6ba9df976d124522f5f5a4d77ffcbd"
+    },
+    {
+      "path": "batch/review-binary-binding-r1.json",
+      "source_path": "work/zip-unix-metadata-integration-20261116/review-binary-binding-r1.json",
+      "bytes": 546,
+      "sha256": "b34be78500f7050f4da7c9848951a98ed2869cf77b67595150c44a2f13c05c00"
+    },
+    {
+      "path": "batch/run_command.py",
+      "source_path": "work/zip-unix-metadata-integration-20261116/run_command.py",
+      "bytes": 1602,
+      "sha256": "a8e8f0b50f2c5d95342e36f1b8fffd4fdc5daeabbf4a382fa15300c747ce65fc"
+    },
+    {
+      "path": "batch/scoped-gate-r1.json",
+      "source_path": "work/zip-unix-metadata-integration-20261116/scoped-gate-r1.json",
+      "bytes": 775,
+      "sha256": "7cf5c9afe2bd181a13904a0760b79635597e4a23b4b46c0be8f68ae50f4b3cf6"
+    },
+    {
+      "path": "batch/scoped-gate-r1.log",
+      "source_path": "work/zip-unix-metadata-integration-20261116/scoped-gate-r1.log",
+      "bytes": 75267,
+      "sha256": "8a787107ba2c70fc76a9d4ecd8abe6d9581dffcff1dd953a4de27fa6a3aa43cd"
+    },
+    {
+      "path": "batch/scoped-summary-r1.json",
+      "source_path": "work/zip-unix-metadata-integration-20261116/scoped-summary-r1.json",
+      "bytes": 73646,
+      "sha256": "dee519ae46dbba896b60b5bd2c6cc05eb14374187ed844ae9acb11bb406b538b"
+    },
+    {
+      "path": "batch/scoped_gate.py",
+      "source_path": "work/zip-unix-metadata-integration-20261116/scoped_gate.py",
+      "bytes": 837,
+      "sha256": "2a6e8f7f1cad85d09d05311caa2dc920c86308be80815b8da63412c3d46cc455"
+    },
+    {
+      "path": "batch/source-r1/.github/workflows/ci.yml",
+      "source_path": "work/zip-unix-metadata-integration-20261116/source-r1/.github/workflows/ci.yml",
+      "bytes": 4040,
+      "sha256": "d11a06dfd3862ac8a407b8729310e8399ae68e8b431a5ba28f4579e9bb22e753"
+    },
+    {
+      "path": "batch/source-r1/crates/keelshell-core/src/archive.rs",
+      "source_path": "work/zip-unix-metadata-integration-20261116/source-r1/crates/keelshell-core/src/archive.rs",
+      "bytes": 42043,
+      "sha256": "bc950cc74f339b37a7ddc87f5b2d50425a561133706140cf23788a40734cfdd0"
+    },
+    {
+      "path": "batch/source-r1/crates/keelshell-core/tests/archive.rs",
+      "source_path": "work/zip-unix-metadata-integration-20261116/source-r1/crates/keelshell-core/tests/archive.rs",
+      "bytes": 28280,
+      "sha256": "c86fb6a384e3d7684d7b980f395c93ae06e2014beda19d571679d50aaae1cefc"
+    },
+    {
+      "path": "batch/source-r2/.github/workflows/ci.yml",
+      "source_path": "work/zip-unix-metadata-integration-20261116/source-r2/.github/workflows/ci.yml",
+      "bytes": 4040,
+      "sha256": "d11a06dfd3862ac8a407b8729310e8399ae68e8b431a5ba28f4579e9bb22e753"
+    },
+    {
+      "path": "batch/source-r2/crates/keelshell-core/src/archive.rs",
+      "source_path": "work/zip-unix-metadata-integration-20261116/source-r2/crates/keelshell-core/src/archive.rs",
+      "bytes": 42043,
+      "sha256": "bc950cc74f339b37a7ddc87f5b2d50425a561133706140cf23788a40734cfdd0"
+    },
+    {
+      "path": "batch/source-r2/crates/keelshell-core/tests/archive.rs",
+      "source_path": "work/zip-unix-metadata-integration-20261116/source-r2/crates/keelshell-core/tests/archive.rs",
+      "bytes": 28326,
+      "sha256": "296783931f3d8284d39efe8e9e93f107076976cd41f7fc2ebc23babf4f377049"
+    },
+    {
+      "path": "batch/upstream-zip-receipt-r1.json",
+      "source_path": "work/zip-unix-metadata-integration-20261116/upstream-zip-receipt-r1.json",
+      "bytes": 1088,
+      "sha256": "2f6985ab4378d0e993085c6ad56d6581bfdcbe85618a4bf18121ace7df3125cc"
+    },
+    {
+      "path": "review/FINAL.md",
+      "source_path": "work/zip-unix-metadata-review-20261116/FINAL.md",
+      "bytes": 5511,
+      "sha256": "96673fda865dcabbb2e3d11fea19bf4a37948972187184fd1a2100a0d27452de"
+    },
+    {
+      "path": "review/REPORT.md",
+      "source_path": "work/zip-unix-metadata-review-20261116/REPORT.md",
+      "bytes": 11608,
+      "sha256": "d35fd012f46c717eb8339708316d4cef5d73bf314dbe6af55ad162f9d66ad7f6"
+    },
+    {
+      "path": "review/independent-archive.log",
+      "source_path": "work/zip-unix-metadata-review-20261116/independent-archive.log",
+      "bytes": 3009,
+      "sha256": "c3bed085e64d29cf66505cb0254a2e7f1a0a9ba5554ee8fed15bdcec57bef392"
+    },
+    {
+      "path": "review/independent-list.log",
+      "source_path": "work/zip-unix-metadata-review-20261116/independent-list.log",
+      "bytes": 2577,
+      "sha256": "901e5469f4a2f549589ae17ecae17e6e96c06a57556724b641941d6bedd504d1"
+    },
+    {
+      "path": "review/independent-test-receipt.json",
+      "source_path": "work/zip-unix-metadata-review-20261116/independent-test-receipt.json",
+      "bytes": 9849,
+      "sha256": "94c71f8086c9db3c7b6761f5d448ff4a2410627e0a9001198a7afef5e54a9842"
+    },
+    {
+      "path": "review/static-receipt.json",
+      "source_path": "work/zip-unix-metadata-review-20261116/static-receipt.json",
+      "bytes": 10762,
+      "sha256": "31ec7a10d890610ae28662d0b66e6b771eb8da3c6d7e870b36ef1bb456ca13b4"
+    },
+    {
+      "path": "tools/verify.py",
+      "source_path": "docs/testing/records/2026-11-16-portable-zip-metadata-evidence/verify.py",
+      "bytes": 3804,
+      "sha256": "54a87883c27b5e895b7c3a2f967dc1fa8b4ad8f55c46fc8c5b74f92a719075be"
+    }
+  ],
+  "author_scope": "342 passed / 4 ignored",
+  "review": "APPROVE_SCOPED / 41 prebuilt host cases",
+  "windows_execution_at_seal": "NOT_RUN",
+  "excluded": [
+    "review-binary",
+    "__pycache__",
+    "Cargo target",
+    "application binaries",
+    "runtime"
+  ]
+}

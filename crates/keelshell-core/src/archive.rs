@@ -11,7 +11,7 @@ use std::io::{self, Cursor, Read, Seek, SeekFrom, Write};
 
 use flate2::{Compression, Crc, Decompress, FlushDecompress, Status};
 use zip::write::SimpleFileOptions;
-use zip::{CompressionMethod, ZipArchive, ZipWriter};
+use zip::{CompressionMethod, System, ZipArchive, ZipWriter};
 
 /// Maximum encoded archive length: 64 MiB.
 pub const MAX_ARCHIVE_BYTES: u64 = 64 * 1024 * 1024;
@@ -229,12 +229,14 @@ impl ArchiveBundle {
 
     fn encode_zip(&self) -> Result<Vec<u8>, ArchiveError> {
         let mut writer = ZipWriter::new(BoundedWriter::default());
+        // Permission bits require a Unix metadata namespace on every creator OS.
+        let options = SimpleFileOptions::default().system(System::Unix);
         for member in &self.members {
             match member.kind {
                 ArchiveEntryKind::File => {
                     writer.start_file(
                         &member.path,
-                        SimpleFileOptions::default()
+                        options
                             .compression_method(CompressionMethod::Deflated)
                             .unix_permissions(0o600),
                     )?;
@@ -242,7 +244,7 @@ impl ArchiveBundle {
                 }
                 ArchiveEntryKind::Directory => writer.add_directory(
                     format!("{}/", member.path),
-                    SimpleFileOptions::default()
+                    options
                         .compression_method(CompressionMethod::Stored)
                         .unix_permissions(0o700),
                 )?,

@@ -32,23 +32,43 @@ jobs:
       - name: Windows native filesystem preflight
         if: runner.os == 'Windows'
         run: cargo test --locked -p keelshell-platform --lib -- --test-threads=1
-      - name: Windows archive backend preflight
+      - name: Windows archive codec preflight
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          $listing = & cargo test --locked -p keelshell-session --lib sftp::archive_transfer::local::tests:: -- --list
+          $listing = & cargo test --locked -p keelshell-core --test archive -- --list
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $listing
+          foreach ($case in @(
+            'reencoding_discards_dangerous_incoming_permissions_and_ownership',
+            'zip_records_private_file_and_directory_modes_in_unix_metadata'
+          )) {
+            if ($listing -cnotcontains "${case}: test") {
+              throw "Required archive codec test was not compiled: $case"
+            }
+          }
+          cargo test --locked -p keelshell-core --test archive -- --test-threads=1
+          exit $LASTEXITCODE
+      - name: Windows session backend preflight
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $listing = & cargo test --locked -p keelshell-session --lib -- --list
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           $listing
           foreach ($case in @(
             'sftp::archive_transfer::local::tests::windows_archive_private_nested_tree_publishes_after_child_creation_handles_close',
-            'sftp::archive_transfer::local::tests::windows_archive_empty_private_tree_publishes_with_exact_root_identity'
-            'sftp::archive_transfer::local::tests::windows_archive_same_content_replacement_after_release_fails_published_readback'
+            'sftp::archive_transfer::local::tests::windows_archive_empty_private_tree_publishes_with_exact_root_identity',
+            'sftp::archive_transfer::local::tests::windows_archive_same_content_replacement_after_release_fails_published_readback',
+            'zmodem::local::tests::zmodem_upload_local_confirmation_rejects_replaced_ancestor_even_with_same_bytes',
+            'zmodem::local::tests::zmodem_windows_reviews_reject_replaced_grandparent_with_original_leaf_and_source',
+            'zmodem::local::tests::zmodem_local_publication_rejects_a_replaced_parent_without_writing_either_tree'
           )) {
             if ($listing -cnotcontains "${case}: test") {
-              throw "Required Windows archive test was not compiled: $case"
+              throw "Required Windows session test was not compiled: $case"
             }
           }
-          cargo test --locked -p keelshell-session --lib sftp::archive_transfer::local::tests:: -- --test-threads=1
+          cargo test --locked -p keelshell-session --lib -- --test-threads=1
           exit $LASTEXITCODE
       - name: Rust quality gate
         run: python scripts/check.py
