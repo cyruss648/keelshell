@@ -25,6 +25,17 @@ ignored, app 1398/0/2, 14 rustdoc, Python 405 run / 2 skipped. Independent
 compiled inventories match all 1400 app, 408 session and 10 routing results. The normal macOS arm64 package passed structure / minimum-system
 inspection, without a GUI launch. Actual Windows API / capture replay, real
 Windows OpenSSH, native desktop and release remain separate acceptance lanes.
+The exact source `5d2df2f` was pushed and its Windows Server2025 AMD64 workflow
+completed successfully: real collectors, independent Win32 comparison, five
+original PowerShell object terminal proofs and authenticated capture replay.
+Real Windows SSH remains UNRUN/HOLD. Exact Quality43972364934 completed
+successfully on Windows/macOS/Ubuntu: ordinary Rust3394/3407/3400 passed,
+zero failed,57/59/60 ignored;14 rustdoc each. The Windows lab actually ran
+111 tests:108 passed and3 skipped. A new non-author API-evidence review
+approved102 offline assertions with zero P0-P3 findings and no test replay.
+The raw artifact digest matches GitHub;91 archived CI members and758 exact
+Git inputs passed the [offline verifier](../testing/records/2026-11-17-windows-read-only-monitor-evidence/ci-completion/README.md).
+Native desktop and release acceptance remain open.
 See [Windows monitoring](WINDOWS_MONITORING.md), [ADR 0156](../adr/0156-windows-read-only-monitor.md)
 and the [exact test record](../testing/records/2026-11-17-windows-read-only-monitor.md).
 

@@ -39,4 +39,7 @@ python3 -B docs/testing/records/2026-11-17-windows-read-only-monitor-evidence/ve
 工作区重算 r2 已实际 exit0。首轮缺失回执的失败及后续精确 Git 绑定见交付补记。
 实际 Windows API／ABI、cmd／PowerShell 原进程终态、capture replay、真实 Windows SSH、
 原生桌面、签名安装和发行不由这份本机记录签署。
-新 hosted workflow 的精确来源及最终状态另行留证，不迁移上一批 CI 成绩。
+同一工程5d2df2f的两个hosted workflow已成功，原job／API原件及逐名结果保存在
+[91成员精确CI终态](ci-completion/README.md)，不迁移上一批CI成绩。
+推送读回、精确来源正常包、后续副本清理、额外非作者API回执复核及原失败
+见[交付封存](delivery/README.md)。上述根540成员封存保持原字节，不添加或改写旧原件。

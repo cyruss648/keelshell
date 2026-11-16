@@ -12,7 +12,10 @@ SHA-256 分别为 `3b6e75e988ef096fd7ec4941241f9a03299c0f1e3933a3100ee5ac7af8496
 
 Windows 远端只读监控已整合：独立平台身份、固定 PowerShell 5.1 JSON、严格解析、
 按项缓存、CPU gauge／未知指标、工作集、端口、三主题双语与带年龄的 AI 缓存。
-基线 `4209e272260aff6374e6216423ce8e0157bea2f4`，工程随本批记录提交，精确远端交付另在本批记录补记。
+基线 `4209e272260aff6374e6216423ce8e0157bea2f4`；工程
+`5d2df2fc5ac8566fe11182b7f4337076296dfa54` 已普通提交／推送，
+本地／tracking／远端三方一致、读回干净。540 成员／758 输入的精确 Git 绑定通过，
+`0/reaped/2.856026s`，不是仅以 HEAD 或编译缓存代签。
 设计见 [ADR0156](adr/0156-windows-read-only-monitor.md)，使用见
 [Windows 监控](product/WINDOWS_MONITORING.md)，实际结果见
 [本批记录](testing/records/2026-11-17-windows-read-only-monitor.md)。
@@ -30,10 +33,21 @@ app1398/0/2、session404/0/4、Windows routing9/0/1；Python405 run/2 skipped，
 app1400、session408、routing10 的精确二进制独立库存也逐名相等，758 输入前后不变。
 正常 release build 和 arm64／minos15.0 包结构已通过，未启动／安装。
 
-Windows API、真实 cmd／PowerShell 终态、capture replay、真实 Windows OpenSSH、
-原生桌面和发行均单独验收。新 Windows workflow push 后自动运行 direct API／replay，
-isolated-ssh 仅手动前置检查，明确 HOLD。本次最新原生检查仍为 Mac 锁屏且自动解锁失败，
-GUI 操作／截图 0。不要将受控 SSH、头部测试或包结构扩大为这些验收。
+精确 Windows workflow `43972365007` 已 completed/success：
+Server2025 AMD64／PowerShell5.1.26100.33648 的生产命令、独立 Win32 对照及认证路由 replay
+步骤通过。原 artifact 14279316541 的 46,825 字节 ZIP 与 GitHub digest 相等；
+34 原件复核五个 cmd→PowerShell 的原对象自然终态／exit0、fixture 终态、
+4 自有双栈端点／2 排除连接、3 稳定接口和2固定卷，全部命令与当前源码逐字节相等。
+Quality `43972364934` 三平台已全部 completed/success：
+Windows／macOS／Ubuntu 普通 Rust 分别3394／3407／3400 passed，failed均0，
+ignored为57／59／60；各14 rustdoc，Python主405 run，skipped分别37／2／2。
+91成员精确CI封存与758 Git输入绑定通过，`0/reaped/2.423535s`；
+逐项结果和边界见[精确CI终态](testing/records/2026-11-17-windows-read-only-monitor-evidence/ci-completion/README.md)。
+Windows lab实际111 run＝108通过＋3跳过。新增非作者Hypatia仅复核API原件／replay，
+102项离线复算通过，限定APPROVE、P0–P3全0；独立Windows执行／测试重跑均0，已实际关闭。
+真实 Windows OpenSSH、原生桌面和发行继续单独验收；isolated-ssh 此次 skipped，
+仅手动前置检查，明确 HOLD。最新原生检查仍为 Mac 锁屏且自动解锁失败，
+GUI 操作／截图 0。API／replay 和包结构不扩大成这些验收。
 
 ## 精确已交付基线
 
@@ -67,8 +81,9 @@ Python 主 discovery 各 293 run，skipped 为 34／2／2；包装与 helper 独
 
 ## 当前资源与下一步
 
-1. Windows 本批最终完整门禁、两位非作者复核和精确库存均通过；
-   封存原失败／原件后普通提交推送，收取精确 Quality 与 Windows API workflow 终态。
+1. Windows 本批已推送，本机完整门禁、两位非作者源码／功能复核、精确库存和Git绑定通过；
+   API workflow与Quality43972364934三平台成功、原job／API原件封存通过，
+   新非作者API回执复算批准且已关闭。维护从精确记录接续，不重复未变工程全门禁。
 2. 按[路线](ROADMAP.md)继续真实 Windows SSH、独立 Zmodem peer、外部 AI／MCP、
    隧道与同步、原生矩阵及六目标发行；完整产品目标不标 complete。
 3. 桌面可用后先复核英文工具栏 P2，再补三主题／尺寸／双语／焦点／IME／辅助技术。
@@ -77,7 +92,17 @@ Python 主 discovery 各 293 run，skipped 为 34／2／2；包装与 helper 独
 `CARGO_BUILD_JOBS=2`、`MACOSX_DEPLOYMENT_TARGET=15.0`。
 归属为当前 checkout，连续使用不 clean；切换源码归属先依
 [共享 target 合同](testing/SHARED_TARGET.md)失效本项目产物并核对编译库存。
-本批活动目录 `work/windows-monitor-integration-20261117/`，正常包 `package-r1/KeelShell.app`；
-六份 reviewer／interop 专用副本已按原 SHA 回收，886,506,992 字节；
-本轮所有作者／reviewer 均已实际关闭。target 和其他任务资源保留。
+当前正常包为 `work/windows-monitor-delivery-20261117/package-r2/KeelShell.app`，
+manifest 绑定精确工程5d2df2f，五个应用文件与提交前包逐字节相等，
+arm64／minos15.0 结构检查通过，未启动／安装。
+本批CI／API原件从上述[精确CI封存](testing/records/2026-11-17-windows-read-only-monitor-evidence/ci-completion/README.md)读取，
+推送、正常包、回收与非作者API报告从[交付封存](testing/records/2026-11-17-windows-read-only-monitor-evidence/delivery/README.md)读取。
+`work/windows-monitor-finalize-20261117/`保留文档推送读回与最终自有副本清理回执。
+CI／reviewer和交付父目录中的工作副本仅供Git绑定后回收，不作为维护入口；
+该交付目录仅需保留上述当前正常包，唯一target继续保留。
+六份专用副本已按原 SHA 回收，886,506,992 字节；再以精确 Git 原件核对回收
+1,968 文件／106,004,384 字节及7自有目录，包括原集成／review／oracle／stage 和旧 CI 副本，
+这些旧路径不可继续使用；9个辅助原件已纳入69成员交付封存。
+本轮所有作者／reviewer 均已实际关闭，正常包六文件摘要及 target 目录身份前后不变。
+target 和其他任务资源保留。
 旧包与旧路径只描述历史，不把已回收路径当当前入口。

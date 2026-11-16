@@ -44,6 +44,13 @@ CPU 曲线复用同一份已验证的当前点，不增加轮询。暂停、断�
 
 ## 验证边界
 
+2026-11-17 精确工程 `5d2df2f` 的 Windows Server2025 AMD64 hosted 验证已通过
+生产采集、独立 Win32 对照、五类 cmd／PowerShell 原对象自然终态和认证路由 replay。
+同一工程的Windows／macOS／Ubuntu完整质量门禁均成功，普通Rust分别3394／3407／3400通过、
+失败均0。Windows工装Python111 run中108通过、3跳过；非作者离线回执复算102项通过。
+这只覆盖记录中的平台、运行时与自有资源，完整原件及精确结果从
+[CI记录](../testing/records/2026-11-17-windows-read-only-monitor-evidence/ci-completion/README.md)读取。
+
 Windows 工装执行实际生产采集命令，经 `cmd.exe` 启动，并用独立 Win32 API 对照
 自有进程和双栈 TCP/UDP 对象。原始帧可以通过认证 monitor 路由回放；
 该回放不证明真实 Windows OpenSSH 的认证、默认 shell 或远端进程终态。
