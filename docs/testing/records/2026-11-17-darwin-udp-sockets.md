@@ -1,7 +1,8 @@
 # 远端 macOS UDP 端口 — 2026-11-17
 
 状态：专项、真实 SSH、两位独立复核、集中完整门禁与正常包结构通过；工程已推送，
-新精确CI进行中，
+精确CI的macOS通过、Ubuntu／Windows栈溢出失败，后续修复另见
+[栈修复记录](2026-11-17-monitor-render-stack.md)；
 完整产品仍未完成。
 基线 `e1f7359a975726dc6cf110fb12edcbb8a582cd95`；
 活动目录 `work/darwin-udp-20261117/`。
@@ -144,3 +145,14 @@ Python缓存。共享target目录device／inode及当前正常包六文件SHA前
 交付／CI工装在`work/darwin-udp-delivery-20261117/`；watch结束后再记录终态。
 [25成员交付补充](2026-11-17-darwin-udp-sockets-evidence/delivery/README.md)
 保存上述原件，重算`0/reaped/0.106333s`、零mismatch，测试重放0。
+
+## 后续精确 CI 终态
+
+Quality43945988599已completed/failure，watch为`1/reaped/1959.911713s`，
+三平台原件已收齐，没有取消或重跑。
+macOS完整gate及OpenSSH成功，普通Rust3325/0/58 ignored、app1375/0/2、
+14rustdoc；Ubuntu／Windows完整app因嵌套监控栈溢出而中止，没有完整app摘要。
+已观察／未报告数及两个准确失败名见
+[37成员终态](2026-11-17-darwin-udp-sockets-evidence/ci-completion/README.md)，
+重算`0/reaped/1.964279s`、729精确Git输入零mismatch。
+该失败不会被后续渲染重构或绿色运行改写，修复后731输入另行验收。

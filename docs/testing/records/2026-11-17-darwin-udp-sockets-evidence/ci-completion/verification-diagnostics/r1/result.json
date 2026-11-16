@@ -1,0 +1,30 @@
+{
+  "receipt": {
+    "observed_exit": 1,
+    "controller_exit": 1,
+    "timed_out": false,
+    "interrupted": false,
+    "terminal": {
+      "direct_reaped": true,
+      "active_processes": 0,
+      "pipes_drained": true,
+      "errors": []
+    },
+    "errors": [],
+    "command": [
+      "python3",
+      "docs/testing/records/2026-11-17-darwin-udp-sockets-evidence/ci-completion/verify.py"
+    ],
+    "seconds": 0.14368420900427736,
+    "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+    "cargo_target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target",
+    "cargo_owner_checkout_unchanged": true,
+    "wrapper_stdout": "",
+    "wrapper_stderr": "",
+    "log_bytes": 558,
+    "log_sha256": "16ba4cbdbcdb3b09414e52e906d547caaeaba35d6f605af563f2750c6fc43225"
+  },
+  "stderr_utf8": "Traceback (most recent call last):\n  File \"/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/docs/testing/records/2026-11-17-darwin-udp-sockets-evidence/ci-completion/verify.py\", line 141, in <module>\n    main()\n    ~~~~^^\n  File \"/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/docs/testing/records/2026-11-17-darwin-udp-sockets-evidence/ci-completion/verify.py\", line 103, in main\n    assert partial == document(f\"job-{job}-partial-r2.json\")\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n",
+  "reason": "Python tuple outcomes compared to JSON list outcomes before representation normalization",
+  "tests_replayed": 0
+}

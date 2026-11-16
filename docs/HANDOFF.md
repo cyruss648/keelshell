@@ -5,32 +5,33 @@
 旧计数不覆盖当前授权。旧入口可从 `2f29744:docs/HANDOFF.md` 的 Git blob 读取；
 更早原文见[交接历史](HANDOFF_HISTORY_2026-11-16.md)与[路线历史](ROADMAP_HISTORY_2026-11-16.md)。
 
-当前在做远端 macOS UDP 端口与缓存分页：生产／测试已实现，专项 session36、
-app12 与真实 Darwin SSH15全部通过；两位独立复核及最终集中门禁已通过，
-正常release构建及arm64/minos15.0包结构通过。工程
-`16703293012d798f885e1590f02c348c47e81a10` 已普通提交／推送，
-本地／tracking／远端三方一致，读回工作区干净；
-199成员／729工程输入精确Git绑定 `0/reaped/2.004278s`、零mismatch。
-提交来源正常包的五个应用文件与提交前逐字节相等，仅来源manifest改变。
-Quality `43945988599` 已触发，最新快照Windows／Ubuntu完整gate在运行、
-macOS排队；不能以旧a1的CI代签本批。
-最终 r3 冻结729输入，aggregate
-`e94405c2858d9796d9256dfd44eb277914c18fedd14e258e8025c747528e9a0e`。
-完整gate为0/reaped/754.599981s，普通Rust3325/0/58 ignored、app1375/0/2、
-14rustdoc、Python293/2 skipped、helper另列30。准确app1377及session358库存
-与执行相等，18新默认名全部ok，工程输入前后不变。
-原分页测试不可见失败和工装命令镜像不匹配失败均保留，分别修订测试滚动和
-两行镜像，没有放宽断言。Hooke／Nash分别批准r3静态源码和父级专用prebuilt，
-P0–P3全0；后者独立69/0/0、独立编译0。四位自有agent均已关闭，
-专用副本2文件／316,832,336字节已核对回收。199成员原件重算通过，
-最初封存过滤器诊断与193成员旧原件保持。依赖官方查询遇网络失败和有界超时，最新版本保持UNKNOWN；
-manifest／lock未改。原生仍锁屏，操作／截图0。
-接续见[本批记录](testing/records/2026-11-17-darwin-udp-sockets.md)及
-[ADR0154](adr/0154-darwin-udp-sockets.md)。
-上一源码a1的Quality43934041540三平台已全部completed/success，watch已收取，
-精确计数／727 Git输入重算见
-[CI终态](testing/records/2026-11-17-editor-backup-readback-evidence/ci-completion/README.md)，
-不代签当前729输入。
+当前在收口监控渲染栈修复：原UDP工程`1670329`已推送，其
+Quality43945988599终态为failure，macOS完整gate／OpenSSH成功，
+Ubuntu／Windows分别在两项既有嵌套监控回归中栈溢出。
+[37成员终态](testing/records/2026-11-17-darwin-udp-sockets-evidence/ci-completion/README.md)
+保存全部原job日志、已观察／未报告结果和派生诊断，729个精确Git输入绑定通过；
+没有取消或重跑，watch已reap。
+
+最终修复r2将全部分区移入私有AnyElement builder，主render只装配；
+没有增加栈配置、改测试断言或依赖。731输入aggregate
+`2ea283af87af7e0af2fa912ebc28f9360e0c5113cd40e1111502f8cdd6d8551e`。
+限定gate为`0/reaped/354.196674s`，fmt、严格workspace/all-target Clippy、
+x.y和显式2 MiB完整app1375/0/2通过，1377库存与逐名结果相等。
+本片没有重跑完整workspace，不移签旧3325项。
+Mill／Hubble最终r2分别静态和父级专用prebuilt限定批准，P0–P3全0，
+后者独立78/0/0、独立编译0；原r1中止／漂移及全部诊断保持。
+两位reviewer及规划agent Singer已关闭，2份专用副本／548,027,216字节已回收。
+正常release构建及arm64/minos15.0包结构通过；提交推送进行中。
+本片没有原生桌面操作，最新依赖在线完整复查仍UNKNOWN。
+接续见[栈修复记录](testing/records/2026-11-17-monitor-render-stack.md)及
+[ADR0155](adr/0155-monitor-render-stack-boundaries.md)。
+
+UDP与缓存分页的专项、真实Darwin SSH15项、原729输入宿主完整门禁和独立复核
+保持各自通过范围，详见[UDP记录](testing/records/2026-11-17-darwin-udp-sockets.md)；
+不能代签后续731输入或三平台桌面。
+上一a1的Quality43934041540三平台成功与
+[727输入终态](testing/records/2026-11-17-editor-backup-readback-evidence/ci-completion/README.md)
+也只属于该精确源码。
 
 上一批编辑器备份完整读回：30 session 新例和 5 GPUI 新例、标准 OpenSSH
 18 项已通过；长状态详情移入／滚动 P2 已修复，两位独立追加复核均 APPROVE、
@@ -196,8 +197,8 @@ unittest 6.134s／外层 6.203s，实际 waited；辅助检索诊断原文保留
 
 ## 下一步与资源
 
-1. UDP功能批的专项、集中门禁、独立复核、正常包结构与提交推送已完成；
-   收取精确源码 `1670329` 的Quality `43945988599` 终态，
+1. 监控栈修复r2的限定门禁、独立复核及正常包结构已通过；
+   完成提交推送，再收取精确修复后CI，保持原43945988599失败和全部诊断。
    保留依赖在线UNKNOWN和原生未验边界，不重复未变宿主测试。
    编辑器备份及Windows测试修复已推送；精确源码 `a1a97b3` 的
    Quality43934041540三平台完整门禁已成功，不重放未变的宿主测试或旧CI。

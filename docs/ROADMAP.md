@@ -26,10 +26,19 @@
 两位独立复核和最终完整宿主gate均通过，普通Rust3325/0/58 ignored、
 14rustdoc、Python293/2 skipped。正常release及arm64/minos15.0包结构通过，
 五个应用文件与提交前逐字节相等；未启动／安装，原生另验。
-Quality43945988599已触发，Windows／Ubuntu完整gate在运行、macOS排队；
+Quality43945988599已completed/failure：macOS完整gate／OpenSSH成功，
+Ubuntu／Windows在嵌套监控回归中栈溢出；原37成员终态和729输入绑定保持。
 依赖在线复查UNKNOWN，不沿用旧CI或旧依赖回执代签。
 235文件／70,913,865字节自有副本按Git原件回收，共享target与保留正常包不变。
 见[UDP记录](testing/records/2026-11-17-darwin-udp-sockets.md)。
+
+当前监控栈修复r2为731输入，将全部分区移入独立AnyElement builder。
+限定gate354.196674s通过，显式2 MiB完整app1375/0/2、1377库存逐名相等，
+fmt／严格Clippy／x.y通过；没有把旧workspace3325项移签到新输入。
+两位新非作者限定批准，P0–P3全0；独立prebuilt78/0/0、独立编译0。
+正常release／arm64/minos15.0包结构通过，提交推送进行中；
+3位本轮agent关闭，2文件／548,027,216字节私有副本已回收。
+见[栈修复记录](testing/records/2026-11-17-monitor-render-stack.md)。
 
 当前编辑器备份完整读回批的 30 session／5 app 新例、标准 OpenSSH 18 项已通过。
 长状态详情移入／滚动 P2 已修复，两位新非作者追加复核均 APPROVE、P0–P3 全 0；
@@ -148,8 +157,9 @@ app 为 `1351/0/2`、`1362/0/2`、`1363/0/2`；各 14 rustdoc，Python 293 项�
 
 ## 接续顺序
 
-0. UDP工程 `1670329` 已推送，收取Quality43945988599三平台终态；
-   当前Windows／Ubuntu完整gate运行中、macOS排队，不把进行中写成成功。
+0. 监控栈修复r2的限定门禁／独立复核／正常包结构通过，完成提交推送并收取新精确CI；
+   原UDP工程1670329的43945988599三平台终态已收齐，保留Ubuntu／Windows栈溢出失败，
+   macOS完整成功不代签修复后输入或其他平台。
    编辑器备份及一行Windows测试修复已推送，源码 `a1a97b3` 的
    Quality43934041540三平台完整gate现已全部成功，
    不重复未变宿主完整测试或重跑旧CI。

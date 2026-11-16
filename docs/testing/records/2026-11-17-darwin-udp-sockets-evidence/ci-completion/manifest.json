@@ -1,0 +1,198 @@
+{
+  "sealed_utc": "2026-11-16T20:46:51.660082+00:00",
+  "count": 37,
+  "archive_bytes": 643423,
+  "archive_sha256": "9ffe6504545878bdcfcea9199b98b009951f041f520db0ff6dbc71138444d356",
+  "entries": [
+    {
+      "path": "ci-current-r2.json",
+      "bytes": 874,
+      "sha256": "ddcf9fefc3ed11d9beed3ef33970a5521c52008b0de1db1228c4081e32336b32"
+    },
+    {
+      "path": "ci-current-r2.log",
+      "bytes": 7793,
+      "sha256": "66f397dd2f64d9d4a8375f8c48a8316bc0ef04fa8431fc3f9c325062aa9f3b7b"
+    },
+    {
+      "path": "ci-final-r1.json",
+      "bytes": 873,
+      "sha256": "c6ff5422b5eafe9206079e16b09f60582ec79182529c43b41955ffe28b648572"
+    },
+    {
+      "path": "ci-final-r1.log",
+      "bytes": 8419,
+      "sha256": "2971acd92f70600e8faa0525e2c755c3cf2a1d80143e0888eb2c149ce1b2423d"
+    },
+    {
+      "path": "ci-ubuntu-failure-download-r1.json",
+      "bytes": 1119,
+      "sha256": "3cc9b17b913b7a8f7f30bd11a0e82ba214a04f2ed2e711f9978182a198983d99"
+    },
+    {
+      "path": "ci-ubuntu-failure-download-r1.log",
+      "bytes": 20,
+      "sha256": "7eac10a1c522ebecd463ba9037c225e59777100eb23d0fad3e3110c927437f1b"
+    },
+    {
+      "path": "ci-watch-r1.json",
+      "bytes": 839,
+      "sha256": "cfa0720121ad85d33522efda791ed9966f6e877a517a0e2d3785181dbfaf166a"
+    },
+    {
+      "path": "ci-watch-r1.log",
+      "bytes": 130189,
+      "sha256": "87f5bba3296a7090f1247170f29a04e26cbdc8f6036629fc6f272f94b48af657"
+    },
+    {
+      "path": "ci-windows-failure-download-r1.json",
+      "bytes": 1119,
+      "sha256": "c86e9a37c01dd86e91981461179f077da4259cd8ff76a04d2852cfbc002a824e"
+    },
+    {
+      "path": "ci-windows-failure-download-r1.log",
+      "bytes": 20,
+      "sha256": "0cf8a3d2ce00cdd4a3b5906ee3f7814e215613d71b5bc62b72ee6c3fa4b90dbb"
+    },
+    {
+      "path": "download-terminal-r1.json",
+      "bytes": 762,
+      "sha256": "64263d56393ebc593cd7974497a7c8c54723a15d59e904565b55d04fc2d31147"
+    },
+    {
+      "path": "download-terminal-r1.log",
+      "bytes": 831,
+      "sha256": "f406ed6d1cb6c6ece129589f0db7958fdd5eec805aebefd42771a9fb677bb5fc"
+    },
+    {
+      "path": "download_terminal.py",
+      "bytes": 1585,
+      "sha256": "884c0f6bc1d9fc0783efb782275efd75fac235620a7e7f298e995eb731e56088"
+    },
+    {
+      "path": "inputs-freeze-r3.json",
+      "bytes": 134249,
+      "sha256": "8c92ef5f4d15b8e2a3842a4726aba694f7e2f52536904c8a1d816e253db8b8df"
+    },
+    {
+      "path": "job-133575666472-suites.json",
+      "bytes": 506435,
+      "sha256": "7bca8ec0d9a01e5b4e4ee27fcec2faf879e8af91a0c3bd12b521e1e9b4ed9c18"
+    },
+    {
+      "path": "job-133575666472.log",
+      "bytes": 867363,
+      "sha256": "8ec9680056631b286b0657c5b202c33d9623827bbf877b3fcf693418d683d6c2"
+    },
+    {
+      "path": "job-133575666946-failure-r1.log",
+      "bytes": 361456,
+      "sha256": "49c02b5bf24c79b04afe8769dc6a36a667b74415a07b6cb3852692fa47d946ef"
+    },
+    {
+      "path": "job-133575666946-partial-r1.json",
+      "bytes": 130946,
+      "sha256": "a405338ee53b23dbd78e81de12ba1c1568743c12c96ce16586e4274166db019f"
+    },
+    {
+      "path": "job-133575666946-partial-r2.json",
+      "bytes": 130946,
+      "sha256": "a405338ee53b23dbd78e81de12ba1c1568743c12c96ce16586e4274166db019f"
+    },
+    {
+      "path": "job-133575666946.log",
+      "bytes": 361456,
+      "sha256": "49c02b5bf24c79b04afe8769dc6a36a667b74415a07b6cb3852692fa47d946ef"
+    },
+    {
+      "path": "job-133575666982-failure-r1.log",
+      "bytes": 468685,
+      "sha256": "e2b2a7e8a1129f839a9be5798090c8f9dce39cfe1fce4209fcce7f36082a7214"
+    },
+    {
+      "path": "job-133575666982-partial-r2.json",
+      "bytes": 124995,
+      "sha256": "303c1eef4598fa41505a7fa6f3de89259441f35e7be3e1a8f40f787c9e2566af"
+    },
+    {
+      "path": "job-133575666982.log",
+      "bytes": 468685,
+      "sha256": "e2b2a7e8a1129f839a9be5798090c8f9dce39cfe1fce4209fcce7f36082a7214"
+    },
+    {
+      "path": "job-logs-r1.json",
+      "bytes": 1017,
+      "sha256": "00d9fb63872ec3b81bcfc5dadefc817a67781ff3cab1f77413c9ef45225e089d"
+    },
+    {
+      "path": "macos-summary-r1.json",
+      "bytes": 572,
+      "sha256": "1eb4d99d978099700e7a4eb3142883d1396f1beabdcbad7a9ec7a299b249fa3d"
+    },
+    {
+      "path": "partial-derive-r1.json",
+      "bytes": 765,
+      "sha256": "c4348d4d40fa73498e7e9dcf9584f328621a4d34aa0bf3b1c158d84ae9ed9ae6"
+    },
+    {
+      "path": "partial-derive-r1.log",
+      "bytes": 633,
+      "sha256": "3075b32163f16ff1b25800ae1276f784619a25d8e32ffbe518f3613ea667ca9b"
+    },
+    {
+      "path": "partial-derive-r2.json",
+      "bytes": 766,
+      "sha256": "c554f3e7cdfd0153283512520cf92224b827b535aa12321d517b8864a5eab657"
+    },
+    {
+      "path": "partial-derive-r2.log",
+      "bytes": 1320,
+      "sha256": "44b2a1541e7b4093f477e2fce685cb9ea15b0a96a9c641df61516ba261392618"
+    },
+    {
+      "path": "partial-parser-diagnostic-r1.json",
+      "bytes": 360,
+      "sha256": "5dd634b33f5a1f87da724a101333fc8468221f1d6ba4976fe40bebeebd252afc"
+    },
+    {
+      "path": "partial-summary-r2.json",
+      "bytes": 1618,
+      "sha256": "9d695e005ac713dc68d1861a1ed7e6aeac4c126dbceb819b5d57cee8ad7d3fdc"
+    },
+    {
+      "path": "run_command.py",
+      "bytes": 1602,
+      "sha256": "a8e8f0b50f2c5d95342e36f1b8fffd4fdc5daeabbf4a382fa15300c747ce65fc"
+    },
+    {
+      "path": "seal_directory.py",
+      "bytes": 2483,
+      "sha256": "135e6aaf4513106c52f22073faed4f5c8d95bd4b203e7da786dbb8909ea82d5c"
+    },
+    {
+      "path": "summarize_partial.py",
+      "bytes": 2927,
+      "sha256": "76ee37525f2dc09673d16a128b997feee3c2813395a87fef55b6b76e4496b9b5"
+    },
+    {
+      "path": "summarize_partial_r1.py",
+      "bytes": 2923,
+      "sha256": "98c2347fc6dd6700cf6714f20f556a63957cd83a47ad97070686c9d391d11079"
+    },
+    {
+      "path": "summarize_tests.py",
+      "bytes": 5815,
+      "sha256": "2c9dff40e07f0d4c5fd95d17bed1f0980b7bd9bfca99e7da8559a37b733f1702"
+    },
+    {
+      "path": "unused-preparation-cleanup-r1.json",
+      "bytes": 739,
+      "sha256": "ca9854302ad0e8a60b1abffcf45eff00c2aa148bd8a52a85487517828ee873b1"
+    }
+  ],
+  "excluded": [
+    "Application packages and binaries",
+    "Python bytecode",
+    "Downloaded full upstream manual; reference digest retained separately"
+  ]
+}
