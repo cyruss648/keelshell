@@ -1,5 +1,33 @@
 # Capability ledger
 
+## 2026-11-17: remote macOS UDP endpoints and socket pages
+
+The port collector now reads TCP LISTEN and UDP sockets with an assigned local
+port through the remote system lsof. Darwin UDP has no reported kernel state:
+`BOUND` and `PEER` describe a bound address or specified peer, without claiming
+handshakes, reachability or service health. Complete unbound `*:*` objects are
+validated and omitted; malformed, partial or warning-bearing output still fails
+closed. Connected TCP clients remain excluded, and no Darwin active probe or
+process action is enabled.
+
+All collected entries are reachable through cached twelve-row pages, with page
+clamping after refresh. Protocol/state, endpoint and process use shared theme
+tokens and bilingual full accessibility labels. Theme, language and page changes
+do not perform SSH collection. The new 15 session and three app tests passed
+focused checks; real Darwin OpenSSH passed 15/0/0, including six new UDP cases.
+The final 729-input full gate passed with ordinary Rust 3325/0/58 ignored,
+app 1375/0/2, 14 doctests, Python discovery 293/two skipped and a separate
+30-test helper. The actual gate app's 1377-name inventory and session's
+358-name inventory match execution, including all 18 new default tests.
+Two independent nonauthor reviews approved with zero P0–P3; the functional
+review independently ran 69/0/0 using private copies of parent prebuilt tests,
+without independent compilation or shared target access.
+Online dependency freshness remains unknown after bounded official-request
+failures; manifests and lockfile are unchanged. Native desktop and release
+acceptance remain open. Earlier TCP-only entries describe their historical batch.
+See [ADR 0154](../adr/0154-darwin-udp-sockets.md) and the
+[batch record](../testing/records/2026-11-17-darwin-udp-sockets.md).
+
 ## 2026-11-17: complete editor backup verification
 
 Reviewed editor saves now keep the backup mutation scope through full checked
@@ -35,7 +63,12 @@ including all 30 new backup tests. A new independent static review approved the
 one-line fix with no P0–P3 and zero independent compilation/test runs.
 The follow-up was pushed as `a1a97b3b2ee0f0ccf91ea53ca96623aa8867fe8d` and
 passed the actual Windows session backend preflight in Quality43934041540.
-All three full quality jobs remain in progress at the final recorded snapshot.
+All three full quality jobs subsequently completed successfully: Windows,
+macOS and Ubuntu ordinary Rust totals are 3294/0/50 ignored, 3307/0/52 and
+3300/0/53; app totals are 1361/0/2, 1372/0/2 and 1373/0/2, with 14 doctests
+each. Python ran 293 tests, skipping 34/two/two respectively.
+The [27-member CI completion](../testing/records/2026-11-17-editor-backup-readback-evidence/ci-completion/README.md)
+preserves exact logs and the 727-input Git binding without replaying tests.
 The old run ended cancelled, retaining the Windows compile failure and cancelled
 macOS/Ubuntu jobs. The earlier full host result is not relabelled as a new full run.
 

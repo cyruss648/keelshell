@@ -11,7 +11,17 @@ use keelshell_session::{
 };
 use russh::keys::{HashAlg, PublicKey};
 
+#[path = "darwin_monitor_interop/udp.rs"]
+mod udp;
+
 type TestResult<T = ()> = Result<T, Box<dyn std::error::Error>>;
+
+fn is_owned_socket(socket: &keelshell_session::monitor::SocketInfo, pid: u32) -> bool {
+    socket
+        .process
+        .as_deref()
+        .is_some_and(|process| process.ends_with(&format!(" (pid={pid})")))
+}
 
 async fn connect() -> TestResult<SshSession> {
     let mut options = SshOptions::new("127.0.0.1", std::env::var("KEELSHELL_OPENSSH_USER")?);
@@ -164,24 +174,26 @@ async fn darwin_tcp_listeners_include_owned_ipv4_and_exclude_connected_endpoints
     let sockets = monitor.listening_sockets().await?;
     let owned = sockets
         .iter()
-        .find(|socket| socket.local == address.to_string())
+        .find(|socket| {
+            socket.protocol == "tcp"
+                && socket.local == address.to_string()
+                && is_owned_socket(socket, std::process::id())
+        })
         .ok_or("owned IPv4 TCP listener was not observed")?;
     assert_eq!((&*owned.protocol, &*owned.state), ("tcp", "LISTEN"));
     assert!(
-        owned
-            .process
-            .as_deref()
-            .is_some_and(|process| process.contains(&format!("(pid={})", std::process::id()))),
-        "the visible listener must identify this owned test process"
-    );
-    assert!(
         sockets
             .iter()
-            .all(|socket| socket.protocol == "tcp" && socket.state == "LISTEN"),
-        "Darwin collection is TCP LISTEN only"
+            .filter(|socket| socket.protocol == "tcp")
+            .all(|socket| socket.state == "LISTEN"),
+        "every Darwin TCP row must remain strictly LISTEN"
     );
     assert!(
-        sockets.iter().all(|socket| socket.local != client_address),
+        sockets.iter().all(|socket| {
+            socket.protocol != "tcp"
+                || !is_owned_socket(socket, std::process::id())
+                || socket.local != client_address
+        }),
         "the owned connected client endpoint is not a listener"
     );
     assert_eq!(
@@ -203,9 +215,12 @@ async fn darwin_tcp_listeners_include_owned_ipv6_and_recheck_revokes_report() ->
     let monitor = LinuxMonitor::new(session.clone());
     let sockets = monitor.listening_sockets().await?;
     assert!(
-        sockets
-            .iter()
-            .any(|socket| socket.local == address && socket.state == "LISTEN"),
+        sockets.iter().any(|socket| {
+            socket.protocol == "tcp"
+                && socket.local == address
+                && socket.state == "LISTEN"
+                && is_owned_socket(socket, std::process::id())
+        }),
         "the owned IPv6 loopback listener must be visible"
     );
     let report = monitor.capability_report().await;
@@ -216,13 +231,12 @@ async fn darwin_tcp_listeners_include_owned_ipv6_and_recheck_revokes_report() ->
         monitor.capabilities().await.sockets.state,
         CapabilityState::Unknown
     );
-    assert!(
-        monitor
-            .listening_sockets()
-            .await?
-            .iter()
-            .any(|socket| socket.local == address)
-    );
+    assert!(monitor.listening_sockets().await?.iter().any(|socket| {
+        socket.protocol == "tcp"
+            && socket.local == address
+            && socket.state == "LISTEN"
+            && is_owned_socket(socket, std::process::id())
+    }));
     drop(listener);
     session.close().await?;
     Ok(())
@@ -241,9 +255,7 @@ async fn darwin_ipv4_mapped_ipv6_listener_retains_lsof_numeric_ipv4_endpoint() -
             socket.local == endpoint
                 && socket.protocol == "tcp"
                 && socket.state == "LISTEN"
-                && socket.process.as_deref().is_some_and(|process| {
-                    process.contains(&format!("(pid={})", std::process::id()))
-                })
+                && is_owned_socket(socket, std::process::id())
         }),
         "the owned mapped listener must preserve the observed numeric IPv4 endpoint"
     );

@@ -51,6 +51,7 @@ enum Job {
 use crate::i18n::{Message, t};
 
 const PROCESS_PAGE_SIZE: usize = 5;
+const SOCKET_PAGE_SIZE: usize = 12;
 const MAX_RESULT_AGE: Duration = Duration::from_secs(10);
 
 enum Outcome {
@@ -98,6 +99,7 @@ pub struct MonitorPanel {
     selected_disk: Option<DiskDevice>,
     processes: Vec<ProcessInfo>,
     sockets: Vec<SocketInfo>,
+    socket_page: usize,
     probes: BTreeMap<String, TcpProbeResult>,
     process_page: usize,
     last_sample: Option<Instant>,
@@ -165,6 +167,7 @@ impl MonitorPanel {
             selected_disk: None,
             processes: Vec::new(),
             sockets: Vec::new(),
+            socket_page: 0,
             probes: BTreeMap::new(),
             process_page: 0,
             last_sample: None,
@@ -393,15 +396,13 @@ impl MonitorPanel {
                 if let Some(result) = sockets {
                     match result {
                         Ok(sockets) => {
-                            self.sockets = sockets;
-                            self.probes.clear();
+                            self.replace_sockets(sockets);
                         }
                         Err(error) => {
                             let (zh, en) = error_text(&error);
                             errors_zh.push(format!("端口：{zh}"));
                             errors_en.push(format!("Sockets: {en}"));
-                            self.sockets.clear();
-                            self.probes.clear();
+                            self.replace_sockets(Vec::new());
                         }
                     }
                 }
@@ -437,11 +438,10 @@ impl MonitorPanel {
                 match result {
                     Ok(sockets) => {
                         self.status = Message::new(
-                            format!("已读取 {} 个监听端口。", sockets.len()),
-                            format!("Loaded {} listening sockets.", sockets.len()),
+                            format!("已读取 {} 个端口条目。", sockets.len()),
+                            format!("Loaded {} socket entries.", sockets.len()),
                         );
-                        self.sockets = sockets;
-                        self.probes.clear();
+                        self.replace_sockets(sockets);
                     }
                     Err(error) => {
                         let (zh, en) = error_text(&error);
@@ -449,8 +449,7 @@ impl MonitorPanel {
                             format!("端口诊断失败：{zh}"),
                             format!("Socket diagnostics failed: {en}"),
                         );
-                        self.sockets.clear();
-                        self.probes.clear();
+                        self.replace_sockets(Vec::new());
                     }
                 }
             }
@@ -531,6 +530,14 @@ impl MonitorPanel {
         cx.notify();
     }
 
+    fn replace_sockets(&mut self, sockets: Vec<SocketInfo>) {
+        self.socket_page = self
+            .socket_page
+            .min(sockets.len().saturating_sub(1) / SOCKET_PAGE_SIZE);
+        self.sockets = sockets;
+        self.probes.clear();
+    }
+
     fn run(&mut self, job: Job, cx: &mut Context<Self>) {
         let Some(monitor) = self.monitor.clone().filter(|_| !self.suspended) else {
             return;
@@ -543,8 +550,8 @@ impl MonitorPanel {
         {
             self.pending = None;
             self.status = Message::new(
-                "此操作需要当前 Linux 资源采样；macOS 支持资源、进程和 TCP 监听端口的只读采集。",
-                "This operation requires a current Linux resource sample; macOS supports read-only resources, processes and TCP listeners.",
+                "此操作需要当前 Linux 资源采样；macOS 支持资源、进程、TCP 监听与 UDP 端口的只读采集。",
+                "This operation requires a current Linux resource sample; macOS supports read-only resources, processes, TCP listeners and UDP sockets.",
             );
             cx.notify();
             return;
@@ -558,7 +565,7 @@ impl MonitorPanel {
                 "正在重新检测主机监控能力…",
                 "Rechecking host monitoring capabilities…",
             ),
-            Job::Sockets => Message::new("正在读取监听端口…", "Reading listening sockets…"),
+            Job::Sockets => Message::new("正在读取端口…", "Reading sockets…"),
             Job::Probe(_) => Message::new(
                 "正在执行只读 TCP 连接探测…",
                 "Running a read-only TCP connect probe…",
@@ -1066,7 +1073,7 @@ impl Render for MonitorPanel {
                             .compact()
                             .rounded(px(components.control_radius))
                             .label(t(cx, "端口", "Sockets"))
-                            .accessibility_label(t(cx, "读取监听端口", "Read listening sockets"))
+                            .accessibility_label(t(cx, "读取端口", "Read sockets"))
                             .on_click(cx.listener(|panel, _, _, cx| {
                                 if panel.pending.is_none() {
                                     panel.run(Job::Sockets, cx);
@@ -1343,13 +1350,13 @@ impl Render for MonitorPanel {
         }
         let mut sockets = section(
             cx,
-            t(cx, "监听端口", "Listening sockets"),
+            t(cx, "端口列表", "Socket listing"),
             IconName::Network,
         )
         .id("monitor-sockets")
         .test_support()
         .role(accesskit::Role::Group)
-        .aria_label(t(cx, "监听端口", "Listening sockets"))
+        .aria_label(t(cx, "端口列表", "Socket listing"))
         .child(
             div()
                 .id("monitor-sockets-note")
@@ -1357,44 +1364,64 @@ impl Render for MonitorPanel {
                 .role(accesskit::Role::Label)
                 .aria_label(t(
                     cx,
-                    "只读采集当前账户可见的监听端口；macOS 仅列 TCP。",
-                    "Read-only listeners visible to this account; macOS lists TCP only.",
+                    "只读采集当前账户可见的 TCP 监听与 UDP 端口。macOS 的 UDP 仅表示已绑定或已指定对端，不代表连通或服务健康。",
+                    "Read-only TCP listeners and UDP sockets visible to this account. macOS UDP labels show a bound address or specified peer, not reachability or service health.",
                 ))
                 .text_xs()
                 .whitespace_normal()
                 .text_color(rgb(visual.muted))
                 .child(t(
                     cx,
-                    "只读采集当前账户可见的监听端口；macOS 仅列 TCP。",
-                    "Read-only listeners visible to this account; macOS lists TCP only.",
+                    "只读采集当前账户可见的 TCP 监听与 UDP 端口。macOS 的 UDP 仅表示已绑定或已指定对端，不代表连通或服务健康。",
+                    "Read-only TCP listeners and UDP sockets visible to this account. macOS UDP labels show a bound address or specified peer, not reachability or service health.",
                 )),
         );
         if self.sockets.is_empty() {
             sockets = sockets.child(div().text_xs().text_color(rgb(visual.muted)).child(t(
                 cx,
                 if self.capabilities.sockets.state == CapabilityState::Available {
-                    "当前账户未观察到监听端口"
+                    "当前账户未观察到 TCP 监听或已绑定的 UDP 端口"
                 } else {
                     "暂无可用端口采样；可点击端口或重新检测"
                 },
                 if self.capabilities.sockets.state == CapabilityState::Available {
-                    "No listening sockets visible to this account"
+                    "No TCP listeners or bound UDP sockets visible to this account"
                 } else {
                     "No socket sample; click Sockets or Recheck"
                 },
             )));
         } else {
-            for (socket_index, socket) in self.sockets.iter().take(12).enumerate() {
+            for (socket_index, socket) in self
+                .sockets
+                .iter()
+                .enumerate()
+                .skip(self.socket_page * SOCKET_PAGE_SIZE)
+                .take(SOCKET_PAGE_SIZE)
+            {
                 let probe_key = socket_key(socket);
-                let process = socket
-                    .process
-                    .as_deref()
-                    .map(|value| format!(" · {value}"))
-                    .unwrap_or_default();
-                let endpoint = format!("{} → {}{}", socket.local, socket.peer, process);
+                let state = match (socket.protocol.as_str(), socket.state.as_str()) {
+                    ("udp", "BOUND") => t(cx, "已绑定", "Bound"),
+                    ("udp", "PEER") => t(cx, "已指定对端", "Peer set"),
+                    _ => socket.state.as_str(),
+                };
+                let endpoint = if socket.peer == "*:*" {
+                    socket.local.clone()
+                } else {
+                    format!("{} → {}", socket.local, socket.peer)
+                };
                 let mut row = div()
                     .id(("monitor-socket", socket_index))
                     .test_support()
+                    .role(accesskit::Role::Group)
+                    .aria_label(format!(
+                        "{}: {state}, {endpoint}{}",
+                        socket.protocol,
+                        socket
+                            .process
+                            .as_deref()
+                            .map(|process| format!(", {process}"))
+                            .unwrap_or_default(),
+                    ))
                     .flex()
                     .flex_col()
                     .gap_1()
@@ -1417,10 +1444,14 @@ impl Render for MonitorPanel {
                             )
                             .child(
                                 div()
+                                    .id(("monitor-socket-state", socket_index))
+                                    .test_support()
+                                    .role(accesskit::Role::Label)
+                                    .aria_label(state.to_owned())
                                     .flex_1()
                                     .min_w_0()
                                     .text_color(rgb(visual.muted))
-                                    .child(socket.state.clone()),
+                                    .child(state.to_owned()),
                             ),
                     )
                     .child(
@@ -1431,6 +1462,15 @@ impl Render for MonitorPanel {
                             .text_color(rgb(visual.text))
                             .child(endpoint),
                     );
+                if let Some(process) = &socket.process {
+                    row = row.child(
+                        div()
+                            .min_w_0()
+                            .truncate()
+                            .text_color(rgb(visual.muted))
+                            .child(process.clone()),
+                    );
+                }
                 if socket.protocol == "tcp" && self.linux_monitor_actions_available() {
                     let selected = socket.clone();
                     row = row.child(
@@ -1469,12 +1509,73 @@ impl Render for MonitorPanel {
                 }
                 sockets = sockets.child(row);
             }
-            if self.sockets.len() > 12 {
+            let pages = self.sockets.len().div_ceil(SOCKET_PAGE_SIZE);
+            if pages > 1 {
+                let page_label = Message::new(
+                    format!(
+                        "第 {} / {pages} 页，共 {} 个端口条目",
+                        self.socket_page + 1,
+                        self.sockets.len()
+                    ),
+                    format!(
+                        "Page {} of {pages}, {} socket entries",
+                        self.socket_page + 1,
+                        self.sockets.len()
+                    ),
+                )
+                .render(cx);
                 sockets = sockets.child(
                     div()
-                        .text_xs()
-                        .text_color(rgb(visual.muted))
-                        .child(format!("… 还有 {} 个", self.sockets.len() - 12)),
+                        .flex()
+                        .items_center()
+                        .gap_1()
+                        .child(
+                            Button::new("socket-page-previous")
+                                .icon(IconName::ChevronLeft)
+                                .disabled(self.socket_page == 0)
+                                .ghost()
+                                .compact()
+                                .rounded(px(components.control_radius))
+                                .accessibility_label(t(
+                                    cx,
+                                    "查看上一页端口",
+                                    "Previous socket page",
+                                ))
+                                .on_click(cx.listener(|panel, _, _, cx| {
+                                    panel.socket_page = panel.socket_page.saturating_sub(1);
+                                    cx.notify();
+                                })),
+                        )
+                        .child(
+                            div()
+                                .id("monitor-socket-page")
+                                .test_support()
+                                .role(accesskit::Role::Label)
+                                .aria_label(page_label.clone())
+                                .flex_1()
+                                .min_w_0()
+                                .text_xs()
+                                .whitespace_normal()
+                                .text_color(rgb(visual.muted))
+                                .child(page_label),
+                        )
+                        .child(
+                            Button::new("socket-page-next")
+                                .icon(IconName::ChevronRight)
+                                .disabled(self.socket_page + 1 >= pages)
+                                .ghost()
+                                .compact()
+                                .rounded(px(components.control_radius))
+                                .accessibility_label(t(cx, "查看下一页端口", "Next socket page"))
+                                .on_click(cx.listener(|panel, _, _, cx| {
+                                    if (panel.socket_page + 1) * SOCKET_PAGE_SIZE
+                                        < panel.sockets.len()
+                                    {
+                                        panel.socket_page += 1;
+                                    }
+                                    cx.notify();
+                                })),
+                        ),
                 );
             }
         }

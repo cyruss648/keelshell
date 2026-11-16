@@ -1,4 +1,4 @@
-//! Strict, account-visible Darwin TCP LISTEN collection using system lsof.
+//! Strict, account-visible Darwin TCP LISTEN and UDP collection using system lsof.
 //!
 //! The wrapper retains lsof's status independently of SSH completion. A quiet
 //! status 1 with no matches is distinct from failed, partial or warning-bearing
@@ -14,7 +14,7 @@ use super::{
     failure_reason,
 };
 
-pub(super) const START: &str = "@@KS:darwin-sockets:1@@\n";
+pub(super) const START: &str = "@@KS:darwin-sockets:2@@\n";
 const STATUS: &str = "@@KS:lsof-status@@\n";
 const END: &str = "\n@@KS:end@@\n";
 const MAX_SOCKETS: usize = 10_000;
@@ -65,6 +65,7 @@ fn parse_sets(body: &str) -> MonitorResult<Vec<SocketInfo>> {
         .strip_suffix('\n')
         .ok_or(MonitorError::InvalidData("incomplete Darwin lsof set"))?;
     let mut sockets = Vec::new();
+    let mut file_count = 0;
     let mut process: Option<(u32, &str)> = None;
     let mut process_has_files = false;
     let mut pids = BTreeSet::new();
@@ -100,29 +101,21 @@ fn parse_sets(body: &str) -> MonitorResult<Vec<SocketInfo>> {
             Some(b'f') => {
                 let (pid, command) =
                     process.ok_or(MonitorError::InvalidData("Darwin socket has no process"))?;
-                if fields.len() != 5 {
-                    return invalid("invalid Darwin lsof socket fields");
-                }
                 let fd = decimal(required(&fields, b'f')?, i32::MAX as u32).ok_or(
                     MonitorError::InvalidData("invalid Darwin socket descriptor"),
                 )?;
                 if !descriptors.insert(fd) {
                     return invalid("duplicate Darwin socket descriptor");
                 }
-                if required(&fields, b'P')? != "TCP" || required(&fields, b'T')? != "ST=LISTEN" {
-                    return invalid("Darwin socket is not TCP LISTEN");
-                }
-                let local = endpoint(required(&fields, b'n')?, required(&fields, b't')?)?;
-                if sockets.len() == MAX_SOCKETS {
+                // Count even unbound UDP descriptors, which are validated but
+                // omitted because they have no port to display.
+                if file_count == MAX_SOCKETS {
                     return invalid("Darwin socket count exceeds 10000");
                 }
-                sockets.push(SocketInfo {
-                    protocol: "tcp".into(),
-                    state: "LISTEN".into(),
-                    local,
-                    peer: "*:*".into(),
-                    process: Some(format!("{command} (pid={pid})")),
-                });
+                file_count += 1;
+                if let Some(socket) = socket(&fields, pid, command)? {
+                    sockets.push(socket);
+                }
                 process_has_files = true;
             }
             _ => return invalid("invalid Darwin lsof set boundary"),
@@ -132,6 +125,53 @@ fn parse_sets(body: &str) -> MonitorResult<Vec<SocketInfo>> {
         return invalid("Darwin lsof process has no files");
     }
     Ok(sockets)
+}
+
+fn socket(
+    fields: &BTreeMap<u8, &str>,
+    pid: u32,
+    command: &str,
+) -> MonitorResult<Option<SocketInfo>> {
+    let family = required(fields, b't')?;
+    let name = required(fields, b'n')?;
+    let (protocol, state, local, peer) = match required(fields, b'P')? {
+        "TCP" if fields.len() == 5 && required(fields, b'T')? == "ST=LISTEN" => {
+            ("tcp", "LISTEN", endpoint(name, family)?, "*:*".into())
+        }
+        "UDP" if fields.len() == 4 => {
+            // Darwin lsof supplies no UDP state. These labels describe the
+            // endpoint shape only; a specified peer proves no handshake.
+            if name == "*:*" {
+                return if matches!(family, "IPv4" | "IPv6") {
+                    Ok(None)
+                } else {
+                    invalid("invalid Darwin socket address family")
+                };
+            }
+            match name.split_once("->") {
+                Some((local, peer)) => {
+                    if peer.contains('*') {
+                        return invalid("invalid Darwin UDP peer");
+                    }
+                    (
+                        "udp",
+                        "PEER",
+                        endpoint(local, family)?,
+                        endpoint(peer, family)?,
+                    )
+                }
+                None => ("udp", "BOUND", endpoint(name, family)?, "*:*".into()),
+            }
+        }
+        _ => return invalid("invalid Darwin socket protocol or state fields"),
+    };
+    Ok(Some(SocketInfo {
+        protocol: protocol.into(),
+        state: state.into(),
+        local,
+        peer,
+        process: Some(format!("{command} (pid={pid})")),
+    }))
 }
 
 fn fields(record: &str) -> MonitorResult<BTreeMap<u8, &str>> {

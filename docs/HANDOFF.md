@@ -5,7 +5,28 @@
 旧计数不覆盖当前授权。旧入口可从 `2f29744:docs/HANDOFF.md` 的 Git blob 读取；
 更早原文见[交接历史](HANDOFF_HISTORY_2026-11-16.md)与[路线历史](ROADMAP_HISTORY_2026-11-16.md)。
 
-当前在做编辑器备份完整读回：30 session 新例和 5 GPUI 新例、标准 OpenSSH
+当前在做远端 macOS UDP 端口与缓存分页：生产／测试已实现，专项 session36、
+app12 与真实 Darwin SSH15全部通过；两位独立复核及最终集中门禁已通过，
+正常release构建及arm64/minos15.0包结构通过，提交交付进行中。
+最终 r3 冻结729输入，aggregate
+`e94405c2858d9796d9256dfd44eb277914c18fedd14e258e8025c747528e9a0e`。
+完整gate为0/reaped/754.599981s，普通Rust3325/0/58 ignored、app1375/0/2、
+14rustdoc、Python293/2 skipped、helper另列30。准确app1377及session358库存
+与执行相等，18新默认名全部ok，工程输入前后不变。
+原分页测试不可见失败和工装命令镜像不匹配失败均保留，分别修订测试滚动和
+两行镜像，没有放宽断言。Hooke／Nash分别批准r3静态源码和父级专用prebuilt，
+P0–P3全0；后者独立69/0/0、独立编译0。四位自有agent均已关闭，
+专用副本2文件／316,832,336字节已核对回收。199成员原件重算通过，
+最初封存过滤器诊断与193成员旧原件保持。依赖官方查询遇网络失败和有界超时，最新版本保持UNKNOWN；
+manifest／lock未改。原生仍锁屏，操作／截图0。
+接续见[本批记录](testing/records/2026-11-17-darwin-udp-sockets.md)及
+[ADR0154](adr/0154-darwin-udp-sockets.md)。
+上一源码a1的Quality43934041540三平台已全部completed/success，watch已收取，
+精确计数／727 Git输入重算见
+[CI终态](testing/records/2026-11-17-editor-backup-readback-evidence/ci-completion/README.md)，
+不代签当前729输入。
+
+上一批编辑器备份完整读回：30 session 新例和 5 GPUI 新例、标准 OpenSSH
 18 项已通过；长状态详情移入／滚动 P2 已修复，两位独立追加复核均 APPROVE、
 P0–P3 全 0。功能复核使用父级 prebuilt，独立 app/editor `88/0/0`；
 源码复核仅签静态差分。作者和两位 reviewer 均已关闭。
@@ -27,7 +48,7 @@ aggregate `5c93cae03daaf370227820a815ad969623a0fb6bef1afb0d6e5362f09816528b`。
 修复 `a1a97b3b2ee0f0ccf91ea53ca96623aa8867fe8d` 已普通推送、三方一致；
 60成员／727输入精确 Git 绑定 `0/reaped/6.955532s`、零 mismatch。
 新 Quality `43934041540` 的 Windows133533978752 已通过 session backend预检，
-原编译错误在真实Windows消除；三平台完整质量门禁仍运行中。
+原编译错误在真实Windows消除；后续三平台完整质量门禁均已成功，见上方终态。
 旧run已 completed/cancelled，Windows原failure保持，macOS／Ubuntu为cancelled，
 不能补签终态成功。没有手动重跑旧run或活动watcher。
 累计300文件／70,938,741字节副本已按Git原件回收；首轮目录删除诊断及恢复保留，
@@ -167,9 +188,10 @@ unittest 6.134s／外层 6.203s，实际 waited；辅助检索诊断原文保留
 
 ## 下一步与资源
 
-1. 编辑器备份及Windows测试修复已推送；当前精确源码 `a1a97b3` 的
-   Quality43934041540已通过Windows session预检，接续收取三平台完整门禁终态，
-   不重放未变的宿主完整测试或旧CI，不把正在运行的成绩补签成功。
+1. 继续UDP功能批的集中门禁、独立复核、正常包结构与提交推送，
+   保留依赖在线UNKNOWN和原生未验边界。
+   编辑器备份及Windows测试修复已推送；精确源码 `a1a97b3` 的
+   Quality43934041540三平台完整门禁已成功，不重放未变的宿主测试或旧CI。
    Darwin TCP 工程 `bd198a8` 已普通推送、三方一致，`43916079699` 三平台终态已收齐，
    不重放未变的监听宿主 gate 或 CI。
    上批 `43901863960` 与更早 `43880245383` 的终态分别记录，不能代签当前源码。

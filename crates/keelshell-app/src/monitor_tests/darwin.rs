@@ -96,7 +96,7 @@ async fn darwin_controls_reject_linux_actions_without_ssh_commands(cx: &mut Test
     cx.update_window(h.window, |_, window, cx| {
         window.render_frame(cx);
         assert!(window.try_find(("review-process", 42_usize)).is_none());
-        assert_eq!(window.find("refresh-sockets").label(), Some("读取监听端口"));
+        assert_eq!(window.find("refresh-sockets").label(), Some("读取端口"));
     })
     .checked("Darwin disabled action");
     h.idle(cx).await;
@@ -212,9 +212,9 @@ async fn darwin_memory_and_capability_labels_follow_all_themes_and_languages_wit
                     assert_eq!(
                         window.find("monitor-sockets-note").label(),
                         Some(if english {
-                            "Read-only listeners visible to this account; macOS lists TCP only."
+                            "Read-only TCP listeners and UDP sockets visible to this account. macOS UDP labels show a bound address or specified peer, not reachability or service health."
                         } else {
-                            "只读采集当前账户可见的监听端口；macOS 仅列 TCP。"
+                            "只读采集当前账户可见的 TCP 监听与 UDP 端口。macOS 的 UDP 仅表示已绑定或已指定对端，不代表连通或服务健康。"
                         })
                     );
                 })

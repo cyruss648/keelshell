@@ -1,0 +1,148 @@
+{
+  "sealed_utc": "2026-11-16T19:36:06.729565+00:00",
+  "count": 27,
+  "archive_bytes": 785625,
+  "archive_sha256": "c8d5abeb89ee55fcab80f29199d6ed344264657d977c5b7e58a0226ca897b0c4",
+  "entries": [
+    {
+      "path": "ci-current-r2.json",
+      "bytes": 842,
+      "sha256": "fe57e4cb5da75998b6e8605d7fe842bbb313f312a3487de6139a829a566b79c8"
+    },
+    {
+      "path": "ci-current-r2.log",
+      "bytes": 7698,
+      "sha256": "c437bd2a1a40babd178e65879617f973a404211a119f9e49685215837d5e7cc6"
+    },
+    {
+      "path": "ci-current-r3.json",
+      "bytes": 842,
+      "sha256": "54444e8be991909c36592dbba6b558496bae078feb58b58ca8bf63c4a49f1366"
+    },
+    {
+      "path": "ci-current-r3.log",
+      "bytes": 8324,
+      "sha256": "d0d79177a2f1ece3c1b198d039aa54b098f03977eed73b9526d517e44ed22c5c"
+    },
+    {
+      "path": "ci-initial-r1.json",
+      "bytes": 864,
+      "sha256": "c3eb6c2b95b8ada1b0ad93310315c3e526bd216f2ad58949d89fec5a60771b86"
+    },
+    {
+      "path": "ci-initial-r1.log",
+      "bytes": 7758,
+      "sha256": "03d01c1aa98bd83da28060995625bded64cd450740a81ba250343f55cd63c9ea"
+    },
+    {
+      "path": "ci-summary-r1.json",
+      "bytes": 2652,
+      "sha256": "514a0986bedbbacc4d3dd0c085da5c404d734d0e02404bfe93e117e49bc9c45f"
+    },
+    {
+      "path": "ci-watch-r1.json",
+      "bytes": 837,
+      "sha256": "af0550d19d08ae49387486d54b3e30620b0ea8fcf67959eec39a3a81bfa4100d"
+    },
+    {
+      "path": "ci-watch-r1.log",
+      "bytes": 28168,
+      "sha256": "ad01a07bedbe5c2120b9967f86b4e4f5ddaa8c3a3a55d03578a6b7e133e145dc"
+    },
+    {
+      "path": "download-final-r1.json",
+      "bytes": 763,
+      "sha256": "482a21fc656fdf5332d78702a8499bc347447b618ae96f7c3d1f4c6f069a7e53"
+    },
+    {
+      "path": "download-final-r1.log",
+      "bytes": 831,
+      "sha256": "e2396424012c51d87395dcadce2ec50510c78829bf1e416978ba2f995906e362"
+    },
+    {
+      "path": "download_final.py",
+      "bytes": 1589,
+      "sha256": "214127c1883891f6c11b920d6aabab62514e63db061b506c00baa7f88da9c4a5"
+    },
+    {
+      "path": "exact-source-binding-r1.json",
+      "bytes": 859,
+      "sha256": "0c6a6e59d22c5365984df9504ce8934d65173bfe504d83540acd91bfd460ac45"
+    },
+    {
+      "path": "exact-source-binding-r1.log",
+      "bytes": 629,
+      "sha256": "4632b2f3300d0fa8ae4883c943d4427a479470ce84593e6a74cc3cd14f693805"
+    },
+    {
+      "path": "inputs-freeze-r5.json",
+      "bytes": 133959,
+      "sha256": "435128649549784f17c795a17465e87e29016ef2c96e7086043be23cfe0b459d"
+    },
+    {
+      "path": "job-133533978752-suites.json",
+      "bytes": 502456,
+      "sha256": "66322a6cd9a49b1c3dc69ca4a2b87c5daacdb974df10e81bf73c94d083a61eea"
+    },
+    {
+      "path": "job-133533978752.log",
+      "bytes": 984026,
+      "sha256": "ba8606802b9eef2967c49fee2f4e6cbcf656a8d2c2731874494344457aca5c6f"
+    },
+    {
+      "path": "job-133533979263-suites.json",
+      "bytes": 502909,
+      "sha256": "642cecf8dc0212ea90bd679e6fdb9a77ce383ffd568d04f131b8a5edf4c5caa4"
+    },
+    {
+      "path": "job-133533979263.log",
+      "bytes": 863966,
+      "sha256": "ce72ee2a31cc9b472c9c37e2eb79958c9dc86934292878802b68e626d6926cfb"
+    },
+    {
+      "path": "job-133533979276-suites.json",
+      "bytes": 501922,
+      "sha256": "96d37e3f8dd4f5f71fe6459959400496efbd0685cabe1b3276c478b0573db255"
+    },
+    {
+      "path": "job-133533979276.log",
+      "bytes": 882733,
+      "sha256": "bd4ca022ee6b70bf1263485d87867ad718f9f3c0ee940aa3d0a8a1668b5b558f"
+    },
+    {
+      "path": "job-logs-r1.json",
+      "bytes": 1017,
+      "sha256": "afd760e4d491b7332bdf866eefab0610140dc2a7f4a153601fae9b29b2754ee0"
+    },
+    {
+      "path": "run_command.py",
+      "bytes": 1602,
+      "sha256": "a8e8f0b50f2c5d95342e36f1b8fffd4fdc5daeabbf4a382fa15300c747ce65fc"
+    },
+    {
+      "path": "summarize-final-r1.json",
+      "bytes": 767,
+      "sha256": "33bc8ebc6cc99a9d5b5ce949b42c20b8ab4d8a0775bbe9b200d2bc6f818773cb"
+    },
+    {
+      "path": "summarize-final-r1.log",
+      "bytes": 1952,
+      "sha256": "ae91b07d4d5e995e1ecb39bcc809c5f9bbcd5fd9d11e14121e3c4d99de74a876"
+    },
+    {
+      "path": "summarize_final.py",
+      "bytes": 2618,
+      "sha256": "b899b546f51865579b2e03fed1e95cd566762b7141ce3b60fcebd2218bca3bab"
+    },
+    {
+      "path": "summarize_tests.py",
+      "bytes": 5815,
+      "sha256": "2c9dff40e07f0d4c5fd95d17bed1f0980b7bd9bfca99e7da8559a37b733f1702"
+    }
+  ],
+  "excluded": [
+    "Application packages and binaries",
+    "Python bytecode",
+    "Downloaded full upstream manual; reference digest retained separately"
+  ]
+}

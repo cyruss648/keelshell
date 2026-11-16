@@ -4,6 +4,8 @@
     reason = "Controlled fixtures and test assertions fail immediately on unexpected values"
 )]
 
+mod udp;
+
 use super::super::{CapabilityState, LinuxMonitor, SOCKETS_SCRIPT};
 use super::*;
 use std::{
@@ -165,7 +167,7 @@ fn darwin_socket_parser_rejects_missing_duplicate_and_unselected_fields() {
 }
 
 #[test]
-fn darwin_socket_parser_rejects_udp_connected_and_non_listening_records() {
+fn darwin_socket_parser_rejects_udp_with_tcp_state_and_non_listening_tcp_records() {
     for invalid in ["UDP", "tcp", "SCTP", ""] {
         assert_invalid(&sample().replace("PTCP\0", &format!("P{invalid}\0")));
     }
@@ -340,8 +342,11 @@ fn socket_command_keeps_linux_ss_and_absolute_read_only_darwin_selection() {
     assert!(SOCKETS_SCRIPT.contains("\nss -H -lntupn\nks_ss_status=$?\n"));
     assert!(SOCKETS_SCRIPT.contains("printf '@@KS:linux-sockets:1@@\\n'"));
     assert!(SOCKETS_SCRIPT.contains("@@KS:ss-status@@\\n%s\\n@@KS:end@@\\n"));
-    assert!(SOCKETS_SCRIPT.contains("/usr/sbin/lsof -nP -a -iTCP -sTCP:LISTEN -F0pcftPnT -Ts"));
-    for forbidden in ["sudo", "kill ", "nc ", " -iUDP", " -w", " -Q"] {
+    assert!(
+        SOCKETS_SCRIPT.contains("/usr/sbin/lsof -nP -a -iTCP -sTCP:LISTEN -iUDP -F0pcftPnT -Ts")
+    );
+    assert!(SOCKETS_SCRIPT.contains("printf '@@KS:darwin-sockets:2@@\\n'"));
+    for forbidden in ["sudo", "kill ", "nc ", " -w", " -Q"] {
         assert!(!SOCKETS_SCRIPT.contains(forbidden));
     }
 }

@@ -662,8 +662,8 @@ async fn compact_capability_reasons_ages_and_recheck_are_keyboard_accessible(
                         ),
                         (
                             Capability::Sockets,
-                            "监听端口：权限不足",
-                            "Listening sockets: Permission denied",
+                            "端口列表：权限不足",
+                            "Socket listing: Permission denied",
                         ),
                     ]
                     .into_iter()
@@ -767,7 +767,7 @@ async fn monitor_hierarchy_and_narrow_controls_keep_bilingual_actions_reachable(
         ("monitor-processes", "进程", "Processes", true),
         ("monitor-disk-io", "磁盘 I/O", "Disk I/O", false),
         ("monitor-network", "网络", "Network", true),
-        ("monitor-sockets", "监听端口", "Listening sockets", true),
+        ("monitor-sockets", "端口列表", "Socket listing", true),
         (
             "monitor-filesystems",
             "磁盘容量",
@@ -788,7 +788,7 @@ async fn monitor_hierarchy_and_narrow_controls_keep_bilingual_actions_reachable(
             "Refresh host monitoring data",
         ),
         ("pause-monitor", "继续自动刷新", "Resume automatic refresh"),
-        ("refresh-sockets", "读取监听端口", "Read listening sockets"),
+        ("refresh-sockets", "读取端口", "Read sockets"),
         (
             "redetect-monitor",
             "重新检测主机监控能力",

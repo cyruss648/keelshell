@@ -1,5 +1,20 @@
 # 编辑器备份完整读回 — 2026-11-17
 
+## 精确修复源码的 CI 终态
+
+Quality `43934041540`，源码 `a1a97b3b2ee0f0ccf91ea53ca96623aa8867fe8d`，
+Windows／macOS／Ubuntu 已全部 `completed/success`；watch
+`0/reaped/428.496959s`，没有活动 watcher。普通 Rust 分别为
+`3294/0/50 ignored`、`3307/0/52`、`3300/0/53`，app 分别为
+`1361/0/2`、`1372/0/2`、`1373/0/2`，各 14 rustdoc；
+Python 293 项分别 34／2／2 skipped，macOS／Ubuntu 标准 OpenSSH 成功。
+原 Windows 编译失败和旧 run 的取消状态保持，不重放旧 CI。
+
+[27 成员终态原件](2026-11-17-editor-backup-readback-evidence/ci-completion/README.md)
+保存原 job 日志和逐名解析，727 Git 输入绑定重算 `0/reaped/2.146137s`、
+零 mismatch。CI 无独立 app `--list`，不补写该证据；终态不代签随后 UDP 差分、
+三平台桌面或发行。下文保留各时点原始事实。
+
 当前状态：专项、真实 OpenSSH、两位非作者复核及集中完整门禁通过。基线为
 `7058925330b96161a25142fb5bee94fa24aa5117`。
 完整产品、FILE-05/M4、三平台桌面和发行仍开放。

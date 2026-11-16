@@ -19,7 +19,8 @@ pub enum Capability {
     Filesystems,
     /// Fixed process columns from `ps`.
     Processes,
-    /// Account-visible Linux TCP/UDP rows from `ss`, or Darwin TCP LISTEN rows from system `lsof`.
+    /// Account-visible Linux TCP/UDP rows from `ss`, or Darwin TCP LISTEN and
+    /// bound UDP rows from system `lsof`.
     Sockets,
 }
 
@@ -29,7 +30,7 @@ impl std::fmt::Display for Capability {
             Self::Resources => "host resources",
             Self::Filesystems => "filesystem capacity",
             Self::Processes => "process listing",
-            Self::Sockets => "listening sockets",
+            Self::Sockets => "socket listing",
         })
     }
 }

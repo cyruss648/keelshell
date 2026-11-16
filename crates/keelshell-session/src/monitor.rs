@@ -92,8 +92,8 @@ case "$("$ks_uname" -s)" in
   Linux) ;;
   Darwin)
     [ -f /usr/sbin/lsof ] && [ -x /usr/sbin/lsof ] || exit 66
-    printf '@@KS:darwin-sockets:1@@\n'
-    /usr/sbin/lsof -nP -a -iTCP -sTCP:LISTEN -F0pcftPnT -Ts
+    printf '@@KS:darwin-sockets:2@@\n'
+    /usr/sbin/lsof -nP -a -iTCP -sTCP:LISTEN -iUDP -F0pcftPnT -Ts
     ks_lsof_status=$?
     printf '@@KS:lsof-status@@\n%s\n@@KS:end@@\n' "$ks_lsof_status"
     exit 0
@@ -431,13 +431,15 @@ pub struct ProcessInfo {
 
 /// A socket visible to the authenticated remote account.
 ///
-/// Linux supplies TCP/UDP rows from `ss`; Darwin supplies only TCP LISTEN
-/// rows from the system `lsof`. Neither collector proves whole-host visibility.
+/// Linux supplies TCP/UDP rows from `ss`; Darwin supplies TCP LISTEN and bound
+/// UDP rows from system `lsof`. Neither collector proves whole-host visibility.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SocketInfo {
     /// Transport protocol, currently `tcp` or `udp`.
     pub protocol: String,
-    /// Kernel socket state, normally `LISTEN` or `UNCONN`.
+    /// Kernel state from `ss`, or `LISTEN` for Darwin TCP. Darwin UDP uses
+    /// `BOUND` or `PEER` to describe its observed address, not a kernel state,
+    /// handshake, reachability or service health.
     pub state: String,
     /// Numeric local address and port; Darwin wildcards are normalized by family.
     pub local: String,
@@ -628,8 +630,10 @@ impl LinuxMonitor {
     /// Collect sockets visible to the authenticated remote account.
     ///
     /// Linux uses fixed `ss` TCP/UDP output. Darwin uses the absolute system
-    /// `lsof` path and returns only TCP LISTEN sockets. Permission diagnostics,
-    /// incomplete Darwin frames and nonempty failed collections are rejected.
+    /// `lsof` path for TCP LISTEN and UDP sockets with an assigned local port.
+    /// Darwin UDP rows retain a specified peer when present; unbound sockets
+    /// without a local port are omitted. Permission diagnostics, incomplete
+    /// frames and nonempty failed collections are rejected.
     /// Results are diagnostic data, not executable commands, whole-host
     /// visibility, or proof that a service accepted a connection.
     pub async fn listening_sockets(&self) -> MonitorResult<Vec<SocketInfo>> {

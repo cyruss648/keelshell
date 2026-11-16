@@ -89,8 +89,8 @@ SOCKETS = """LC_ALL=C; export LC_ALL
   Linux) ;;
   Darwin)
     [ -f /usr/sbin/lsof ] && [ -x /usr/sbin/lsof ] || exit 66
-    printf '@@KS:darwin-sockets:1@@\\n'
-    /usr/sbin/lsof -nP -a -iTCP -sTCP:LISTEN -F0pcftPnT -Ts
+    printf '@@KS:darwin-sockets:2@@\\n'
+    /usr/sbin/lsof -nP -a -iTCP -sTCP:LISTEN -iUDP -F0pcftPnT -Ts
     ks_lsof_status=$?
     printf '@@KS:lsof-status@@\\n%s\\n@@KS:end@@\\n' "$ks_lsof_status"
     exit 0
