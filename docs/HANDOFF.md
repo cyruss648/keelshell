@@ -25,11 +25,15 @@
 
 ## 最近实际交付与精确 CI
 
-最近源码 `f094de6ad2789d168f5a24bacb316c98b83608ac` 已推送。
-随后文档 `2f29744a2615393bcc5bedb81cd2c425e7bc6372` 已实际读回三方一致，读回时干净。
-后续源码候选的提交身份按本批记录与 Git readback 接续，不能将旧 CI 移签。
+最近源码 `01f6f6bd8272303fe049bc7b52976afefdb44c37` 已推送，
+本地、tracking、远端 SHA 实际一致，读回时工作区干净。
+当前 Quality `43867112056` 绑定该源码，Windows filesystem／archive codec
+两个预检 step 已 success，完整 session library 正在执行；确切库存和计数待原日志。
+Windows `133298403995`、macOS `133298403996`、Ubuntu `133298403683`；
+新完整三平台门禁仍未终态，不将前批结果移签。
 
-Quality `43859165104` 已 completed/failure，watch `1/reaped/1600.284s`，没有取消或重跑。
+前批源码 `f094de6ad2789d168f5a24bacb316c98b83608ac` 的 Quality `43859165104`
+已 completed/failure，watch `1/reaped/1600.284s`，没有取消或重跑。
 三平台完整原日志全部收取：
 
 | 平台 | Job | 实际结果 |
@@ -73,7 +77,8 @@ app archive `13/0/0`。346 个唯一库存名与结果逐项相等，342 ok／4 
 
 ## 下一步与资源
 
-1. 新非作者已完成且无开放发现；冻结不变后及时提交推送并读回三方 SHA。
+1. 本批源码已提交推送、三方读回一致，32 成员／719 输入精确 Git 绑定
+   `0/reaped/6.950s`；继续收取当前精确 CI，不重跑已通过且输入未变的专项。
 2. 跟进新精确 CI 的 Windows codec／完整 session 预检与三平台终态；只按实际失败接续。
    若命中上述 Zmodem 两例，先保存原件，再审修订及准确命名，不机械改其他 rename。
 3. 桌面可用后复核英文工具栏 P2，再补主题／尺寸／双语／完整键盘／IME／辅助技术。
@@ -83,8 +88,11 @@ app archive `13/0/0`。346 个唯一库存名与结果逐项相等，342 ok／4 
 唯一 Cargo target 为 `work/recovery-batch-integration-20261115/target`，
 `CARGO_BUILD_JOBS=2`、`MACOSX_DEPLOYMENT_TARGET=15.0`。同一 checkout 连续使用，归属未切换，
 不反复 clean；换归属前遵循[共享 target 合同](testing/SHARED_TARGET.md)。
-当前活动目录为 `work/zip-unix-metadata-integration-20261116/`；旧 publication 目录已封存，
-待提交／Git 绑定后回收。没有新建用户 chat、worktree、分支或容器。
+当前活动目录为 `work/zip-unix-metadata-integration-20261116/`；
+旧 publication、两个已完成 reviewer 目录及稳定测试副本在精确 Git 原件核对后
+已回收 88 文件／13,465,970 字节，三个自有 agent 均已关闭。
+旧 publication 路径不可再使用；尚有用途的 Zmodem 候选保留。
+没有新建用户 chat、worktree、分支或容器。
 
 最近原生 inventory 仍明确报告 Mac 锁屏且自动解锁失败；GUI 操作／截图 0。
 保留 `work/workbench-fit-20261116/package-r1/KeelShell.app` 供工具栏复核：

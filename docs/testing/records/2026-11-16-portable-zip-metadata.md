@@ -69,3 +69,22 @@ Windows 先执行完整 archive codec target，再执行完整 session library�
 [依赖记录](2026-11-16-route-and-dependency-followup.md)。
 英文工具栏原生 P2 仍受 Mac 锁屏阻塞；GUI 操作／截图为 0。
 完整产品、FILE-05/M4、三平台桌面、IME／辅助技术和发行未完成。
+
+## 实际交付与后续进展
+
+源码与原件已在 `01f6f6bd8272303fe049bc7b52976afefdb44c37` 提交推送；
+本地、tracking、远端 SHA 实际一致，读回时工作区干净。
+32 成员和 719 输入的精确 Git 绑定验证 `0/reaped/6.950s`、零 mismatch，
+没有重放测试。交付原件在[补充回执](2026-11-16-portable-zip-metadata-evidence/delivery/manifest.json)。
+
+新 Quality `43867112056` 绑定该源码。Windows job `133298403995` 的
+filesystem／archive codec 两个预检 step 已 success，当前正在执行完整
+session library；这证明当前 Windows codec 编译／执行通过，但确切
+41 名库存与计数仍待完整原日志。完整 Windows gate 尚未运行。
+macOS `133298403996`、Ubuntu `133298403683` 执行完整门禁，新终态待收取。
+原封存的 Windows NOT_RUN 是提交前时点，保持不改写。
+
+旧 publication、两个已完成 reviewer 目录及稳定测试副本，逐字节核对精确提交
+中的归档／摘要后回收 88 文件、13,465,970 字节；三位自有 agent 均已关闭。
+当前 CI 原件、主 target、正常 GUI 包和待用 Zmodem 候选保留。
+没有新建或删除用户 chat、其他 worktree、分支、容器。

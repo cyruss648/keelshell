@@ -1,0 +1,27 @@
+{
+  "observed_at_utc": "2026-11-16T12:30:49.790614+00:00",
+  "readbacks": [
+    {
+      "label": "local",
+      "stdout": "01f6f6bd8272303fe049bc7b52976afefdb44c37\n",
+      "exit": 0
+    },
+    {
+      "label": "tracking",
+      "stdout": "01f6f6bd8272303fe049bc7b52976afefdb44c37\n",
+      "exit": 0
+    },
+    {
+      "label": "remote",
+      "stdout": "01f6f6bd8272303fe049bc7b52976afefdb44c37\trefs/heads/feature/editor-unicode-codec-20261114\n",
+      "exit": 0
+    },
+    {
+      "label": "status",
+      "stdout": "",
+      "exit": 0
+    }
+  ],
+  "same": true,
+  "clean": true
+}

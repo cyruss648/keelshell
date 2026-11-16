@@ -1,0 +1,544 @@
+{
+  "observed_at_utc": "2026-11-16T12:32:38.752633+00:00",
+  "archive_commit": "01f6f6bd8272303fe049bc7b52976afefdb44c37",
+  "files_removed": 88,
+  "bytes_removed": 13465970,
+  "verified_preserved": [
+    {
+      "path": "work/windows-archive-publication-integration-20261116/candidate-r1.diff",
+      "bytes": 14198,
+      "sha256": "175fc0055e307a40a871befa60436670a271ed6b13e7f3b83ae2dde00057372a",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/candidate-source-r1.json",
+      "bytes": 558,
+      "sha256": "bb3c95872eed6c1045dd458583868c2f98e087b33d8e5721d7df100080d90ab3",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/commit-bind-r1.json",
+      "bytes": 900,
+      "sha256": "cd197fd4757d32dfa240e71af9f4368a5b12c2f6f36bc1e18c7c9947ddc67d4a",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/commit-bind-r1.log",
+      "bytes": 309,
+      "sha256": "d26579837597ee244127635afbca3342bb61ea1b4585f228bcc2c18a407a863d",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/dependencies-live-r2.json",
+      "bytes": 911,
+      "sha256": "3cd80f10b9a30020afbd2560e44df61864b4ee64728cd2dff8bea4ffc3fce22b",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/dependencies-live-r2.log",
+      "bytes": 84,
+      "sha256": "ab64b915bbbe059dbaca438c3b8ebad9d4d8681f89e7278a84aa08fb6dd393c4",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/dependencies-report-r2.json",
+      "bytes": 60807,
+      "sha256": "40b0e9489c692560ac40ff4570653eb29f9edb82f7f54aa53d7eaba19cdb8e2d",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/docs-push-r1.json",
+      "bytes": 790,
+      "sha256": "c8e217b43003a603941dcc9814361f5bf6f1cf3957622b18ac21302a290d2170",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/docs-push-r1.log",
+      "bytes": 113,
+      "sha256": "be46c5c90f2a09a324f81e55e0b0b19b04ad66ca2ce3e662af027d40123397f4",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/evidence-verify-r1.json",
+      "bytes": 799,
+      "sha256": "2680f9ea834c3bbca0b0b79eae0f6b8810efc5f70057b00ecea2adda680e5b9b",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/evidence-verify-r1.log",
+      "bytes": 276,
+      "sha256": "b05ee99075760b01c5eaf40f9942a0a0a17485897935beeab5de7989f2b9d52a",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/expected-windows-tests-r1.txt",
+      "bytes": 3438,
+      "sha256": "caf106a54b22fdcc69c148b2af2ca78beb7af5817f86583e9c270d3f76e5ce1f",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/inputs-freeze-r1.json",
+      "bytes": 132220,
+      "sha256": "e0576c0776ba803bddfccfa88341542dd9c39d3dee0a391a2fd174372745b186",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/inventory-parse-attempt-r1.json",
+      "bytes": 560,
+      "sha256": "00fa3011effb5903edb9ce7b1bb3bd0cde60342ce9fdcf43e9e47919d39f4c59",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/native-access-blocked-r3.json",
+      "bytes": 404,
+      "sha256": "78e6cfe36166b2396d660e3255b0c07cc9a208a476c367f274085c8201d65a36",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/native-access-blocked-r4.json",
+      "bytes": 426,
+      "sha256": "074abdeac5769641b62b537209f527415fdc85c18de41da46285312e2c9b0d08",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/owned-cleanup-r1.json",
+      "bytes": 14960,
+      "sha256": "b821c550c74eebc56be8b5f1f0326f34be474a796aa70ef4221eaa710f9ec3dc",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/parser-prior-macos-r1.json",
+      "bytes": 483478,
+      "sha256": "96e8d0a29d7efd7cca38f2162d2608826e08fc358eab7b3e38289129d9e70908",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/parser-prior-ubuntu-r1.json",
+      "bytes": 483416,
+      "sha256": "316646195573b78139714de241119ed673dc1803e79bf4a82dc8a231dc07ca99",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/preflight-progress-r1.json",
+      "bytes": 805,
+      "sha256": "83aa2928fa019f511c21b26f37817a8255ed9fe55f50e907d4e1c3620908c6ff",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/prior-ci-final-r1.json",
+      "bytes": 802,
+      "sha256": "c5a84fd4c6edbfd4516f9cb8a2902cbcaf9d054ac72d97f81d03940c3afc68cf",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/prior-ci-final-r1.log",
+      "bytes": 7811,
+      "sha256": "6363c7f4c2bfdad69442030a7b5496edd05736b63c5831378e920800f4dc253f",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/prior-ci-summary-r1.json",
+      "bytes": 12290,
+      "sha256": "a89235df553d6a3230db86d4c34663413fb4b3b7eef3ca56a0de164beea8ddee",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/prior-docs-delivery-r1.json",
+      "bytes": 779,
+      "sha256": "65f1c7d468f25adf62b3ef4a97c839d697438b9bdb7c0c4012f88ab079467cf6",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/prior-macos-job-r1.clean.txt",
+      "bytes": 845437,
+      "sha256": "364608cd6033582d9998f7a07808cbea233625dbb21781cf8a42b77a5208e02d",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/prior-macos-job-r1.json",
+      "bytes": 807,
+      "sha256": "07f1c1f354b8c8703b439882eeb7f455710221b40357b792080668feb6d51f97",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/prior-macos-job-r1.log",
+      "bytes": 847146,
+      "sha256": "4b1d2571c90db2b13d757c7b169b0d4ab307a5b2589d34cf4dfef70dff463621",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/prior-ubuntu-job-r1.clean.txt",
+      "bytes": 868762,
+      "sha256": "c56d54c36ac1987d6e475c3b22b8b97101bdbf75508d536741968a5a63202674",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/prior-ubuntu-job-r1.json",
+      "bytes": 807,
+      "sha256": "5b84d4fb4f549ff8faa301e0de8a92e786e7cef6d7054750be0eb9a2b46b7838",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/prior-ubuntu-job-r1.log",
+      "bytes": 870447,
+      "sha256": "2c5c338e04b7dd413273552d109df9ed1bb96b4cbf99a244c30d200fc6e90508",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/prior-windows-ci-summary-r1.json",
+      "bytes": 8609,
+      "sha256": "1f407b100727f0e2e70f62759a7baaa07416e9c43da9290eabe6d37b1d2d29ea",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/route-docs-delivery-r1.json",
+      "bytes": 587,
+      "sha256": "83bba7ae7333bd654d4c2369a69105bc02c86fab12f282e2c011a5d0eefb8ca4",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/route-docs-push-r1.json",
+      "bytes": 791,
+      "sha256": "009d28ef9f96cdb8f21cac931f2bfd3ff0cf5dbe57524342653d60095f5315ff",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/route-docs-push-r1.log",
+      "bytes": 113,
+      "sha256": "96abdbc4eab14bb7ef4e05646626177732afb82d3eb24b879e60eb8a839977f5",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/run_command.py",
+      "bytes": 1602,
+      "sha256": "a8e8f0b50f2c5d95342e36f1b8fffd4fdc5daeabbf4a382fa15300c747ce65fc",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/scoped-gate-r1.json",
+      "bytes": 1550,
+      "sha256": "e85ef5e91b3cba7173ee72ffba708049284326ccd3b8e97b81af82185ab5dc22",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/scoped-gate-r1.log",
+      "bytes": 67918,
+      "sha256": "4c1294930756e0b0115ea4766c7586d6912727093782c15284c0df316fceb496",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/scoped-summary-r1.json",
+      "bytes": 67371,
+      "sha256": "0b01729c629b98f2374afceaab69566c79c1a8e0044efaf957c2ea51710d993f",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/seal_evidence.py",
+      "bytes": 3184,
+      "sha256": "a6b2f01065c13c68efe956969bd8bc9ad432881b5dbeb762eeb62c61786bebe0",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/source-ci-final-r1.json",
+      "bytes": 809,
+      "sha256": "f89223159b6cf43145e11e8d9de55a0c3d3f73914feb217a5ebc7f26f7d74f7c",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/source-ci-final-r1.log",
+      "bytes": 7764,
+      "sha256": "69313b501b3c2b27286dd3839eff69e4266446a767e31cbc96323a61c300b139",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/source-ci-identity-r1.json",
+      "bytes": 212,
+      "sha256": "b01b5302655ac34d8ae0cd8adf75dbc710dc2d537a4da3f569ccdc16c8148904",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/source-ci-jobs-r1.json",
+      "bytes": 802,
+      "sha256": "e50eb92e76544b3aca5c9c23d28c1c0bcc124e65f2ca598578b8863d247ab664",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/source-ci-jobs-r1.log",
+      "bytes": 7131,
+      "sha256": "6e4ae489a8858ccf8c3cd7c0818ccf0a74e82cdf8146e99f5d983b3791823f26",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/source-ci-runs-r1.json",
+      "bytes": 905,
+      "sha256": "548989afce0659fb5c9536aea719e86139084119d865e18b6a23c289792b0dc4",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/source-ci-runs-r1.log",
+      "bytes": 389,
+      "sha256": "380e6016a55b1cea87c6db5cc449e4d091bd30f29b40811c7b6d18a846d17913",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/source-ci-snapshot-r2.json",
+      "bytes": 802,
+      "sha256": "eade38682737a6b3de041620d957645da22ed170cbe8c8c8eec23b9576e45a4f",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/source-ci-snapshot-r2.log",
+      "bytes": 7185,
+      "sha256": "4b48cd1c1d15ae3dfd72d1be14cb7b8f102c159fc896dcf4791303dcfc5e2bee",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/source-ci-snapshot-r3.json",
+      "bytes": 809,
+      "sha256": "79a091710eba57871085ec522ad2ff46eea4fd0d0770814fd63633259f8bef31",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/source-ci-snapshot-r3.log",
+      "bytes": 7138,
+      "sha256": "e1c6393de6ea206c4182c812234888b52d0531b3f3b1c4570ba1b28ace5f2acb",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/source-ci-snapshot-r4.json",
+      "bytes": 809,
+      "sha256": "515d1706037378ce886c06d128f26e50258ede7dbd00467530634b5818fb718e",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/source-ci-snapshot-r4.log",
+      "bytes": 7552,
+      "sha256": "e044fa20708a6607e3c183bed70ccc6dcc4877a4b6027a359e9cedc1550dad7a",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/source-ci-summary-final-r1.json",
+      "bytes": 15849,
+      "sha256": "2beebf44a5519f9a3863d8e49528dc0f6740041ef8dc72e6a26e2a021aa66aad",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/source-ci-watch-r1.json",
+      "bytes": 798,
+      "sha256": "f8f06b785f887aff85391f8999f49f0e9392055c668167e50c54281148f5071a",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/source-ci-watch-r1.log",
+      "bytes": 132864,
+      "sha256": "4070891bd2760761a5d06b3248d5a0b21fb7ec9e23fa0dba7f53e709d32ae100",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/source-delivery-r1.json",
+      "bytes": 334,
+      "sha256": "eb53d6ddbd6c1a568f5caa1671884e9e10e7c1aea115892d7736fbe74a1cdb06",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/source-macos-job-r1.json",
+      "bytes": 807,
+      "sha256": "44be6629ea5c5602e057f8ec45296805ac4c2940afbe4269277fd98ecffea949",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/source-macos-job-r1.log",
+      "bytes": 852043,
+      "sha256": "fa22f7e853aebdba93cdeba28b3423b054a649058da480f5df83bbeb71fcca83",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/source-macos-summary-r1.json",
+      "bytes": 482925,
+      "sha256": "a9254650b77c340d4dd19ef9e6e9720c32bb802bcaec2f5aa977e3b5066ef6e7",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/source-push-r1.json",
+      "bytes": 790,
+      "sha256": "9430ac033d295b02fa8bbf3fd6f9a85460b3b5e452141165f2d9ca8f335dee5d",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/source-push-r1.log",
+      "bytes": 113,
+      "sha256": "268b8e4e5fe9ee76a0d73c5ffe1c1e9bf54377b106a6af8938205e218e44f91a",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/source-r1/.github/workflows/ci.yml",
+      "bytes": 3015,
+      "sha256": "0833437e00d35fdd9fdac35a8ab85ab31115c9bb8b559105ec840a743d6321e9",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/source-r1/crates/keelshell-session/src/sftp/archive_transfer/local_windows/tests.rs",
+      "bytes": 36220,
+      "sha256": "2be9fc335e49e764ec528e94e4792ad7353d528d5ae97c4bd7cebb486857d57b",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/source-r1/crates/keelshell-session/src/sftp/archive_transfer/local_windows.rs",
+      "bytes": 38847,
+      "sha256": "4687f089b5759a4095ff7e660dae1e7f766729246eca12ee90bdac4a93313c07",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/source-ubuntu-job-r1.json",
+      "bytes": 776,
+      "sha256": "355881a2c4edd92339907591624fcaeef953937e91a95764dfe962732ca078dd",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/source-ubuntu-job-r1.log",
+      "bytes": 99,
+      "sha256": "8b6407b2fdbca54bf3d53fb93e79a3560dbe59567fa5044cfee4bed1b5b6e467",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/source-ubuntu-job-r2.json",
+      "bytes": 808,
+      "sha256": "e76a2bcf88dd0644dd64c813a623fc382e768f86ec32d708fb4346c979fb413e",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/source-ubuntu-job-r2.log",
+      "bytes": 869928,
+      "sha256": "f4e461b1a152ae026b5c4eb1141b58759620c59d3b793d2a6cfe153dee1220b8",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/source-ubuntu-summary-r1.json",
+      "bytes": 483427,
+      "sha256": "7c4a07bc8d04ea801c2cfdf707a153558e03f19f83ad066de6353b6251cebfbc",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/source-windows-job-r1.json",
+      "bytes": 777,
+      "sha256": "f9b5e9a8e1089a7c6b6a58815819ebe84b2bfee34c793db83a812f2963c4a146",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/source-windows-job-r1.log",
+      "bytes": 99,
+      "sha256": "8b6407b2fdbca54bf3d53fb93e79a3560dbe59567fa5044cfee4bed1b5b6e467",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/source-windows-job-r2.json",
+      "bytes": 807,
+      "sha256": "88a763575619047dd82c13705e70a90b89678e94bad1bb2e3cbb0851bc9acd97",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/source-windows-job-r2.log",
+      "bytes": 504508,
+      "sha256": "a7b57d6aee70693e8ab2cdda3c2bc08a2bdce12a42d200b141a38895e80e6e2f",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/source-windows-summary-r1.json",
+      "bytes": 271534,
+      "sha256": "26920242b2d75c096e3c72b55633071f548b3f733c9babf4a23ffb341173da31",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/source-windows-summary-r2.json",
+      "bytes": 275265,
+      "sha256": "8e49e9f317fc098f5073aaa1444fff1bf81945bcf02c08f5c6bff9167f44d73e",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/summarize_ci.py",
+      "bytes": 4864,
+      "sha256": "b72b82f98a220c999612041b6e3a89d3e6c260e668e32d6ecd3c594c343891f5",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/toolchain-live-r1.json",
+      "bytes": 744,
+      "sha256": "d007704950ce9873d01f3ac337a3d9c8730323cee244f2c024e0f893ad7aff4f",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-archive-publication-integration-20261116/windows-spec-receipts-r1.json",
+      "bytes": 1004,
+      "sha256": "e5fc4afb9493cd60760f14fc665bcb15b40c321c41515eb27908c5db73755c69",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-zmodem-parent-rename-review-20261116/REPORT.md",
+      "bytes": 18959,
+      "sha256": "8f3b9684650caafafac0733f03151c41ed3e1a4fa2cfefeb955785ea82675579",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/windows-zmodem-parent-rename-review-20261116/static-receipt.json",
+      "bytes": 9095,
+      "sha256": "56c026e59efa83347c600e2b88632b6ee7f07138b5771211454b232001c3f718",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/zip-unix-metadata-review-20261116/FINAL.md",
+      "bytes": 5511,
+      "sha256": "96673fda865dcabbb2e3d11fea19bf4a37948972187184fd1a2100a0d27452de",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/zip-unix-metadata-review-20261116/REPORT.md",
+      "bytes": 11608,
+      "sha256": "d35fd012f46c717eb8339708316d4cef5d73bf314dbe6af55ad162f9d66ad7f6",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/zip-unix-metadata-review-20261116/independent-archive.log",
+      "bytes": 3009,
+      "sha256": "c3bed085e64d29cf66505cb0254a2e7f1a0a9ba5554ee8fed15bdcec57bef392",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/zip-unix-metadata-review-20261116/independent-list.log",
+      "bytes": 2577,
+      "sha256": "901e5469f4a2f549589ae17ecae17e6e96c06a57556724b641941d6bedd504d1",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/zip-unix-metadata-review-20261116/independent-test-receipt.json",
+      "bytes": 9849,
+      "sha256": "94c71f8086c9db3c7b6761f5d448ff4a2410627e0a9001198a7afef5e54a9842",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/zip-unix-metadata-review-20261116/static-receipt.json",
+      "bytes": 10762,
+      "sha256": "31ec7a10d890610ae28662d0b66e6b771eb8da3c6d7e870b36ef1bb456ca13b4",
+      "basis": "committed exact archive member"
+    },
+    {
+      "path": "work/zip-unix-metadata-integration-20261116/review-binary/archive-tests",
+      "bytes": 4558792,
+      "sha256": "f317ce23f6ff0117b89f6efdeeae9b62a30fcec1e08826e2ed84eeabf12887b3",
+      "basis": "completed reviewer stable copy; committed digest and test receipt"
+    }
+  ],
+  "generated_bytecode": [
+    {
+      "path": "work/windows-archive-publication-integration-20261116/__pycache__/summarize_ci.cpython-315.pyc",
+      "bytes": 7991,
+      "sha256": "0feb222778a0813470d5f15c79fc71867c265d370844fa2754b72f4ea2e76763"
+    }
+  ],
+  "agents_closed": [
+    "Wegener",
+    "Mencius",
+    "Noether"
+  ],
+  "cargo_target_touched": false,
+  "other_resources_touched": false
+}

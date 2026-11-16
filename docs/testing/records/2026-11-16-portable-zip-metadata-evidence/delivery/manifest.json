@@ -1,0 +1,55 @@
+{
+  "source": "01f6f6bd8272303fe049bc7b52976afefdb44c37",
+  "run": 43867112056,
+  "original_seal_unchanged": true,
+  "entries": [
+    {
+      "source": "source-push-r1.json",
+      "path": "source-push-r1.json",
+      "bytes": 791,
+      "sha256": "21a5f6761edc9bfa26eb0dbfada97de05b5b5d93cd0344c0fe4c8a15bd377765"
+    },
+    {
+      "source": "source-push-r1.log",
+      "path": "source-push-r1.txt",
+      "bytes": 113,
+      "sha256": "df257cd780a604eea9d07261672a34d51c98e15f0e7316844301de6030cc2db1"
+    },
+    {
+      "source": "source-delivery-r1.json",
+      "path": "source-delivery-r1.json",
+      "bytes": 587,
+      "sha256": "9d3ea3294d5a44dc27922ca5a290534ada990b72129ab3264757e0c988587f7e"
+    },
+    {
+      "source": "commit-bind-r1.json",
+      "path": "commit-bind-r1.json",
+      "bytes": 851,
+      "sha256": "d306ee5f18f5221bbc1621635ef2a62c02558acf602c2e9d2f89975e0a3b585c"
+    },
+    {
+      "source": "commit-bind-r1.log",
+      "path": "commit-bind-r1.txt",
+      "bytes": 186,
+      "sha256": "4ac6b5621d9bf535a5ab7226afe7ec15fe0f8c828265eea9c636dbb8ac98363e"
+    },
+    {
+      "source": "owned-cleanup-r1.json",
+      "path": "owned-cleanup-r1.json",
+      "bytes": 23379,
+      "sha256": "308ed1a6ea0db8498b043f87e89a2e07129cb086fd2203297d041d55b1b5e725"
+    },
+    {
+      "source": "source-ci-snapshot-r1.log",
+      "path": "initial-ci-snapshot-r1.json",
+      "bytes": 7642,
+      "sha256": "5e7a5aba7d3b18b1ff72db9c112540ddf781541a60d32530e3f3d81eb255f2ee"
+    },
+    {
+      "source": "source-ci-snapshot-r1.json",
+      "path": "initial-ci-query-receipt-r1.json",
+      "bytes": 809,
+      "sha256": "083a3d7f94541fdd51d317a1ea8116ccd77e69a71458dd424170513a7d4a0fbc"
+    }
+  ]
+}

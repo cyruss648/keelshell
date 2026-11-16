@@ -22,10 +22,12 @@
 
 以下为 2026-11-16 的精确快照；后续 CI 终态记录在对应批次，不改写历史原件。
 
-- 工程源码已推送：`f094de6ad2789d168f5a24bacb316c98b83608ac`。
+- 工程源码已推送：`01f6f6bd8272303fe049bc7b52976afefdb44c37`，三方一致、读回干净。
+  新 Quality `43867112056` 的 Windows filesystem／archive codec step 已 success，
+  完整 session library 仍运行；新完整门禁和精确计数待后续实际原件。
 - 此前文档提交 `2f29744a2615393bcc5bedb81cd2c425e7bc6372` 已读回本地、tracking、
   远端三方一致，读回时工作区干净。
-- 精确 Quality `43859165104 / attempt 1` 绑定上述工程源码；Windows job `133271138956`
+- 前批源码 `f094de6` 的精确 Quality `43859165104 / attempt 1`，Windows job `133271138956`
   的 filesystem `70/0/0`、archive backend `29/0/1 ignored`，30 名库存／执行逐项相等，
   app `1330/0/2 ignored`，原四项解包／续传失败全部逐名通过。
   后续 core archive `39/1/0`，私有权限重编码断言失败，剩余 session gate 未运行；
@@ -43,7 +45,7 @@
 
 ## 接续顺序
 
-1. 完成 ZIP 元数据修订的新非作者复核和交付读回，收取新精确 CI 的早期 codec／session
+1. ZIP 修订已完成限定非作者批准、推送和三方读回；收取新精确 CI 的早期 codec／session
    与完整三平台门禁；上一 run 已封存，不取消或重跑来替换原失败。
 2. 根据新 Windows 实际结果处理尚未运行的后端／target；已通过的四项 app 范围保持，
    不清空 UNKNOWN/quarantine、不重放不确定写入、不放宽审核、权限、完整字节和发布后重验。

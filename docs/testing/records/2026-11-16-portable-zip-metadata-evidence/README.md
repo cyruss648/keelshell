@@ -20,3 +20,8 @@ SHA-256 `09d557db11c14309f8ff06f9e9c167e08d805564abe776c6b3e2816722984fa3`。
 验证精确提交时增加 `--source` 和完整 40 位提交 SHA。
 实际 current 验证 `0/reaped/0.164s`，32 成员、719 输入零 mismatch，测试重放 0。
 逐成员原始路径、大小和 SHA-256 见 `manifest.json`；失败／诊断原文不删改。
+
+源码交付为 `01f6f6bd8272303fe049bc7b52976afefdb44c37`，三方读回一致、干净。
+精确 Git 绑定 `0/reaped/6.950s`，32 成员／719 输入零 mismatch。
+[delivery](delivery/manifest.json)保存源码 push、SHA 读回、提交绑定、清理与新 CI
+首轮快照；它独立于上述 32 成员封存，不改写提交前 Windows NOT_RUN。
