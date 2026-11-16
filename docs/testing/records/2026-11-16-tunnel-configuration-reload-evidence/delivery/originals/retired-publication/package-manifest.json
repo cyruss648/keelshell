@@ -1,0 +1,24 @@
+{
+  "binary_sha256": "be1029bda1fe6afc8882d11cbf9a0be789ae32faa587028c3e7fccf2d77f494a",
+  "build": {
+    "commit": "ee3ad7320e90f40c9d777c500543cc6e909d0484",
+    "rustc": "rustc 1.100.0 (0ef1bc386 2026-11-09)",
+    "workflow_run": null
+  },
+  "files": {
+    "KeelShell.app/Contents/Info.plist": "dd22add85ade50271b72d6e67859f36c19c9a64c88df25bf51d5a161a1973c70",
+    "KeelShell.app/Contents/MacOS/keelshell-app": "be1029bda1fe6afc8882d11cbf9a0be789ae32faa587028c3e7fccf2d77f494a",
+    "KeelShell.app/Contents/MacOS/keelshell-mcp": "5166352519c48c15f2d02db8986c4d9301ccd8e0d055c736cf9471bd88ce584b",
+    "KeelShell.app/Contents/PkgInfo": "82502191c9484b04d685374f9879a0066069c49b8acae7a04b01d38d07e8eca0",
+    "KeelShell.app/Contents/Resources/KeelShell.icns": "781f0bb16c48eb7dbd2281aae9b2b1267d59bab64b428b82333add377b107425"
+  },
+  "icon_source_sha256": "4ec61292dba2a8c9a151b47beb1bcfea8114be33f86d52c6c931f9aedb6fcf60",
+  "installed": false,
+  "mcp_binary_sha256": "5166352519c48c15f2d02db8986c4d9301ccd8e0d055c736cf9471bd88ce584b",
+  "native_acceptance": "not performed by this script",
+  "platform": "macos",
+  "schema_version": 1,
+  "signed_by_packaging_script": false,
+  "target": "aarch64-apple-darwin",
+  "version": "0.1.0"
+}

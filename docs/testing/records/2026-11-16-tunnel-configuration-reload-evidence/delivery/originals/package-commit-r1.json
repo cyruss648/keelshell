@@ -1,0 +1,35 @@
+{
+  "observed_exit": 0,
+  "controller_exit": 0,
+  "timed_out": false,
+  "interrupted": false,
+  "terminal": {
+    "direct_reaped": true,
+    "active_processes": 0,
+    "pipes_drained": true,
+    "errors": []
+  },
+  "errors": [],
+  "command": [
+    "python3",
+    "-B",
+    "packaging/package.py",
+    "macos",
+    "--binary",
+    "work/recovery-batch-integration-20261115/target/release/keelshell-app",
+    "--mcp-binary",
+    "work/recovery-batch-integration-20261115/target/release/keelshell-mcp",
+    "--target",
+    "aarch64-apple-darwin",
+    "--output",
+    "work/tunnel-configuration-reload-20261116/package-r1"
+  ],
+  "seconds": 0.17812641699856613,
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "cargo_target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target",
+  "cargo_owner_checkout_unchanged": true,
+  "wrapper_stdout": "",
+  "wrapper_stderr": "",
+  "log_bytes": 223,
+  "log_sha256": "8431ad3265dddcaba7d7fbdbea096beee9ada6edda02507c6f3a8dd0d774b301"
+}

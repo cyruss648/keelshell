@@ -1,0 +1,18 @@
+[feature/editor-unicode-codec-20261114 c81f718] docs: close three-platform fixture CI and archive independent verification
+ 20 files changed, 2701 insertions(+), 24 deletions(-)
+ create mode 100644 docs/testing/records/2026-11-16-windows-fixture-publication-evidence/ci-completion/README.md
+ create mode 100644 docs/testing/records/2026-11-16-windows-fixture-publication-evidence/ci-completion/independent-review/README.md
+ create mode 100644 docs/testing/records/2026-11-16-windows-fixture-publication-evidence/ci-completion/independent-review/manifest.json
+ create mode 100644 docs/testing/records/2026-11-16-windows-fixture-publication-evidence/ci-completion/independent-review/originals.tar.gz
+ create mode 100644 docs/testing/records/2026-11-16-windows-fixture-publication-evidence/ci-completion/independent-review/owned-cleanup-r1.json
+ create mode 100644 docs/testing/records/2026-11-16-windows-fixture-publication-evidence/ci-completion/manifest.json
+ create mode 100644 docs/testing/records/2026-11-16-windows-fixture-publication-evidence/ci-completion/originals.tar.gz
+ create mode 100644 docs/testing/records/2026-11-16-windows-fixture-publication-evidence/ci-completion/verification-after-cleanup-r1.json
+ create mode 100644 docs/testing/records/2026-11-16-windows-fixture-publication-evidence/ci-completion/verification-after-cleanup-r1.txt
+ create mode 100644 docs/testing/records/2026-11-16-windows-fixture-publication-evidence/ci-completion/verification-r1.json
+ create mode 100644 docs/testing/records/2026-11-16-windows-fixture-publication-evidence/ci-completion/verification-r1.txt
+ create mode 100644 docs/testing/records/2026-11-16-windows-fixture-publication-evidence/ci-completion/verify.py
+ create mode 100644 docs/testing/records/2026-11-16-windows-fixture-publication-evidence/delivery/followup/README.md
+ create mode 100644 docs/testing/records/2026-11-16-windows-fixture-publication-evidence/delivery/followup/manifest.json
+ create mode 100644 docs/testing/records/2026-11-16-windows-fixture-publication-evidence/delivery/followup/originals.tar.gz
+ create mode 100644 docs/testing/records/2026-11-16-windows-fixture-publication-evidence/delivery/followup/owned-cleanup-r1.json

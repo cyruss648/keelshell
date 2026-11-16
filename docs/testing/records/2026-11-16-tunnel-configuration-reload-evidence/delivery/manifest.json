@@ -1,0 +1,161 @@
+{
+  "schema_version": 1,
+  "observed_at_utc": "2026-11-16T16:00:32.930157+00:00",
+  "source": "6f28f5c424752a221746fbfb621e319c20ff38b9",
+  "count": 30,
+  "entries": [
+    {
+      "path": "originals/ci-snapshot-r1.json",
+      "bytes": 833,
+      "sha256": "807385e610e21a9b29beb2826e83793aa3c0fdea1d36bf276d8790cbc546d5f7"
+    },
+    {
+      "path": "originals/ci-snapshot-r1.log",
+      "bytes": 7721,
+      "sha256": "8f3cf52ea058cebf9f3bd776fe88d364dec83bb9568e5c302d004b6504f90508"
+    },
+    {
+      "path": "originals/delivery-source-r1.json",
+      "bytes": 279,
+      "sha256": "09566c1bbca80f02d3b89267cd6e826b6abc26808148233242b943befa1cef29"
+    },
+    {
+      "path": "originals/feature-commit-r1.json",
+      "bytes": 794,
+      "sha256": "0f0fc137443fc395ed56575ebc0483cfa2d2ea883ba4e8b1d30167aa338c5e0a"
+    },
+    {
+      "path": "originals/feature-commit-r1.log",
+      "bytes": 6952,
+      "sha256": "e29ffc96a73746c69adcb4d6b35f4ae3e30137f160e5f60dfc65896a1fa8e14b"
+    },
+    {
+      "path": "originals/feature-commit-r2.json",
+      "bytes": 753,
+      "sha256": "91df07a2ce1596cc006256a1be91c195a15dd9824ee3004d2ed3c30c73514f73"
+    },
+    {
+      "path": "originals/feature-commit-r2.log",
+      "bytes": 10477,
+      "sha256": "19e0a2c4972c7f3c9292897ac1c2026bbce7e1f7a7d0fde56725e588f319c33d"
+    },
+    {
+      "path": "originals/feature-commit-r3.json",
+      "bytes": 753,
+      "sha256": "d519cf5235beebb3df406fa042aa55b4de7376116d04c4c4ac9e06e8490e2676"
+    },
+    {
+      "path": "originals/feature-commit-r3.log",
+      "bytes": 10580,
+      "sha256": "116b28f7b6834403adea38cff47fc1028bb809c24a6b911ad1b5d45a7d757a80"
+    },
+    {
+      "path": "originals/feature-push-r1.json",
+      "bytes": 775,
+      "sha256": "b7626198bc4946030de43a75e4e7a5adf11e506ba890c973c929e755517915ba"
+    },
+    {
+      "path": "originals/feature-push-r1.log",
+      "bytes": 146,
+      "sha256": "9246f7ff90dc302a7aa24ec7c639511c2fdb6b554cebf7d19c9c582b1481e495"
+    },
+    {
+      "path": "originals/inspect-commit-r1.json",
+      "bytes": 905,
+      "sha256": "ce39e900cf41fafae9b86766df79895bf5d36a4711c00f9fe3b656f40a1a3dbb"
+    },
+    {
+      "path": "originals/inspect-commit-r1.log",
+      "bytes": 3719,
+      "sha256": "d8b6f017bdf8a879d7a7cccbbb36307c6e4369dfbbe79cabdfce1f558b91d543"
+    },
+    {
+      "path": "originals/package-commit-manifest-r1.json",
+      "bytes": 1238,
+      "sha256": "b39ef92f4d3244e902cd1175728d7b73bca7344c8ab478acb2200d4f29d084fd"
+    },
+    {
+      "path": "originals/package-commit-r1.json",
+      "bytes": 1070,
+      "sha256": "0239c591104db46fe77a442095faac1244bbd54d7ad0a91b4a603d9798a66f16"
+    },
+    {
+      "path": "originals/package-commit-r1.log",
+      "bytes": 223,
+      "sha256": "8431ad3265dddcaba7d7fbdbea096beee9ada6edda02507c6f3a8dd0d774b301"
+    },
+    {
+      "path": "originals/retired-publication/final-delivery-r1.json",
+      "bytes": 6712,
+      "sha256": "42304cf7ab91a63edd61d2aa98d0f66c19cc2f1c467f8776388c7459c88b6027"
+    },
+    {
+      "path": "originals/retired-publication/final-docs-commit-r1.json",
+      "bytes": 812,
+      "sha256": "8381f5556cd8b8cd85ee71652313e4288ded070339558e5d9715fc85c36d44de"
+    },
+    {
+      "path": "originals/retired-publication/final-docs-commit-r1.log",
+      "bytes": 2205,
+      "sha256": "b446e8fa668747e83908729f702c3bdf9377c576afb3b70d04cc0cfb1de7f9af"
+    },
+    {
+      "path": "originals/retired-publication/final-docs-push-r1.json",
+      "bytes": 774,
+      "sha256": "4ba756ac9e43dfba8508e63b0609b723e6fb5bbdfb37ecdb2e4a17243e9b6dae"
+    },
+    {
+      "path": "originals/retired-publication/final-docs-push-r1.log",
+      "bytes": 146,
+      "sha256": "364455599211fd86ebc8ecec3a172e771412a598a470d0e9b42c9e281a0085fb"
+    },
+    {
+      "path": "originals/retired-publication/final-evidence-verify-r1.json",
+      "bytes": 807,
+      "sha256": "f7183c6983a701d88372686daa983e230364b7e41c452058ae6d7075833d3ecc"
+    },
+    {
+      "path": "originals/retired-publication/final-evidence-verify-r1.log",
+      "bytes": 867,
+      "sha256": "abf3d27e7584d12f52fed551b9abe9483caacc95833a1c297f6e014ccd3f8d6d"
+    },
+    {
+      "path": "originals/retired-publication/final-index-check-r1.json",
+      "bytes": 5542,
+      "sha256": "3d94dffec4aafe549342f119c20d851f96e46bd9416bf1e7ba7073b626bd12f8"
+    },
+    {
+      "path": "originals/retired-publication/package-manifest.json",
+      "bytes": 1238,
+      "sha256": "5e93d5aa2f71f3d28f7b61ff4d64c7928d260377e99325d602ac56f1bc1756ec"
+    },
+    {
+      "path": "originals/retired-publication/run_command.py",
+      "bytes": 1602,
+      "sha256": "a8e8f0b50f2c5d95342e36f1b8fffd4fdc5daeabbf4a382fa15300c747ce65fc"
+    },
+    {
+      "path": "originals/source-binding-r1.json",
+      "bytes": 866,
+      "sha256": "51e5bf13061a100a8cc817ff1b7cc66a13d9c0f0809872a47f048b784f347b87"
+    },
+    {
+      "path": "originals/source-binding-r1.log",
+      "bytes": 594,
+      "sha256": "ba138bd80ffd3db9c9d41eb69e56e4e437fd622af2e671236ead114930754fcd"
+    },
+    {
+      "path": "originals/verify-sealed-r1.json",
+      "bytes": 805,
+      "sha256": "f9d4de7cbab339e0abf309b784921db35dd1dd9ae7a45d8ae3a0a1ab014a99e8"
+    },
+    {
+      "path": "originals/verify-sealed-r1.log",
+      "bytes": 561,
+      "sha256": "0710008335f047bf3007612ecb282731c48b2386f9b3c0e3fc8bcfebee77d54b"
+    }
+  ],
+  "ci_run": 43901863960,
+  "ci_status": "in_progress",
+  "ci_not_desktop_acceptance": true
+}

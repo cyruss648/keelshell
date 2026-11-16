@@ -1,4 +1,4 @@
-# KeelShell 当前交接 — 2026-11-16
+# KeelShell 当前交接 — 2026-11-17
 
 本页只维护当前工作和接续入口。完整产品、FILE-05/M4、三平台桌面与发行仍进行中。
 先按[当前路线](ROADMAP.md)查缺口，再读对应精确记录；历史“不 push”、旧 HOLD 和
@@ -15,8 +15,15 @@ archive helper 另列 30；1364 app 库存与逐名执行相等。
 session library `288/0/4 ignored`、真实 OpenSSH 17/17；Mac 仍锁屏、GUI 0。
 按[本批记录](testing/records/2026-11-16-tunnel-configuration-reload.md)接续，
 正常 release build `0/reaped/183.646s`，提交前包结构／arm64／minos 15.0 检查通过，
-未启动或安装；准备普通提交推送，随后绑定精确提交与正常包。不要重复本轮全量测试
-或封存前批 CI。唯一槽仍为下文 target，不切换归属。
+未启动或安装。工程 `6f28f5c424752a221746fbfb621e319c20ff38b9` 已普通推送，
+本地／tracking／远端一致；76 原件与 721 输入从真实 Git blob 验证
+`0/reaped/7.350s`，零 mismatch。精确提交正常包位于
+`work/tunnel-configuration-reload-20261116/package-r1/KeelShell.app`，
+GUI `0db8640a…`、MCP `bb415f3a…`，完整摘要见本批记录。
+新 Quality `43901863960` 的 Windows `133420285732`、Ubuntu `133420286130`、
+macOS `133420286347` 均 in_progress；接续收取实际终态，不重放宿主 gate。
+当前活动目录是 `work/tunnel-configuration-reload-20261116/`，旧 publication 包与
+重复副本在交付补充的 Git 绑定后清理；唯一 Cargo 槽仍保持，不切换归属。
 
 ## 不变的实现与交付约束
 
@@ -116,7 +123,7 @@ unittest 6.134s／外层 6.203s，实际 waited；辅助检索诊断原文保留
 唯一 Cargo target 为 `work/recovery-batch-integration-20261115/target`，
 `CARGO_BUILD_JOBS=2`、`MACOSX_DEPLOYMENT_TARGET=15.0`。同一 checkout 连续使用，归属未切换，
 不反复 clean；换归属前遵循[共享 target 合同](testing/SHARED_TARGET.md)。
-当前活动目录为 `work/windows-fixture-publication-integration-20261116/`；
+上一发布批活动目录为 `work/windows-fixture-publication-integration-20261116/`；
 旧 publication、两个已完成 reviewer 目录及稳定测试副本在精确 Git 原件核对后
 已回收 88 文件／13,465,970 字节，三个自有 agent 均已关闭。
 旧 publication 路径不可再使用。ZIP 活动副本、Zmodem 准备候选与 Turing 目录
@@ -137,8 +144,8 @@ unittest 6.134s／外层 6.203s，实际 waited；辅助检索诊断原文保留
 CI watcher 已实际 reap，没有活动 Cargo 或自有 reviewer。
 没有新建用户 chat、worktree、分支或容器。
 
-本次再次原生 inventory 仍明确报告 Mac 锁屏且自动解锁失败；GUI 操作／截图 0。
-新正常包为 `work/windows-fixture-publication-integration-20261116/package-r1/KeelShell.app`，
+上一发布批的原生 inventory 明确报告 Mac 锁屏且自动解锁失败；GUI 操作／截图 0。
+该批正常包原位于 `work/windows-fixture-publication-integration-20261116/package-r1/KeelShell.app`，
 绑定 `ee3ad73` 与当前冻结。release build `0/reaped/150.274s`，
 打包及本机结构／arm64／minos 15.0 检查通过；没有启动、安装、签名或公证。
 app SHA-256 `be1029bda1fe6afc8882d11cbf9a0be789ae32faa587028c3e7fccf2d77f494a`，

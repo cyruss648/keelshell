@@ -108,8 +108,29 @@ r4 对实际原件分别解析后通过，普通 Rust、rustdoc、主 Python 和
 实际 `0/reaped/0.154s`，721 输入零 mismatch，1364 app 名逐项相等、21 新名全部 ok。
 重派生没有执行测试或修改 target。原 parser 诊断、父／非作者执行和原生锁屏事实均保留。
 
+随后增强为从精确 Git 提交核对全部成员与工程输入；派生器变化后当前封存仍为
+76 成员、1,854,528 字节。原始日志按目录属性关闭换行转换及 diff 空白 lint，
+补齐默认忽略的日志后，在首次 push 前完成本地修订；没有强推。
+
+## 实际提交推送与包
+
+工程 `6f28f5c424752a221746fbfb621e319c20ff38b9` 已普通推送，
+`2026-11-16T15:56:52Z` 三方读回一致且工作区干净。
+76 原件与 721 输入全部从该提交的真实 Git blob 验证通过，
+`0/reaped/7.350s`，零 mismatch，测试重放 0。
+
+精确标识该提交的正常包位于本地
+`work/tunnel-configuration-reload-20261116/package-r1/KeelShell.app`；
+程序摘要与上面的提交前包相同，全体包成员逐项核验，打包／结构检查再次退出 0。
+原 `build.commit=null` 的提交前包没有被追溯修改，而由新目录替代。
+
+[30 成员交付补充](2026-11-16-tunnel-configuration-reload-evidence/delivery/README.md)
+保存实际提交／push／三方读回、精确包 manifest、CI 运行中快照及旧资源原件。
+
 ## 尚未验证
 
-精确新提交 CI、带提交标识的正常包和原生桌面尚未完成。
+精确 Quality `43901863960` 正在运行；Windows `133420285732`、Ubuntu
+`133420286130`、macOS `133420286347` 均 in_progress，尚无新候选平台终态。
+正常包结构检查不代表 GUI 已启动，也不代表 Windows／Linux 或六目标发行通过。
 本轮 `cua.getState` 再次明确报告 Mac 锁屏且自动解锁失败，GUI 操作与截图均为 0。
 前批源码、正常包与 CI 成绩不移签为本批。

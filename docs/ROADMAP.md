@@ -1,4 +1,4 @@
-# 当前开发路线 — 2026-11-16
+# 当前开发路线 — 2026-11-17
 
 本页只维护当前路线与接续顺序；完整产品仍在开发，FILE-05/M4 未整体完成。
 先读[当前交接](HANDOFF.md)，再按[能力台账](product/CAPABILITIES.md)和各批精确记录接续。
@@ -90,8 +90,9 @@
    owner 保留、跨面板 busy 和迟到结果边界；russh 锁版本更新至 `0.65.2`。
    21 新例、独立 63 项及两位非作者限定批准；最终完整门禁 `0/reaped/834.958s`，
    普通 Rust `3246/0/48 ignored`、app `1362/0/2 ignored`、rustdoc 14。
-   正常 build 和本机包结构通过，普通 push／精确提交包／新 CI 按
-   [本批记录](testing/records/2026-11-16-tunnel-configuration-reload.md)接续；
+   工程 `6f28f5c` 已普通 push、三方一致，精确正常包／本机结构通过；
+   新 Quality `43901863960` 三平台进行中，按
+   [本批记录](testing/records/2026-11-16-tunnel-configuration-reload.md)接续终态；
    原生桌面仍待验，前批成功不移签。
 
 1. `ee3ad73` 的 `43880245383` 三平台完整 gate、Windows 293 项 Python／七类真实 tree／Job barrier，
