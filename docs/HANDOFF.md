@@ -5,7 +5,8 @@
 旧计数不覆盖当前授权。旧入口可从 `2f29744:docs/HANDOFF.md` 的 Git blob 读取；
 更早原文见[交接历史](HANDOFF_HISTORY_2026-11-16.md)与[路线历史](ROADMAP_HISTORY_2026-11-16.md)。
 
-当前在收口监控渲染栈修复：原UDP工程`1670329`已推送，其
+监控渲染栈修复已普通推送`bbd4eaccfa8bba2feb487ff43e0423567428bc82`，
+本地／tracking／远端三方一致、读回干净。原UDP工程`1670329`已推送，其
 Quality43945988599终态为failure，macOS完整gate／OpenSSH成功，
 Ubuntu／Windows分别在两项既有嵌套监控回归中栈溢出。
 [37成员终态](testing/records/2026-11-17-darwin-udp-sockets-evidence/ci-completion/README.md)
@@ -21,7 +22,12 @@ x.y和显式2 MiB完整app1375/0/2通过，1377库存与逐名结果相等。
 Mill／Hubble最终r2分别静态和父级专用prebuilt限定批准，P0–P3全0，
 后者独立78/0/0、独立编译0；原r1中止／漂移及全部诊断保持。
 两位reviewer及规划agent Singer已关闭，2份专用副本／548,027,216字节已回收。
-正常release构建及arm64/minos15.0包结构通过；提交推送进行中。
+正常release构建及arm64/minos15.0包结构通过；192成员／731输入的精确Git绑定通过。
+提交来源包五个应用文件与提交前包逐字节相等，只更新manifest来源。
+新Quality43955379234已启动：Windows133608443190、macOS133608443592、
+Ubuntu133608443616均运行中，尚无终态；未取消或重跑旧run，也未留下watcher。
+按精确Git原件回收266文件／74,562,243字节、4个已无用途的自有目录；
+当前正常包和共享target身份不变，首轮清理预检发现bytecode而安全停止的诊断保持。
 本片没有原生桌面操作，最新依赖在线完整复查仍UNKNOWN。
 接续见[栈修复记录](testing/records/2026-11-17-monitor-render-stack.md)及
 [ADR0155](adr/0155-monitor-render-stack-boundaries.md)。
@@ -197,8 +203,8 @@ unittest 6.134s／外层 6.203s，实际 waited；辅助检索诊断原文保留
 
 ## 下一步与资源
 
-1. 监控栈修复r2的限定门禁、独立复核及正常包结构已通过；
-   完成提交推送，再收取精确修复后CI，保持原43945988599失败和全部诊断。
+1. 监控栈修复`bbd4eac`已普通推送，限定门禁、独立复核、精确Git绑定及正常来源包通过；
+   收取运行中的Quality43955379234终态，保持原43945988599失败和全部诊断。
    保留依赖在线UNKNOWN和原生未验边界，不重复未变宿主测试。
    编辑器备份及Windows测试修复已推送；精确源码 `a1a97b3` 的
    Quality43934041540三平台完整门禁已成功，不重放未变的宿主测试或旧CI。
@@ -214,7 +220,12 @@ unittest 6.134s／外层 6.203s，实际 waited；辅助检索诊断原文保留
 唯一 Cargo target 为 `work/recovery-batch-integration-20261115/target`，
 `CARGO_BUILD_JOBS=2`、`MACOSX_DEPLOYMENT_TARGET=15.0`。同一 checkout 连续使用，归属未切换，
 不反复 clean；换归属前遵循[共享 target 合同](testing/SHARED_TARGET.md)。
-当前活动目录为 `work/editor-backup-verification-20261117/`；
+监控修复当前正常包与必要交付工装位于
+`work/monitor-stack-delivery-20261117/package-r2/KeelShell.app`及其父目录；
+旧`work/monitor-stack-20261117/`、`work/windows-monitor-planning-20261117/`、
+`work/darwin-udp-ci-20261117/`与`work/darwin-udp-delivery-20261117/`已核对回收。
+原件与Windows后续规划从本批Git封存读取，不能继续访问旧活动路径。
+编辑器活动目录为 `work/editor-backup-verification-20261117/`；
 编辑器原失败、r4正例及两位reviewer的原审／追加签署已移至docs主封存；
 活动目录保留精确f810f67正常包和后续交付／Windows修复工装。
 `work/darwin-tcp-listeners-20261117/` 是上一批保留正常包和交付回执。
@@ -243,8 +254,8 @@ CI watcher 已实际 reap，没有活动 Cargo 或自有 reviewer。
 没有新建用户 chat、worktree、分支或容器。
 
 UDP当前正常包为 `work/darwin-udp-20261117/package-r1/KeelShell.app`，
-绑定工程 `1670329` 与729输入；交付／CI工装在
-`work/darwin-udp-delivery-20261117/`。
+绑定工程 `1670329` 与729输入；交付／CI工装已封存回收，
+当前用上述监控修复交付目录中的必要helper接续。
 本批199成员和上一CI27成员均从上述工程的Git blob逐项核对后，
 回收235文件／70,913,865字节，含已被精确正常包替代的提交前包及下载手册；
 共享target目录身份和当前正常包六文件摘要前后相等。
