@@ -19,6 +19,10 @@ CI 必须编译出新完整用例名。宿主 scoped gate `0/reaped/19.678s`，s
 新非作者静态批准、P0–P3 全 0、独立运行 0，已关闭；Windows 类型/native
 仍待实际 CI。62 成员证据 current 绑定零 mismatch。见
 [本批记录](testing/records/2026-11-16-windows-archive-root-publication.md)。
+本批源码 `f094de6ad2789d168f5a24bacb316c98b83608ac` 已推送且三方一致。
+新精确 Quality `43859165104` 的 Windows 两个预检 step 已 success，完整 gate
+运行中；确切测试库存/执行计数及 app 结果仍待终态原日志，不提前签全绿。
+
 
 ## 2026-11-16 Windows 私有归档预检
 

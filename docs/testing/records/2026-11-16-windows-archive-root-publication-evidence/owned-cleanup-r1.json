@@ -1,0 +1,380 @@
+{
+  "files": [
+    {
+      "path": "work/windows-archive-preflight-integration-20261116/candidate-r1.diff",
+      "bytes": 6287,
+      "sha256": "1f8f104a4daf2acc022b8f3eaca17abc213964425a62391eefa35ac15e196ee2",
+      "source_path_match": true
+    },
+    {
+      "path": "work/windows-archive-preflight-integration-20261116/candidate-three-files-r1.json",
+      "bytes": 446,
+      "sha256": "872fdfe4e29634da6d19b58d9fad862d38cf4d482fc1c3d10ef576b61882944e",
+      "source_path_match": true
+    },
+    {
+      "path": "work/windows-archive-preflight-integration-20261116/commit-bind-r1.json",
+      "bytes": 858,
+      "sha256": "e4007e4358597958b11ad2d66924f0a798328faa0a1b40a7510b81d0a5a5a437",
+      "source_path_match": false
+    },
+    {
+      "path": "work/windows-archive-preflight-integration-20261116/commit-bind-r1.log",
+      "bytes": 1837,
+      "sha256": "868319f4138b5292dbac7827f7babca2605f4b6f6b4f85fd279b1a49723e626c",
+      "source_path_match": false
+    },
+    {
+      "path": "work/windows-archive-preflight-integration-20261116/commit-bind-r2.json",
+      "bytes": 892,
+      "sha256": "ce4366f74664965413c0e17a15e37414d44bf5b00d9117bd378b18e6d7abc5fa",
+      "source_path_match": false
+    },
+    {
+      "path": "work/windows-archive-preflight-integration-20261116/commit-bind-r2.log",
+      "bytes": 309,
+      "sha256": "9112191479be4203b7b9fdaea68f40a12882489e42911fdd69acc4f6fcbbaa8f",
+      "source_path_match": false
+    },
+    {
+      "path": "work/windows-archive-preflight-integration-20261116/dependencies-live-r1.json",
+      "bytes": 864,
+      "sha256": "9408f420a7cc6bbbe06ab8fa40eabbcdf9bbeb0dfa36be40963a722f3c0a190b",
+      "source_path_match": true
+    },
+    {
+      "path": "work/windows-archive-preflight-integration-20261116/dependencies-live-r1.log",
+      "bytes": 2224,
+      "sha256": "f474b36b3cf074ca6e2854f16b2df0c44f751a0a3979b16057aaa8658aa55558",
+      "source_path_match": true
+    },
+    {
+      "path": "work/windows-archive-preflight-integration-20261116/dependencies-report-r1.json",
+      "bytes": 57863,
+      "sha256": "4c1cd11e56e5b191bb9741001e85d8b892c61511d49511ccc9cddb5b75f9c56e",
+      "source_path_match": true
+    },
+    {
+      "path": "work/windows-archive-preflight-integration-20261116/docs-push-r1.json",
+      "bytes": 790,
+      "sha256": "738712d8567bf31ba0bad11b174050264a439348ed491aed6e6f57a00695aac5",
+      "source_path_match": true
+    },
+    {
+      "path": "work/windows-archive-preflight-integration-20261116/docs-push-r1.log",
+      "bytes": 113,
+      "sha256": "8e9583c3d446411a8133dcad5e8767fde9feeda7994bef5ad3dda96e274d9dd9",
+      "source_path_match": true
+    },
+    {
+      "path": "work/windows-archive-preflight-integration-20261116/evidence-verify-r1.json",
+      "bytes": 792,
+      "sha256": "a6999e687d847545d145aeae6041fa796e928a54cce6463de2ac345823a7b0e3",
+      "source_path_match": false
+    },
+    {
+      "path": "work/windows-archive-preflight-integration-20261116/evidence-verify-r1.log",
+      "bytes": 276,
+      "sha256": "186059feb7869baa2b4a9063b8cd819b075b39c702fdf6a108ea50657e578ae2",
+      "source_path_match": false
+    },
+    {
+      "path": "work/windows-archive-preflight-integration-20261116/inputs-freeze-r1.json",
+      "bytes": 132291,
+      "sha256": "fda4fd6890e11d7907ff7bf8d81c72e2bb8112985b5d39a23c2f2342e3643057",
+      "source_path_match": true
+    },
+    {
+      "path": "work/windows-archive-preflight-integration-20261116/native-access-blocked-r2.json",
+      "bytes": 371,
+      "sha256": "6ad3c7c607604f889446a59b05fecece8e7428e49f34b0bb8e2f9679892d7a37",
+      "source_path_match": true
+    },
+    {
+      "path": "work/windows-archive-preflight-integration-20261116/official-workflow-reference-r1.json",
+      "bytes": 589,
+      "sha256": "b0f5a321c720944073ecbe31c80827220917a59e410d3322c3bb7bb02c028411",
+      "source_path_match": true
+    },
+    {
+      "path": "work/windows-archive-preflight-integration-20261116/owned-cleanup-r1.json",
+      "bytes": 14178,
+      "sha256": "e281e52f60f175bcd60de45157c9a5c0913c987c53156c958d8ebed820c91fb7",
+      "source_path_match": false
+    },
+    {
+      "path": "work/windows-archive-preflight-integration-20261116/push-r1.json",
+      "bytes": 790,
+      "sha256": "0049a3e0c5c8de1bb4ec98bb5e54c3dd82d4f634f0e417ed206a9bff5a1082e7",
+      "source_path_match": false
+    },
+    {
+      "path": "work/windows-archive-preflight-integration-20261116/push-r1.log",
+      "bytes": 113,
+      "sha256": "203b4dbd9a02d7fc19b89d8da9d166c16d77bf91346a3a1b118381bd157f825f",
+      "source_path_match": false
+    },
+    {
+      "path": "work/windows-archive-preflight-integration-20261116/run_command.py",
+      "bytes": 1602,
+      "sha256": "a8e8f0b50f2c5d95342e36f1b8fffd4fdc5daeabbf4a382fa15300c747ce65fc",
+      "source_path_match": true
+    },
+    {
+      "path": "work/windows-archive-preflight-integration-20261116/scoped-gate-r1.json",
+      "bytes": 783,
+      "sha256": "6306aec5e035c350be66bb01659e568cfe6893eeda01065c6b2f7c4b3c6c854b",
+      "source_path_match": true
+    },
+    {
+      "path": "work/windows-archive-preflight-integration-20261116/scoped-gate-r1.log",
+      "bytes": 6176,
+      "sha256": "5e6cc81e0847e060a9dd215891221438eefa508932e640980abe2ae07cdae1a9",
+      "source_path_match": true
+    },
+    {
+      "path": "work/windows-archive-preflight-integration-20261116/scoped-summary-r1.json",
+      "bytes": 2072,
+      "sha256": "6eb6407c9320650f579e6e14de9ae05d2dee4276c5b3cde7289d622258717555",
+      "source_path_match": true
+    },
+    {
+      "path": "work/windows-archive-preflight-integration-20261116/scoped_gate.py",
+      "bytes": 837,
+      "sha256": "568c65bc982c169f9e25302c98f8643f6955c9c859a1a2de692f286130a5ebe9",
+      "source_path_match": true
+    },
+    {
+      "path": "work/windows-archive-preflight-integration-20261116/seal_evidence.py",
+      "bytes": 2974,
+      "sha256": "4366de9c9edf38c662ea48bd610cbcb3a0796de03b148c950dbe0976c2c76962",
+      "source_path_match": true
+    },
+    {
+      "path": "work/windows-archive-preflight-integration-20261116/source-ci-jobs-r1.json",
+      "bytes": 802,
+      "sha256": "cb1b841a730785306c0ada4a7df6930f772cbd6212afa0592825f978cb172868",
+      "source_path_match": false
+    },
+    {
+      "path": "work/windows-archive-preflight-integration-20261116/source-ci-jobs-r1.log",
+      "bytes": 7176,
+      "sha256": "03607ff9e0c05efe7c914168ee0045d38b2c64130da0a3ca9ce84a1f7f527d5d",
+      "source_path_match": false
+    },
+    {
+      "path": "work/windows-archive-preflight-integration-20261116/source-ci-runs-r1.json",
+      "bytes": 905,
+      "sha256": "25fe3781bd40c22acf2c33c6d4db366856eb5f20d575f6da3f7d8547bb0aaa04",
+      "source_path_match": false
+    },
+    {
+      "path": "work/windows-archive-preflight-integration-20261116/source-ci-runs-r1.log",
+      "bytes": 585,
+      "sha256": "14bff0bce0f52a9fa5444ee7013e590491907339e56c8728ed27a09a1f046dbb",
+      "source_path_match": false
+    },
+    {
+      "path": "work/windows-archive-preflight-integration-20261116/source-ci-watch-r1.json",
+      "bytes": 798,
+      "sha256": "81810134ca94fbef809ca3fee4e648b8a5cebd7e57a8f4337267968ccb6920dd",
+      "source_path_match": true
+    },
+    {
+      "path": "work/windows-archive-preflight-integration-20261116/source-ci-watch-r1.log",
+      "bytes": 113756,
+      "sha256": "fe6a9e572f86845ab418f7dec719a778a6f9775919da39b05e99f187caa3d430",
+      "source_path_match": true
+    },
+    {
+      "path": "work/windows-archive-preflight-integration-20261116/source-delivery-r1.json",
+      "bytes": 314,
+      "sha256": "fecc187a4394e069fca1c995d54489f1fcc2e813627123d1e82dd44a11313d3c",
+      "source_path_match": false
+    },
+    {
+      "path": "work/windows-archive-preflight-integration-20261116/source-r1/.github/workflows/ci.yml",
+      "bytes": 2883,
+      "sha256": "029b8b955380a86d31da88a5b6c94f82c15d532b7ca482f9b15088c3083f60ab",
+      "source_path_match": true
+    },
+    {
+      "path": "work/windows-archive-preflight-integration-20261116/source-r1/crates/keelshell-app/src/files/archive_tests.rs",
+      "bytes": 33410,
+      "sha256": "7e195be17fdb2b03628b6cb7e7ea191e86acbc6c2399906db7824b94426a15f4",
+      "source_path_match": true
+    },
+    {
+      "path": "work/windows-archive-preflight-integration-20261116/source-r1/crates/keelshell-session/src/sftp/archive_transfer/local_windows/tests.rs",
+      "bytes": 30137,
+      "sha256": "48d59382ddb1096e10a7a84e458b5df01796c1567e216c52de3ef3a409b25fbb",
+      "source_path_match": true
+    },
+    {
+      "path": "work/windows-archive-preflight-integration-20261116/windows-cross-clippy-r1.json",
+      "bytes": 879,
+      "sha256": "4ff0c64cf74b4bc5d8e2f842b4d87b2d978af4b0acabf87a69bac211e77c4e44",
+      "source_path_match": true
+    },
+    {
+      "path": "work/windows-archive-preflight-integration-20261116/windows-cross-clippy-r1.log",
+      "bytes": 63569,
+      "sha256": "750ea34f5c5bfde2ab8f738571910094f6272bca3456288cfd8e44120876ea27",
+      "source_path_match": true
+    },
+    {
+      "path": "work/windows-archive-preflight-integration-20261116/windows-job-log-r1.clean.txt",
+      "bytes": 77864,
+      "sha256": "97a29d585f3c3faba941f774aa5da13c0d4d8c1d568f18a3f9d5774ad854cbab",
+      "source_path_match": false
+    },
+    {
+      "path": "work/windows-archive-preflight-integration-20261116/windows-job-log-r1.json",
+      "bytes": 806,
+      "sha256": "8550031d4facfa03e62ac14badc69b99758673638d11ba62e4809121811f3e95",
+      "source_path_match": true
+    },
+    {
+      "path": "work/windows-archive-preflight-integration-20261116/windows-job-log-r1.log",
+      "bytes": 80987,
+      "sha256": "3a4e8a5a1c927709544a1aef0612d8ccead304b8509a58d085085274b8b176ba",
+      "source_path_match": true
+    },
+    {
+      "path": "work/windows-archive-publish-tests-candidate-20261116/REPORT.md",
+      "bytes": 4098,
+      "sha256": "a761ca3e6692e47fef91e589f11722c6b6e7c5739f1aa3b992a11fce17008e13",
+      "source_path_match": true
+    },
+    {
+      "path": "work/windows-archive-publish-tests-candidate-20261116/rustfmt-check-r1.log",
+      "bytes": 155,
+      "sha256": "f6c72a67a4efe2f702a54ee8c53be221cf50920c9ed604f11d49655885c0cc0b",
+      "source_path_match": true
+    },
+    {
+      "path": "work/windows-archive-publish-tests-candidate-20261116/rustfmt-r1.log",
+      "bytes": 147,
+      "sha256": "a298abd42dd14cfd3976dba6bae5f35df19781100a55cb5282e1c5cc4fd2678f",
+      "source_path_match": true
+    },
+    {
+      "path": "work/windows-archive-publish-tests-candidate-20261116/static-receipt-r1.json",
+      "bytes": 4273,
+      "sha256": "ac06d19758b06dc57fe64c35558344a3a0ebc9ac8d24e56b38b0252de711927c",
+      "source_path_match": true
+    },
+    {
+      "path": "work/windows-archive-publish-tests-candidate-20261116/tests-candidate.patch",
+      "bytes": 7402,
+      "sha256": "3086c25d8ac6a3ffcbb2ae82ced470fd3239e31e0add66057fea69cd264521fd",
+      "source_path_match": true
+    },
+    {
+      "path": "work/windows-archive-publish-tests-candidate-20261116/verify_candidate.py",
+      "bytes": 6237,
+      "sha256": "dc482be2f42242f14e177fd3d7be9996ecf4cc8ecbe58c51ff7437d8c2c1092e",
+      "source_path_match": true
+    },
+    {
+      "path": "work/windows-archive-publication-review-20261116/report-r1.md",
+      "bytes": 10359,
+      "sha256": "684bc7cf8fc183841b2affeebd6e270dbd5bf85891545f8e124a2ff7a1d7f248",
+      "source_path_match": true
+    },
+    {
+      "path": "work/windows-archive-publication-review-20261116/static-receipt-r1.json",
+      "bytes": 6084,
+      "sha256": "89eccf3b4e412f4c4fa8bd05188110b96eedd747db4deb19dec6f42936513dc3",
+      "source_path_match": true
+    },
+    {
+      "path": "work/workbench-fit-20261116/docs-delivery-r2.json",
+      "bytes": 348,
+      "sha256": "04b727385e12cfd30e20e1b1075fb9687212342246f7998462dcc5061ad82e29",
+      "source_path_match": true
+    },
+    {
+      "path": "work/workbench-fit-20261116/evidence-commit-bind-r1.json",
+      "bytes": 853,
+      "sha256": "fdf456c54d4be7ea90670b462d2ac40ece1c92ec14ca342e6bf3747b179132b5",
+      "source_path_match": true
+    },
+    {
+      "path": "work/workbench-fit-20261116/evidence-commit-bind-r1.log",
+      "bytes": 257,
+      "sha256": "4e049bc404901e0c10008b0ae56b26e4601c860edb7e048cdc0cfb8e8d21b838",
+      "source_path_match": true
+    },
+    {
+      "path": "work/workbench-fit-20261116/evidence-verify-r1.json",
+      "bytes": 791,
+      "sha256": "cdbd3aa28e7245ad5344e0d46dbd92d49f460abaae36bd22c87dcc0df1140df4",
+      "source_path_match": true
+    },
+    {
+      "path": "work/workbench-fit-20261116/evidence-verify-r1.log",
+      "bytes": 224,
+      "sha256": "4628736b9e154116aa89942bf786c0116a967f4b3b256489f2ff41147683f957",
+      "source_path_match": true
+    },
+    {
+      "path": "work/workbench-fit-20261116/run_command.py",
+      "bytes": 1602,
+      "sha256": "a8e8f0b50f2c5d95342e36f1b8fffd4fdc5daeabbf4a382fa15300c747ce65fc",
+      "source_path_match": true
+    },
+    {
+      "path": "work/workbench-fit-20261116/seal_native_ci.py",
+      "bytes": 3909,
+      "sha256": "21b5f8efee683f20c27ff104b07b3a54c7b841af1bb04c8328a73bc61839e75b",
+      "source_path_match": true
+    },
+    {
+      "path": "work/workbench-fit-20261116/source-ci-jobs-query-r1.json",
+      "bytes": 201,
+      "sha256": "2a7bd82c63e019a81721cd5a78551dc71b11d5c9e54559c98fc16903a44e2c28",
+      "source_path_match": true
+    },
+    {
+      "path": "work/workbench-fit-20261116/source-ci-jobs-r1.json",
+      "bytes": 8144,
+      "sha256": "ac7babe79aa1272b2feeafd980be42da86919dbd94a12601659141ebc8528032",
+      "source_path_match": true
+    },
+    {
+      "path": "work/workbench-fit-20261116/source-ci-query-r1.json",
+      "bytes": 180,
+      "sha256": "6269d34a09d7a54afd107c3e0f087caf5a70ad8cfb7729a860f202a3ff4cad8f",
+      "source_path_match": true
+    },
+    {
+      "path": "work/workbench-fit-20261116/source-ci-runs-r1.json",
+      "bytes": 12279,
+      "sha256": "8d2c379248c0f7ac1e4d01594b137daae6d6b362fbc6ae1b758aa18b301bb91b",
+      "source_path_match": true
+    },
+    {
+      "path": "work/workbench-fit-20261116/source-delivery-r1.json",
+      "bytes": 272,
+      "sha256": "43718e5b6c16db18f2236ed6d5bcb454b309d5c2af8eeef3e82f23f1d1a3ffd2",
+      "source_path_match": true
+    }
+  ],
+  "derived": [
+    {
+      "path": "work/windows-archive-preflight-integration-20261116/windows-job-log-r1.clean.txt",
+      "sha256": "97a29d585f3c3faba941f774aa5da13c0d4d8c1d568f18a3f9d5774ad854cbab",
+      "raw_sha256": "3a4e8a5a1c927709544a1aef0612d8ccead304b8509a58d085085274b8b176ba",
+      "derivation": "strip ANSI SGR with ESC [ [0-?]* [ -/]* [@-~]; normalize CRLF to LF; UTF-8",
+      "raw_is_durable": true
+    }
+  ],
+  "deleted_files": 60,
+  "deleted_bytes": 719013,
+  "all_originals_verified_durable": true,
+  "normal_package_retained": true,
+  "current_active_batch_retained": true,
+  "active_agents": 0,
+  "other_checkouts_touched": false
+}

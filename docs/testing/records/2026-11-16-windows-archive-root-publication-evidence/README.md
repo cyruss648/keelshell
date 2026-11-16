@@ -7,3 +7,6 @@
 使用本目录 `verify.py` 核对当前源码，或以 `--source` 指定完整提交 SHA。
 该命令核对原件和源码身份，不重新执行测试，不代表 Windows 条件代码或桌面通过。
 范围、失败和待验收项见[本批记录](../2026-11-16-windows-archive-root-publication.md)。
+
+封存 manifest 的验证状态描述封存时点。目录中的交付、精确提交绑定及
+`preflight-progress-r1.json` 是后续独立回执；它们不改写归档原件。

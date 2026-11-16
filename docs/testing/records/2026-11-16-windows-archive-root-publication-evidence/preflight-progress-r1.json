@@ -1,0 +1,28 @@
+{
+  "checked_at_utc": "2026-11-16T11:45:34.525428+00:00",
+  "source": "f094de6ad2789d168f5a24bacb316c98b83608ac",
+  "run": 43859165104,
+  "job": 133271138956,
+  "native_windows_preflight_steps": [
+    {
+      "completedAt": "2026-11-16T11:37:44Z",
+      "conclusion": "success",
+      "name": "Windows native filesystem preflight",
+      "number": 5,
+      "startedAt": "2026-11-16T11:37:16Z",
+      "status": "completed"
+    },
+    {
+      "completedAt": "2026-11-16T11:39:57Z",
+      "conclusion": "success",
+      "name": "Windows archive backend preflight",
+      "number": 6,
+      "startedAt": "2026-11-16T11:37:44Z",
+      "status": "completed"
+    }
+  ],
+  "step_status": "success",
+  "exact_test_counts": "PENDING_COMPLETE_JOB_LOG",
+  "full_gate": "IN_PROGRESS",
+  "windows_desktop": "NOT_RUN"
+}

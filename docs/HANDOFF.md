@@ -9,7 +9,7 @@
 - 用户已确认远端恢复，完成的功能批次及时提交并推送，读取本地、tracking、
   远端 SHA；不强推。当前分支为 `feature/editor-unicode-codec-20261114`。
   最近已实际读回三方相等的源码提交是
-  `8527cf2af581e50ac0e1f795176ab69737730e18`，读回时工作区干净。
+  `f094de6ad2789d168f5a24bacb316c98b83608ac`，读回时工作区干净。
   `origin/main` 另有独立状态文档，不能直接覆盖。
 - 本批源码及证据已在 `878f13b` 推送原功能分支；临时
   `feature/archive-deadline-clock-20261116` 已删除，本地/tracking/远端均 absent。
@@ -58,6 +58,13 @@ Rust/PowerShell/native 执行 0，已关闭。Windows 类型检查未完成，�
 含原 1 ignored，新增后验替换拒绝用例不冒充完整 publish_stage 端到端。
 62 成员原件已封存，current 绑定 `0/reaped/0.273s`；见
 [当前批次](testing/records/2026-11-16-windows-archive-root-publication.md)。
+本批已在 `f094de6ad2789d168f5a24bacb316c98b83608ac` 推送，三方一致、读回干净。
+精确 Git 绑定 `0/reaped/6.703s`，719 输入/62 成员零 mismatch。
+新 Quality `43859165104`，Windows `133271138956` 两个预检 step 已 success，
+完整 Rust gate 运行中；确切 30 名库存/计数须等原日志，不提前签完整 app 或 gate。
+macOS `133271139049`、Ubuntu `133271138662` 同时执行，旧 run 不移签。
+旧预检目录及已完成原件再回收 60 文件/719,013 字节；原生 inventory 仍锁屏。
+
 
 英文工具栏修订已在 `8c07d61` 推送；正常包 app SHA 为
 `3b127956723c187943236537c9c49814e99866834a9d01a2468d85cf751dd19f`。
