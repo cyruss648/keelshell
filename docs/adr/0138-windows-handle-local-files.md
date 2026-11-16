@@ -47,10 +47,16 @@ padding、ACL 空闲区或 SACL。创建失败或后验失败均不自动删除�
 普通文件从创建到发布保留独占其他写入/删除 open 的原创建句柄。目录长期
 capability 只请求读访问并分享所有访问，不持有 DELETE：Windows 内核为
 rename 打开目标目录时，在部分受支持版本上不分享 DELETE。目录作为源发布时，
-内部以 `ReOpenFile` 从实际保留对象取得短期同步 DELETE lease，重新核验本地
+内部从实际保留对象取得短期同步 DELETE lease，重新核验本地
 volume、完整对象观察及私有 DACL；不按路径重新赋予来源身份。这个 lease 仅
 在源发布调用期间存活，不替换原 capability。全部 namespace 与内容重验继续
 承担竞争检测，不能把目录的读 capability 表示为排斥同账户写入的锁。
+2026-11-16 的源码 `4d72e1e` 原生预检已确认原 `ReOpenFile` 路径在四项目录发布
+用例中拒绝访问。接续候选改用保留句柄加空 NT 相对名的同步 `NtCreateFile`，
+短期请求 `FILE_GENERIC_READ | DELETE` 并只分享 READ/WRITE。
+通用 opener 的普通访问和分享参数原样保留；本机 platform 与 Windows 交叉严格
+Clippy 已通过，静态复核保留原输入范围。组合完整门禁和真实 Windows 结果
+分别记录，不从共享 helper 或已通过的只读游标推断其 DELETE 打开必定成功。
 
 发布针对保留的 `PrivateEntry`，`NtSetInformationFile(FileRenameInformation)`
 传入目标目录句柄与单个名称，`ReplaceIfExists=false`。目录枚举使用独立打开

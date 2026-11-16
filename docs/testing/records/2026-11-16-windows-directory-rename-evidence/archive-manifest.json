@@ -1,0 +1,2115 @@
+{
+  "schema": "keelshell.windows-directory-rename.evidence.v1",
+  "base_commit": "4d72e1e592bdd6194f6eadca3a6a760192b5fe82",
+  "archive": "originals.tar.gz",
+  "count": 237,
+  "original_bytes": 8904728,
+  "files": [
+    {
+      "path": "batch/app-inventory-r3.json",
+      "bytes": 792,
+      "sha256": "6bfabea2e03a30ce40e7f7be099e6bc7ffa5ed7e553355eae20628a29463d5d4",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/app-inventory-r3.json"
+    },
+    {
+      "path": "batch/app-inventory-r3.log",
+      "bytes": 143575,
+      "sha256": "27eb84bd9086c27cfa64f58ae3bf3ceecd34a028b765a3691600cf41009e52fe",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/app-inventory-r3.log"
+    },
+    {
+      "path": "batch/app-inventory-r4.json",
+      "bytes": 814,
+      "sha256": "5dbb50db2f6e62df9a7760f8ca794f41fa3074ee7cf62f9491f618fddc3ee59a",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/app-inventory-r4.json"
+    },
+    {
+      "path": "batch/app-inventory-r4.log",
+      "bytes": 143575,
+      "sha256": "325d7377610998b8dbdb5d307273c967f7a7f0e7ea765ee7109da6ef1247ba42",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/app-inventory-r4.log"
+    },
+    {
+      "path": "batch/app-inventory-r5.json",
+      "bytes": 814,
+      "sha256": "0e308bb434e27f2341a7b1d34c53b4a398526add34207f07cfd41341709f9094",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/app-inventory-r5.json"
+    },
+    {
+      "path": "batch/app-inventory-r5.log",
+      "bytes": 143575,
+      "sha256": "63f6fe2b6b7f9cd8f87c7cd7782143d8484a1ac43ff589c430f6522fd81cf1cf",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/app-inventory-r5.log"
+    },
+    {
+      "path": "batch/app-inventory-r6.json",
+      "bytes": 814,
+      "sha256": "63ffbcd743839e203aade1092f9cfc1e6f963ab0154f7aa2370a0996cf8457b0",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/app-inventory-r6.json"
+    },
+    {
+      "path": "batch/app-inventory-r6.log",
+      "bytes": 143575,
+      "sha256": "63f6fe2b6b7f9cd8f87c7cd7782143d8484a1ac43ff589c430f6522fd81cf1cf",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/app-inventory-r6.log"
+    },
+    {
+      "path": "batch/archive-author/REPORT.md",
+      "bytes": 8213,
+      "sha256": "37e9658a19cad72a31abf3504bbfc3da1513ada6e8ff3df504c8291a930ab706",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/archive-author/REPORT.md"
+    },
+    {
+      "path": "batch/archive-author/archive_batch-help-r2.txt",
+      "bytes": 1219,
+      "sha256": "fd2001c82801a91bedb0849a71a4c75fcef8f8770a3d6a9e0e4b7f0ff76859c5",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/archive-author/archive_batch-help-r2.txt"
+    },
+    {
+      "path": "batch/archive-author/archive_batch-help-r3.txt",
+      "bytes": 1219,
+      "sha256": "fd2001c82801a91bedb0849a71a4c75fcef8f8770a3d6a9e0e4b7f0ff76859c5",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/archive-author/archive_batch-help-r3.txt"
+    },
+    {
+      "path": "batch/archive-author/handoff-state-r1.json",
+      "bytes": 625,
+      "sha256": "6a2f794df572c20c6d044832a8fd2275e58864188c1b440e9294b6ad0c743c4e",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/archive-author/handoff-state-r1.json"
+    },
+    {
+      "path": "batch/archive-author/static-check-r1.json",
+      "bytes": 1466,
+      "sha256": "b5075fbcafbcb7301185b97676caacc268febf43c98869257c8732c44e5ae434",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/archive-author/static-check-r1.json"
+    },
+    {
+      "path": "batch/archive-author/static-check-r2.json",
+      "bytes": 1934,
+      "sha256": "8ebf1509c3d0b5dda1eab8442b8faf5baabba578f99dda08117557aa0c2880a6",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/archive-author/static-check-r2.json"
+    },
+    {
+      "path": "batch/archive-author/static-check-r3.json",
+      "bytes": 1934,
+      "sha256": "3d1b3592f6630f82de1c1cb390c484a7d81fdad12d7241f43083a77080a3114f",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/archive-author/static-check-r3.json"
+    },
+    {
+      "path": "batch/archive-author/verify-evidence-draft-before-r1.txt",
+      "bytes": 9483,
+      "sha256": "39ec45dcc22d26e72b9bd53363e4e7d09b5ccbd8eb4532fbfb74a0a00d48ff25",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/archive-author/verify-evidence-draft-before-r1.txt"
+    },
+    {
+      "path": "batch/archive-author/verify_evidence-help-r2.txt",
+      "bytes": 1328,
+      "sha256": "8a38eb66a1b6755370430485ba26fd757f9b310719fa58f790bd120c944386c5",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/archive-author/verify_evidence-help-r2.txt"
+    },
+    {
+      "path": "batch/archive-author/verify_evidence-help-r3.txt",
+      "bytes": 1328,
+      "sha256": "8a38eb66a1b6755370430485ba26fd757f9b310719fa58f790bd120c944386c5",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/archive-author/verify_evidence-help-r3.txt"
+    },
+    {
+      "path": "batch/archive_batch.py",
+      "bytes": 14590,
+      "sha256": "46396017d4b7bd9459c3012478cfe87ecea3ac4f25c3189be8e7d4c3ab506031",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/archive_batch.py"
+    },
+    {
+      "path": "batch/dependencies-live-r1.json",
+      "bytes": 915,
+      "sha256": "91453b460a899d8bd67d8f101298cf167de981e930a440eadf4db45c7d783f1d",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/dependencies-live-r1.json"
+    },
+    {
+      "path": "batch/dependencies-live-r1.log",
+      "bytes": 311,
+      "sha256": "143572dde2a3e4217d0d3d7189ff44ad469c51dcbd42cc83d35bb14a86983b7f",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/dependencies-live-r1.log"
+    },
+    {
+      "path": "batch/dependencies-live-r2.json",
+      "bytes": 915,
+      "sha256": "8dde57b77e41eccc4533aad506560966d01decbfad863eb941d741b096235269",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/dependencies-live-r2.json"
+    },
+    {
+      "path": "batch/dependencies-live-r2.log",
+      "bytes": 581,
+      "sha256": "c2cd2d98d71ebf957d28a0b06b61be6ac41b222c2cb9928955edeed87226bccf",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/dependencies-live-r2.log"
+    },
+    {
+      "path": "batch/dependencies-live-r3.json",
+      "bytes": 744,
+      "sha256": "993376f1c5872d1982b2ebe0e0144fa3645671848852d0e859b90885cece5aef",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/dependencies-live-r3.json"
+    },
+    {
+      "path": "batch/dependencies-live-r3.log",
+      "bytes": 84,
+      "sha256": "59e5c313dee67f06614a2e482b700c871c29635f2230b5a314a3d1b59f9826ae",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/dependencies-live-r3.log"
+    },
+    {
+      "path": "batch/dependencies-live-report-r1.json",
+      "bytes": 61029,
+      "sha256": "ad22dd549a1a6b65b42c4a5f03bd6137a8cda4c3d5f71f8ea5852b092fa9e91f",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/dependencies-live-report-r1.json"
+    },
+    {
+      "path": "batch/dependencies-live-report-r2.json",
+      "bytes": 60121,
+      "sha256": "5f796484c97ac67967c73fe64c69080f20a6d7586f811a7af6dd06e25aa85855",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/dependencies-live-report-r2.json"
+    },
+    {
+      "path": "batch/engineering-inputs-r4.json",
+      "bytes": 116621,
+      "sha256": "c6535972f2eb0e3aeacf78439b5957ab1c487c13eedaedc7881b1af04eb3ddd3",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/engineering-inputs-r4.json"
+    },
+    {
+      "path": "batch/environment-r4.json",
+      "bytes": 805,
+      "sha256": "2bbe1b962b228fe7f30804f45b1d2baec6cb47bb443f3b99ec256119f69f2ad5",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/environment-r4.json"
+    },
+    {
+      "path": "batch/failed-r1-reconstruction.json",
+      "bytes": 468,
+      "sha256": "8187ec1448472d1aacc95f829e28ffda2a758a4a165c1c820e658fa24cb7d0bd",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/failed-r1-reconstruction.json"
+    },
+    {
+      "path": "batch/failed-r1-tests-reconstructed.rs",
+      "bytes": 27858,
+      "sha256": "b0d4cdf0ace84c0339542a0a4700df52917a552fe8ceda284e4540c5460277ff",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/failed-r1-tests-reconstructed.rs"
+    },
+    {
+      "path": "batch/freeze.py",
+      "bytes": 910,
+      "sha256": "0a57b9f74d6d9c592459ce3a0594a96c27dffecb469717dad331ce7868494ff1",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/freeze.py"
+    },
+    {
+      "path": "batch/full-gate-r1.json",
+      "bytes": 735,
+      "sha256": "3a5daa1b25041422170ea3dd3044f13d8dc325d0effef6ec63b5879dbdb29d53",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/full-gate-r1.json"
+    },
+    {
+      "path": "batch/full-gate-r1.log",
+      "bytes": 171602,
+      "sha256": "39fe68b0f0b8d738ef1f3edb0c7532efae7a43af186350abb27b86d1bf02e98a",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/full-gate-r1.log"
+    },
+    {
+      "path": "batch/full-gate-r2.json",
+      "bytes": 734,
+      "sha256": "5fe0659d0a5f1258a42f01e6e0bd142f052bdd17feb1878745804907085df125",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/full-gate-r2.json"
+    },
+    {
+      "path": "batch/full-gate-r2.log",
+      "bytes": 195309,
+      "sha256": "ddf78d2aee15ceab3b54ef5eb43baaf742a0910fad96a00930ae78d794cab739",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/full-gate-r2.log"
+    },
+    {
+      "path": "batch/full-gate-r3.json",
+      "bytes": 734,
+      "sha256": "8ade45ac536654fd07c0bd81f5d13bc512de62903a2d95b43cf8e8f33e0464a2",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/full-gate-r3.json"
+    },
+    {
+      "path": "batch/full-gate-r3.log",
+      "bytes": 314727,
+      "sha256": "dee7588c5b8b667f9e4f5bc0ffa975d432122e95d4bf0caefaf5755f0641bda9",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/full-gate-r3.log"
+    },
+    {
+      "path": "batch/full-gate-r4-summary.json",
+      "bytes": 10262,
+      "sha256": "16e80f125a388d618b66c0ac42f77aaf28755e06a33b8074fcb87589d21a7dea",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/full-gate-r4-summary.json"
+    },
+    {
+      "path": "batch/full-gate-r4.json",
+      "bytes": 734,
+      "sha256": "e0ac3e469014fd2c4ed3296340136c1ba667a33aaac9675b02c5f497c108ba0a",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/full-gate-r4.json"
+    },
+    {
+      "path": "batch/full-gate-r4.log",
+      "bytes": 645378,
+      "sha256": "386d76544c5e71390b2ea58d75e0390fec322b218dcd9d7e8bdfe9ebad6e8b96",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/full-gate-r4.log"
+    },
+    {
+      "path": "batch/inputs-freeze-r1.json",
+      "bytes": 116621,
+      "sha256": "c3fae616a98e40b51a63780da0d47ade15c42fe8557177b36ce024d082220d41",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/inputs-freeze-r1.json"
+    },
+    {
+      "path": "batch/inputs-freeze-r2.json",
+      "bytes": 116621,
+      "sha256": "f8aac3d060dfadf74d8e2809e2d0507b444068cc4ef3f768cc2169257b88b180",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/inputs-freeze-r2.json"
+    },
+    {
+      "path": "batch/inputs-freeze-r3.json",
+      "bytes": 116621,
+      "sha256": "8454f5eeb7e31cb1e6c1e4c45cbf0e96b86ae321bca80a3800d95a6d1d8187ec",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/inputs-freeze-r3.json"
+    },
+    {
+      "path": "batch/inputs-freeze-r5.json",
+      "bytes": 116621,
+      "sha256": "ff58102e9f408f4cefc4c360adfe096a1ecca0dc5caba5db6b5a29dea69a3148",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/inputs-freeze-r5.json"
+    },
+    {
+      "path": "batch/inputs-freeze-r6.json",
+      "bytes": 116621,
+      "sha256": "1c61aca36a53e511452b5b6d5aed8295b0ceb0675d067f619a43095379b7a5d1",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/inputs-freeze-r6.json"
+    },
+    {
+      "path": "batch/kit-ai-settings-r1.json",
+      "bytes": 843,
+      "sha256": "7d41f14c0d9573324c5f43eb666823dd5963a1b0d53f189cc971e6846d7957a4",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/kit-ai-settings-r1.json"
+    },
+    {
+      "path": "batch/kit-ai-settings-r1.log",
+      "bytes": 10367,
+      "sha256": "522dbd033edaec9b2e19589c50b3d14113c48c25dbaa1bf8320a0b9ffadc1080",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/kit-ai-settings-r1.log"
+    },
+    {
+      "path": "batch/kit-feature-graph-r3.json",
+      "bytes": 794,
+      "sha256": "514ab07699109ebc75479169734c777f074e5f9a3f27c65050e89f8851a7bbaa",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/kit-feature-graph-r3.json"
+    },
+    {
+      "path": "batch/kit-feature-graph-r3.log",
+      "bytes": 656152,
+      "sha256": "c99acc4b9d4cdaba32bbcd297c7cfe10ff6f3ffac4d61b40237ab68bef0e7ed5",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/kit-feature-graph-r3.log"
+    },
+    {
+      "path": "batch/kit-files-stack-crash-frames-r1.json",
+      "bytes": 18630,
+      "sha256": "32362de6cb16e08a999cdd294d463635bc5ee08f1665345c55839329cbb18503",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/kit-files-stack-crash-frames-r1.json"
+    },
+    {
+      "path": "batch/kit-files-stack-fixed-r1.json",
+      "bytes": 967,
+      "sha256": "d8ab4a131c32726f77dd8c99eb132b1e0de0a7228e1ddd83c8824e0c2d4b32cf",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/kit-files-stack-fixed-r1.json"
+    },
+    {
+      "path": "batch/kit-files-stack-fixed-r1.log",
+      "bytes": 897,
+      "sha256": "0b1947e31fcb77e4659951208c08a186a1bf34746ad48c49019e2bf050a81718",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/kit-files-stack-fixed-r1.log"
+    },
+    {
+      "path": "batch/kit-inventory-and-features-r3.json",
+      "bytes": 275,
+      "sha256": "5fdc4ad9595bcd8b72b9eafc0af4e36cb3e5b4cad3f404e3f24f01ec098b3644",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/kit-inventory-and-features-r3.json"
+    },
+    {
+      "path": "batch/kit-locale-green-r1.json",
+      "bytes": 897,
+      "sha256": "0ed09fc876827460050429578662e46032850fdd0114767e6f54238cbac41095",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/kit-locale-green-r1.json"
+    },
+    {
+      "path": "batch/kit-locale-green-r1.log",
+      "bytes": 1741,
+      "sha256": "e07f6226b9f76e390dedc2e2dde1350663d443dbdd62248a883ac9c82e999579",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/kit-locale-green-r1.log"
+    },
+    {
+      "path": "batch/kit-locale-green-r2.json",
+      "bytes": 896,
+      "sha256": "677e4f42db69d48a2ec655b8cc6903fc3fb36d959515cfc1dcffb8f54a3378bc",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/kit-locale-green-r2.json"
+    },
+    {
+      "path": "batch/kit-locale-green-r2.log",
+      "bytes": 868,
+      "sha256": "a5f6cd9f01bc7882b387368018cbdabc314a3680cbbcf3cc8b3391ec410f821d",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/kit-locale-green-r2.log"
+    },
+    {
+      "path": "batch/kit-locale-mutant-r1.rs",
+      "bytes": 9808,
+      "sha256": "3189ab38bafce97162d43f5c572ce5413443d2d6920c610fda637d7c55c81b84",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/kit-locale-mutant-r1.rs"
+    },
+    {
+      "path": "batch/kit-locale-mutation-r1.json",
+      "bytes": 315,
+      "sha256": "3d9078611a7df182d6aad812f7e0cf36d835656ff4c05335265b896ad2195615",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/kit-locale-mutation-r1.json"
+    },
+    {
+      "path": "batch/kit-locale-red-r1.json",
+      "bytes": 902,
+      "sha256": "1cb372fa5ff4178167edef1802f1959f7f259b2606c39425476331f84bc0eef0",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/kit-locale-red-r1.json"
+    },
+    {
+      "path": "batch/kit-locale-red-r1.log",
+      "bytes": 1494,
+      "sha256": "0caa0c449c97582ef9dc2c7ed3c989e50f750a8270f1fca05c50a286c6dfa376",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/kit-locale-red-r1.log"
+    },
+    {
+      "path": "batch/kit-locale-restored-r3.json",
+      "bytes": 316,
+      "sha256": "69ece5a895ea8a1964557a70a93db85cd7627732faacd1119576d3598c7328cf",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/kit-locale-restored-r3.json"
+    },
+    {
+      "path": "batch/kit-lock-update-r1.json",
+      "bytes": 775,
+      "sha256": "66a1d481fe73da4dce09a0637700b0f7b14ea174259ef60b457161e8579aa9d9",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/kit-lock-update-r1.json"
+    },
+    {
+      "path": "batch/kit-lock-update-r1.log",
+      "bytes": 762,
+      "sha256": "b0cb28e3e7eccb2611734fdd592207d5b987653715391fdd15eae47f21124dd6",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/kit-lock-update-r1.log"
+    },
+    {
+      "path": "batch/kit-stack-fixed-r1.json",
+      "bytes": 973,
+      "sha256": "61a271fc5f8bb67460adeb6b34302b41fda0c8c8bbd60bfb0f504be612101042",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/kit-stack-fixed-r1.json"
+    },
+    {
+      "path": "batch/kit-stack-fixed-r1.log",
+      "bytes": 903,
+      "sha256": "3c83209f94cc4ff69360c7b0c6a536d5f24c457f6e03496cf91523d36b4e0ad1",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/kit-stack-fixed-r1.log"
+    },
+    {
+      "path": "batch/kit-stack-lldb-r1.json",
+      "bytes": 1314,
+      "sha256": "a2f9c07abc4a69d09dca59d68a9bf901425cd8cb8d90928a5d790d177aff7b1e",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/kit-stack-lldb-r1.json"
+    },
+    {
+      "path": "batch/kit-stack-lldb-r1.log",
+      "bytes": 1756,
+      "sha256": "0cdc7a522c565069637cb5dad2d92d5fb0b44a1861db9257d6269b1ad9c08f61",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/kit-stack-lldb-r1.log"
+    },
+    {
+      "path": "batch/kit-stack-own-crash-frames-r1.json",
+      "bytes": 28258,
+      "sha256": "8cf626ea5fd5bb3cbcb42812e5e1f9b405bd49b0839324406085266776644139",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/kit-stack-own-crash-frames-r1.json"
+    },
+    {
+      "path": "batch/kit-stack-repro-r1.json",
+      "bytes": 1180,
+      "sha256": "cb05ad96a5a3e73670bb6a2c281521826a0cbc0d24629b5d66016b7ad5e6ade8",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/kit-stack-repro-r1.json"
+    },
+    {
+      "path": "batch/kit-stack-repro-r1.log",
+      "bytes": 338,
+      "sha256": "740157b40ccff7074a9df4ebd87836158e0726632a56ba89c4e7b33adb948bee",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/kit-stack-repro-r1.log"
+    },
+    {
+      "path": "batch/kit-tunnels-stack-crash-frames-r1.json",
+      "bytes": 18606,
+      "sha256": "12eab064182f798711b17acef18625d12428f22cbfdf4d442c7ff32426b565f4",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/kit-tunnels-stack-crash-frames-r1.json"
+    },
+    {
+      "path": "batch/kit-tunnels-stack-fixed-r1.json",
+      "bytes": 975,
+      "sha256": "1deb20ba730e2cd83e90a4928eaf9f5f63333a332424d87fe91208a586aa18a6",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/kit-tunnels-stack-fixed-r1.json"
+    },
+    {
+      "path": "batch/kit-tunnels-stack-fixed-r1.log",
+      "bytes": 907,
+      "sha256": "ce222b12bc66ac66d3fa1b16139fe3936ff0f53bf51a2f3ff6cb3d41cea497f2",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/kit-tunnels-stack-fixed-r1.log"
+    },
+    {
+      "path": "batch/kit-tunnels-workspace-r1.json",
+      "bytes": 860,
+      "sha256": "49302ce6f2938d8b18a5975ff421fc1ec90657133891da9a49242370d8f8a77c",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/kit-tunnels-workspace-r1.json"
+    },
+    {
+      "path": "batch/kit-tunnels-workspace-r1.log",
+      "bytes": 2815,
+      "sha256": "d66b415ed27afd90c0e735710b4279f5fb05deed86d58039a59daf17c0ff967c",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/kit-tunnels-workspace-r1.log"
+    },
+    {
+      "path": "batch/official-source-receipts-r1.json",
+      "bytes": 521,
+      "sha256": "8e116fef82421b1bbe47384c038fb7008d0dae1f4410a3e297a0b54aea0ce8ca",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/official-source-receipts-r1.json"
+    },
+    {
+      "path": "batch/parent-seal/revision.json",
+      "bytes": 622,
+      "sha256": "37ba3299c8f61cfe92c1f7c846e04b6b724c5aa55a81b107db6b326d0497913f",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/parent-seal/revision.json"
+    },
+    {
+      "path": "batch/parent-seal/seal-readiness-r1.json",
+      "bytes": 995,
+      "sha256": "6d90a76d2c5f2e9fb041c802b95f0c842638a36a5926ae7b3dd9f200cf1c84e5",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/parent-seal/seal-readiness-r1.json"
+    },
+    {
+      "path": "batch/parent-seal/seal-readiness-r1.log",
+      "bytes": 113,
+      "sha256": "3fdbc5458fe1932c2e172c9b8a2f5fb7a7411262d54a4f4d111e9332aba11b91",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/parent-seal/seal-readiness-r1.log"
+    },
+    {
+      "path": "batch/parent-seal/seal-readiness-r2.json",
+      "bytes": 994,
+      "sha256": "24f949a4e7925495cef7ed040fd7dc483f72f52ceed2b00a2b9788e8afb61c2c",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/parent-seal/seal-readiness-r2.json"
+    },
+    {
+      "path": "batch/parent-seal/seal-readiness-r2.log",
+      "bytes": 1785,
+      "sha256": "c2f6f0dc6cbc3b56089f8eecbd8d75e0e1ad1a96e9209894757b46cbc6338505",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/parent-seal/seal-readiness-r2.log"
+    },
+    {
+      "path": "batch/predecessor-terminal-assessment-r1.json",
+      "bytes": 1085,
+      "sha256": "ec715b39d8f3dbf11b579d11b880ddc64e5e5451bddcaebb24794e9ca09f8e50",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/predecessor-terminal-assessment-r1.json"
+    },
+    {
+      "path": "batch/predecessor-ubuntu-assessment-r1.json",
+      "bytes": 672,
+      "sha256": "46192097a90af0285969658ba1cd43ab8b4916a6bbe57ceff283cc9620211140",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/predecessor-ubuntu-assessment-r1.json"
+    },
+    {
+      "path": "batch/predecessor-windows-assessment-r1.json",
+      "bytes": 10649,
+      "sha256": "5fd2727860ba9b7670d41977deeb649a46b5bd44124a4381ae80d6396ecd0b1a",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/predecessor-windows-assessment-r1.json"
+    },
+    {
+      "path": "batch/production-candidate-r1.json",
+      "bytes": 373,
+      "sha256": "5e0694aec906331060ff137c614a91f969fa3d4cec85d3f1ff8e540b8517c1c0",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/production-candidate-r1.json"
+    },
+    {
+      "path": "batch/production-r1.patch",
+      "bytes": 6096,
+      "sha256": "5aa31b7c576833c8385527091babc7cc64cda082a246202560fbbc955282b4b4",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/production-r1.patch"
+    },
+    {
+      "path": "batch/reviewer-files-r5/r4-r5-files-view.diff",
+      "bytes": 13068,
+      "sha256": "d50935f80e871293d032e7a235bab05152ee9089557c84c26f3a80e4082c5b8e",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/reviewer-files-r5/r4-r5-files-view.diff"
+    },
+    {
+      "path": "batch/reviewer-files-r5/report.md",
+      "bytes": 11452,
+      "sha256": "14895186e84987c693ae479b484603c6e361bc9d6ebca5cc0cc8c05573b798f2",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/reviewer-files-r5/report.md"
+    },
+    {
+      "path": "batch/reviewer-files-r5/static-evidence.json",
+      "bytes": 24199,
+      "sha256": "0908fa603b2ce838754d6f6e234774192fd109f436f990fa0ba735fff7fed321",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/reviewer-files-r5/static-evidence.json"
+    },
+    {
+      "path": "batch/reviewer-files-r5/summary.json",
+      "bytes": 30741,
+      "sha256": "7b951fd4d10342e669164d2a8ccd3900d722228d51993c436115aa6f82438306",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/reviewer-files-r5/summary.json"
+    },
+    {
+      "path": "batch/reviewer-kit010/compatibility-readback.json",
+      "bytes": 5248,
+      "sha256": "4cc66573f0c9aad161792d660a013900234e89eadf79677a4dbaba07f31893a4",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/reviewer-kit010/compatibility-readback.json"
+    },
+    {
+      "path": "batch/reviewer-kit010/input-begin.json",
+      "bytes": 4819,
+      "sha256": "bde39095a2f3dfc134d372b2d8cc0ad89bf9b7cdf3d73ef3062781bc5e7b1fbd",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/reviewer-kit010/input-begin.json"
+    },
+    {
+      "path": "batch/reviewer-kit010/input-end-and-parent-readback.json",
+      "bytes": 2051,
+      "sha256": "b8f1f55189bd0041c025376a3454b58cc64cc7469c5f7f84912a5b527c2e9598",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/reviewer-kit010/input-end-and-parent-readback.json"
+    },
+    {
+      "path": "batch/reviewer-kit010/parent-receipts-readback.json",
+      "bytes": 2015,
+      "sha256": "a99ca44c4e53e5cc9c1840b79bbd4afad286e652c02b60decba7fa2736286477",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/reviewer-kit010/parent-receipts-readback.json"
+    },
+    {
+      "path": "batch/reviewer-kit010/report.md",
+      "bytes": 3736,
+      "sha256": "5a72fc9cfc2bbc9d91b17a216e496f3c645359834749bfb665e4e6a6f69660dc",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/reviewer-kit010/report.md"
+    },
+    {
+      "path": "batch/reviewer-kit010/single-file-check.json",
+      "bytes": 429,
+      "sha256": "039309a56dd7f1616ae42dd949e2940a2ca3cdff53d091ad2dcece7b0fcc768d",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/reviewer-kit010/single-file-check.json"
+    },
+    {
+      "path": "batch/reviewer-kit010/summary.json",
+      "bytes": 5304,
+      "sha256": "b1d0021e3036f92db6d57f2d50dfead505ea8afc0e0c22f6fe4bf2b64fec3384",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/reviewer-kit010/summary.json"
+    },
+    {
+      "path": "batch/reviewer-stack-r4/report.md",
+      "bytes": 13662,
+      "sha256": "137ffcffb318c12acea9aeda3d442af0080bf5f42ac42d3dc854be190fb824f6",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/reviewer-stack-r4/report.md"
+    },
+    {
+      "path": "batch/reviewer-stack-r4/summary.json",
+      "bytes": 25128,
+      "sha256": "0b8e949331a71c41786f4809566b7483590438d5ced7779cefea8bf57e67de82",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/reviewer-stack-r4/summary.json"
+    },
+    {
+      "path": "batch/reviewer-tunnels-r6/full-gate-r4-app-readback.json",
+      "bytes": 4130,
+      "sha256": "1f8a78f0d1cb8be6084cce079821b5f780c583ce70842f7f0d8c9701ecb6c563",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/reviewer-tunnels-r6/full-gate-r4-app-readback.json"
+    },
+    {
+      "path": "batch/reviewer-tunnels-r6/full-gate-r4-app-snapshot.log",
+      "bytes": 152252,
+      "sha256": "674f9c9bee1a56cefec8d358cf16f12fb0c37d318d6d55ab4fcbca4c71a2f7d9",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/reviewer-tunnels-r6/full-gate-r4-app-snapshot.log"
+    },
+    {
+      "path": "batch/reviewer-tunnels-r6/full-gate-r4-final-readback.json",
+      "bytes": 11442,
+      "sha256": "98491f71b2e491e250a8e034b3cbf0c09471be86b3761725c1c4df7cc374e4d0",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/reviewer-tunnels-r6/full-gate-r4-final-readback.json"
+    },
+    {
+      "path": "batch/reviewer-tunnels-r6/protected-inputs-begin.json",
+      "bytes": 13840,
+      "sha256": "5e5690857c44aefe5022bee7ae3f67afd1e1a9005bce7a58e7f1a782d6eb4d9a",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/reviewer-tunnels-r6/protected-inputs-begin.json"
+    },
+    {
+      "path": "batch/reviewer-tunnels-r6/r5-r6-tunnels.diff",
+      "bytes": 5201,
+      "sha256": "d0e67c0c877e4643b7ef0c9b62bb806c2daf095d386bb08e3fcbe87982d903c1",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/reviewer-tunnels-r6/r5-r6-tunnels.diff"
+    },
+    {
+      "path": "batch/reviewer-tunnels-r6/report.md",
+      "bytes": 19872,
+      "sha256": "9a48b9bf79c73792cd8f0015c0a7e41179ea78131d3a5dfee54d6e44a85c63d2",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/reviewer-tunnels-r6/report.md"
+    },
+    {
+      "path": "batch/reviewer-tunnels-r6/static-evidence.json",
+      "bytes": 34776,
+      "sha256": "880af17b6bbe07f59a2fa3b294088aa77b5b4b0ca7563ed64e99d29bb3a2470b",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/reviewer-tunnels-r6/static-evidence.json"
+    },
+    {
+      "path": "batch/reviewer-tunnels-r6/summary.json",
+      "bytes": 49600,
+      "sha256": "68502ced59932512303fe77e2b6c792686cff62881a4cf4246aa102dd4269695",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/reviewer-tunnels-r6/summary.json"
+    },
+    {
+      "path": "batch/reviewer-tunnels-r6/verify-static.py",
+      "bytes": 14472,
+      "sha256": "4c281a8e2a31e012f173e3cfb92e9742a5cddefeabcb7bffc549e58fefee7ea0",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/reviewer-tunnels-r6/verify-static.py"
+    },
+    {
+      "path": "batch/reviewer/evidence-readback.json",
+      "bytes": 5469,
+      "sha256": "1ae299f2fd84d563708f4ebd4a920522b266ee9bcdea5e32dfe55bc9b07b59d0",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/reviewer/evidence-readback.json"
+    },
+    {
+      "path": "batch/reviewer/independent-command-results.json",
+      "bytes": 902,
+      "sha256": "1d846c55bf09274f8c2adb074641ca457483ffeb18e6ac72413c3f660b5b358d",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/reviewer/independent-command-results.json"
+    },
+    {
+      "path": "batch/reviewer/inputs-begin-r2.json",
+      "bytes": 117687,
+      "sha256": "2df17df656b41b564b36fc1e8c5f957f6b6cfafd9fe370dbf7b24d9fc00466c6",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/reviewer/inputs-begin-r2.json"
+    },
+    {
+      "path": "batch/reviewer/inputs-end-r2.json",
+      "bytes": 117178,
+      "sha256": "cc06dbf1d6370fa4eb455934328d2aab8328bac2e111677c58bc908361f59dab",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/reviewer/inputs-end-r2.json"
+    },
+    {
+      "path": "batch/reviewer/production-static-comparison.json",
+      "bytes": 7637,
+      "sha256": "312c8217c17a4b85ff38fc3117d25f91a5d4cdaa807da1a14abacce82ef64588",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/reviewer/production-static-comparison.json"
+    },
+    {
+      "path": "batch/reviewer/r1-r2-static-comparison.json",
+      "bytes": 1139,
+      "sha256": "30ce167b1bdd9b0f4d66b457ccaea7cbcb58c1005cb8992f10cb8ad2d4d49912",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/reviewer/r1-r2-static-comparison.json"
+    },
+    {
+      "path": "batch/reviewer/r1-r2-tests.diff",
+      "bytes": 2418,
+      "sha256": "004a603446d0059aa7dc9b866a9c67ab5aa2dcf8d1139241308f48f4257b2dc7",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/reviewer/r1-r2-tests.diff"
+    },
+    {
+      "path": "batch/reviewer/review.md",
+      "bytes": 6589,
+      "sha256": "939b450d37792d7537f923abab8e8829edf08a0fd4adf7ff9489e010fd908f36",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/reviewer/review.md"
+    },
+    {
+      "path": "batch/reviewer/summary.json",
+      "bytes": 7349,
+      "sha256": "f967e35f233e9371efdd697977a4996bb0223191fdff7a078b87bc8048aed4e3",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/reviewer/summary.json"
+    },
+    {
+      "path": "batch/run_command.py",
+      "bytes": 1602,
+      "sha256": "a8e8f0b50f2c5d95342e36f1b8fffd4fdc5daeabbf4a382fa15300c747ce65fc",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/run_command.py"
+    },
+    {
+      "path": "batch/scoped-gate-r1.json",
+      "bytes": 796,
+      "sha256": "1333bb61ea2c2c88d652ebea275000e06402935afb1b29d59838af67936d55b7",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/scoped-gate-r1.json"
+    },
+    {
+      "path": "batch/scoped-gate-r1.log",
+      "bytes": 6226,
+      "sha256": "dab925e8cb847ca2289028cb611b600c1d493601d0e11b44205d56737170f23e",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/scoped-gate-r1.log"
+    },
+    {
+      "path": "batch/scoped-gate-r2.json",
+      "bytes": 796,
+      "sha256": "040bdac52b7c8b99342677d1fe4696d410ce0b58b53832e72c32bcacda335314",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/scoped-gate-r2.json"
+    },
+    {
+      "path": "batch/scoped-gate-r2.log",
+      "bytes": 2558,
+      "sha256": "bc7171ef2479d5ea4849cabcfa8b521391a2e4a8c4ff73a7d5de837a97699e19",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/scoped-gate-r2.log"
+    },
+    {
+      "path": "batch/snapshot-r4/Cargo.lock",
+      "bytes": 261844,
+      "sha256": "caac68c1aa02070181bf4828e5e011c3bec0764982a908b26049bdae72dfb593",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/snapshot-r4/Cargo.lock"
+    },
+    {
+      "path": "batch/snapshot-r4/Cargo.toml",
+      "bytes": 2193,
+      "sha256": "7d9e3d1124083a47384e9ad26c1c8bc76da1ab90eacd383bcab751d773eb487a",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/snapshot-r4/Cargo.toml"
+    },
+    {
+      "path": "batch/snapshot-r4/crates/keelshell-app/src/ai_settings/view.rs",
+      "bytes": 26678,
+      "sha256": "cb24057f413c53c9a9690c2cc113b235a51d001ed664c57ffaca445b0ca71e65",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/snapshot-r4/crates/keelshell-app/src/ai_settings/view.rs"
+    },
+    {
+      "path": "batch/snapshot-r4/crates/keelshell-app/src/i18n.rs",
+      "bytes": 9890,
+      "sha256": "e67c3b67cd1a97841a606b0353141067403d3e4f38132081ff74dc9415229abf",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/snapshot-r4/crates/keelshell-app/src/i18n.rs"
+    },
+    {
+      "path": "batch/snapshot-r4/crates/keelshell-platform/src/windows/native.rs",
+      "bytes": 16063,
+      "sha256": "e2b082a91d3564bb436a062f024e18152f366d81df99dddd0fd5ab716b29c514",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/snapshot-r4/crates/keelshell-platform/src/windows/native.rs"
+    },
+    {
+      "path": "batch/snapshot-r4/crates/keelshell-platform/src/windows/tests.rs",
+      "bytes": 28128,
+      "sha256": "2a41a12674277171d211e3533791cd736a7f0b0dbe8ceb782ff0523dad4bb965",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/snapshot-r4/crates/keelshell-platform/src/windows/tests.rs"
+    },
+    {
+      "path": "batch/source-r3-manifest.json",
+      "bytes": 954,
+      "sha256": "3bdad38298329dcdb6cb540883c79fc88d22415be773633ac8b1693297130e71",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/source-r3-manifest.json"
+    },
+    {
+      "path": "batch/source-r3/Cargo.lock",
+      "bytes": 261844,
+      "sha256": "caac68c1aa02070181bf4828e5e011c3bec0764982a908b26049bdae72dfb593",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/source-r3/Cargo.lock"
+    },
+    {
+      "path": "batch/source-r3/Cargo.toml",
+      "bytes": 2193,
+      "sha256": "7d9e3d1124083a47384e9ad26c1c8bc76da1ab90eacd383bcab751d773eb487a",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/source-r3/Cargo.toml"
+    },
+    {
+      "path": "batch/source-r3/crates/keelshell-app/src/i18n.rs",
+      "bytes": 9890,
+      "sha256": "e67c3b67cd1a97841a606b0353141067403d3e4f38132081ff74dc9415229abf",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/source-r3/crates/keelshell-app/src/i18n.rs"
+    },
+    {
+      "path": "batch/source-r3/crates/keelshell-platform/src/windows/native.rs",
+      "bytes": 16063,
+      "sha256": "e2b082a91d3564bb436a062f024e18152f366d81df99dddd0fd5ab716b29c514",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/source-r3/crates/keelshell-platform/src/windows/native.rs"
+    },
+    {
+      "path": "batch/source-r3/crates/keelshell-platform/src/windows/tests.rs",
+      "bytes": 28128,
+      "sha256": "2a41a12674277171d211e3533791cd736a7f0b0dbe8ceb782ff0523dad4bb965",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/source-r3/crates/keelshell-platform/src/windows/tests.rs"
+    },
+    {
+      "path": "batch/source-r4.patch",
+      "bytes": 27127,
+      "sha256": "940b1744b3d3bfe67b4f80b9efaee71f065172bb5d8efbbd3bc6bdf80d70d591",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/source-r4.patch"
+    },
+    {
+      "path": "batch/source-r5-manifest.json",
+      "bytes": 1198,
+      "sha256": "81d735579ff6d9b11ff604d14d00b7b913427a6cb0827599a7493a5023327689",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/source-r5-manifest.json"
+    },
+    {
+      "path": "batch/source-r5.patch",
+      "bytes": 40254,
+      "sha256": "c1240721ed5619fa963a1a52c319576f4188af6a9b1a78a01654afe1913fdafa",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/source-r5.patch"
+    },
+    {
+      "path": "batch/source-r5/Cargo.lock",
+      "bytes": 261844,
+      "sha256": "caac68c1aa02070181bf4828e5e011c3bec0764982a908b26049bdae72dfb593",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/source-r5/Cargo.lock"
+    },
+    {
+      "path": "batch/source-r5/Cargo.toml",
+      "bytes": 2193,
+      "sha256": "7d9e3d1124083a47384e9ad26c1c8bc76da1ab90eacd383bcab751d773eb487a",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/source-r5/Cargo.toml"
+    },
+    {
+      "path": "batch/source-r5/crates/keelshell-app/src/ai_settings/view.rs",
+      "bytes": 26678,
+      "sha256": "cb24057f413c53c9a9690c2cc113b235a51d001ed664c57ffaca445b0ca71e65",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/source-r5/crates/keelshell-app/src/ai_settings/view.rs"
+    },
+    {
+      "path": "batch/source-r5/crates/keelshell-app/src/files/view.rs",
+      "bytes": 42095,
+      "sha256": "9bd872a51824749da992fa04ba56e401d49d2e23bb069f7d5e0077ef7838b765",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/source-r5/crates/keelshell-app/src/files/view.rs"
+    },
+    {
+      "path": "batch/source-r5/crates/keelshell-app/src/i18n.rs",
+      "bytes": 9890,
+      "sha256": "e67c3b67cd1a97841a606b0353141067403d3e4f38132081ff74dc9415229abf",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/source-r5/crates/keelshell-app/src/i18n.rs"
+    },
+    {
+      "path": "batch/source-r5/crates/keelshell-platform/src/windows/native.rs",
+      "bytes": 16063,
+      "sha256": "e2b082a91d3564bb436a062f024e18152f366d81df99dddd0fd5ab716b29c514",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/source-r5/crates/keelshell-platform/src/windows/native.rs"
+    },
+    {
+      "path": "batch/source-r5/crates/keelshell-platform/src/windows/tests.rs",
+      "bytes": 28128,
+      "sha256": "2a41a12674277171d211e3533791cd736a7f0b0dbe8ceb782ff0523dad4bb965",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/source-r5/crates/keelshell-platform/src/windows/tests.rs"
+    },
+    {
+      "path": "batch/source-r6-manifest.json",
+      "bytes": 1369,
+      "sha256": "80ff319786bfe385ff02a74512fa1574ab15cbbc947d9b9f1bf641aadf59506c",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/source-r6-manifest.json"
+    },
+    {
+      "path": "batch/source-r6.patch",
+      "bytes": 45593,
+      "sha256": "1d6f71df54a2155eaa83a9a3788f1daca3bdd9b29ec11956d2e8fdf5d988217e",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/source-r6.patch"
+    },
+    {
+      "path": "batch/source-r6/Cargo.lock",
+      "bytes": 261844,
+      "sha256": "caac68c1aa02070181bf4828e5e011c3bec0764982a908b26049bdae72dfb593",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/source-r6/Cargo.lock"
+    },
+    {
+      "path": "batch/source-r6/Cargo.toml",
+      "bytes": 2193,
+      "sha256": "7d9e3d1124083a47384e9ad26c1c8bc76da1ab90eacd383bcab751d773eb487a",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/source-r6/Cargo.toml"
+    },
+    {
+      "path": "batch/source-r6/crates/keelshell-app/src/ai_settings/view.rs",
+      "bytes": 26678,
+      "sha256": "cb24057f413c53c9a9690c2cc113b235a51d001ed664c57ffaca445b0ca71e65",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/source-r6/crates/keelshell-app/src/ai_settings/view.rs"
+    },
+    {
+      "path": "batch/source-r6/crates/keelshell-app/src/files/view.rs",
+      "bytes": 42095,
+      "sha256": "9bd872a51824749da992fa04ba56e401d49d2e23bb069f7d5e0077ef7838b765",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/source-r6/crates/keelshell-app/src/files/view.rs"
+    },
+    {
+      "path": "batch/source-r6/crates/keelshell-app/src/i18n.rs",
+      "bytes": 9890,
+      "sha256": "e67c3b67cd1a97841a606b0353141067403d3e4f38132081ff74dc9415229abf",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/source-r6/crates/keelshell-app/src/i18n.rs"
+    },
+    {
+      "path": "batch/source-r6/crates/keelshell-app/src/tunnels.rs",
+      "bytes": 77718,
+      "sha256": "e99af710b46724ea074cddc340b50f787b9ffa79f3815fc0868f4bde7b5446df",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/source-r6/crates/keelshell-app/src/tunnels.rs"
+    },
+    {
+      "path": "batch/source-r6/crates/keelshell-platform/src/windows/native.rs",
+      "bytes": 16063,
+      "sha256": "e2b082a91d3564bb436a062f024e18152f366d81df99dddd0fd5ab716b29c514",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/source-r6/crates/keelshell-platform/src/windows/native.rs"
+    },
+    {
+      "path": "batch/source-r6/crates/keelshell-platform/src/windows/tests.rs",
+      "bytes": 28128,
+      "sha256": "2a41a12674277171d211e3533791cd736a7f0b0dbe8ceb782ff0523dad4bb965",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/source-r6/crates/keelshell-platform/src/windows/tests.rs"
+    },
+    {
+      "path": "batch/summarize_gate.py",
+      "bytes": 5954,
+      "sha256": "16b0d6c9f71b3aab7d6ef163aeef065bcca000032ed8ebc52ac06206344b2460",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/summarize_gate.py"
+    },
+    {
+      "path": "batch/test-author/FROZEN.json",
+      "bytes": 1041,
+      "sha256": "64e86b5db80990246439774b88dec902a8d2f3aefdd6a926c6c0700518c24a64",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/test-author/FROZEN.json"
+    },
+    {
+      "path": "batch/test-author/REPORT.md",
+      "bytes": 5831,
+      "sha256": "1a52a792646711fc29ae7e587f2afaefb95a9fb399028243a312d12944cc5cd3",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/test-author/REPORT.md"
+    },
+    {
+      "path": "batch/test-author/baseline.json",
+      "bytes": 2109,
+      "sha256": "d2a55c0b430fa99d5ce8c0d0e30cd696454949c08fcd973b2a31f7bf32ea2e2d",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/test-author/baseline.json"
+    },
+    {
+      "path": "batch/test-author/git-diff-check.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/test-author/git-diff-check.log"
+    },
+    {
+      "path": "batch/test-author/rustfmt-check.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/test-author/rustfmt-check.log"
+    },
+    {
+      "path": "batch/test-author/static-receipt.json",
+      "bytes": 1837,
+      "sha256": "a44a7805733e3e56ee3bdb732a01bfe65065e463386eeda7eed9907aa35afca5",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/test-author/static-receipt.json"
+    },
+    {
+      "path": "batch/test-author/tests-before.rs",
+      "bytes": 19200,
+      "sha256": "7bbcd69bd03b15b91903b6a4ead4c56173a5456c05b0366e861ec921f08fded2",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/test-author/tests-before.rs"
+    },
+    {
+      "path": "batch/validate_scoped.py",
+      "bytes": 595,
+      "sha256": "e99105ccc80aecc995f3a733b807bdd35b3c1bbf48dc03cd658197add7a18c85",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/validate_scoped.py"
+    },
+    {
+      "path": "batch/windows-app-archive-expected-r1.json",
+      "bytes": 1321,
+      "sha256": "dcee96c17643d101bd9050eb3f038e559cc1d0838ce3f74b87b1fc56989bae07",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/windows-app-archive-expected-r1.json"
+    },
+    {
+      "path": "batch/windows-expected-inventory-r1.json",
+      "bytes": 6795,
+      "sha256": "9852311c244565cff24d6bfbb928c04dd5076c20e456fe3219982418039eef91",
+      "kind": "original",
+      "origin": "work/windows-directory-rename-integration-20261116/windows-expected-inventory-r1.json"
+    },
+    {
+      "path": "derived/input-bindings.json",
+      "bytes": 4456,
+      "sha256": "c459a60ae3e477812f4402a51a6a117fd9db325ce911c1470c45e5c4d40e30de",
+      "kind": "derived",
+      "origin": "retained snapshots and exact base Git blobs"
+    },
+    {
+      "path": "derived/source-r3-manifest.json",
+      "bytes": 960,
+      "sha256": "113fa67e552626567b81c224371204bb942a18b0c57f684e0a691d38406550e7",
+      "kind": "derived",
+      "origin": "retained snapshots and exact base Git blobs"
+    },
+    {
+      "path": "derived/source-r4-manifest.json",
+      "bytes": 1140,
+      "sha256": "aad1f5530ac66c1fee03067b4daa6f2e07ae6163b5d432f1fccff5c04e2f8c91",
+      "kind": "derived",
+      "origin": "retained snapshots and exact base Git blobs"
+    },
+    {
+      "path": "derived/source-r5-manifest.json",
+      "bytes": 1314,
+      "sha256": "fd0f251eace5f59b1f9ffad9998ee8a43c7f352ffa4723629c84d36f924766ad",
+      "kind": "derived",
+      "origin": "retained snapshots and exact base Git blobs"
+    },
+    {
+      "path": "derived/source-r6-manifest.json",
+      "bytes": 1485,
+      "sha256": "2e6aa4920cfbccfb2c321fcd095e33609100bac7e2b092019e7c8e6ba96aeaaf",
+      "kind": "derived",
+      "origin": "retained snapshots and exact base Git blobs"
+    },
+    {
+      "path": "kit-author/DELIVERY.json",
+      "bytes": 4347,
+      "sha256": "2b62f2af16f0cc772a4bc07c22b18245fa74f9c2446a020abf7801fee27ec234",
+      "kind": "original",
+      "origin": "work/gpui-kit-010-candidate-20261116/DELIVERY.json"
+    },
+    {
+      "path": "kit-author/REPORT.md",
+      "bytes": 15069,
+      "sha256": "070f1c9f962e5e84e9f040ffd44dffe08f55a9c90841cd5ba2ca3d80789e767b",
+      "kind": "original",
+      "origin": "work/gpui-kit-010-candidate-20261116/REPORT.md"
+    },
+    {
+      "path": "kit-author/SOURCES.md",
+      "bytes": 7839,
+      "sha256": "0614756e7d121669203f5f0b07b58f6649e294c41b9f04ad4ea60b06b05867ea",
+      "kind": "original",
+      "origin": "work/gpui-kit-010-candidate-20261116/SOURCES.md"
+    },
+    {
+      "path": "kit-author/analysis/app-imports.json",
+      "bytes": 43267,
+      "sha256": "6c5f575a03afc4b4a794c419f3389d6ff3cec5c4e839e84baaa1d5bac43985a5",
+      "kind": "original",
+      "origin": "work/gpui-kit-010-candidate-20261116/analysis/app-imports.json"
+    },
+    {
+      "path": "kit-author/analysis/archive-verification.json",
+      "bytes": 2572,
+      "sha256": "1458565017dd5ebb73bd3fb9ba30ed5a6311ae072aa5ec9229fad7b1ee8cf470",
+      "kind": "original",
+      "origin": "work/gpui-kit-010-candidate-20261116/analysis/archive-verification.json"
+    },
+    {
+      "path": "kit-author/analysis/candidate.json",
+      "bytes": 845,
+      "sha256": "59ff0ae66971a6d2bed2acb97136a2a727a3be89551d6f21070d5c3e2a1dbb34",
+      "kind": "original",
+      "origin": "work/gpui-kit-010-candidate-20261116/analysis/candidate.json"
+    },
+    {
+      "path": "kit-author/analysis/compatibility-evidence.json",
+      "bytes": 12095,
+      "sha256": "2b4f1b5249bee4355aa7ffdd096c0eeffcbb32ad6b294856cae25d06b54e6708",
+      "kind": "original",
+      "origin": "work/gpui-kit-010-candidate-20261116/analysis/compatibility-evidence.json"
+    },
+    {
+      "path": "kit-author/analysis/gpui-base-files.json",
+      "bytes": 67059,
+      "sha256": "acedc99b870f45118ecfd31f3a46e0edd01307ee501c30c4388bbff29107527c",
+      "kind": "original",
+      "origin": "work/gpui-kit-010-candidate-20261116/analysis/gpui-base-files.json"
+    },
+    {
+      "path": "kit-author/analysis/gpui-component-files.json",
+      "bytes": 83672,
+      "sha256": "c630fc7a42edd93e6c0cc92c14c593b529378f8ff0f9f69f477409cd155e24e3",
+      "kind": "original",
+      "origin": "work/gpui-kit-010-candidate-20261116/analysis/gpui-component-files.json"
+    },
+    {
+      "path": "kit-author/analysis/gpui-component-macros-files.json",
+      "bytes": 2256,
+      "sha256": "48806409d301dddf216c683a116a19d90b50279e54872ab7b810f182a3327b3d",
+      "kind": "original",
+      "origin": "work/gpui-kit-010-candidate-20261116/analysis/gpui-component-macros-files.json"
+    },
+    {
+      "path": "kit-author/analysis/gpui-kit-assets-files.json",
+      "bytes": 543552,
+      "sha256": "6e88b19c38cc9494479bf06e6ddb7e189cfd7669d2335b233c642ef800f974c7",
+      "kind": "original",
+      "origin": "work/gpui-kit-010-candidate-20261116/analysis/gpui-kit-assets-files.json"
+    },
+    {
+      "path": "kit-author/analysis/gpui-kit-files.json",
+      "bytes": 16501,
+      "sha256": "9e5dae112f8ea0a1727eb200d3acae32f02486939a23f650d033e9d8302cab4b",
+      "kind": "original",
+      "origin": "work/gpui-kit-010-candidate-20261116/analysis/gpui-kit-files.json"
+    },
+    {
+      "path": "kit-author/analysis/input-snapshot.json",
+      "bytes": 58066,
+      "sha256": "bab878692d1e16f12e0f5ef743aa65503a661075c2dab639b853819748868806",
+      "kind": "original",
+      "origin": "work/gpui-kit-010-candidate-20261116/analysis/input-snapshot.json"
+    },
+    {
+      "path": "kit-author/analysis/local-registry-integrity.json",
+      "bytes": 3098,
+      "sha256": "4f925e27c92b5878c7ab4f5865b958acc9515ae054cbf26affec805fd640b436",
+      "kind": "original",
+      "origin": "work/gpui-kit-010-candidate-20261116/analysis/local-registry-integrity.json"
+    },
+    {
+      "path": "kit-author/analysis/manifest-comparison.json",
+      "bytes": 71868,
+      "sha256": "c16d141c63ec947e1a14e56d480226e7e3f88d0c5608ead240b36d941bc093b8",
+      "kind": "original",
+      "origin": "work/gpui-kit-010-candidate-20261116/analysis/manifest-comparison.json"
+    },
+    {
+      "path": "kit-author/analysis/old-kit-official-equivalence.json",
+      "bytes": 101,
+      "sha256": "62abd68c8811753bc280b5ec7ff51ecd4d4bb0501b2d6f1d13c0292b9227aa87",
+      "kind": "original",
+      "origin": "work/gpui-kit-010-candidate-20261116/analysis/old-kit-official-equivalence.json"
+    },
+    {
+      "path": "kit-author/analysis/removable-materials.json",
+      "bytes": 410,
+      "sha256": "5d79143c1b90c096dc6aa3e3d86ad0f65a922c29733f7598b69205ca3655187f",
+      "kind": "original",
+      "origin": "work/gpui-kit-010-candidate-20261116/analysis/removable-materials.json"
+    },
+    {
+      "path": "kit-author/analysis/source-summary.json",
+      "bytes": 6150,
+      "sha256": "4f1390b17ba01875a892fdd8eddbbc1d5205a1d93f8b67db38ff3095f80ca9df",
+      "kind": "original",
+      "origin": "work/gpui-kit-010-candidate-20261116/analysis/source-summary.json"
+    },
+    {
+      "path": "kit-author/compare_sources.py",
+      "bytes": 7277,
+      "sha256": "7145b2e31a14e2215d80246f39a594774e91fa039b2dbc9da7acf338098d9341",
+      "kind": "original",
+      "origin": "work/gpui-kit-010-candidate-20261116/compare_sources.py"
+    },
+    {
+      "path": "kit-author/fetch_public.py",
+      "bytes": 3232,
+      "sha256": "105d40774293ff6b217b6788fc199f3f304e12eea338012247d5013286c372d1",
+      "kind": "original",
+      "origin": "work/gpui-kit-010-candidate-20261116/fetch_public.py"
+    },
+    {
+      "path": "kit-author/patches/01-gpui-kit-0.10-requirement.patch",
+      "bytes": 299,
+      "sha256": "388e485ae0582beeb854e551cbce7a05edbdf2ef0f3f8f81ab0a93f89a230d66",
+      "kind": "original",
+      "origin": "work/gpui-kit-010-candidate-20261116/patches/01-gpui-kit-0.10-requirement.patch"
+    },
+    {
+      "path": "kit-author/patches/02-selected-language-direction-and-regression.patch",
+      "bytes": 2919,
+      "sha256": "45e1a1d661812f11f7bec123265f435607c481efeb58c789d63b62d7d25e9b10",
+      "kind": "original",
+      "origin": "work/gpui-kit-010-candidate-20261116/patches/02-selected-language-direction-and-regression.patch"
+    },
+    {
+      "path": "kit-author/patches/migration-candidate.patch",
+      "bytes": 3218,
+      "sha256": "63de2121e748dc809652997a4e452bc9c13534cb287c6593fd6510265ef9aa08",
+      "kind": "original",
+      "origin": "work/gpui-kit-010-candidate-20261116/patches/migration-candidate.patch"
+    },
+    {
+      "path": "kit-author/prepare_candidate.py",
+      "bytes": 5161,
+      "sha256": "9f64aff31cbca5277540edb07add69a390ce314d82c64396dd58ccf3b2a8a992",
+      "kind": "original",
+      "origin": "work/gpui-kit-010-candidate-20261116/prepare_candidate.py"
+    },
+    {
+      "path": "kit-author/receipts/fetch.jsonl",
+      "bytes": 18050,
+      "sha256": "a1801f021ca2c128754776219286a2d6e4fb757aa1028098a441e46ac74f1347",
+      "kind": "original",
+      "origin": "work/gpui-kit-010-candidate-20261116/receipts/fetch.jsonl"
+    },
+    {
+      "path": "kit-author/receipts/static-check.json",
+      "bytes": 684,
+      "sha256": "00b5d84e8679bc496180be31d614fbf7b09dc4612a5acdf6306a7b165d5071ea",
+      "kind": "original",
+      "origin": "work/gpui-kit-010-candidate-20261116/receipts/static-check.json"
+    },
+    {
+      "path": "previous-delivery/committed-binding-r1.json",
+      "bytes": 940,
+      "sha256": "e6005427cef586f59feb5ec253c389aa0d7598f756ccf87ea7320b3f0f6e3d5c",
+      "kind": "original",
+      "origin": "work/windows-directory-cursor-integration-20261116/committed-binding-r1.json"
+    },
+    {
+      "path": "previous-delivery/committed-binding-r1.log",
+      "bytes": 248,
+      "sha256": "6229341159d83c7d67d6d87e53de87a118f5a9951e99e30b995fc24ee76c67db",
+      "kind": "original",
+      "origin": "work/windows-directory-cursor-integration-20261116/committed-binding-r1.log"
+    },
+    {
+      "path": "previous-delivery/index-binding-r1.json",
+      "bytes": 825,
+      "sha256": "a316e9fba8d36fb401d8fb693e60171939ae8136227b477e3a41036833740cab",
+      "kind": "original",
+      "origin": "work/windows-directory-cursor-integration-20261116/index-binding-r1.json"
+    },
+    {
+      "path": "previous-delivery/index-binding-r1.log",
+      "bytes": 178,
+      "sha256": "dccb3e6040bbeb69ed52e2c36beceb005b58bdfe697dad1d7af82ba39aea576a",
+      "kind": "original",
+      "origin": "work/windows-directory-cursor-integration-20261116/index-binding-r1.log"
+    },
+    {
+      "path": "previous-delivery/prior-archive-manifest.json",
+      "bytes": 13637,
+      "sha256": "3a8f379bf9b10d35be440f416fa46704c84966e9fcfd90127233437813a18af5",
+      "kind": "original",
+      "origin": "docs/testing/records/2026-11-16-windows-directory-cursor-evidence/archive-manifest.json"
+    },
+    {
+      "path": "previous-delivery/source-ci-jobs-r1.json",
+      "bytes": 882,
+      "sha256": "b13071bfe08bb06f16715e62a8e12e0403660bcd655c2d3e5e37c965996fd479",
+      "kind": "original",
+      "origin": "work/windows-directory-cursor-integration-20261116/source-ci-jobs-r1.json"
+    },
+    {
+      "path": "previous-delivery/source-ci-jobs-r1.log",
+      "bytes": 6980,
+      "sha256": "632debccd72858be4e650e0ec29faa6ea1f039b778802127062c862a4c5fbd4f",
+      "kind": "original",
+      "origin": "work/windows-directory-cursor-integration-20261116/source-ci-jobs-r1.log"
+    },
+    {
+      "path": "previous-delivery/source-ci-jobs-r2.json",
+      "bytes": 882,
+      "sha256": "fdf5a6d0336cf9fea0551af89c2c695bf4b4b2be1d7e94716c228a2c93dbbad3",
+      "kind": "original",
+      "origin": "work/windows-directory-cursor-integration-20261116/source-ci-jobs-r2.json"
+    },
+    {
+      "path": "previous-delivery/source-ci-jobs-r2.log",
+      "bytes": 6980,
+      "sha256": "632debccd72858be4e650e0ec29faa6ea1f039b778802127062c862a4c5fbd4f",
+      "kind": "original",
+      "origin": "work/windows-directory-cursor-integration-20261116/source-ci-jobs-r2.log"
+    },
+    {
+      "path": "previous-delivery/source-ci-jobs-r3.json",
+      "bytes": 882,
+      "sha256": "f8c4621803bd86971b554c0ed8b8b00ac435330719a92e52c8929196d5e5022b",
+      "kind": "original",
+      "origin": "work/windows-directory-cursor-integration-20261116/source-ci-jobs-r3.json"
+    },
+    {
+      "path": "previous-delivery/source-ci-jobs-r3.log",
+      "bytes": 6980,
+      "sha256": "632debccd72858be4e650e0ec29faa6ea1f039b778802127062c862a4c5fbd4f",
+      "kind": "original",
+      "origin": "work/windows-directory-cursor-integration-20261116/source-ci-jobs-r3.log"
+    },
+    {
+      "path": "previous-delivery/source-ci-jobs-r4.json",
+      "bytes": 881,
+      "sha256": "1103ad28f0913e036191de95216f78045e187a25596f923b38daf99707244d97",
+      "kind": "original",
+      "origin": "work/windows-directory-cursor-integration-20261116/source-ci-jobs-r4.json"
+    },
+    {
+      "path": "previous-delivery/source-ci-jobs-r4.log",
+      "bytes": 6980,
+      "sha256": "632debccd72858be4e650e0ec29faa6ea1f039b778802127062c862a4c5fbd4f",
+      "kind": "original",
+      "origin": "work/windows-directory-cursor-integration-20261116/source-ci-jobs-r4.log"
+    },
+    {
+      "path": "previous-delivery/source-ci-r1.json",
+      "bytes": 943,
+      "sha256": "baf5dd3b78fbbd673a50d60601cfebd833a76a93c46a8354ab58e06660f3900c",
+      "kind": "original",
+      "origin": "work/windows-directory-cursor-integration-20261116/source-ci-r1.json"
+    },
+    {
+      "path": "previous-delivery/source-ci-r1.log",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+      "kind": "original",
+      "origin": "work/windows-directory-cursor-integration-20261116/source-ci-r1.log"
+    },
+    {
+      "path": "previous-delivery/source-ci-r2.json",
+      "bytes": 978,
+      "sha256": "8ecf33f876b32c3372769f6348cad7294cc8c713bed814452b53d877050d47a1",
+      "kind": "original",
+      "origin": "work/windows-directory-cursor-integration-20261116/source-ci-r2.json"
+    },
+    {
+      "path": "previous-delivery/source-ci-r2.log",
+      "bytes": 275,
+      "sha256": "ea8d22f7a5232c31ca897f9e0e42adc854c99d875b0b52e55bea42443ef9c565",
+      "kind": "original",
+      "origin": "work/windows-directory-cursor-integration-20261116/source-ci-r2.log"
+    },
+    {
+      "path": "previous-delivery/source-ci-terminal-r1.json",
+      "bytes": 882,
+      "sha256": "ff4036551ce3f21211f4892a2e3073ac29a282fde559350c46b4a4fa05f07452",
+      "kind": "original",
+      "origin": "work/windows-directory-cursor-integration-20261116/source-ci-terminal-r1.json"
+    },
+    {
+      "path": "previous-delivery/source-ci-terminal-r1.log",
+      "bytes": 7399,
+      "sha256": "cfec1b8f5d73055c86b2927b2e80573dfd630ec90102ef9c725a1662d6b4b377",
+      "kind": "original",
+      "origin": "work/windows-directory-cursor-integration-20261116/source-ci-terminal-r1.log"
+    },
+    {
+      "path": "previous-delivery/source-ci-watch-r1.json",
+      "bytes": 837,
+      "sha256": "fb0e35bf6841e3c5e9091e35c08c8e0db88c90a2b6666da60c6d4a2706b4fad4",
+      "kind": "original",
+      "origin": "work/windows-directory-cursor-integration-20261116/source-ci-watch-r1.json"
+    },
+    {
+      "path": "previous-delivery/source-ci-watch-r1.log",
+      "bytes": 13208,
+      "sha256": "01e3dbb7b830bcca2cc2579081001ef7df554c5cbb10e0c5faee9c0a47d8878e",
+      "kind": "original",
+      "origin": "work/windows-directory-cursor-integration-20261116/source-ci-watch-r1.log"
+    },
+    {
+      "path": "previous-delivery/source-commit-r1.json",
+      "bytes": 791,
+      "sha256": "6eaf0eea935e5c09a8e7640f193e5930848d97e091e5a731ed979602e66d0ee2",
+      "kind": "original",
+      "origin": "work/windows-directory-cursor-integration-20261116/source-commit-r1.json"
+    },
+    {
+      "path": "previous-delivery/source-commit-r1.log",
+      "bytes": 649,
+      "sha256": "86e05b747f7180ef55274a85901031aa8363185b5565491d76552b8f543a4334",
+      "kind": "original",
+      "origin": "work/windows-directory-cursor-integration-20261116/source-commit-r1.log"
+    },
+    {
+      "path": "previous-delivery/source-macos-log-r1.json",
+      "bytes": 812,
+      "sha256": "7417a7eb57fdffa67581b298b3e9bf7062956309c4433e9a75d51612234d1d7f",
+      "kind": "original",
+      "origin": "work/windows-directory-cursor-integration-20261116/source-macos-log-r1.json"
+    },
+    {
+      "path": "previous-delivery/source-macos-log-r1.log",
+      "bytes": 855099,
+      "sha256": "280c2aca95f8a7e843fb62bec7a61356fe858fda687121b0d73983aa848abae4",
+      "kind": "original",
+      "origin": "work/windows-directory-cursor-integration-20261116/source-macos-log-r1.log"
+    },
+    {
+      "path": "previous-delivery/source-push-r1.json",
+      "bytes": 791,
+      "sha256": "0e01a93722d053a72d2407d88849487773ef387c194967e383399f933d3ad81f",
+      "kind": "original",
+      "origin": "work/windows-directory-cursor-integration-20261116/source-push-r1.json"
+    },
+    {
+      "path": "previous-delivery/source-push-r1.log",
+      "bytes": 113,
+      "sha256": "b4a6ac0b4ebca4b297158d80ae72696779aab2a79668b77028ea354ed6db4fcb",
+      "kind": "original",
+      "origin": "work/windows-directory-cursor-integration-20261116/source-push-r1.log"
+    },
+    {
+      "path": "previous-delivery/source-readback-r1.json",
+      "bytes": 268,
+      "sha256": "5c3bc1cea293f025956305fd4dfd0a7064fb4443330e06bc3e2b8111f667b8a5",
+      "kind": "original",
+      "origin": "work/windows-directory-cursor-integration-20261116/source-readback-r1.json"
+    },
+    {
+      "path": "previous-delivery/source-ubuntu-log-r1.json",
+      "bytes": 813,
+      "sha256": "f965ad5d3f237a31269e451680c4fafc932c44092dbd3874711d7b928753e954",
+      "kind": "original",
+      "origin": "work/windows-directory-cursor-integration-20261116/source-ubuntu-log-r1.json"
+    },
+    {
+      "path": "previous-delivery/source-ubuntu-log-r1.log",
+      "bytes": 870131,
+      "sha256": "e7d0d4b7f1ba4096f429eef5d89fb462d41b1a25cbbf84beac1eeb85e5f7de0e",
+      "kind": "original",
+      "origin": "work/windows-directory-cursor-integration-20261116/source-ubuntu-log-r1.log"
+    },
+    {
+      "path": "previous-delivery/source-windows-job-r1.json",
+      "bytes": 773,
+      "sha256": "05807660f3676f299ebde6dc04c210b4afd02129f3463fa559bedd91ebac11bc",
+      "kind": "original",
+      "origin": "work/windows-directory-cursor-integration-20261116/source-windows-job-r1.json"
+    },
+    {
+      "path": "previous-delivery/source-windows-job-r1.log",
+      "bytes": 3047,
+      "sha256": "8c8319aace2bcac2f4fa5ce4fde6a67435c9a5e8fe3cb431a861a1b1c8e5c580",
+      "kind": "original",
+      "origin": "work/windows-directory-cursor-integration-20261116/source-windows-job-r1.log"
+    },
+    {
+      "path": "previous-delivery/source-windows-log-r1.json",
+      "bytes": 831,
+      "sha256": "1543f203f108cabf6b981abe519b9ba1a74535bc475109ea3832f89ed63c7659",
+      "kind": "original",
+      "origin": "work/windows-directory-cursor-integration-20261116/source-windows-log-r1.json"
+    },
+    {
+      "path": "previous-delivery/source-windows-log-r1.log",
+      "bytes": 81,
+      "sha256": "7a5554e251eb6ae661a89b63784da9d708d9aa4ef1d2d43c3255e7285a23d960",
+      "kind": "original",
+      "origin": "work/windows-directory-cursor-integration-20261116/source-windows-log-r1.log"
+    },
+    {
+      "path": "previous-delivery/source-windows-log-r2.json",
+      "bytes": 777,
+      "sha256": "c3383dce6ed1bf3338f74726a814e99fe99ea0f7348eb556e7e0aa378bca21c4",
+      "kind": "original",
+      "origin": "work/windows-directory-cursor-integration-20261116/source-windows-log-r2.json"
+    },
+    {
+      "path": "previous-delivery/source-windows-log-r2.log",
+      "bytes": 99,
+      "sha256": "8b6407b2fdbca54bf3d53fb93e79a3560dbe59567fa5044cfee4bed1b5b6e467",
+      "kind": "original",
+      "origin": "work/windows-directory-cursor-integration-20261116/source-windows-log-r2.log"
+    },
+    {
+      "path": "previous-delivery/source-windows-log-r3.json",
+      "bytes": 812,
+      "sha256": "064a2f681ce992a06d0b82edae57586d3c3bc9c485799bff233386f41e6c9da3",
+      "kind": "original",
+      "origin": "work/windows-directory-cursor-integration-20261116/source-windows-log-r3.json"
+    },
+    {
+      "path": "previous-delivery/source-windows-log-r3.log",
+      "bytes": 58484,
+      "sha256": "e8601808a8e860396d72e77c1ef07843d8687fcc6498722723e37e52a8d4f14c",
+      "kind": "original",
+      "origin": "work/windows-directory-cursor-integration-20261116/source-windows-log-r3.log"
+    },
+    {
+      "path": "tools/verify_evidence.py",
+      "bytes": 42176,
+      "sha256": "ab8a2db5be9dbaf59a49d5c748f5ea55e611f05b29698e82aa124fb9cf9947f2",
+      "kind": "original",
+      "origin": "docs/testing/records/2026-11-16-windows-directory-rename-evidence/verify_evidence.py"
+    }
+  ],
+  "original_count": 232,
+  "derived_count": 5,
+  "engineering_inputs": 719,
+  "engineering_sha256": "f0f64a6629b2441d63eef1e801189eaef69dd848aea0039eef4d09ff143b5164",
+  "final": {
+    "freeze": "batch/inputs-freeze-r6.json",
+    "snapshot": "batch/source-r6",
+    "gate": "batch/full-gate-r4.json",
+    "summary": "batch/full-gate-r4-summary.json",
+    "review": "batch/reviewer-tunnels-r6/summary.json"
+  },
+  "previous_archive": {
+    "directory": "docs/testing/records/2026-11-16-windows-directory-cursor-evidence",
+    "manifest_bytes": 13637,
+    "manifest_sha256": "3a8f379bf9b10d35be440f416fa46704c84966e9fcfd90127233437813a18af5",
+    "archive_bytes": 420430,
+    "archive_sha256": "811f4059b8de563af58e3858e66ba1e56f20243bfea87abfefd2d5d9b4291bf7",
+    "omitted_unchanged": [
+      {
+        "path": "batch/archive_batch.py",
+        "bytes": 2892,
+        "sha256": "2d2cb158002165f91fea7cd795a7bafed236c2a4a79bae8f82284100adbe0f8f"
+      },
+      {
+        "path": "batch/author/FILES.sha256",
+        "bytes": 2317,
+        "sha256": "2cc5ab4258fa004dc934855fa38bbe544495fe853607b792d64133bfed864476"
+      },
+      {
+        "path": "batch/author/README.md",
+        "bytes": 8863,
+        "sha256": "635d9973f776560c0b7dce8589573fe02c6e2f06d4b5485893b36fbe34ceca58"
+      },
+      {
+        "path": "batch/author/baseline/crates/keelshell-platform/src/windows/native.rs",
+        "bytes": 15591,
+        "sha256": "1e439a8de27af7f8a46ea1d3fdcc454c7752cd7f50328b52f8532d7c519bd7d3"
+      },
+      {
+        "path": "batch/author/baseline/crates/keelshell-platform/src/windows/tests.rs",
+        "bytes": 13874,
+        "sha256": "797f725c9b07048b9a508b8edab3227ba595f5a219eaa500fc9bc1ac3c660244"
+      },
+      {
+        "path": "batch/author/baseline-manifest.json",
+        "bytes": 535,
+        "sha256": "c2997593a21e2922bc9464ac7d6b3fb7fb0336cbb967867ee6109b152560fe84"
+      },
+      {
+        "path": "batch/author/candidate/crates/keelshell-platform/src/windows/native.rs",
+        "bytes": 16146,
+        "sha256": "0fc2f6e04ae09ce5ad30eacaf09b5c5cc42d59e5b733ea0df0b4d757ffb2b986"
+      },
+      {
+        "path": "batch/author/candidate/crates/keelshell-platform/src/windows/tests.rs",
+        "bytes": 19200,
+        "sha256": "7bbcd69bd03b15b91903b6a4ead4c56173a5456c05b0366e861ec921f08fded2"
+      },
+      {
+        "path": "batch/author/candidate.patch",
+        "bytes": 7369,
+        "sha256": "766e6629dc76c3cbb3a6c7d83a5f6ae88df7f220fe55701c5ec9f7537036234f"
+      },
+      {
+        "path": "batch/author/evidence/platform-preflight-excerpt.txt",
+        "bytes": 9976,
+        "sha256": "01d2033aae6ba089b8cb656ef5621bd498d8b2331b4a92185a4b65ccd70020e2"
+      },
+      {
+        "path": "batch/author/evidence/platform-preflight-receipt.json",
+        "bytes": 3801,
+        "sha256": "bacfd591ae0bcd592fcbfea24c2469c70a15bddc7ddfc264c73b136dbf882b44"
+      },
+      {
+        "path": "batch/author/implementation.patch",
+        "bytes": 1615,
+        "sha256": "8c0aee7fe04f10f8c5a769569ab3a72a01fa92440d7ec3d1ee8f818af53b7914"
+      },
+      {
+        "path": "batch/author/sources/fetch-receipts.json",
+        "bytes": 2617,
+        "sha256": "18c93ca70688cf5e7d257fa9ba9aca44e50c0a5061c38615fa75454e97de0dd3"
+      },
+      {
+        "path": "batch/author/sources/rust-windows-fetch-receipt.json",
+        "bytes": 389,
+        "sha256": "ce083b479d439223666309fc6b20dd0dd08818afbe0ca2f061cad330d365762a"
+      },
+      {
+        "path": "batch/author/validation.json",
+        "bytes": 1448,
+        "sha256": "9d2c12f642c2a2eaf3f8a876741f69408eccaebd0d0c795f1d4a0faf09743cb6"
+      },
+      {
+        "path": "batch/author/verify_candidate.py",
+        "bytes": 5115,
+        "sha256": "c0a4623596c1cb9c1f7326afa79aae7a022acbf43ade724092969e2f2bd2e532"
+      },
+      {
+        "path": "batch/author-cleanup-r1.json",
+        "bytes": 253,
+        "sha256": "03874f2f013006e79cb3e3c0ad29ba1d1e2de392fd7c871126d7348a2b256e7b"
+      },
+      {
+        "path": "batch/author-copy-r1.json",
+        "bytes": 4227,
+        "sha256": "d6451d375d78a7883ccaa9a29ebd8c21c61e9ae820c4f0efe711fb529ea56ab8"
+      },
+      {
+        "path": "batch/author-parent-validation-r1.json",
+        "bytes": 1448,
+        "sha256": "40e7e89c8cdb4122ca51057bddf5148f3c0b97d974e453f44fe7a32045a3fa4a"
+      },
+      {
+        "path": "batch/dependencies-live-r1.json",
+        "bytes": 915,
+        "sha256": "07a6a37d8a7f16c9aa9cf885182bd5b780d46e6f1640e819f5e9a472d0c89fe5"
+      },
+      {
+        "path": "batch/dependencies-live-r1.log",
+        "bytes": 84,
+        "sha256": "38b7c7b7fab50cbdbf3d006e649088d6327a11cb84ba12bb24347ab5c83d9336"
+      },
+      {
+        "path": "batch/dependencies-live-report-r1.json",
+        "bytes": 60796,
+        "sha256": "7228828a82d0a9459caaa26604beba344f8a7dfa496e9f5c77b1e01e038344cc"
+      },
+      {
+        "path": "batch/folder-pause-focused-r1.json",
+        "bytes": 968,
+        "sha256": "365316de838a80ed1b3a73ece8d283fca02cd3851b61ac41e672edd1e179c8a9"
+      },
+      {
+        "path": "batch/folder-pause-focused-r1.log",
+        "bytes": 1020,
+        "sha256": "6cb70748fc5cd4e2a9147a58e85ae4aa7878bca61729d870631f4b3504ad8e94"
+      },
+      {
+        "path": "batch/freeze.py",
+        "bytes": 910,
+        "sha256": "0a57b9f74d6d9c592459ce3a0594a96c27dffecb469717dad331ce7868494ff1"
+      },
+      {
+        "path": "batch/full-gate-r1.json",
+        "bytes": 734,
+        "sha256": "83f851068b4dba94d37aca70b10ab6717ca607a99eee9a50cf0e20eb037123ce"
+      },
+      {
+        "path": "batch/full-gate-r1.log",
+        "bytes": 339893,
+        "sha256": "3a703cfbc1feadae8774d84e92c21bd63511f1b734b7bf7ea8608433ef260db1"
+      },
+      {
+        "path": "batch/full-gate-r2-summary.json",
+        "bytes": 9448,
+        "sha256": "e2c2cec09fb76e408358cbb292e2fed90ac60503128cbf37e7812f0e625f93ee"
+      },
+      {
+        "path": "batch/full-gate-r2.json",
+        "bytes": 734,
+        "sha256": "9b8f75b0711e9b60f6dc518248410d5e3a193b0d68421c5c2c9a2f8ce9d8fd88"
+      },
+      {
+        "path": "batch/full-gate-r2.log",
+        "bytes": 645414,
+        "sha256": "8af4c44c790c22c4e6a67f6a1219dc0ec28a39b38b11cc8dc1f8cd2d242564b8"
+      },
+      {
+        "path": "batch/inputs-freeze-r1.json",
+        "bytes": 116621,
+        "sha256": "60b40d08e725bb089a2df17e1fe604f10bf1660f8feac31dd3d0706eed064ee1"
+      },
+      {
+        "path": "batch/inputs-freeze-r2.json",
+        "bytes": 116621,
+        "sha256": "10386499c08e55265a400141467ad7af32c15f08f84ec874da454f16f68269e1"
+      },
+      {
+        "path": "batch/merge-author/baseline/crates/keelshell-app/src/files/conflict_merge_tests.rs",
+        "bytes": 36517,
+        "sha256": "990b9a089f15181b4d25977a402bd18cd79aa9ca4d88a1b7eb47dadfec3ae19a"
+      },
+      {
+        "path": "batch/merge-author/candidate/crates/keelshell-app/src/files/conflict_merge_tests.rs",
+        "bytes": 36963,
+        "sha256": "ee205fc703c0b253252bfcf6c02dbdc914c3f536f209ba458183f516cc059efa"
+      },
+      {
+        "path": "batch/merge-author/patch/merge-review-race.patch",
+        "bytes": 1310,
+        "sha256": "dd84f658c4b778df20d8de6987105b668b3705c0a897a7db4ffacea8f50a8a5b"
+      },
+      {
+        "path": "batch/merge-author/report/HANDOFF.md",
+        "bytes": 4647,
+        "sha256": "af4e482ead79e0505ff13a326b3a26a1fbb4f066c98f7901a47685e4a7e78efd"
+      },
+      {
+        "path": "batch/merge-author/report/patch-validation.json",
+        "bytes": 1265,
+        "sha256": "aae667e5ee734338539e747aa5ccb7ac925061756b258834adcc5bc875a90560"
+      },
+      {
+        "path": "batch/merge-author/report/previous-macos-failure-excerpt.log",
+        "bytes": 1629,
+        "sha256": "b8b652fee72eb1942a299f024ef6999f0ceb81f7546a579ba219879a812851fa"
+      },
+      {
+        "path": "batch/merge-author/report/rustfmt-check.json",
+        "bytes": 403,
+        "sha256": "42c0811c23098225d7a88acffcd7f3a00f344770c5f8713193e8ece9f22eb96b"
+      },
+      {
+        "path": "batch/merge-author/report/source-provenance.json",
+        "bytes": 2401,
+        "sha256": "9b3b57131334bbcefd4122d9e337e717267074e532b7ffb5241c141c0b589725"
+      },
+      {
+        "path": "batch/merge-author/report/static-validation.json",
+        "bytes": 1250,
+        "sha256": "b4b59ec93939533eb3a9a722ba31984ab747285e0e764dfc746c16c6317e9946"
+      },
+      {
+        "path": "batch/merge-author-copy-cleanup-r1.json",
+        "bytes": 1689,
+        "sha256": "b8f7722d5c837f56a4fee7f35629b1f441dea8dbfb25213dc0a905a1a4f64995"
+      },
+      {
+        "path": "batch/merge-focused-r1.json",
+        "bytes": 980,
+        "sha256": "239d2ae49cd9d8225b120e1a37f17f9d5e973725e5d90cbd7654d404bb79f849"
+      },
+      {
+        "path": "batch/merge-focused-r1.log",
+        "bytes": 898,
+        "sha256": "4a770278dca8381934b02a4a46a7ef42cc446197a51d3550821419ce1cb08465"
+      },
+      {
+        "path": "batch/merge-module-r1.json",
+        "bytes": 906,
+        "sha256": "e7871dbbd8dbe77095a822f862b7d879e281cc9d77c5cb6b9b79eb039e54f017"
+      },
+      {
+        "path": "batch/merge-module-r1.log",
+        "bytes": 5446,
+        "sha256": "458c16692c07433242689bd25a5141c97dd5d2fb3526fcab5e69e0002ff9a80d"
+      },
+      {
+        "path": "batch/previous-ci-terminal-summary-r1.json",
+        "bytes": 1287,
+        "sha256": "bdc4e83c32d0d950af08ea8827d0df31142b7978f085f2ae4d062a28f00925fd"
+      },
+      {
+        "path": "batch/previous-macos-log-r1.json",
+        "bytes": 813,
+        "sha256": "dce5643e5ad387b40b773194e7a308f89802e95e9e0686e689c58713441a0ecf"
+      },
+      {
+        "path": "batch/previous-macos-log-r1.log",
+        "bytes": 440143,
+        "sha256": "66d534fd679d75a1d922c9269db55d55f98a49a2ae6632a947ac57b9ccaf8980"
+      },
+      {
+        "path": "batch/previous-source-ci-r1.json",
+        "bytes": 813,
+        "sha256": "c78f26bc0bc2f35e1a66d38b1170658af5df109d5e58038cc53b9dceb55cab52"
+      },
+      {
+        "path": "batch/previous-source-ci-r1.log",
+        "bytes": 7105,
+        "sha256": "f88da1732cc5df033dacd60c27aa5a5e8ac7d2d72af25e620bd51eaedb10375f"
+      },
+      {
+        "path": "batch/previous-source-ci-r2.json",
+        "bytes": 813,
+        "sha256": "310e9ac2d7907aef17bcc51f6db8caaa8f6d72e9376b7d7c0cfd65687d3a3d13"
+      },
+      {
+        "path": "batch/previous-source-ci-r2.log",
+        "bytes": 7317,
+        "sha256": "864bd1d24d8d20bcdac4d46acf6911028b8afc908e54583d76a453efd052e6c6"
+      },
+      {
+        "path": "batch/prior-diagnostics/docs-delivery-readback-r1.json",
+        "bytes": 20171,
+        "sha256": "e1d21c2360e3d3341ffed982b4bdee265c53536cef5d72f36665ff2ca42fdd85"
+      },
+      {
+        "path": "batch/prior-diagnostics-cleanup-r1.json",
+        "bytes": 201,
+        "sha256": "38be5366a32768ec107326354bbfaac8712d8b5ebf8046d85a418b72071d1324"
+      },
+      {
+        "path": "batch/reviewer/FILES.sha256",
+        "bytes": 439,
+        "sha256": "350e9998b633c29fd3cf1c53e49b7a92df362efc8343352a7743e3640171222a"
+      },
+      {
+        "path": "batch/reviewer/primary-reference-receipts-r1.json",
+        "bytes": 2917,
+        "sha256": "6d12f0e745ebb615144240c586cc223be7628ebaf0ecdffc1b4f690e24dd7b8a"
+      },
+      {
+        "path": "batch/reviewer/review-r1.md",
+        "bytes": 18737,
+        "sha256": "2e5413b97aefc8b93ad0052351820df431b9627f47a9c673b2d8c6a8d160aaed"
+      },
+      {
+        "path": "batch/reviewer/review-summary-r1.json",
+        "bytes": 6103,
+        "sha256": "dabead0848946dbe00e36566d384b61f3f0fdeda3499ccc210a7dde2d102b76e"
+      },
+      {
+        "path": "batch/reviewer/review_static.py",
+        "bytes": 14478,
+        "sha256": "a1059d63421c1498d3fbdf0f4b4da2e84d302a1e6841011a28795ede687132ed"
+      },
+      {
+        "path": "batch/reviewer/static-audit-r1.json",
+        "bytes": 19682,
+        "sha256": "3022ab7269658ac07f6998b591253e9ea0daedc9a89d36616458b8bb4de65649"
+      },
+      {
+        "path": "batch/reviewer-folder-pause/review.md",
+        "bytes": 6040,
+        "sha256": "9c94aa63d4c8792bd21d5f438143b27600974a9ff852689ea5331e2349820a1e"
+      },
+      {
+        "path": "batch/reviewer-merge/REPORT.md",
+        "bytes": 5315,
+        "sha256": "63321c7ae2f168df7a679fdec9b89acbc66a388e17de9c4ca0a486ea739895e1"
+      },
+      {
+        "path": "batch/reviewer-merge/evidence.json",
+        "bytes": 1776,
+        "sha256": "8e969e3cb39bea191594f1ff830e219d0ea2d081359ee3dfd097b8d19ef2c3c4"
+      },
+      {
+        "path": "batch/run_command.py",
+        "bytes": 1602,
+        "sha256": "a8e8f0b50f2c5d95342e36f1b8fffd4fdc5daeabbf4a382fa15300c747ce65fc"
+      },
+      {
+        "path": "batch/scoped-gate-r1.json",
+        "bytes": 796,
+        "sha256": "e0ded4524f37b16078a2737f8249ca4cbd6e009c59f7adf1108962fec5288d30"
+      },
+      {
+        "path": "batch/scoped-gate-r1.log",
+        "bytes": 2558,
+        "sha256": "b2ba962609bca32b74e9ad8eff74c62f508ab9c8823f2e30b8b0c2856ea78793"
+      },
+      {
+        "path": "batch/summarize_gate.py",
+        "bytes": 5339,
+        "sha256": "74898783be1597510d58d4a19ac43614c037e5d2cf8679e21c200dc782075f32"
+      },
+      {
+        "path": "batch/validate_scoped.py",
+        "bytes": 595,
+        "sha256": "e99105ccc80aecc995f3a733b807bdd35b3c1bbf48dc03cd658197add7a18c85"
+      },
+      {
+        "path": "batch/windows-expected-inventory-r1.json",
+        "bytes": 6509,
+        "sha256": "c5220fdeb597ad374dff7a93adf0b68647424885d77edda7940c7a4de82910ff"
+      }
+    ],
+    "changed_since_prior_archive": [],
+    "policy": "Unchanged prior originals are referenced, not duplicated; later delivery/CI is retained."
+  },
+  "historical_full_gate_failures": [
+    {
+      "receipt": "batch/full-gate-r1.json",
+      "input_revision": "r3",
+      "controller_exit": 1,
+      "seconds": 107.95394970800044
+    },
+    {
+      "receipt": "batch/full-gate-r2.json",
+      "input_revision": "r4",
+      "controller_exit": 1,
+      "seconds": 58.95475287499721
+    },
+    {
+      "receipt": "batch/full-gate-r3.json",
+      "input_revision": "r5",
+      "controller_exit": 1,
+      "seconds": 389.3764937920023
+    }
+  ],
+  "additional_gate_input_bindings": {},
+  "reviews": [
+    {
+      "path": "batch/reviewer-files-r5/summary.json",
+      "sha256": "7b951fd4d10342e669164d2a8ccd3900d722228d51993c436115aa6f82438306",
+      "decision": "APPROVE_FILES_STATIC_SCOPE_ONLY",
+      "aggregate_sha256": "f2374487a954c6bc2be418461d8199e3c77ae1cf6d54f13b49103cf53ece4af4",
+      "approval_conditions_preserved": true,
+      "used_for_final_binding": false
+    },
+    {
+      "path": "batch/reviewer-kit010/summary.json",
+      "sha256": "b1d0021e3036f92db6d57f2d50dfead505ea8afc0e0c22f6fe4bf2b64fec3384",
+      "decision": "APPROVE_STATIC",
+      "aggregate_sha256": "83e4927b62b7e86592c485f9cb65e46d2d96f0f39a52adb9c2278efe018b4593",
+      "approval_conditions_preserved": true,
+      "used_for_final_binding": false
+    },
+    {
+      "path": "batch/reviewer-stack-r4/summary.json",
+      "sha256": "0b8e949331a71c41786f4809566b7483590438d5ced7779cefea8bf57e67de82",
+      "decision": "APPROVE_STATIC_SCOPE_ONLY_FULL_GATE_CONDITION_UNSATISFIED",
+      "aggregate_sha256": "6ac314882cc707b7622a4b95082e3264b5e3e9359109d48cfcaf4b12c9f87755",
+      "approval_conditions_preserved": true,
+      "used_for_final_binding": false
+    },
+    {
+      "path": "batch/reviewer-tunnels-r6/summary.json",
+      "sha256": "68502ced59932512303fe77e2b6c792686cff62881a4cf4246aa102dd4269695",
+      "decision": "APPROVE_STATIC_R6_INCREMENT_AND_COMPOSITION_WITH_PARENT_FINAL_GATE_BOUND",
+      "aggregate_sha256": "f0f64a6629b2441d63eef1e801189eaef69dd848aea0039eef4d09ff143b5164",
+      "approval_conditions_preserved": true,
+      "used_for_final_binding": true
+    },
+    {
+      "path": "batch/reviewer/summary.json",
+      "sha256": "f967e35f233e9371efdd697977a4996bb0223191fdff7a078b87bc8048aed4e3",
+      "decision": "APPROVE_STATIC",
+      "aggregate_sha256": "d0707bf3c8971f4d1116fe9b9fc39b1d153d3471639764db0cebe0feb645f4b2",
+      "approval_conditions_preserved": true,
+      "used_for_final_binding": false
+    }
+  ],
+  "verifier": {
+    "path": "verify_evidence.py",
+    "bytes": 42176,
+    "sha256": "ab8a2db5be9dbaf59a49d5c748f5ea55e611f05b29698e82aa124fb9cf9947f2"
+  },
+  "archive_bytes": 1763368,
+  "archive_sha256": "41701965edfeb7c3fa6a630a9085d5e83cf889f00ca0bb2728f6411ea347a0e0",
+  "readme": {
+    "path": "README.md",
+    "bytes": 3532,
+    "sha256": "0a3ab7b387d86473b455248df9e441b509a5d301a509833e1080f039b380b915"
+  }
+}

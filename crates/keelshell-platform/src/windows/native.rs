@@ -17,15 +17,14 @@ use windows_sys::Wdk::System::SystemServices::{
     FILE_FS_DEVICE_INFORMATION, FILE_REMOTE_DEVICE, FILE_REMOTE_DEVICE_VSMB,
 };
 use windows_sys::Win32::Foundation::{
-    HANDLE, INVALID_HANDLE_VALUE, NTSTATUS, OBJ_CASE_INSENSITIVE, OBJ_DONT_REPARSE,
-    RtlNtStatusToDosError, UNICODE_STRING,
+    HANDLE, NTSTATUS, OBJ_CASE_INSENSITIVE, OBJ_DONT_REPARSE, RtlNtStatusToDosError, UNICODE_STRING,
 };
 use windows_sys::Win32::Storage::FileSystem::{
     DELETE, FILE_ATTRIBUTE_DIRECTORY, FILE_ATTRIBUTE_NORMAL, FILE_ATTRIBUTE_REPARSE_POINT,
-    FILE_BASIC_INFO, FILE_DEVICE_DISK, FILE_FLAG_BACKUP_SEMANTICS, FILE_FLAG_OPEN_REPARSE_POINT,
-    FILE_GENERIC_READ, FILE_GENERIC_WRITE, FILE_ID_INFO, FILE_SHARE_DELETE, FILE_SHARE_READ,
-    FILE_SHARE_WRITE, FILE_STANDARD_INFO, FILE_TYPE_DISK, FileBasicInfo, FileIdInfo,
-    FileStandardInfo, GetDriveTypeW, GetFileInformationByHandleEx, GetFileType, ReOpenFile,
+    FILE_BASIC_INFO, FILE_DEVICE_DISK, FILE_GENERIC_READ, FILE_GENERIC_WRITE, FILE_ID_INFO,
+    FILE_SHARE_DELETE, FILE_SHARE_READ, FILE_SHARE_WRITE, FILE_STANDARD_INFO, FILE_TYPE_DISK,
+    FileBasicInfo, FileIdInfo, FileStandardInfo, GetDriveTypeW, GetFileInformationByHandleEx,
+    GetFileType,
 };
 use windows_sys::Win32::System::IO::IO_STATUS_BLOCK;
 
@@ -100,6 +99,37 @@ fn open(
     disposition: u32,
     security: Option<&PrivateSecurity>,
 ) -> io::Result<File> {
+    let access = FILE_GENERIC_READ
+        | if writable && !directory {
+            FILE_GENERIC_WRITE | DELETE
+        } else {
+            0
+        };
+    let sharing = if disposition == FILE_CREATE && !directory {
+        FILE_SHARE_READ
+    } else {
+        SHARE_ALL
+    };
+    open_with_access(
+        parent,
+        name,
+        directory,
+        access,
+        sharing,
+        disposition,
+        security,
+    )
+}
+
+fn open_with_access(
+    parent: HANDLE,
+    name: &str,
+    directory: bool,
+    access: u32,
+    sharing: u32,
+    disposition: u32,
+    security: Option<&PrivateSecurity>,
+) -> io::Result<File> {
     let mut encoded: Vec<u16> = name.encode_utf16().collect();
     let length = encoded
         .len()
@@ -133,12 +163,6 @@ fn open(
     };
     let mut handle = ptr::null_mut();
     let mut status_block = IO_STATUS_BLOCK::default();
-    let access = FILE_GENERIC_READ
-        | if writable && !directory {
-            FILE_GENERIC_WRITE | DELETE
-        } else {
-            0
-        };
     // SAFETY: every pointer refers to live, correctly aligned storage through
     // this synchronous call. RootDirectory is null or a borrowed live handle.
     // FILE_SYNCHRONOUS_IO_NONALERT and SYNCHRONIZE (in FILE_GENERIC_READ) prevent
@@ -155,11 +179,7 @@ fn open(
             } else {
                 FILE_ATTRIBUTE_NORMAL
             },
-            if disposition == FILE_CREATE && !directory {
-                FILE_SHARE_READ
-            } else {
-                SHARE_ALL
-            },
+            sharing,
             disposition,
             FILE_SYNCHRONOUS_IO_NONALERT
                 | FILE_OPEN_REPARSE_POINT
@@ -193,8 +213,8 @@ fn open(
 fn local_device(file: &File) -> io::Result<()> {
     let mut device = FILE_FS_DEVICE_INFORMATION::default();
     let mut status_block = IO_STATUS_BLOCK::default();
-    // SAFETY: this private helper receives only a handle from open(), which sets
-    // FILE_SYNCHRONOUS_IO_NONALERT and SYNCHRONIZE. Both initialized buffers
+    // SAFETY: this private helper receives only a handle from the common opener,
+    // which sets FILE_SYNCHRONOUS_IO_NONALERT and SYNCHRONIZE. Both buffers
     // remain live through the synchronous query. Check the actual held volume:
     // a prior GetDriveTypeW pathname check cannot exclude drive-mapping races.
     let status = unsafe {
@@ -341,30 +361,22 @@ pub(super) fn directory_rename_handle(source: &File) -> io::Result<File> {
     if !original.directory {
         return Err(invalid("directory publication requires a directory"));
     }
-    // SAFETY: ReOpenFile addresses the actual retained object, not a pathname.
-    // Omitting OVERLAPPED creates a synchronous file object; the borrowed
-    // original stays live for the call and the returned handle is adopted once.
     // Only this short-lived source lease requests DELETE. Long-lived directory
     // capabilities must not conflict with Windows' target-directory open, which
     // on supported Windows versions shares READ/WRITE but does not share DELETE.
-    let handle = unsafe {
-        ReOpenFile(
-            source.as_raw_handle(),
-            FILE_GENERIC_READ | DELETE,
-            FILE_SHARE_READ | FILE_SHARE_WRITE,
-            FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT,
-        )
-    };
-    if handle.is_null() || handle == INVALID_HANDLE_VALUE {
-        return Err(observe(
-            Operation::ReopenDirectoryRename,
-            io::Error::last_os_error(),
-            None,
-        ));
-    }
-    // SAFETY: ReOpenFile succeeded with a new, exclusively owned handle.
-    let file = unsafe { File::from_raw_handle(handle) };
-    local_device(&file)?;
+    // Reopen the retained object with an empty NT relative name, as for an
+    // independent scan cursor. The common opener retains synchronous completion,
+    // reparse rejection and actual local-volume checks without resolving a path.
+    let file = open_with_access(
+        source.as_raw_handle(),
+        "",
+        true,
+        FILE_GENERIC_READ | DELETE,
+        FILE_SHARE_READ | FILE_SHARE_WRITE,
+        FILE_OPEN,
+        None,
+    )
+    .map_err(|error| observe(Operation::ReopenDirectoryRename, error, None))?;
     if metadata(&file)? != original {
         return Err(invalid(
             "directory publication object changed while reopening",

@@ -6,6 +6,28 @@
 读取本地、tracking 和远端 SHA。下列历史批次“不 push”仅描述原时点，
 后续按[当前交接](HANDOFF.md)及实际交付回执继续。
 
+## 2026-11-16 Windows 目录发布短期句柄与 Kit 0.10
+
+游标源码 `4d72e1e592bdd6194f6eadca3a6a760192b5fe82` 已推送并读回三方一致。
+精确 Quality `43822369487` 的 Windows job `133148170879` 实际
+`63/4/0 / 1.03s`；余下四项在短期目录发布 lease 拒绝访问，完整 gate `NOT_RUN`。
+macOS/Ubuntu 已终态 success，app 分别 `1339/0/2`、`1340/0/2`。
+
+接续候选使用保留句柄加空 NT 相对名取得短期 DELETE lease，原长期权限和分享
+规则保持。三项新回归和本机专项已过，Windows 实际 70 项仍待新精确 CI。
+组合升级 Kit 到直接要求 `0.10`/锁定 `0.10.0`，补应用语言方向及真实键盘 red/green。
+最新官方检查覆盖 37 包/113 声明全部通过，旧失败和 UNKNOWN 原件保持。
+前三轮组合门禁分别发现 AI 设置、文件工具和隧道管理视图栈溢出，保留失败并
+拆分大构建函数；原精确失败回归都已通过。Files 独立复核核对 344 项全部通过，
+隧道工作区专项 `19/0/0`。r6 的 719 项冻结为
+`f0f64a6629b2441d63eef1e801189eaef69dd848aea0039eef4d09ff143b5164`，
+完整 `full-gate-r4` 实际 `0/reaped/687.799s`：普通 Rust `3223/0/48 ignored`、
+rustdoc `14/0`、Python `290 run / 1 skip`，app `1340/0/2` 的 1,342 名逐项匹配，
+719 项输入零漂移；fmt、严格 Clippy、x.y 与三组 controller 全过。
+最终非作者增量/组合静态批准，P0–P3 全 0，独立执行 0，并已核对父最终门禁。
+237 份成员已持久封存、current 绑定零 mismatch；完成 index/Git 树绑定后及时
+提交推送。真实 Windows、跨平台桌面和发行另行验收。
+
 ## 2026-11-16 Windows 目录游标与文件回归同步
 
 四文件候选已集成。Windows 游标使用保留句柄加空 NT 相对名重开，
@@ -30,7 +52,7 @@ rustdoc `14/0`、Python `290 run / 289 passed / 1 skipped`，fmt、严格 Clippy
 x.y 和三组 AI controller 均通过。app `1339/0/2` 的 1,341 名及 session
 归档 40 名逐项匹配，719 项输入路径和字节零漂移。
 实时依赖查询 37 包/113 声明全部通过，UNKNOWN 0，无 manifest/lock 变更。
-74 份原件已持久归档、源码绑定零 mismatch，待随本批提交推送。
+74 份原件已随 `4d72e1e` 提交推送，index/精确 Git 树绑定均零 mismatch。
 旧诊断 64 文件、原作者 24 文件、合并作者 9 文件均核对必要原件后清理。
 详见[本批记录](testing/records/2026-11-16-windows-directory-cursor.md)；
 真实 Windows 67 项、八项 app 归档、三平台桌面及完整产品仍开放。

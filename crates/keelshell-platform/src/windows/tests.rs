@@ -512,3 +512,204 @@ fn security_observations_are_opaque_in_public_debug_output() -> io::Result<()> {
     assert!(!debug.contains("security"));
     Ok(())
 }
+
+#[test]
+fn directory_publication_retains_the_source_rebound_before_its_rename_lease() -> io::Result<()> {
+    let (_temporary, path, parent) = fixture()?;
+    let stage = parent.create_directory("stage")?;
+    let mut original_file = stage.as_directory()?.create_file("original-only")?;
+    original_file.write_all(b"original\0\xff")?;
+    original_file.sync_all()?;
+    drop(original_file);
+    let original = metadata(stage.as_file())?.directory_stamp()?;
+
+    // Rebind the source name before the public operation obtains its lease.
+    std::fs::rename(path.join("stage"), path.join("moved"))?;
+    let replacement = parent.create_directory("stage")?;
+    let mut replacement_file = replacement
+        .as_directory()?
+        .create_file("replacement-only")?;
+    replacement_file.write_all(b"replacement")?;
+    replacement_file.sync_all()?;
+    drop(replacement_file);
+    let replacement_before = metadata(replacement.as_file())?.directory_stamp()?;
+    assert_ne!(replacement_before, original);
+
+    parent.rename_no_replace(&stage, "published")?;
+    let published = parent.open_directory("published")?;
+    assert_eq!(published.stamp()?, original);
+    assert_eq!(metadata(stage.as_file())?.directory_stamp()?, original);
+    verify_private(published.as_file(), true)?;
+    assert_eq!(published.entries()?, ["original-only"]);
+    assert_eq!(
+        std::fs::read(path.join("published/original-only"))?,
+        b"original\0\xff"
+    );
+    let untouched = parent.open_directory("stage")?;
+    assert_eq!(untouched.stamp()?, replacement_before);
+    assert_eq!(untouched.entries()?, ["replacement-only"]);
+    assert_eq!(
+        std::fs::read(path.join("stage/replacement-only"))?,
+        b"replacement"
+    );
+    parent.require_absent("moved")?;
+    parent.require_unique_name("published")?;
+    Ok(())
+}
+
+#[test]
+fn directory_rename_lease_retains_the_source_rebound_after_acquisition() -> io::Result<()> {
+    let (_temporary, path, parent) = fixture()?;
+    let stage = parent.create_directory("stage")?;
+    let mut original_file = stage.as_directory()?.create_file("original-only")?;
+    original_file.write_all(b"retained lease\0\xff")?;
+    original_file.sync_all()?;
+    drop(original_file);
+    let original = metadata(stage.as_file())?.directory_stamp()?;
+    let source_lease = native::directory_rename_handle(stage.as_file())?;
+    verify_private(&source_lease, true)?;
+    assert_eq!(metadata(&source_lease)?.directory_stamp()?, original);
+
+    // Use the already granted DELETE lease to move the held object. A second
+    // delete opener would instead test sharing, not publication after rebinding.
+    native::rename_no_replace(&source_lease, parent.as_file(), "moved")?;
+    let replacement = parent.create_directory("stage")?;
+    let mut replacement_file = replacement
+        .as_directory()?
+        .create_file("replacement-only")?;
+    replacement_file.write_all(b"replacement after lease")?;
+    replacement_file.sync_all()?;
+    drop(replacement_file);
+    let replacement_before = metadata(replacement.as_file())?.directory_stamp()?;
+    assert_ne!(replacement_before, original);
+
+    native::rename_no_replace(&source_lease, parent.as_file(), "published")?;
+    let published = parent.open_directory("published")?;
+    assert_eq!(published.stamp()?, original);
+    assert_eq!(metadata(&source_lease)?.directory_stamp()?, original);
+    assert_eq!(metadata(stage.as_file())?.directory_stamp()?, original);
+    verify_private(&source_lease, true)?;
+    verify_private(published.as_file(), true)?;
+    assert_eq!(published.entries()?, ["original-only"]);
+    assert_eq!(
+        std::fs::read(path.join("published/original-only"))?,
+        b"retained lease\0\xff"
+    );
+    let untouched = parent.open_directory("stage")?;
+    assert_eq!(untouched.stamp()?, replacement_before);
+    assert_eq!(untouched.entries()?, ["replacement-only"]);
+    assert_eq!(
+        std::fs::read(path.join("stage/replacement-only"))?,
+        b"replacement after lease"
+    );
+    parent.require_absent("moved")?;
+    parent.require_unique_name("published")?;
+    Ok(())
+}
+
+#[test]
+fn directory_rename_lease_preserves_private_kind_access_and_share_contracts() -> io::Result<()> {
+    use std::os::windows::fs::OpenOptionsExt;
+    use windows_sys::Win32::Foundation::{ERROR_ACCESS_DENIED, ERROR_SHARING_VIOLATION};
+    use windows_sys::Win32::Storage::FileSystem::{
+        DELETE, FILE_FLAG_BACKUP_SEMANTICS, FILE_FLAG_OPEN_REPARSE_POINT, FILE_SHARE_DELETE,
+        FILE_SHARE_READ, FILE_SHARE_WRITE, FILE_WRITE_ATTRIBUTES,
+    };
+
+    let (_temporary, path, parent) = fixture()?;
+    let stage = parent.create_directory("stage")?;
+    let tree = stage.as_directory()?;
+    let reopened = parent.open_private_entry("stage", true)?;
+    let observed = parent.open_directory("stage")?;
+    let before = tree.stamp()?;
+    verify_private(stage.as_file(), true)?;
+
+    // Confirm that a timestamp write is supported on this directory when its
+    // handle actually requests the right; the retained handles must lack it.
+    let probe_time = std::time::UNIX_EPOCH + std::time::Duration::from_secs(946_684_800);
+    let attribute_writer = std::fs::OpenOptions::new()
+        .access_mode(FILE_WRITE_ATTRIBUTES)
+        .share_mode(FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE)
+        .custom_flags(FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT)
+        .open(path.join("stage"))?;
+    attribute_writer.set_modified(probe_time)?;
+    drop(attribute_writer);
+    let modified = metadata(stage.as_file())?.modified;
+
+    let mut regular = parent.create_file("regular")?;
+    regular.write_all(b"a private file is still not a directory")?;
+    regular.sync_all()?;
+    let regular_before = metadata(regular.as_file())?;
+    let error = native::directory_rename_handle(regular.as_file())
+        .err()
+        .ok_or_else(|| io::Error::other("directory rename leases must reject regular files"))?;
+    assert_eq!(error.kind(), io::ErrorKind::InvalidData);
+    assert_eq!(metadata(regular.as_file())?, regular_before);
+
+    let require_read_only_handles = || -> io::Result<()> {
+        for retained in [
+            stage.as_file(),
+            tree.as_file(),
+            reopened.as_file(),
+            observed.as_file(),
+        ] {
+            // Exercise the kernel's access check rather than comparing masks.
+            let error = native::rename_no_replace(retained, parent.as_file(), "unexpected")
+                .err()
+                .ok_or_else(|| {
+                    io::Error::other("long-lived directory handles must not acquire DELETE access")
+                })?;
+            assert_eq!(error.raw_os_error(), Some(ERROR_ACCESS_DENIED as i32));
+            let error = retained.set_modified(probe_time).err().ok_or_else(|| {
+                io::Error::other(
+                    "long-lived directory handles must not acquire write-attribute access",
+                )
+            })?;
+            assert_eq!(error.raw_os_error(), Some(ERROR_ACCESS_DENIED as i32));
+        }
+        parent.require_absent("unexpected")?;
+        assert_eq!(tree.stamp()?, before);
+        assert_eq!(metadata(stage.as_file())?.modified, modified);
+        Ok(())
+    };
+    let read_without_delete_sharing = || {
+        std::fs::OpenOptions::new()
+            .read(true)
+            .share_mode(FILE_SHARE_READ | FILE_SHARE_WRITE)
+            .custom_flags(FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT)
+            .open(path.join("stage"))
+    };
+    let open_delete = || {
+        std::fs::OpenOptions::new()
+            .access_mode(DELETE)
+            .share_mode(FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE)
+            .custom_flags(FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT)
+            .open(path.join("stage"))
+    };
+
+    require_read_only_handles()?;
+    // Both probes must work before the short lease and again after it closes.
+    drop(read_without_delete_sharing()?);
+    drop(open_delete()?);
+    let source_lease = native::directory_rename_handle(stage.as_file())?;
+    assert_eq!(metadata(&source_lease)?.directory_stamp()?, before);
+    verify_private(&source_lease, true)?;
+    require_read_only_handles()?;
+    let error = read_without_delete_sharing()
+        .err()
+        .ok_or_else(|| io::Error::other("the active DELETE lease must require delete sharing"))?;
+    assert_eq!(error.raw_os_error(), Some(ERROR_SHARING_VIOLATION as i32));
+    let error = open_delete()
+        .err()
+        .ok_or_else(|| io::Error::other("the source lease must deny another DELETE opener"))?;
+    assert_eq!(error.raw_os_error(), Some(ERROR_SHARING_VIOLATION as i32));
+    drop(source_lease);
+
+    require_read_only_handles()?;
+    drop(read_without_delete_sharing()?);
+    drop(open_delete()?);
+    verify_private(stage.as_file(), true)?;
+    assert_eq!(tree.stamp()?, before);
+    assert!(tree.entries()?.is_empty());
+    Ok(())
+}

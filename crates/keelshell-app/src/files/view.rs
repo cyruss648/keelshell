@@ -377,68 +377,12 @@ impl FilesPanel {
     }
 }
 
-impl Render for FilesPanel {
-    fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        if self.confirmation_expanded
-            && let Some((message, _)) = &self.pending
-        {
-            return self
-                .expanded_confirmation(format!("{} · {}", self.host, message.render(cx)), cx);
-        }
-        if self.pending.is_none()
-            && let Some(surface) = self.editor_surface
-        {
-            return self.editor_surface(surface, cx);
-        }
-        let hidden_actions = self.pending.is_some()
-            || self.queue_details_visible
-            || self.tool_section != Some(action_view::ToolSection::File);
-        let hidden_transfer = self.pending.is_some()
-            || self.queue_details_visible
-            || self.tool_section != Some(action_view::ToolSection::Transfer);
-        if [
-            (&self.name, hidden_actions),
-            (&self.mode, hidden_actions),
-            (&self.local, hidden_transfer),
-            (&self.archive_name, hidden_transfer),
-            (&self.editor_find, self.queue_details_visible),
-            (&self.editor_replace, self.queue_details_visible),
-        ]
-        .iter()
-        .any(|(input, hidden)| *hidden && input.read(cx).focus_handle(cx).is_focused(window))
-            || (self.queue_details_visible
-                && (self.editor.read(cx).focus_handle(cx).is_focused(window)
-                    || self.patch.read(cx).focus_handle(cx).is_focused(window)
-                    || self.merge_review.as_ref().is_some_and(|review| {
-                        review.manual.read(cx).focus_handle(cx).is_focused(window)
-                    })))
-        {
-            // Reviews and queue details can unmount retained inputs without a
-            // disclosure click. Never leave keyboard events in an unseen draft.
-            self.review_focus.focus(window, cx);
-        }
+impl FilesPanel {
+    // Complete the large editor and comparison subtrees before building queue
+    // cards. Debug element temporaries otherwise accumulate in Render's frame.
+    #[inline(never)]
+    fn inline_editor_card(&self, cx: &mut Context<Self>) -> Option<AnyElement> {
         let visual = crate::design::palette(cx);
-        let navigation = self.local_browser_view(cx);
-        let table = self.remote_browser_view(cx);
-        let body = div()
-            .id("file-browsing-area")
-            .flex_1()
-            // Reserve the 28px header, a real 28px entry and scrollbar space.
-            // Toolbars and secondary cards must scroll instead of taking this.
-            .min_h(px(64.))
-            .flex()
-            .child(navigation)
-            .child(table);
-        let mut tools = div()
-            .id("file-tools-scroll")
-            .flex_1()
-            .min_h_0()
-            .overflow_y_scroll()
-            .track_scroll(&self.tools_scroll)
-            .vertical_scrollbar(&self.tools_scroll)
-            .flex()
-            .flex_col()
-            .test_support();
         let mut editor_card = None;
         if let Some((path, _)) = &self.editing {
             let mut editor_panel = div()
@@ -526,66 +470,26 @@ impl Render for FilesPanel {
                     cx,
                 ));
             }
-            editor_card = Some(self.editor_keyboard_scope(editor_panel, cx).test_support());
-        }
-        if let Some(card) = self.patch_card(cx) {
-            tools = tools.child(card);
-        }
-        if let Some(card) = self.merge_card(cx) {
-            tools = tools.child(card);
-        }
-        let mut panel = div()
-            .track_focus(&self.review_focus)
-            .w_full()
-            .min_w_0()
-            .h_full()
-            .min_h_0()
-            .flex()
-            .flex_col()
-            .bg(rgb(visual.surface))
-            .text_color(rgb(visual.text))
-            .text_xs()
-            .child(self.folder_navigation(cx))
-            .when(self.suspended, |panel| {
-                panel.child(
-                    div()
-                        .px_3()
-                        .py_1()
-                        .flex_shrink_0()
-                        .bg(rgb(visual.canvas))
-                        .text_color(rgb(visual.muted))
-                        .child(t(
-                            cx,
-                            "上一会话快照 · 草稿可复制，远程操作已停用",
-                            "Previous session snapshot · Copy drafts; remote actions are disabled",
-                        )),
-                )
-            })
-            .child(self.queue_entry_bar(cx))
-            .when(
-                !self.queue_details_visible && self.merge_review.is_none(),
-                |panel| panel.child(body.test_support()),
+            editor_card = Some(
+                self.editor_keyboard_scope(editor_panel, cx)
+                    .test_support()
+                    .into_any_element(),
             );
-        if self.pending.is_none() {
-            tools = match self.tool_section {
-                Some(action_view::ToolSection::File) => tools.child(self.mutation_tools(cx)),
-                Some(action_view::ToolSection::Transfer) => tools.child(self.transfer_tools(cx)),
-                None => tools,
-            };
         }
-        if let Some(editor) = editor_card {
-            if self.pending.is_none() {
-                tools = tools.child(self.editor_entry_bar(cx));
-            }
-            tools = tools.child(editor);
-        }
+        editor_card
+    }
+
+    #[inline(never)]
+    fn comparison_cards(&self, cx: &mut Context<Self>) -> Vec<AnyElement> {
+        let visual = crate::design::palette(cx);
+        let mut cards = Vec::new();
         if let Some(comparison) = &self.comparison {
             let can_apply = comparison
                 .sync_plan
                 .as_ref()
                 .is_some_and(|p| p.operation_count() > 0);
             let disabled = self.suspended || self.busy || self.pending.is_some();
-            tools = tools.child(
+            cards.push(
                 div()
                     .mx_2()
                     .flex_shrink_0()
@@ -716,9 +620,10 @@ impl Render for FilesPanel {
                                 view.comparison = None;
                                 cx.notify();
                             })),
-                    ),
+                    )
+                    .into_any_element(),
             );
-            tools = tools.child(directory_compare_card(comparison, cx));
+            cards.push(directory_compare_card(comparison, cx).into_any_element());
         }
         if !self.mirror_conflicts.is_empty() {
             let mut conflicts = div()
@@ -763,7 +668,7 @@ impl Render for FilesPanel {
                         .child(format!("{} · {reason}", conflict.path)),
                 );
             }
-            tools = tools.child(conflicts.test_support());
+            cards.push(conflicts.test_support().into_any_element());
         }
         if let Some(journal) = &self.sync_journal
             && let Ok(journal) = journal.lock()
@@ -814,12 +719,137 @@ impl Render for FilesPanel {
                     "Item results retained; SFTP cleanup unconfirmed",
                 ));
             }
-            tools = tools.child(rows.test_support());
+            cards.push(rows.test_support().into_any_element());
         }
+        cards
+    }
+
+    #[inline(never)]
+    fn file_tools_view(&self, cx: &mut Context<Self>) -> AnyElement {
+        let editor_card = self.inline_editor_card(cx);
+        let mut tools = div()
+            .id("file-tools-scroll")
+            .flex_1()
+            .min_h_0()
+            .overflow_y_scroll()
+            .track_scroll(&self.tools_scroll)
+            .vertical_scrollbar(&self.tools_scroll)
+            .flex()
+            .flex_col()
+            .test_support();
+        if let Some(card) = self.patch_card(cx) {
+            tools = tools.child(card);
+        }
+        if let Some(card) = self.merge_card(cx) {
+            tools = tools.child(card);
+        }
+        if self.pending.is_none() {
+            tools = match self.tool_section {
+                Some(action_view::ToolSection::File) => tools.child(self.mutation_tools(cx)),
+                Some(action_view::ToolSection::Transfer) => tools.child(self.transfer_tools(cx)),
+                None => tools,
+            };
+        }
+        if let Some(editor) = editor_card {
+            if self.pending.is_none() {
+                tools = tools.child(self.editor_entry_bar(cx));
+            }
+            tools = tools.child(editor);
+        }
+        tools = tools.children(self.comparison_cards(cx));
         if self.transfer.is_some() {
             tools = tools.child(self.transfer_card(cx));
         }
         tools = tools.child(self.parallel_queue_card(cx));
+        tools.into_any_element()
+    }
+}
+
+impl Render for FilesPanel {
+    fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        if self.confirmation_expanded
+            && let Some((message, _)) = &self.pending
+        {
+            return self
+                .expanded_confirmation(format!("{} · {}", self.host, message.render(cx)), cx);
+        }
+        if self.pending.is_none()
+            && let Some(surface) = self.editor_surface
+        {
+            return self.editor_surface(surface, cx);
+        }
+        let hidden_actions = self.pending.is_some()
+            || self.queue_details_visible
+            || self.tool_section != Some(action_view::ToolSection::File);
+        let hidden_transfer = self.pending.is_some()
+            || self.queue_details_visible
+            || self.tool_section != Some(action_view::ToolSection::Transfer);
+        if [
+            (&self.name, hidden_actions),
+            (&self.mode, hidden_actions),
+            (&self.local, hidden_transfer),
+            (&self.archive_name, hidden_transfer),
+            (&self.editor_find, self.queue_details_visible),
+            (&self.editor_replace, self.queue_details_visible),
+        ]
+        .iter()
+        .any(|(input, hidden)| *hidden && input.read(cx).focus_handle(cx).is_focused(window))
+            || (self.queue_details_visible
+                && (self.editor.read(cx).focus_handle(cx).is_focused(window)
+                    || self.patch.read(cx).focus_handle(cx).is_focused(window)
+                    || self.merge_review.as_ref().is_some_and(|review| {
+                        review.manual.read(cx).focus_handle(cx).is_focused(window)
+                    })))
+        {
+            // Reviews and queue details can unmount retained inputs without a
+            // disclosure click. Never leave keyboard events in an unseen draft.
+            self.review_focus.focus(window, cx);
+        }
+        let visual = crate::design::palette(cx);
+        let navigation = self.local_browser_view(cx);
+        let table = self.remote_browser_view(cx);
+        let body = div()
+            .id("file-browsing-area")
+            .flex_1()
+            // Reserve the 28px header, a real 28px entry and scrollbar space.
+            // Toolbars and secondary cards must scroll instead of taking this.
+            .min_h(px(64.))
+            .flex()
+            .child(navigation)
+            .child(table);
+        let tools = self.file_tools_view(cx);
+        let mut panel = div()
+            .track_focus(&self.review_focus)
+            .w_full()
+            .min_w_0()
+            .h_full()
+            .min_h_0()
+            .flex()
+            .flex_col()
+            .bg(rgb(visual.surface))
+            .text_color(rgb(visual.text))
+            .text_xs()
+            .child(self.folder_navigation(cx))
+            .when(self.suspended, |panel| {
+                panel.child(
+                    div()
+                        .px_3()
+                        .py_1()
+                        .flex_shrink_0()
+                        .bg(rgb(visual.canvas))
+                        .text_color(rgb(visual.muted))
+                        .child(t(
+                            cx,
+                            "上一会话快照 · 草稿可复制，远程操作已停用",
+                            "Previous session snapshot · Copy drafts; remote actions are disabled",
+                        )),
+                )
+            })
+            .child(self.queue_entry_bar(cx))
+            .when(
+                !self.queue_details_visible && self.merge_review.is_none(),
+                |panel| panel.child(body.test_support()),
+            );
         panel = if self.queue_details_visible {
             panel.child(self.queue_details_view(cx))
         } else {

@@ -1,5 +1,30 @@
 # Capability ledger
 
+## 2026-11-16: Windows directory scan preflight
+
+Source `4d72e1e592bdd6194f6eadca3a6a760192b5fe82` was pushed and its local,
+tracking and remote SHAs matched. Windows job `133148170879`, Quality
+`43822369487`, actually executed all 67 expected platform tests: 63 passed,
+4 failed, none ignored. The three new independent-cursor tests passed; 12 of
+the 16 previous failures recovered. The four remaining directory-publication
+tests failed at the short source lease's `ReOpenFile` with access denied.
+The Windows full gate and app archive regressions did not run.
+
+The separate short directory-lease candidate and its new handle-binding tests
+are tracked in the [rename record](../testing/records/2026-11-16-windows-directory-rename.md).
+Cross Clippy and host tests passed after the narrowly documented test lint fix;
+static reviews preserve their original input scope. Kit 0.10 and three render-stack
+fixes are included in the r6 combined candidate. Its final full gate passed:
+3,223 ordinary Rust tests, 14 doctests and 290 Python tests (one skipped);
+48 ordinary Rust cases remain ignored. App results are 1,340/0/2, with all 1,342
+executed names matching the fresh inventory. The final independent static review
+approved the r6 increment and composition with zero P0-P3 findings and verified
+the parent gate receipts; it executed no independent build or tests. The 237-member
+archive passed current-source binding; new Windows execution remains pending. This updates platform
+execution evidence without establishing Windows desktop, app transfer or
+complete product acceptance. Earlier NOT_RUN entries retain their original
+source and signing-time scope.
+
 ## 2026-11-16: scoped composer-to-list focus follow-up
 
 The later macOS Frost light Chinese check, using an owned SSH/SFTP fixture with

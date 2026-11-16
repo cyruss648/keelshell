@@ -133,3 +133,30 @@ app 1,341 名与 session 归档 40 名逐项匹配，完整 719 项工程输入�
 首轮失败单独绑定旧输入，不改写原作者和 reviewer 报告。
 本片无新 chat、worktree、容器、正常包、安装或原生桌面操作。
 真实 Windows 67 项预检、原完整 gate、八项 app 归档和三平台桌面分别验收。
+
+## 推送后 Windows 预检
+
+本批源码与初始归档已在 `4d72e1e592bdd6194f6eadca3a6a760192b5fe82`
+提交推送，本地、tracking、远端三方 SHA 相等且工作区曾干净。
+精确源码与原件 Git 树绑定实际 `0/reaped/14.656s`，零 mismatch。
+
+Quality `43822369487 / attempt 1` 的 Windows job `133148170879`
+已 completed/failure，platform 实际 `63 passed / 4 failed / 0 ignored / 1.03s`。
+67 项执行名与预期逐项相等；三项新游标回归全部通过，原 16 项失败中 12 项
+恢复。其余四项为：
+
+- `complete_private_tree_is_published_through_its_retained_root`
+- `directory_no_replace_syscall_preserves_other_empty_directories`
+- `directory_rename_buffers_cover_one_and_255_utf16_unit_names`
+- `publication_into_a_retained_private_target_directory_supports_files_and_directories`
+
+四项均输出 `reopen-directory-rename / PermissionDenied / raw_os_error=Some(5) /
+nt_status=None`，没有出现原游标 NT 名称错误。不能仅由固定阶段和 OS 错误推断
+`ReOpenFile` 拒绝的全部原因。Windows 原完整 gate 与八项 app 归档 `NOT_RUN`，
+macOS/Ubuntu 已终态 success，app 分别 `1339/0/2`、`1340/0/2`，
+两处 UI 同步回归及真实 OpenSSH 均通过；不构成新的原生桌面验收。
+完整原始日志 58,484 字节，SHA-256
+`e8601808a8e860396d72e77c1ef07843d8687fcc6498722723e37e52a8d4f14c`。
+`gh run view --log` 因整条 run 未结束拒绝，首次 job API 受终端转义保护拒绝，
+随后将原始输出保存到文件的请求成功；两次失败回执均保留。
+目录发布的后续补丁与新增回归使用新批次，不改写本批输入或验收。

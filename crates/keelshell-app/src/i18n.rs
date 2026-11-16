@@ -104,6 +104,8 @@ impl Message {
 pub fn set_language(language: Language, cx: &mut App) {
     cx.set_global(Locale(language));
     gpui_kit::component::set_locale(language.code());
+    // Component direction follows the selected app language, not the desktop locale.
+    gpui_kit::base::LayoutDirection::from_locale(language.code()).set_global(cx);
     cx.refresh_windows();
 }
 
@@ -197,5 +199,59 @@ mod tests {
             set_language(Language::ZhCn, cx);
             assert_eq!(message.render(cx), "主机：ops@example:22");
         });
+    }
+
+    #[gpui_kit::test]
+    fn app_languages_keep_plain_input_navigation_ltr_after_rtl_locale(cx: &mut TestAppContext) {
+        use gpui_kit::{
+            base::LayoutDirection,
+            component::input::{Input, InputState},
+        };
+
+        struct DirectionInput {
+            state: gpui_kit::Entity<InputState>,
+        }
+
+        impl Render for DirectionInput {
+            fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+                div()
+                    .w(gpui_kit::px(300.))
+                    .p_4()
+                    .child(Input::new(&self.state).id("locale-direction-input"))
+            }
+        }
+
+        let (handle, view) = cx.update(|cx| {
+            gpui_kit::init(cx);
+            gpui_kit::open_window(WindowOptions::default(), cx, |window, cx| {
+                cx.new(|cx| DirectionInput {
+                    state: cx.new(|cx| InputState::new(window, cx)),
+                })
+            })
+            .unwrap_or_else(|error| panic!("locale direction test window: {error}"))
+        });
+        for selected in [Language::ZhCn, Language::En] {
+            cx.update_window(handle, |_, window, cx| {
+                // The deterministic scheduler defaults to LTR, so seed the
+                // direction that a real RTL desktop supplies during Kit init.
+                LayoutDirection::Rtl.set_global(cx);
+                set_language(selected, cx);
+                let state = view.read(cx).state.clone();
+                state.update(cx, |state, cx| {
+                    state.set_value("", window, cx);
+                    state.focus(window, cx);
+                });
+                window.render_frame(cx);
+                window.input("ab", cx);
+                window.press("left", cx);
+                window.input("X", cx);
+                assert_eq!(
+                    state.read(cx).value().as_ref(),
+                    "aXb",
+                    "the app language must control plain-input arrow navigation"
+                );
+            })
+            .unwrap_or_else(|error| panic!("locale direction keyboard interaction: {error}"));
+        }
     }
 }

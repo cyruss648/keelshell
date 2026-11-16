@@ -9,7 +9,7 @@
 - 用户已确认远端恢复，完成的功能批次及时提交并推送，读取本地、tracking、
   远端 SHA；不强推。当前分支为 `feature/editor-unicode-codec-20261114`。
   最近已实际读回三方相等的提交是
-  `80397acc98d5881cbd177d7259a54fd7f1556c4f`。
+  `4d72e1e592bdd6194f6eadca3a6a760192b5fe82`。
   `origin/main` 另有独立状态文档，不能直接覆盖。
 - 本批源码及证据已在 `878f13b` 推送原功能分支；临时
   `feature/archive-deadline-clock-20261116` 已删除，本地/tracking/远端均 absent。
@@ -30,10 +30,58 @@
 - 用户已授权提交推送、标签触发跨平台 Release、本地 Podman 联调；不含覆盖
   安装现有应用、遥测上传或跳过尚未完成的发行验证。
 
-## 活动批次：Windows 独立目录游标修复
+## 活动批次：Windows 目录发布短期句柄与 Kit 0.10
 
-基线 `80397acc98d5881cbd177d7259a54fd7f1556c4f`，最终四文件候选已经集成、
-尚未提交；Windows 生产改动为保留句柄加空 NT 相对名重开独立游标，
+基线为已推送的 `4d72e1e592bdd6194f6eadca3a6a760192b5fe82`。
+其 Quality `43822369487 / attempt 1` 的 Windows job `133148170879`
+预检实际 `63/4/0 / 1.03s`，67 名与预期逐项相等，三项新游标回归全部通过。
+四项剩余失败均为 `reopen-directory-rename / PermissionDenied / raw code 5`，
+完整 Windows gate `NOT_RUN`；macOS/Ubuntu 已终态 success，app 分别
+`1339/0/2`、`1340/0/2`，两处 UI 同步回归和真实 OpenSSH 均通过。
+不是完整 Windows 文件操作或桌面通过。
+
+目录源的短期 DELETE lease 已改为保留句柄加空 NT 相对名，复用同步
+`NtCreateFile`；长期 capability 仍只读/share-all。三项 Windows 回归保留句柄绑定、
+私有 DACL、访问与分享约束，原 22 项测试正文保持。r2 专项 `0/reaped/2.890s`，
+fmt/x.y、本机 platform `18/0/0` 与 Windows 全 target cross-Clippy 均过。
+r2/r3 非作者静态批准各绑定原输入，独立执行 0；Windows 真实仍待新 CI。
+
+同时升级 Kit 直接要求到 `0.10`，五包实际锁到 `0.10.0`；默认仍为 gpui-pre。
+应用中英文统一同步布局方向，真实 Input 专项绿、删同步行重新编译红（abX ≠ aXb）、
+精确恢复重新编译绿。最新 `dependencies-live-r3` 实际 `0/reaped/17.158s`，
+37 包/113 声明全部通过；旧新版本差异和 UNKNOWN 回执保持原事实。
+
+组合门禁 r1 在 AI 设置页栈溢出；缩小渲染函数后原精确用例通过，AI settings
+实际 `79/0/2 ignored`。r4 的完整门禁 r2 又在文件删除审核页栈溢出，实际
+`1/reaped/58.955s`。r5 将文件工具栏、编辑器及比较结果的构建移到不内联
+`AnyElement` helper，保留原树层级、子节点顺序、处理器和审核条件；原精确失败
+例重新编译实际 `1/0/0`。没有提高线程栈、skip 或改变安全断言。
+
+r5 门禁 r3 在工作区隧道冲突恢复流程再次栈溢出，实际
+`1/reaped/389.376s`；其中 344 项 Files 名称与库存一致且全过。r4 AI 和 r5 Files
+非作者静态范围均 P0–P3 全 0、组合各 HOLD，已关闭，不移签原失败。
+r6 将普通隧道 runtime 大构建从 rule review/editor 的 render 栈帧分离，
+原精确失败例重新编译 `1/0/0`，相关 workspace 隧道测试 `19/0/0`。
+
+当前最终候选 r6 为八个工程改动文件，719 项全输入 SHA-256：
+`f0f64a6629b2441d63eef1e801189eaef69dd848aea0039eef4d09ff143b5164`。
+`full-gate-r4` 实际 `0/reaped/687.799s`：Rust `3223/0/48 ignored`、
+rustdoc `14/0`、Python `290 run / 289 passed / 1 skipped`；fmt、严格 workspace
+Clippy、x.y 与三组 AI controller 均过。app `1340/0/2`，1,342 名与重新编译
+库存完全一致，session 归档 40 名逐项匹配，719 项工程路径/字节零漂移。
+新非作者隧道增量及 r6 组合静态批准，P0–P3 全 0；独立执行 0，已核对并绑定
+父最终门禁。其余历史批准/HOLD 保持原范围，全部 agents 已关闭。
+[237 份持久成员](testing/records/2026-11-16-windows-directory-rename-evidence/README.md)
+已形成并完成 current 绑定，包含 232 份原件与 5 份明确标记的派生说明；
+尚待 index/精确 Git 树绑定和普通推送，真实 Windows 尚待新 CI。
+当前活动目录为 `work/windows-directory-rename-integration-20261116/`；历史冻结、
+失败、作者与各窄范围评审均保持。详见[本批记录](testing/records/2026-11-16-windows-directory-rename.md)。
+
+## 已交付：Windows 独立目录游标修复
+
+基线 `80397acc98d5881cbd177d7259a54fd7f1556c4f`，最终四文件已在
+`4d72e1e592bdd6194f6eadca3a6a760192b5fe82` 提交推送；Windows 生产改动为
+保留句柄加空 NT 相对名重开独立游标，
 校验 identity/attributes/security，并增加三项 Windows 回归。
 app 的两处测试同步处理本机目录暂停超时和远端 macOS 合并审核缺审；
 没有生产 app 补丁。作者及三名非作者均已关闭。
@@ -70,7 +118,7 @@ app 的两处测试同步处理本机目录暂停超时和远端 macOS 合并审
   后续必须检查真实 Windows 预检及八项 app，未运行不算成功。
 - 当前目录 `work/windows-directory-cursor-integration-20261116/`；
   [74 份持久原件](testing/records/2026-11-16-windows-directory-cursor-evidence/README.md)
-  已归档，当前源码绑定零 mismatch，待随本批源码提交推送。
+  已随源码推送，index 与精确源码 Git 树绑定均零 mismatch。
   原作者候选目录 24 文件/457,582 字节已核对后回收。前批诊断 64 文件/4,244,910 字节已
   在精确归档及末次读回核对后回收，旧目录不能再依赖。
 
@@ -190,10 +238,10 @@ Python `290 run / 1 skip`；app 1,341 名逐项一致。源码 `76b8253` 与后�
 
 ## 接续顺序与资源归属
 
-1. 最终完整门禁和全部输入/逐名库存已核对成功，不重复运行已通过的门禁。
-   完成本批证据 index 绑定和提交；首轮失败及三片静态批准保持。
+1. r6 实现、专项、完整门禁和新非作者复核已完成；完成证据 index/精确 Git 树
+   绑定后立即推送，不重复运行已成功的完整门禁。旧失败及历史静态范围保持。
 2. 及时推送当前原功能分支，读取三方 SHA 和新精确 CI；
-   核对真实 Windows 67 项、三项新例、原 16 项及八项 app 归档。
+   核对真实 Windows 预检、原四项目录发布回归及八项 app 归档。
    不得放宽原安全断言、原生权限或将 app 未运行范围改成成功。
 3. 更新本批记录/路线、归档必要原件，完成 feature commit 和普通 push，
    实际读回本地、tracking 和远端 SHA。当前源码/归档提交身份分别绑定。
@@ -208,7 +256,8 @@ Python `290 run / 1 skip`；app 1,341 名逐项一致。源码 `76b8253` 与后�
 正常 GUI 仍为上批摘要；门禁后 MCP 字节已变化，实测
 `3e9270c84f3aad14f331b06cb3f15e77f2d2a40602dcd61e90dd39b5b939ed4b`。
 不能再用 target 中 MCP 代签上一批程序；当前不签新正常包或新桌面验收。
-当前批次目录为 `work/windows-directory-cursor-integration-20261116/`；
+当前批次目录为 `work/windows-directory-rename-integration-20261116/`；
+游标批次目录仍有本次交付及 CI 原件，归档核对以前保持。
 旧 `work/windows-native-phases-integration-20261116/` 已回收。
 前批父命令回执目录 `work/archive-deadline-delivery-20261116/` 的 11 文件、
 23,386 字节已在 `878f13b` 归档后回收。

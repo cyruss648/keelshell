@@ -1330,63 +1330,12 @@ fn byte_size(bytes: u64) -> String {
     }
 }
 
-impl Render for TunnelsPanel {
-    fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+impl TunnelsPanel {
+    // Keep inactive runtime builders out of the management branch's stack
+    // frame: an editor can render inside an already nested workspace modal.
+    #[inline(never)]
+    fn runtime_view(&self, cx: &mut Context<Self>) -> AnyElement {
         let visual = crate::design::palette(cx);
-        // The workspace tool area is bounded. A draft/review takes that area
-        // temporarily and scrolls independently instead of pushing actions offscreen.
-        if let Some(content) = self
-            .rule_review_view(cx)
-            .or_else(|| self.rule_editor_view(cx))
-        {
-            return div()
-                .id("tunnels-panel")
-                .test_support()
-                .size_full()
-                .flex()
-                .flex_col()
-                .overflow_hidden()
-                .text_sm()
-                .bg(rgb(visual.surface))
-                .text_color(rgb(visual.text))
-                .child(
-                    div()
-                        .id("tunnel-management-scroll")
-                        .test_support()
-                        .flex_1()
-                        .min_h_0()
-                        .overflow_y_scroll()
-                        .child(content.body),
-                )
-                .child(
-                    div()
-                        .id("tunnel-review-footer")
-                        .test_support()
-                        .min_h(px(48.))
-                        .px_3()
-                        .py_2()
-                        .flex_shrink_0()
-                        .border_t_1()
-                        .border_color(rgb(visual.border))
-                        .bg(rgb(visual.canvas))
-                        .flex()
-                        .items_center()
-                        .justify_end()
-                        .child(content.footer),
-                )
-                .child(
-                    div()
-                        .px_3()
-                        .py_1()
-                        .flex_shrink_0()
-                        .text_color(rgb(visual.muted))
-                        .child(tunnel_text(
-                            "tunnel-rule-feedback",
-                            self.rule_feedback().render(cx),
-                        )),
-                )
-                .into_any_element();
-        }
         let matching_rules = self.matching_rules();
         let selected_rule = self.selected_rule;
         let epoch = self.rule_epoch;
@@ -1759,6 +1708,67 @@ impl Render for TunnelsPanel {
                     )),
             )
             .into_any_element()
+    }
+}
+
+impl Render for TunnelsPanel {
+    fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        let visual = crate::design::palette(cx);
+        // The workspace tool area is bounded. A draft/review takes that area
+        // temporarily and scrolls independently instead of pushing actions offscreen.
+        if let Some(content) = self
+            .rule_review_view(cx)
+            .or_else(|| self.rule_editor_view(cx))
+        {
+            return div()
+                .id("tunnels-panel")
+                .test_support()
+                .size_full()
+                .flex()
+                .flex_col()
+                .overflow_hidden()
+                .text_sm()
+                .bg(rgb(visual.surface))
+                .text_color(rgb(visual.text))
+                .child(
+                    div()
+                        .id("tunnel-management-scroll")
+                        .test_support()
+                        .flex_1()
+                        .min_h_0()
+                        .overflow_y_scroll()
+                        .child(content.body),
+                )
+                .child(
+                    div()
+                        .id("tunnel-review-footer")
+                        .test_support()
+                        .min_h(px(48.))
+                        .px_3()
+                        .py_2()
+                        .flex_shrink_0()
+                        .border_t_1()
+                        .border_color(rgb(visual.border))
+                        .bg(rgb(visual.canvas))
+                        .flex()
+                        .items_center()
+                        .justify_end()
+                        .child(content.footer),
+                )
+                .child(
+                    div()
+                        .px_3()
+                        .py_1()
+                        .flex_shrink_0()
+                        .text_color(rgb(visual.muted))
+                        .child(tunnel_text(
+                            "tunnel-rule-feedback",
+                            self.rule_feedback().render(cx),
+                        )),
+                )
+                .into_any_element();
+        }
+        self.runtime_view(cx)
     }
 }
 

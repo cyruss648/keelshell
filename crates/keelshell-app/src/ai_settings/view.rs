@@ -35,11 +35,13 @@ pub(super) fn label(cx: &App, zh: &'static str, en: &'static str) -> Div {
         .child(t(cx, zh, en))
 }
 
-impl Render for AiSettingsPanel {
-    fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+impl AiSettingsPanel {
+    // Finish each subtree before entering the next builder. Keeping all debug
+    // temporaries in Render's frame can exhaust a normal thread while a nested
+    // request-header row allocates its credential action buttons.
+    #[inline(never)]
+    fn profile_list_view(&self, cx: &mut Context<Self>) -> AnyElement {
         let visual = crate::design::palette(cx);
-        self.clear_pending_key(window, cx);
-        self.load_inference_editor(window, cx);
         let mut list = div()
             .id("ai-profile-list")
             .w(px(215.))
@@ -95,6 +97,12 @@ impl Render for AiSettingsPanel {
             "★ 为默认配置；助手内可临时切换。",
             "★ marks the default; the assistant can select another profile.",
         ));
+        list.into_any_element()
+    }
+
+    #[inline(never)]
+    fn profile_form_view(&self, cx: &mut Context<Self>) -> AnyElement {
+        let visual = crate::design::palette(cx);
         let profile = self.profile().cloned();
         // Keep the form at its natural content height inside a scroll viewport.
         // A constrained flex column would shrink model-result hit areas as
@@ -362,6 +370,17 @@ impl Render for AiSettingsPanel {
                 "Click New configuration to add a model provider.",
             )));
         }
+        form.into_any_element()
+    }
+}
+
+impl Render for AiSettingsPanel {
+    fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        let visual = crate::design::palette(cx);
+        self.clear_pending_key(window, cx);
+        self.load_inference_editor(window, cx);
+        let list = self.profile_list_view(cx);
+        let form = self.profile_form_view(cx);
         div()
             .id("ai-settings-panel")
             .track_focus(&self.focus)
