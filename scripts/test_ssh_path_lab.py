@@ -5,7 +5,7 @@ from contextlib import redirect_stderr, redirect_stdout
 import io
 import json
 from pathlib import Path
-import signal
+import platform
 import socket
 import subprocess
 import sys
@@ -16,6 +16,12 @@ from unittest.mock import MagicMock, patch
 
 import openssh_interop as interop
 import ssh_path_lab as lab
+
+
+requires_posix_runner = unittest.skipUnless(
+    platform.system() in ("Darwin", "Linux"),
+    "Lab runners require macOS/Linux kernel birth identities and POSIX signals",
+)
 
 
 def complete_report():
@@ -207,19 +213,36 @@ class EvidenceTests(unittest.TestCase):
         for flag, value in (("--timeout", "nan"), ("--timeout", "301"),
                             ("--delay-ms", "inf"), ("--rate", "-1")):
             with self.subTest(flag=flag, value=value), \
-                    redirect_stderr(io.StringIO()), patch.object(lab.subprocess, "Popen") as launch:
+                    redirect_stderr(io.StringIO()), \
+                    patch.object(lab.platform, "system", return_value="Linux"), \
+                    patch.object(lab.subprocess, "Popen") as launch:
                 with self.assertRaises(SystemExit) as error:
                     lab.main(["--output", "/unused", "--test-binary", sys.executable, flag, value])
                 self.assertEqual(error.exception.code, 2)
                 launch.assert_not_called()
 
     def test_noop_impairment_is_rejected_before_launch(self):
-        with redirect_stderr(io.StringIO()), patch.object(lab.subprocess, "Popen") as launch:
+        with redirect_stderr(io.StringIO()), \
+                patch.object(lab.platform, "system", return_value="Linux"), \
+                patch.object(lab.subprocess, "Popen") as launch:
             with self.assertRaises(SystemExit) as error:
                 lab.main(["--output", "/unused", "--test-binary", sys.executable,
                           "--delay-ms", "0", "--rate", "0"])
         self.assertEqual(error.exception.code, 2)
         launch.assert_not_called()
+
+    def test_unsupported_host_is_rejected_before_output_or_process_creation(self):
+        for system in ("Windows", "FreeBSD"):
+            with self.subTest(system=system), redirect_stderr(io.StringIO()) as errors, \
+                    patch.object(lab.platform, "system", return_value=system), \
+                    patch.object(interop, "create_output") as output, \
+                    patch.object(lab.subprocess, "Popen") as launch:
+                with self.assertRaises(SystemExit) as error:
+                    lab.main(["--output", "/unused", "--test-binary", sys.executable])
+                self.assertEqual(error.exception.code, 2)
+                self.assertIn("requires macOS or Linux", errors.getvalue())
+                output.assert_not_called()
+                launch.assert_not_called()
 
 
 class CleanupTests(unittest.TestCase):
@@ -232,14 +255,16 @@ class CleanupTests(unittest.TestCase):
         runner.names = {process: "test"}
         runner.owned = {process: {101: identity}}
         with patch.object(interop, "stop_owned", side_effect=interop.InteropFailure("inventory timed out")), \
-                patch.object(interop, "signal_owned") as kill:
+                patch.object(interop, "signal_owned") as kill, \
+                patch.object(lab, "signal") as signals:
             rows = lab.shutdown(runner, time.monotonic() + 1)
-        kill.assert_called_once_with(101, identity, signal.SIGKILL)
+            kill.assert_called_once_with(101, identity, signals.SIGKILL)
         process.wait.assert_called_once()
         self.assertTrue(rows[0]["reaped"])
         self.assertFalse(rows[0]["observed_stopped"])
         self.assertEqual(rows[0]["returncode"], -9)
 
+    @requires_posix_runner
     def test_early_inventory_rejection_retains_failed_receipt_and_cleanup(self):
         # Execute a real short Python child, never Rust. A zero exit with a
         # stale/empty libtest inventory must fail before generating credentials.
@@ -260,6 +285,7 @@ class CleanupTests(unittest.TestCase):
             self.assertTrue(report["cleanup"]["processes"][0]["reaped"])
             self.assertEqual(report["scenarios"], [])
 
+    @requires_posix_runner
     def test_gate_child_stops_and_is_reaped_with_a_live_connection(self):
         with tempfile.TemporaryDirectory() as directory:
             config = Path(directory) / "gate.json"

@@ -6,6 +6,27 @@
 读取本地、tracking 和远端 SHA。下列历史批次“不 push”仅描述原时点，
 后续按[当前交接](HANDOFF.md)及实际交付回执继续。
 
+## 2026-11-16 三平台工程门禁修复（本机完整门禁通过，真实 CI 待复验）
+
+已推送基线 `4fd1932` 的 Quality run `43789081172 / attempt 1`：
+Windows 在 Python 阶段 `262 run / 2 failures / 20 errors / 15 skipped`，
+Rust 尚未开始。同 run 的 Linux 已成功，macOS 归档 helper 在 post-reap
+OSError 分支失败，旧 errno 未知。已集成 POSIX 实验的精确适用性和懒导入、
+Windows 安全阶段诊断、共用绝对清理截止及仅 EPERM 的非破坏性观察重试；
+保留 UNKNOWN、原始失败及原生清理断言，移除测试在回收后再按缓存 PGID kill
+的风险。十文件最终 r4 冻结 717 项，非作者有条件源码批准，开放 P0–P3 全 0。
+父 archive `30/30`、Rust 入口 `11/11`、打包 `57/57`；
+非作者 archive `30/30` 和边界 `7/7`。最终完整门禁实际
+`exit 0 / reaped / 771.347s`：Rust `3210/0/48 ignored`、rustdoc `14/0`、
+Python `290 run / 1 skipped`、helper `30/30`，fmt、严格 Clippy、x.y 与三组
+controller 全通过；app 1,331 名及 717 项完整路径/字节绑定通过。
+新真实 Windows/macOS CI 尚待推送后执行，不称历史根因已经确认。
+纯 docs push 忽略过滤避免证据提交重复触发 CI；PR 检查保持。
+原生反向 Tab 仍 HOLD；本批不据工程门禁代签三平台桌面或完整产品。
+下一批命令框焦点补丁和八项回归已经并行交付，尚未集成或验证；作者已关闭，
+受管树已归档，原件留在父下一批工作目录。
+见[当前记录](testing/records/2026-11-16-platform-gates.md)。
+
 ## 2026-11-16 文件列表键盘与状态语义（完整门禁通过，限定原生）
 
 本地/远程列表共用稳定路径游标与最多 32 项的有界范围/全选，加入方向、首尾、

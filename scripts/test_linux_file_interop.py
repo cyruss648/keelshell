@@ -10,6 +10,7 @@ import contextlib
 import io
 import json
 from pathlib import Path
+import platform
 import shlex
 import sys
 import tempfile
@@ -18,6 +19,12 @@ from unittest.mock import MagicMock, patch
 
 sys.dont_write_bytecode = True
 import run_linux_file_interop as fixture
+
+
+requires_posix_runner = unittest.skipUnless(
+    platform.system() in ("Darwin", "Linux"),
+    "Lab runners require macOS/Linux kernel birth identities and POSIX signals",
+)
 
 
 class OwnershipTests(unittest.TestCase):
@@ -241,6 +248,7 @@ class CommandDeadlineTests(unittest.TestCase):
         self.assert_recorded_step(timed_out=False, interrupted=False)
 
 
+@requires_posix_runner
 class ProcessTests(unittest.TestCase):
     def setUp(self):
         self.directory = tempfile.TemporaryDirectory()

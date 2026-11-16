@@ -591,10 +591,27 @@ class PreparationTreeTests(unittest.TestCase):
             bound_at = None
             ack_created = False
             partial_observations = []
+            identity_observation = {"phase": "awaiting_publication"}
             def tick(process):
+                nonlocal signalled, bound_pids, bound_at, ack_created
+                try:
+                    observe_identity(process)
+                except OSError as error:
+                    # The controller deliberately redacts exception text. Retain
+                    # only host error codes here so CI can distinguish a failed
+                    # read from a native identity failure without exposing paths.
+                    identity_observation["failure"] = {
+                        "kind": type(error).__name__,
+                        "errno": error.errno,
+                        "winerror": getattr(error, "winerror", None),
+                    }
+                    raise
+
+            def observe_identity(process):
                 nonlocal signalled, bound_pids, bound_at, ack_created
                 if bound_pids is not None:
                     return
+                identity_observation["phase"] = "awaiting_publication"
                 if publication_delay and time.monotonic() - start >= publication_delay:
                     publication_allowed.touch()
                 # The staged counterexample deliberately exposes incomplete
@@ -602,6 +619,7 @@ class PreparationTreeTests(unittest.TestCase):
                 # competing Windows read handle while the producer renames.
                 if staged and partial_seen.exists() and not published.exists():
                     return
+                identity_observation["phase"] = "reading_publication"
                 pids = ready_pids(record, process.pid)
                 if pids is None:
                     if staged and record.exists():
@@ -613,6 +631,7 @@ class PreparationTreeTests(unittest.TestCase):
                             partial_observations.append("partial")
                             partial_seen.touch()
                     return
+                identity_observation["phase"] = "binding_original_identities"
                 if identities is not None:
                     identities.bind(pids)
                 elif os.getpgid(pids["child"]) != process.pid:
@@ -624,6 +643,7 @@ class PreparationTreeTests(unittest.TestCase):
                 constrain_tree_execution(deadline)
                 ack.touch()
                 ack_created = True
+                identity_observation["phase"] = "identity_acknowledged"
                 if interrupt:
                     signalled = True
                     signal.raise_signal(signal.SIGINT)
@@ -636,6 +656,7 @@ class PreparationTreeTests(unittest.TestCase):
                     bound_pids,
                     {
                         "phase": "identity publication",
+                        "identity_observation": identity_observation,
                         "ack_created": ack_created,
                         "record_exists": record.exists(),
                         "published": published.exists(),

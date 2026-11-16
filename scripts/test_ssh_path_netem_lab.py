@@ -6,6 +6,7 @@ import copy
 import io
 import json
 from pathlib import Path
+import platform
 import socket
 import struct
 import sys
@@ -18,6 +19,12 @@ from unittest.mock import MagicMock, patch
 import openssh_interop as interop
 import ssh_path_netem_lab as lab
 from ssh_path_netem import container as service, qdisc
+
+
+requires_posix_runner = unittest.skipUnless(
+    platform.system() in ("Darwin", "Linux"),
+    "Lab runners require macOS/Linux kernel birth identities and POSIX signals",
+)
 
 
 def complete_report():
@@ -285,15 +292,19 @@ class SafetyTests(unittest.TestCase):
                 worker.join(timeout=2)
                 lab.stream_lab.shutdown(runner, time.monotonic() + 3)
 
+    @requires_posix_runner
     def test_timeout_reaps_creator_before_checks_and_keeps_late_creation_unknown(self):
         self.check_late_creation(False)
 
+    @requires_posix_runner
     def test_interrupt_reaps_creator_before_checks_and_keeps_late_creation_unknown(self):
         self.check_late_creation(True)
 
+    @requires_posix_runner
     def test_nonzero_creator_exit_does_not_settle_the_daemon_request(self):
         self.check_late_creation(False, 125)
 
+    @requires_posix_runner
     def test_signaled_creator_exit_does_not_settle_the_daemon_request(self):
         self.check_late_creation(False, -15)
 
@@ -401,6 +412,7 @@ class SafetyTests(unittest.TestCase):
                             ("--loss-percent", "0"), ("--timeout", "inf"),
                             ("--timeout", "601"), ("--delay-ms", "nan")):
             with self.subTest(flag=flag, value=value), redirect_stderr(io.StringIO()), \
+                    patch.object(lab.platform, "system", return_value="Linux"), \
                     patch.object(interop.subprocess, "Popen") as start:
                 with self.assertRaises(SystemExit) as error:
                     lab.main([*base, flag, value])
@@ -410,7 +422,9 @@ class SafetyTests(unittest.TestCase):
     def test_digest_rejection_preserves_a_failed_receipt_without_launching(self):
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory) / "digest-failure"
-            with redirect_stdout(io.StringIO()), patch.object(interop.subprocess, "Popen") as start:
+            with redirect_stdout(io.StringIO()), \
+                    patch.object(lab.platform, "system", return_value="Linux"), \
+                    patch.object(interop.subprocess, "Popen") as start:
                 result = lab.main([
                     "--output", str(output), "--test-binary", sys.executable,
                     "--test-binary-sha256", "0" * 64, "--base-image", "existing",
@@ -422,6 +436,7 @@ class SafetyTests(unittest.TestCase):
             self.assertTrue(receipt["cleanup"]["confirmed"])
             start.assert_not_called()
 
+    @requires_posix_runner
     def test_zero_inventory_real_child_is_reaped_without_creating_resources(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -456,6 +471,22 @@ class SafetyTests(unittest.TestCase):
                          [{"HostIp": "127.0.0.1", "HostPort": "1234"}] * 2):
             with self.subTest(bindings=bindings), self.assertRaises(lab.LabFailure):
                 lab.gate_endpoint({"network": {"Ports": {"8080/tcp": bindings}}})
+
+    def test_unsupported_host_is_rejected_before_output_or_process_creation(self):
+        for system in ("Windows", "FreeBSD"):
+            with self.subTest(system=system), redirect_stderr(io.StringIO()) as errors, \
+                    patch.object(lab.platform, "system", return_value=system), \
+                    patch.object(interop, "create_output") as output, \
+                    patch.object(interop.subprocess, "Popen") as start:
+                with self.assertRaises(SystemExit) as error:
+                    lab.main([
+                        "--output", "/unused", "--test-binary", sys.executable,
+                        "--test-binary-sha256", "0" * 64, "--base-image", "existing",
+                    ])
+                self.assertEqual(error.exception.code, 2)
+                self.assertIn("supports macOS and Linux", errors.getvalue())
+                output.assert_not_called()
+                start.assert_not_called()
 
 
 class GateTests(unittest.IsolatedAsyncioTestCase):

@@ -256,11 +256,14 @@ class OwnedProcessTests(unittest.TestCase):
                 "time.sleep(9) if pid==0 else os._exit(0)")
         started = time.monotonic()
         with mock.patch.object(probe.os, "killpg", side_effect=kill_group):
-            state, status, out, err = run_python(code, seconds=0.15)
+            # Two Python startups and fork precede the tool's exit status. Keep
+            # the ordinary one-second command window; the descendant sleeps nine
+            # seconds, so the timeout still proves inherited pipes cannot escape.
+            state, status, out, err = run_python(code, seconds=1)
         self.assertEqual((state, status, err), ("timed_out", 0, b""))
         self.assertEqual([number for _pid, number in seen_groups if number != 0], [signal.SIGKILL])
         self.assertGreaterEqual(len(out.splitlines()), 1)
-        self.assertLess(time.monotonic() - started, 1.5)
+        self.assertLess(time.monotonic() - started, 2.5)
 
     def test_success_kills_same_group_descendant_with_closed_stdio_before_reaping_leader(self):
         children = []
@@ -285,25 +288,19 @@ if pid == 0:
 os.write(1, ("%d %d\\n" % (os.getpgrp(), pid)).encode())
 os._exit(0)
 """
-        descendant = group = None
-        try:
-            with mock.patch.object(probe.subprocess, "Popen", side_effect=spawn), \
-                    mock.patch.object(probe.os, "killpg", side_effect=signal_group):
-                state, status, out, err = run_python(code, seconds=1)
-            group, descendant = map(int, out.split())
-            self.assertEqual((state, status, err), ("passed", 0, b""))
-            self.assertEqual(kill_ownership, [(children[0].pid, None)])
-            with self.assertRaises(ProcessLookupError):
-                os.kill(descendant, 0)
-            with self.assertRaises(ChildProcessError):
-                os.waitpid(children[0].pid, os.WNOHANG)
-        finally:
-            if descendant is not None:
-                try:
-                    if os.getpgid(descendant) == group:
-                        actual_killpg(group, signal.SIGKILL)
-                except ProcessLookupError:
-                    pass
+        with mock.patch.object(probe.subprocess, "Popen", side_effect=spawn), \
+                mock.patch.object(probe.os, "killpg", side_effect=signal_group):
+            state, status, out, err = run_python(code, seconds=1)
+        group, descendant = map(int, out.split())
+        self.assertEqual((state, status, err), ("passed", 0, b""))
+        self.assertEqual(group, children[0].pid)
+        self.assertEqual(kill_ownership, [(children[0].pid, None)])
+        # run_owned owns teardown. After return, numeric PID/PGID observations
+        # cannot reacquire the old leader or authorize another destructive kill.
+        with self.assertRaises(ProcessLookupError):
+            os.kill(descendant, 0)
+        with self.assertRaises(ChildProcessError):
+            os.waitpid(children[0].pid, os.WNOHANG)
 
     def test_child_that_never_reads_fixed_stdin_cannot_block_output_or_timeout(self):
         # Larger fixture input stresses the runner; production input never exceeds 10 KiB.
@@ -358,10 +355,147 @@ os._exit(0)
     def test_unconfirmed_child_wait_fails_closed_instead_of_returning_a_status(self):
         child = types.SimpleNamespace(pid=1234)
         child.wait = mock.Mock(side_effect=subprocess.TimeoutExpired("fixed fixture", 0.2))
-        with mock.patch.object(probe.os, "killpg"):
-            with self.assertRaises(probe.CleanupUnknown):
+        with mock.patch.object(probe.os, "killpg"), \
+                mock.patch.object(probe.time, "monotonic", return_value=0):
+            with self.assertRaises(probe.CleanupUnknown) as caught:
                 probe.terminate_and_wait(child)
         child.wait.assert_called_once_with(timeout=probe.CLEANUP_SECONDS)
+        self.assertEqual((caught.exception.phase, caught.exception.errno),
+                         ("leader_wait_unconfirmed", None))
+        self.assertNotIn("fixed fixture", str(caught.exception))
+
+    def test_cleanup_observes_delayed_group_absence_without_repeating_the_kill(self):
+        clock = [0.0]
+        signals = []
+        child = types.SimpleNamespace(pid=1234, wait=mock.Mock())
+
+        def kill_group(pid, number):
+            signals.append((pid, number))
+            if number == 0 and clock[0] >= 0.35:
+                raise ProcessLookupError()
+
+        def sleep(seconds):
+            clock[0] += seconds
+
+        with mock.patch.object(probe.os, "killpg", side_effect=kill_group), \
+                mock.patch.object(probe.time, "monotonic", side_effect=lambda: clock[0]), \
+                mock.patch.object(probe.time, "sleep", side_effect=sleep):
+            probe.terminate_and_wait(child)
+        self.assertGreaterEqual(clock[0], 0.35)
+        self.assertLessEqual(clock[0], 1.0)
+        self.assertEqual([item for item in signals if item[1] != 0],
+                         [(child.pid, signal.SIGKILL)])
+        self.assertTrue(all(number == 0 for _pid, number in signals[1:]))
+        child.wait.assert_called_once()
+
+    def test_cleanup_reap_and_group_observation_cannot_renew_the_same_budget(self):
+        clock = [0.0]
+        signals = []
+
+        def reap(timeout):
+            self.assertEqual(timeout, 1.0)
+            clock[0] = 0.85
+
+        child = types.SimpleNamespace(pid=1234, wait=mock.Mock(side_effect=reap))
+
+        def sleep(seconds):
+            clock[0] += seconds
+
+        with mock.patch.object(probe, "CLEANUP_SECONDS", 1.0), \
+                mock.patch.object(probe.os, "killpg",
+                                  side_effect=lambda pid, number: signals.append((pid, number))), \
+                mock.patch.object(probe.time, "monotonic", side_effect=lambda: clock[0]), \
+                mock.patch.object(probe.time, "sleep", side_effect=sleep):
+            with self.assertRaises(probe.CleanupUnknown) as caught:
+                probe.terminate_and_wait(child)
+        self.assertGreaterEqual(clock[0], 1.0)
+        self.assertLessEqual(clock[0], 1.005)
+        self.assertEqual([item for item in signals if item[1] != 0],
+                         [(child.pid, signal.SIGKILL)])
+        child.wait.assert_called_once_with(timeout=1.0)
+        self.assertEqual((caught.exception.phase, caught.exception.errno),
+                         ("group_absence_unconfirmed", None))
+
+    def test_post_reap_permission_error_stays_pending_until_confirmed_absence(self):
+        clock = [0.0]
+        events = []
+        absent = []
+
+        def reap(timeout):
+            events.append(("reap", timeout))
+            clock[0] = 0.1
+
+        def kill_group(pid, number):
+            events.append(("signal", number))
+            if number == 0:
+                if clock[0] < 0.35:
+                    raise PermissionError(errno.EPERM, "owned observation")
+                absent.append(True)
+                raise ProcessLookupError()
+
+        child = types.SimpleNamespace(pid=1234, wait=mock.Mock(side_effect=reap))
+
+        def sleep(seconds):
+            self.assertFalse(absent)
+            clock[0] += seconds
+
+        with mock.patch.object(probe.os, "killpg", side_effect=kill_group), \
+                mock.patch.object(probe.time, "monotonic", side_effect=lambda: clock[0]), \
+                mock.patch.object(probe.time, "sleep", side_effect=sleep):
+            probe.terminate_and_wait(child)
+        self.assertEqual(absent, [True])
+        self.assertGreaterEqual(clock[0], 0.35)
+        self.assertLessEqual(clock[0], 1.0)
+        self.assertEqual(events[:2], [("signal", signal.SIGKILL), ("reap", 1.0)])
+        self.assertTrue(all(event == ("signal", 0) for event in events[2:]))
+
+    def test_persistent_post_reap_permission_error_cannot_pass_or_renew_budget(self):
+        clock = [0.0]
+        signals = []
+
+        def reap(timeout):
+            self.assertEqual(timeout, 1.0)
+            clock[0] = 0.85
+
+        def kill_group(pid, number):
+            signals.append(number)
+            if number == 0:
+                raise PermissionError(errno.EPERM, "owned observation")
+
+        def sleep(seconds):
+            clock[0] += seconds
+
+        child = types.SimpleNamespace(pid=1234, wait=mock.Mock(side_effect=reap))
+        with mock.patch.object(probe.os, "killpg", side_effect=kill_group), \
+                mock.patch.object(probe.time, "monotonic", side_effect=lambda: clock[0]), \
+                mock.patch.object(probe.time, "sleep", side_effect=sleep):
+            with self.assertRaises(probe.CleanupUnknown) as caught:
+                probe.terminate_and_wait(child)
+        self.assertGreaterEqual(clock[0], 1.0)
+        self.assertLessEqual(clock[0], 1.005)
+        self.assertEqual(signals[0], signal.SIGKILL)
+        self.assertTrue(all(number == 0 for number in signals[1:]))
+        child.wait.assert_called_once_with(timeout=1.0)
+        self.assertEqual((caught.exception.phase, caught.exception.errno),
+                         ("group_absence_unconfirmed", errno.EPERM))
+        self.assertNotIn("owned observation", str(caught.exception))
+
+    def test_other_post_reap_query_errors_fail_closed_without_retry(self):
+        for number in (errno.EACCES, errno.EIO, errno.EINVAL):
+            with self.subTest(errno=number):
+                child = types.SimpleNamespace(pid=1234, wait=mock.Mock())
+                with mock.patch.object(probe.os, "killpg",
+                                       side_effect=[None, OSError(number, "owned observation")]) as kill, \
+                        mock.patch.object(probe.time, "monotonic", return_value=0), \
+                        mock.patch.object(probe.time, "sleep") as sleep:
+                    with self.assertRaises(probe.CleanupUnknown) as caught:
+                        probe.terminate_and_wait(child)
+                self.assertEqual(kill.call_args_list,
+                                 [mock.call(child.pid, signal.SIGKILL), mock.call(child.pid, 0)])
+                sleep.assert_not_called()
+                self.assertEqual((caught.exception.phase, caught.exception.errno),
+                                 ("group_query_failed", number))
+                self.assertNotIn("owned observation", str(caught.exception))
 
     def test_process_spawn_failures_are_unavailable_and_never_reflect_exception_text(self):
         for error in (FileNotFoundError("private path"), PermissionError("private path")):

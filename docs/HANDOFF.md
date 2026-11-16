@@ -8,6 +8,52 @@
 不强推或覆盖远端其他提交。当前远端 main 另有一项项目状态文档，不能忽略它直接
 覆盖 main。交付回执在当前批次的持久证据中保存。
 
+## 当前批次：三平台工程门禁修复（本机完整门禁通过，真实 CI 待复验）
+
+基线 `4fd193227bb9e5e5e4b49ad6f1503f10741f7383` 已推送。
+精确 push 的 Quality run `43789081172 / attempt 1` 在 Windows Python 阶段失败：
+`262 run / 2 failures / 20 errors / 15 skipped`，尚未开始 Rust 编译。
+已确认 POSIX 实验的适用性与 `fcntl` 导入边界错误，以及一个 Windows
+原生进程树夹具在身份发布后未完成绑定；后者具体原因仍待诊断，不能跳过或
+把后来清理成功当作身份绑定成功。Linux/macOS 同 run 状态继续实际读回。
+macOS job `133043263469` 已返回失败：归档 Python 两项在回收 leader 后
+组查询遇到 OSError；非作者以基线行号纠正了最初“0.2 秒超时”的解释，
+旧日志具体 errno 未知。两个预算红例与两个 EPERM 红例保留；
+候选共用一份一秒绝对清理截止，仅重试 post-reap 的 EPERM 非破坏性观察，
+必须 ESRCH 才确认 absent，持续拒绝/存在或其他错误仍 UNKNOWN。
+另移除旧测试在回收 leader 后用缓存 PGID 再次 kill 的风险。
+旧候选专项 `27/27` 与 session 包 `exit 0 / 221.500s` 保留，最终修订待回归；
+新的真实 CI 待运行。Windows 只补安全阶段/错误码诊断，
+模块本机 `69 run / 1 skipped`，没有把未知问题签成修复。
+独立作者的六文件 POSIX 边界修复已按摘要集成：真实本机 Python `127/127`，
+模拟 Windows `127 run / 108 passed / 19 skipped`，不代签真实 Windows。
+作者 agent 已关闭，受管树已归档，路径与 Git worktree 记录均 absent；
+原件已复制并核对。session 包历史专项通过，归档最终窄修另行回归。
+最终已扩为十个工程文件（另含仅 push 的 docs 过滤）：非作者 r4 有条件源码批准，
+开放 P0–P3 均为 0，两个历史 P2 在限定源码/回归内关闭；作者、调查和 reviewer
+均已关闭。最终 717 项集合 SHA-256
+`04b232fb2095b490614d509d3545ea72afa65a998646300617df87f6af11180f`。
+父最终 archive `30/30`、Rust 入口 `11/11`、打包 `57/57`，
+非作者 archive `30/30`、额外边界 `7/7`。`full-gate-r1` 实际
+`exit 0 / reaped / 771.347s`：Rust `3210/0/48 ignored`、rustdoc `14/0`、
+Python `290 run / 1 skipped`、archive helper `30/30`，fmt、严格 Clippy、
+x.y 政策与三组 AI controller 全通过。1,331 项 app 库存逐名匹配，
+717 项完整路径及字节零漂移。原始非作者报告保持原签署时的待定条件；
+相同输入最终成功回执另行满足完整门禁条件，真实平台仍待复验。
+唯一 Cargo target 仍属于当前父 checkout，没有切换归属或清理有效产物。
+原生反向 Tab 保持 HOLD，本批暂优先处理已确认的跨平台门禁故障。
+从[本批记录](testing/records/2026-11-16-platform-gates.md)接续；
+持久证据从[本批原件](testing/records/2026-11-16-platform-gates-evidence/README.md)读取；
+归档、Git blob 绑定及清理以实际回执为准。本批没有重建正常 GUI/MCP 或签署新
+桌面验收，现有正常程序摘要保持。
+
+下一批命令输入框 Tab/ShiftTab 的三文件补丁和八项 GPUI 回归已由独立作者完成，
+原件已逐项核对并复制到 `work/composer-focus-integration-20261116/author/`；
+尚未编译、集成、实际红绿或评审，不能计入上述 r4 门禁或批准。作者 agent 已关闭，
+受管 `composer-focus-20261116` 树已归档，路径及 Git worktree 记录 absent。
+原生调查笔记保存在本批持久原件 `raw/focus-investigation.md.gz`，
+原生反向 Tab 仍 HOLD。
+
 ## 当前批次：文件列表键盘与状态语义（完整门禁通过，限定原生）
 
 基线 `e709d02d86ccfbb1a01677f7cda618b64050765b`。本地/远程列表已加入稳定路径

@@ -6,6 +6,7 @@ import copy
 import io
 import json
 from pathlib import Path
+import platform
 import subprocess
 import sys
 import signal
@@ -17,6 +18,12 @@ from unittest import mock
 
 sys.dont_write_bytecode = True
 import run_linux_local_backend as backend
+
+
+requires_posix_runner = unittest.skipUnless(
+    platform.system() in ("Darwin", "Linux"),
+    "Lab runners require macOS/Linux kernel birth identities and POSIX signals",
+)
 
 
 class PureContracts(unittest.TestCase):
@@ -353,6 +360,7 @@ class BudgetAndProcessContracts(unittest.TestCase):
             process.Popen.assert_not_called()
         self.assertEqual(self.receipt["steps"], [])
 
+    @requires_posix_runner
     def test_overall_budget_caps_real_command_and_reaps_its_owned_descendant(self):
         self.commands = backend.Commands(self.root, self.receipt, time.monotonic() + 0.8, lambda: None)
         child = self.root / "descendant.pid"
@@ -374,6 +382,7 @@ class BudgetAndProcessContracts(unittest.TestCase):
         self.assertTrue(info is None or info[3].startswith("Z"))
         self.assertEqual(json.loads((self.root / "progress.json").read_text())["steps"][0], step)
 
+    @requires_posix_runner
     def test_nonzero_exit_keeps_actual_stderr_and_budget_receipt(self):
         self.commands = backend.Commands(self.root, self.receipt, time.monotonic() + 5, lambda: None)
         with self.assertRaises(backend.fixture.FixtureFailure):
@@ -418,13 +427,12 @@ class TopLevelFailureContracts(unittest.TestCase):
                 output=output, revision="a" * 40, image="synthetic", budget_seconds=60,
             )
             process = mock.Mock(pid=123456)
+            identity = (1, process.pid, ("synthetic", 1), "R")
             handlers = {sig: signal.getsignal(sig) for sig in (signal.SIGINT, signal.SIGTERM)}
 
             def fail(commands, *unused_args, **unused_kwargs):
                 commands.processes.append(process)
-                commands.identities[process] = {
-                    process.pid: (1, process.pid, ("synthetic", 1), "R"),
-                }
+                commands.identities[process] = {process.pid: identity}
                 raise backend.BackendFailure("primary source failure")
 
             with (
@@ -436,10 +444,13 @@ class TopLevelFailureContracts(unittest.TestCase):
                 mock.patch.object(
                     backend.fixture.ownership, "signal_owned",
                     side_effect=PermissionError("signal denied"),
-                ),
+                ) as signal_owned,
+                # The signal is data passed to a mock, never a host capability.
+                mock.patch.object(backend.fixture, "signal") as signals,
                 mock.patch("sys.stdout", new_callable=io.StringIO),
             ):
                 self.assertEqual(backend.execute(args), 1)
+                signal_owned.assert_called_once_with(process.pid, identity, signals.SIGKILL)
             receipt = json.loads((output / "receipt.json").read_text())
             cleanup = json.loads((output / "cleanup.json").read_text())
             self.assertEqual(receipt["status"], "FAIL")

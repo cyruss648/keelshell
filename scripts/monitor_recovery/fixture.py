@@ -8,13 +8,11 @@ protocol is an application command or a general-purpose remote administration AP
 
 import argparse
 from contextlib import contextmanager
-import fcntl
 import hashlib
 import hmac
 import json
 import os
 from pathlib import Path
-import pwd
 import re
 import secrets
 import shutil
@@ -128,6 +126,9 @@ def write_json(path, value):
 
 @contextmanager
 def locked_state():
+    # Contract inspection is portable; entering the runtime still requires flock.
+    import fcntl
+
     with (STATE / "lock").open("r+") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
         value = json.loads((STATE / "counts.json").read_text())
@@ -162,6 +163,8 @@ def control(command, token, value):
 
 
 def guard():
+    import pwd
+
     if (not Path("/run/.containerenv").is_file()
             or os.getuid() != pwd.getpwnam(USER).pw_uid):
         raise PermissionError("Fixture requires its dedicated container account")
@@ -232,6 +235,8 @@ def config():
 
 
 def prepare(owner):
+    import pwd
+
     LAB.chmod(0o755)
     keys = LAB / "keys"
     keys.mkdir(mode=0o755)

@@ -7,6 +7,7 @@ import importlib.util
 import io
 import json
 from pathlib import Path
+import platform
 import re
 import shutil
 import signal
@@ -22,6 +23,12 @@ import monitor_recovery_lab as lab
 SPEC = importlib.util.spec_from_file_location("monitor_fixture", lab.HELPERS / "fixture.py")
 fixture = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(fixture)
+
+
+requires_posix_runner = unittest.skipUnless(
+    platform.system() in ("Darwin", "Linux"),
+    "Lab runners require macOS/Linux kernel birth identities and POSIX signals",
+)
 
 
 def receipt():
@@ -116,15 +123,19 @@ class SafetyTests(unittest.TestCase):
                 runner.check_interrupt = lambda: None
                 lab.stop_clients(runner, time.monotonic() + 3)
 
+    @requires_posix_runner
     def test_timeout_reaps_client_and_late_creation_cannot_be_signed_absent(self):
         self.late_creation()
 
+    @requires_posix_runner
     def test_interrupt_reaps_client_and_late_creation_cannot_be_signed_absent(self):
         self.late_creation(interrupted=True)
 
+    @requires_posix_runner
     def test_nonzero_mutation_is_unknown_even_after_client_reap(self):
         self.late_creation(code=125)
 
+    @requires_posix_runner
     def test_signaled_mutation_is_unknown_even_after_client_reap(self):
         self.late_creation(code=-signal.SIGTERM)
 
@@ -140,6 +151,7 @@ class SafetyTests(unittest.TestCase):
         self.assertFalse(rows[0]["absent"])
         self.assertEqual(rows[0]["failure"]["type"], "CleanupBarrierUnconfirmed")
 
+    @requires_posix_runner
     def test_capture_failure_after_popen_does_not_lose_the_real_child(self):
         with tempfile.TemporaryDirectory() as directory, ExitStack() as stack:
             record = receipt()
@@ -219,6 +231,29 @@ class SafetyTests(unittest.TestCase):
 
 
 class FixtureTests(unittest.TestCase):
+    def test_contract_import_does_not_load_posix_runtime_dependencies(self):
+        with patch.dict(sys.modules, {"fcntl": None, "pwd": None}):
+            imported = importlib.util.module_from_spec(SPEC)
+            SPEC.loader.exec_module(imported)
+            self.assertEqual(imported.collector_command(imported.SNAPSHOT), fixture.SNAPSHOT)
+            self.assertEqual(imported.COLLECTORS, fixture.COLLECTORS)
+
+    def test_missing_runtime_dependencies_still_fail_when_used(self):
+        with patch.dict(sys.modules, {"fcntl": None, "pwd": None}):
+            with self.assertRaises(ModuleNotFoundError) as error:
+                with fixture.locked_state():
+                    self.fail("Missing fcntl must not permit unlocked access")
+            self.assertEqual(error.exception.name, "fcntl")
+            for operation in (fixture.guard, lambda: fixture.prepare("unused")):
+                with self.subTest(operation=operation), self.assertRaises(ModuleNotFoundError) as error:
+                    operation()
+                self.assertEqual(error.exception.name, "pwd")
+
+    def test_missing_portable_dependency_is_not_hidden_during_import(self):
+        with patch.dict(sys.modules, {"hashlib": None}), self.assertRaises(ModuleNotFoundError) as error:
+            SPEC.loader.exec_module(importlib.util.module_from_spec(SPEC))
+        self.assertEqual(error.exception.name, "hashlib")
+
     def test_forcecommand_collectors_exactly_match_linux_api_including_df_cache(self):
         source = (lab.ROOT / "crates/keelshell-session/src/monitor.rs").read_text()
         for constant, script in (("SNAPSHOT_SCRIPT", fixture.SNAPSHOT),
@@ -271,6 +306,7 @@ class FixtureTests(unittest.TestCase):
         self.assertEqual(set(fixture.COLLECTORS.values()),
                          {("core", "df"), ("core", None), ("ps", "ps"), ("ss", "ss")})
 
+    @requires_posix_runner
     def test_successful_wrapper_execs_an_existing_tool_and_error_modes_never_delegate(self):
         # This executes the host's real df to test exec/counter behavior only.
         # It makes no Linux, SSH, Rust, parser or native-app acceptance claim.
@@ -353,7 +389,9 @@ class EvidenceTests(unittest.TestCase):
     def test_digest_mismatch_preserves_failure_and_launches_no_process(self):
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory) / "failed"
-            with redirect_stdout(io.StringIO()), patch.object(lab.subprocess, "Popen") as start:
+            with redirect_stdout(io.StringIO()), \
+                    patch.object(lab.platform, "system", return_value="Linux"), \
+                    patch.object(lab.subprocess, "Popen") as start:
                 self.assertEqual(lab.main(self.cli(output)), 1)
             start.assert_not_called()
             result = json.loads((output / "result.json").read_text())
@@ -361,6 +399,7 @@ class EvidenceTests(unittest.TestCase):
             self.assertFalse(result["observations_admissible"])
             self.assertTrue(result["cleanup"]["confirmed"])
 
+    @requires_posix_runner
     def test_zero_test_real_child_is_reaped_before_any_resource_is_created(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -388,6 +427,7 @@ class EvidenceTests(unittest.TestCase):
         for flag, value in (("--timeout", "nan"), ("--timeout", "299"), ("--base-image", "short"),
                             ("--source-sha", "539c172"), ("--test-binary-sha256", "short")):
             with self.subTest(flag=flag), redirect_stderr(io.StringIO()), \
+                    patch.object(lab.platform, "system", return_value="Linux"), \
                     patch.object(lab.subprocess, "Popen") as start:
                 with self.assertRaises(SystemExit) as error:
                     lab.main([*self.cli("/unused"), flag, value])
@@ -399,9 +439,23 @@ class EvidenceTests(unittest.TestCase):
             output = Path(directory)
             old = output / "result.json"
             old.write_text('{"status":"FAILED"}\n')
-            with self.assertRaises(FileExistsError):
+            with patch.object(lab.platform, "system", return_value="Linux"), \
+                    self.assertRaises(FileExistsError):
                 lab.main(self.cli(output))
             self.assertEqual(old.read_text(), '{"status":"FAILED"}\n')
+
+    def test_unsupported_host_is_rejected_before_output_or_process_creation(self):
+        for system in ("Windows", "FreeBSD"):
+            with self.subTest(system=system), redirect_stderr(io.StringIO()) as errors, \
+                    patch.object(lab.platform, "system", return_value=system), \
+                    patch.object(lab.interop, "create_output") as output, \
+                    patch.object(lab.subprocess, "Popen") as start:
+                with self.assertRaises(SystemExit) as error:
+                    lab.main(self.cli("/unused"))
+                self.assertEqual(error.exception.code, 2)
+                self.assertIn("require macOS or Linux", errors.getvalue())
+                output.assert_not_called()
+                start.assert_not_called()
 
     def test_private_cleanup_refuses_replaced_identity_or_owner(self):
         with tempfile.TemporaryDirectory() as directory:

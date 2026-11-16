@@ -3,6 +3,7 @@ import sys
 
 sys.dont_write_bytecode = True
 
+import errno
 import gzip
 import io
 import json
@@ -27,7 +28,10 @@ COMMAND_OUTPUT = 4096
 TOTAL_OUTPUT = 16384
 COMMAND_SECONDS = 1.0
 TOTAL_SECONDS = 6.0
-CLEANUP_SECONDS = 0.2
+# One cleanup envelope covers leader reap and asynchronous group disappearance.
+# collect's shared six-second deadline includes earlier cleanup; the final
+# envelope therefore leaves room inside the transport's ten-second deadline.
+CLEANUP_SECONDS = 1.0
 STOPPED = False
 
 # The child source is fully visible in the review command. Both formats stay in BytesIO.
@@ -95,6 +99,12 @@ while True:
 class CleanupUnknown(Exception):
     """Do not emit an adoptable report when the owned child's exit is unconfirmed."""
 
+    def __init__(self, phase="cleanup_unconfirmed", number=None):
+        # Fixed local phase and numeric errno only; no child output or paths.
+        self.phase = phase
+        self.errno = number
+        super().__init__(phase, number)
+
 
 def safe_text(value, limit):
     try:
@@ -142,31 +152,39 @@ def interrupted(_number, _frame):
 
 
 def terminate_and_wait(child):
+    until = time.monotonic() + CLEANUP_SECONDS
     # Never poll/reap the leader while inherited output pipes remain open. Its unreaped PID
     # prevents process-group reuse before this kill, including when the leader exited first.
     try:
         os.killpg(child.pid, signal.SIGKILL)
     except ProcessLookupError:
         pass
-    except OSError:
-        raise CleanupUnknown() from None
+    except OSError as error:
+        raise CleanupUnknown("group_kill_failed", error.errno) from None
     try:
-        child.wait(timeout=CLEANUP_SECONDS)
-    except (OSError, subprocess.TimeoutExpired):
-        raise CleanupUnknown() from None
+        child.wait(timeout=max(0, until - time.monotonic()))
+    except (OSError, subprocess.TimeoutExpired) as error:
+        raise CleanupUnknown("leader_wait_unconfirmed", getattr(error, "errno", None)) from None
     # Observation after reap is non-destructive: a reused PGID can only produce an
     # unconfirmed result. Never send a destructive signal after leader ownership ends.
-    until = time.monotonic() + CLEANUP_SECONDS
+    last_error = None
     while True:
         try:
             os.killpg(child.pid, 0)
+            last_error = None
         except ProcessLookupError:
             return
-        except OSError:
-            raise CleanupUnknown() from None
-        if time.monotonic() >= until:
-            raise CleanupUnknown()
-        time.sleep(0.005)
+        except OSError as error:
+            if error.errno != errno.EPERM:
+                raise CleanupUnknown("group_query_failed", error.errno) from None
+            # A reaped leader can leave a group awaiting system reaping. EPERM
+            # is inconclusive, so only retry this non-destructive observation.
+            # A new group reusing the number also cannot authorize another kill.
+            last_error = error.errno
+        remaining = until - time.monotonic()
+        if remaining <= 0:
+            raise CleanupUnknown("group_absence_unconfirmed", last_error)
+        time.sleep(min(0.005, remaining))
 
 
 def run_owned(argv, data, env, deadline, remaining_output):

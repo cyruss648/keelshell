@@ -2,6 +2,8 @@ name: Quality
 on:
   push:
     branches: ['**']
+    # Evidence-only pushes must not replace a running source validation.
+    paths-ignore: ['docs/**']
   pull_request:
 permissions:
   contents: read
