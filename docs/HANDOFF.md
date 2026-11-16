@@ -22,8 +22,12 @@ session library `288/0/4 ignored`、真实 OpenSSH 17/17；Mac 仍锁屏、GUI 0
 GUI `0db8640a…`、MCP `bb415f3a…`，完整摘要见本批记录。
 新 Quality `43901863960` 的 Windows `133420285732`、Ubuntu `133420286130`、
 macOS `133420286347` 均 in_progress；接续收取实际终态，不重放宿主 gate。
-当前活动目录是 `work/tunnel-configuration-reload-20261116/`，旧 publication 包与
-重复副本在交付补充的 Git 绑定后清理；唯一 Cargo 槽仍保持，不切换归属。
+交付文档 `e56f3cf7bcd621cbce37ee9b112b0bf3755b98aa` 已普通推送。
+在真实 Git 原件逐项核对后，115 文件／115,495,894 字节自有副本已回收，
+旧 publication 活动目录与提交前重复包已删除；新正常包六文件摘要和 target 目录
+身份前后不变，三个 agent 已关闭。当前活动目录是
+`work/tunnel-configuration-reload-20261116/`，保留正常包／工装和最后交付回执；
+原日志、冻结及解析器从 docs 封存读取。唯一 Cargo 槽仍保持，不切换归属。
 
 ## 不变的实现与交付约束
 

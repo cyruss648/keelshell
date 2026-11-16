@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-11-16T16:11:25.666808+00:00",
+  "source": "6f28f5c424752a221746fbfb621e319c20ff38b9",
+  "count": 9,
+  "entries": [
+    {
+      "path": "ci-snapshot-r2.json",
+      "bytes": 833,
+      "sha256": "a6c6959f908a0a4c6b4cc8f60f884bbb48c75b2c85eb83f96ec11f8ea1ca3aee"
+    },
+    {
+      "path": "ci-snapshot-r2.log",
+      "bytes": 7793,
+      "sha256": "ee73db0afdd1e1dd0a73db66726482ed2d84b55b2d48ce63e7075217a41760e1"
+    },
+    {
+      "path": "delivery-docs-commit-r1.json",
+      "bytes": 799,
+      "sha256": "be8567e4ce829fc9a5b0e67c83dd9c64a62dff7c67bc29083fafe76bcb631ecb"
+    },
+    {
+      "path": "delivery-docs-commit-r1.log",
+      "bytes": 4629,
+      "sha256": "6a435d86ec72fbf675546c813373a0e9ea9318a2c18cc7a94891a898baf86b06"
+    },
+    {
+      "path": "delivery-docs-push-r1.json",
+      "bytes": 775,
+      "sha256": "c6af66fedd94750a66f528f9b2e6af20e67d425b79ab444cfb4e080c706b7ff4"
+    },
+    {
+      "path": "delivery-docs-push-r1.log",
+      "bytes": 146,
+      "sha256": "64687859b047164234f7cf34a0a18f6bdbec21348cf211548b5a19311ca74367"
+    },
+    {
+      "path": "native-availability-r2.json",
+      "bytes": 353,
+      "sha256": "b36ec94c56dfe95ac4b51a791be4c186038e40c30bf3a94b9d6e86d075bdc3a7"
+    },
+    {
+      "path": "verify-after-cleanup-r1.json",
+      "bytes": 805,
+      "sha256": "70dc0cb821400cb6b11507185b742112e0b132720045605ab812c120c5d319b7"
+    },
+    {
+      "path": "verify-after-cleanup-r1.log",
+      "bytes": 561,
+      "sha256": "0710008335f047bf3007612ecb282731c48b2386f9b3c0e3fc8bcfebee77d54b"
+    }
+  ],
+  "purpose": "Subsequent cleanup verification, documentation delivery and CI/native availability observations; no change to the original 30-member delivery manifest."
+}

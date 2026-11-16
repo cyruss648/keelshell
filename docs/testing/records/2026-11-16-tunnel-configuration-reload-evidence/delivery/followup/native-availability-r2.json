@@ -1,0 +1,10 @@
+{
+  "observed_date_local": "2026-11-17",
+  "timezone": "Asia/Shanghai",
+  "source": "native inventory tool error from immediately preceding observation",
+  "error": "The Mac is locked and automatic unlock could not unlock it.",
+  "gui_actions": 0,
+  "screenshots": 0,
+  "native_acceptance": "NOT_RUN",
+  "unrelated_inventory_content_persisted": false
+}

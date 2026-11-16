@@ -1,0 +1,29 @@
+{
+  "observed_exit": 0,
+  "controller_exit": 0,
+  "timed_out": false,
+  "interrupted": false,
+  "terminal": {
+    "direct_reaped": true,
+    "active_processes": 0,
+    "pipes_drained": true,
+    "errors": []
+  },
+  "errors": [],
+  "command": [
+    "gh",
+    "run",
+    "view",
+    "43901863960",
+    "--json",
+    "databaseId,headSha,status,conclusion,url,jobs,createdAt,updatedAt"
+  ],
+  "seconds": 1.8875899580016267,
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "cargo_target": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/work/recovery-batch-integration-20261115/target",
+  "cargo_owner_checkout_unchanged": true,
+  "wrapper_stdout": "",
+  "wrapper_stderr": "",
+  "log_bytes": 7793,
+  "log_sha256": "ee73db0afdd1e1dd0a73db66726482ed2d84b55b2d48ce63e7075217a41760e1"
+}

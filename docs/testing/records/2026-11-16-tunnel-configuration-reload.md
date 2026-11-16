@@ -127,6 +127,18 @@ r4 对实际原件分别解析后通过，普通 Rust、rustdoc、主 Python 和
 [30 成员交付补充](2026-11-16-tunnel-configuration-reload-evidence/delivery/README.md)
 保存实际提交／push／三方读回、精确包 manifest、CI 运行中快照及旧资源原件。
 
+交付文档 `e56f3cf7bcd621cbce37ee9b112b0bf3755b98aa` 已普通推送。
+在全部对应原件与包 manifest 核对真实 Git blob 后，实际回收 115 文件、
+115,495,894 字节，包括本批运行副本、提交前重复包、被新包替代的旧 publication 包
+及上一活动目录。新正常包六文件前后摘要相等，共享 target 的目录身份不变，
+没有删除第三方缓存或其他任务资源；三位自有 agent 已关闭。
+[逐项清理回执](2026-11-16-tunnel-configuration-reload-evidence/delivery/owned-cleanup-r1.json)
+保留每项路径、摘要、字节及 Git 原件依据。旧活动目录已经不存在，后续只使用本批
+正常包和 docs 封存；活动目录仅保留必要包、工装和最后交付／CI 观察回执。
+[后续原件](2026-11-16-tunnel-configuration-reload-evidence/delivery/followup/README.md)
+记录清理后主封存再次验证 `0/reaped/0.155s`，以及原生通道再次报告锁屏、
+GUI 操作／截图仍为 0；没有重跑宿主完整门禁。
+
 ## 尚未验证
 
 精确 Quality `43901863960` 正在运行；Windows `133420285732`、Ubuntu

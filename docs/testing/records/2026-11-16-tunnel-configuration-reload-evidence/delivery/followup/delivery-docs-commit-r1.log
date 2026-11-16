@@ -1,0 +1,35 @@
+[feature/editor-unicode-codec-20261114 e56f3cf] docs: bind tunnel reload delivery and native package evidence
+ 36 files changed, 226 insertions(+), 10 deletions(-)
+ create mode 100644 docs/testing/records/2026-11-16-tunnel-configuration-reload-evidence/delivery/.gitattributes
+ create mode 100644 docs/testing/records/2026-11-16-tunnel-configuration-reload-evidence/delivery/README.md
+ create mode 100644 docs/testing/records/2026-11-16-tunnel-configuration-reload-evidence/delivery/manifest.json
+ create mode 100644 docs/testing/records/2026-11-16-tunnel-configuration-reload-evidence/delivery/originals/ci-snapshot-r1.json
+ create mode 100644 docs/testing/records/2026-11-16-tunnel-configuration-reload-evidence/delivery/originals/ci-snapshot-r1.log
+ create mode 100644 docs/testing/records/2026-11-16-tunnel-configuration-reload-evidence/delivery/originals/delivery-source-r1.json
+ create mode 100644 docs/testing/records/2026-11-16-tunnel-configuration-reload-evidence/delivery/originals/feature-commit-r1.json
+ create mode 100644 docs/testing/records/2026-11-16-tunnel-configuration-reload-evidence/delivery/originals/feature-commit-r1.log
+ create mode 100644 docs/testing/records/2026-11-16-tunnel-configuration-reload-evidence/delivery/originals/feature-commit-r2.json
+ create mode 100644 docs/testing/records/2026-11-16-tunnel-configuration-reload-evidence/delivery/originals/feature-commit-r2.log
+ create mode 100644 docs/testing/records/2026-11-16-tunnel-configuration-reload-evidence/delivery/originals/feature-commit-r3.json
+ create mode 100644 docs/testing/records/2026-11-16-tunnel-configuration-reload-evidence/delivery/originals/feature-commit-r3.log
+ create mode 100644 docs/testing/records/2026-11-16-tunnel-configuration-reload-evidence/delivery/originals/feature-push-r1.json
+ create mode 100644 docs/testing/records/2026-11-16-tunnel-configuration-reload-evidence/delivery/originals/feature-push-r1.log
+ create mode 100644 docs/testing/records/2026-11-16-tunnel-configuration-reload-evidence/delivery/originals/inspect-commit-r1.json
+ create mode 100644 docs/testing/records/2026-11-16-tunnel-configuration-reload-evidence/delivery/originals/inspect-commit-r1.log
+ create mode 100644 docs/testing/records/2026-11-16-tunnel-configuration-reload-evidence/delivery/originals/package-commit-manifest-r1.json
+ create mode 100644 docs/testing/records/2026-11-16-tunnel-configuration-reload-evidence/delivery/originals/package-commit-r1.json
+ create mode 100644 docs/testing/records/2026-11-16-tunnel-configuration-reload-evidence/delivery/originals/package-commit-r1.log
+ create mode 100644 docs/testing/records/2026-11-16-tunnel-configuration-reload-evidence/delivery/originals/retired-publication/final-delivery-r1.json
+ create mode 100644 docs/testing/records/2026-11-16-tunnel-configuration-reload-evidence/delivery/originals/retired-publication/final-docs-commit-r1.json
+ create mode 100644 docs/testing/records/2026-11-16-tunnel-configuration-reload-evidence/delivery/originals/retired-publication/final-docs-commit-r1.log
+ create mode 100644 docs/testing/records/2026-11-16-tunnel-configuration-reload-evidence/delivery/originals/retired-publication/final-docs-push-r1.json
+ create mode 100644 docs/testing/records/2026-11-16-tunnel-configuration-reload-evidence/delivery/originals/retired-publication/final-docs-push-r1.log
+ create mode 100644 docs/testing/records/2026-11-16-tunnel-configuration-reload-evidence/delivery/originals/retired-publication/final-evidence-verify-r1.json
+ create mode 100644 docs/testing/records/2026-11-16-tunnel-configuration-reload-evidence/delivery/originals/retired-publication/final-evidence-verify-r1.log
+ create mode 100644 docs/testing/records/2026-11-16-tunnel-configuration-reload-evidence/delivery/originals/retired-publication/final-index-check-r1.json
+ create mode 100644 docs/testing/records/2026-11-16-tunnel-configuration-reload-evidence/delivery/originals/retired-publication/package-manifest.json
+ create mode 100644 docs/testing/records/2026-11-16-tunnel-configuration-reload-evidence/delivery/originals/retired-publication/run_command.py
+ create mode 100644 docs/testing/records/2026-11-16-tunnel-configuration-reload-evidence/delivery/originals/source-binding-r1.json
+ create mode 100644 docs/testing/records/2026-11-16-tunnel-configuration-reload-evidence/delivery/originals/source-binding-r1.log
+ create mode 100644 docs/testing/records/2026-11-16-tunnel-configuration-reload-evidence/delivery/originals/verify-sealed-r1.json
+ create mode 100644 docs/testing/records/2026-11-16-tunnel-configuration-reload-evidence/delivery/originals/verify-sealed-r1.log
