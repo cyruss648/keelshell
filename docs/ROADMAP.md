@@ -33,9 +33,13 @@ helper 另列 30；准确 app1374 库存与逐名执行相等，35 新例均 ok�
 filesystem70／archive41先通过，完整 gate未开始。
 一行测试分支修订的 r5 其余726输入不变；限定 gate `0/reaped/26.866s`，
 session343库存与执行相等、339/0/4、新30项ok，fmt／严格 Clippy／策略通过。
-Banach新静态窄复核APPROVE、P0–P3全0，独立编译／执行0，四位自有agent均关闭；
-修复后的精确 Windows CI 另验。242文件副本清理及目录恢复诊断
-完整保留，不把 r4 宿主完整成绩改签 r5；
+Banach新静态窄复核APPROVE、P0–P3全0，独立编译／执行0，四位自有agent均关闭。
+修复 `a1a97b3b2ee0f0ccf91ea53ca96623aa8867fe8d` 已普通推送、三方一致；
+60成员／727输入精确Git绑定通过。新 Quality43934041540 的Windows133533978752
+已通过session backend预检，三平台完整质量门禁仍在运行；旧run全局cancelled，
+其中Windows为原failure、macOS／Ubuntu为cancelled，不补签成功。
+累计300文件／70,938,741字节副本清理及目录恢复诊断完整保留；
+当前正常包六文件不变，不把 r4 宿主完整成绩改签 r5；
 见[备份记录](testing/records/2026-11-17-editor-backup-readback.md)。
 
 2026-11-17 上一功能批为远端 macOS 账户可见 TCP LISTEN 列表，设计见
@@ -131,9 +135,9 @@ app 为 `1351/0/2`、`1362/0/2`、`1363/0/2`；各 14 rustdoc，Python 293 项�
 
 ## 接续顺序
 
-0. 当前编辑器备份批 `f810f67` 已推送，精确 Windows CI 的测试 helper 编译错误
-   已补一行明确分支，限定宿主门禁和新静态窄复核通过；封存并及时普通提交推送，
-   跟进新精确 Windows CI，不重复未变宿主完整测试。
+0. 编辑器备份及一行Windows测试修复已推送，当前精确源码 `a1a97b3` 的
+   Quality43934041540已通过Windows session预检；收取三平台完整门禁终态，
+   不重复未变宿主完整测试或重跑旧CI，不把运行中状态写成成功。
    Darwin TCP 功能的专项、独立复核、真实 SSH 与一次最终完整门禁均已通过；
    工程 `bd198a8` 已普通推送并三方读回，`43916079699` 精确三平台 CI 已全部成功。
    上一隧道源码的三平台 CI 已全部成功；不重复宿主全量或重放已成功 CI。

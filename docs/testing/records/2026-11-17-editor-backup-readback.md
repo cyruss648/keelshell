@@ -164,7 +164,13 @@ controller 的宿主完整测试，也不把 r4 完整成绩改签成 r5 全量�
 显式分支，并搜索644个tracked Rust文件中的28处相关匹配，未发现同类遗漏。
 独立编译、测试、网络和target写入均0，只签这一行修复，不签并行及后续docs。
 已实际收取并关闭，本功能批及后续共四位自有agent均已关闭。
-修复后的精确 Windows CI 另行验收。
+修复随后以 `a1a97b3b2ee0f0ccf91ea53ca96623aa8867fe8d` 普通提交／推送，
+本地／tracking／实际远端一致，读回干净。60成员／727输入精确Git绑定
+`0/reaped/6.955532s`、零 mismatch。新 Quality `43934041540` 的
+Windows `133533978752` 已通过 session backend预检，原 E0004 在真实Windows消除；
+三平台完整质量门禁在最后快照时均运行中，不能补签完整通过。
+旧 `43929740313` 已 completed/cancelled，Windows保留原failure，
+macOS／Ubuntu为cancelled；没有手动重跑原run。
 最初限定 gate 解析器漏掉 Python helper stderr 同行前缀后的三个 Rust 结果，
 派生退出 1；修订解析后343名逐项相等，派生退出 0。原解析器与诊断保留，
 没有为解析问题重放测试。
@@ -178,5 +184,10 @@ controller 的宿主完整测试，也不把 r4 完整成绩改签成 r5 全量�
 恢复轮逐项对照精确 Git 原件与242项缺席事实，清理剩余空目录，退出 0；
 当前正常包六文件与删除前来源回执相等，恢复轮共享 target 目录身份前后相等。
 首轮没有完成 target 前后比较回执，不补造该证据。
-辅助脚本保留待交付补充封存后回收。未操作其他任务资源或旧正常包。
+辅助脚本及后续无用途副本已随60成员精确Git核对后再回收58文件／852,129字节，
+累计300文件／70,938,741字节。后续清理在删除前持久保存逐项计划，
+当前正常包六文件前后相等，共享target目录身份前后相等。
+未操作其他任务资源或旧正常包。
 详见[交付补充](2026-11-17-editor-backup-readback-evidence/delivery/README.md)。
+最后27份原件、修复推送／读回、精确来源和新旧CI快照另存
+[最终补记](2026-11-17-editor-backup-readback-evidence/delivery/final/README.md)。

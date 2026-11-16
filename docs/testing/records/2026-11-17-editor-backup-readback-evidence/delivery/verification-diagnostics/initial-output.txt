@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/docs/testing/records/2026-11-17-editor-backup-readback-evidence/delivery/verify.py", line 157, in <module>
+    main()
+    ~~~~^^
+  File "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/docs/testing/records/2026-11-17-editor-backup-readback-evidence/delivery/verify.py", line 117, in main
+    assert summary == {key: value for key, value in saved.items() if key != "binary"}
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

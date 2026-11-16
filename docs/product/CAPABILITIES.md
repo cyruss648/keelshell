@@ -33,8 +33,11 @@ variant label; all 726 other engineering inputs remain equal. The scoped host
 gate passed with 343 session inventory names matching 339 passed/four ignored,
 including all 30 new backup tests. A new independent static review approved the
 one-line fix with no P0–P3 and zero independent compilation/test runs.
-Actual Windows compilation remains a separate
-pending CI check; the earlier full host result is not relabelled as a new full run.
+The follow-up was pushed as `a1a97b3b2ee0f0ccf91ea53ca96623aa8867fe8d` and
+passed the actual Windows session backend preflight in Quality43934041540.
+All three full quality jobs remain in progress at the final recorded snapshot.
+The old run ended cancelled, retaining the Windows compile failure and cancelled
+macOS/Ubuntu jobs. The earlier full host result is not relabelled as a new full run.
 
 ## 2026-11-17: remote macOS TCP listeners
 

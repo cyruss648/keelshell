@@ -17,15 +17,22 @@ app `1372/0/2`、14 rustdoc、Python 293/2 skipped，helper 另列 30。
 未启动或安装，锁屏使原生仍待验收。工程
 `f810f674c57b2c25dac5b987d77bf38656e3af56` 已普通推送、三方一致，
 206 成员／727 输入精确 Git 绑定通过；提交来源正常包结构通过。
-新 Quality `43929740313` 的 Windows session 预检因测试错误分类器漏新 variant
+原 Quality `43929740313` 的 Windows session 预检因测试分类器漏新 variant
 而编译失败，filesystem70／archive41通过，完整 gate 未开始。
-当前只补该 Windows 测试 helper 的一行穷尽分支；r5其余726输入不变，
+该 Windows 测试 helper 只补一行穷尽分支；r5其余726输入不变，
 aggregate `5c93cae03daaf370227820a815ad969623a0fb6bef1afb0d6e5362f09816528b`。
 限定 gate `0/reaped/26.866s`，session343库存／执行相等、`339/0/4`，
 新30项 ok，fmt／严格 Clippy／策略通过；Banach新静态窄复核APPROVE、P0–P3全0，
-独立编译／执行0，已关闭，四位自有agent均关闭；修复后的精确 Windows CI 另验。
-242文件／70,086,612字节副本已按Git原件回收；首轮目录删除诊断、
-后续恢复和保留 helper 明确记录，不补造首轮 target 前后证据。从
+独立编译／执行0，已关闭，四位自有agent均关闭。
+修复 `a1a97b3b2ee0f0ccf91ea53ca96623aa8867fe8d` 已普通推送、三方一致；
+60成员／727输入精确 Git 绑定 `0/reaped/6.955532s`、零 mismatch。
+新 Quality `43934041540` 的 Windows133533978752 已通过 session backend预检，
+原编译错误在真实Windows消除；三平台完整质量门禁仍运行中。
+旧run已 completed/cancelled，Windows原failure保持，macOS／Ubuntu为cancelled，
+不能补签终态成功。没有手动重跑旧run或活动watcher。
+累计300文件／70,938,741字节副本已按Git原件回收；首轮目录删除诊断及恢复保留，
+当前正常包六文件及恢复／后续清理的共享target目录身份核对通过。
+最后交付原件见[最终补记](testing/records/2026-11-17-editor-backup-readback-evidence/delivery/final/README.md)。从
 [本批记录](testing/records/2026-11-17-editor-backup-readback.md)接续，不重放未知写入。
 
 上一功能批新增远端 macOS 账户可见的 TCP LISTEN 列表，使用已有 lsof，
@@ -160,9 +167,9 @@ unittest 6.134s／外层 6.203s，实际 waited；辅助检索诊断原文保留
 
 ## 下一步与资源
 
-1. 编辑器备份工程 `f810f67` 已推送，宿主完整门禁通过但精确 Windows CI 发现
-   测试 helper 穷尽匹配缺失；一行修复的限定 gate 与新静态复核已通过，
-   封存／普通提交推送，跟进新精确 CI，不重放未变的宿主完整测试。
+1. 编辑器备份及Windows测试修复已推送；当前精确源码 `a1a97b3` 的
+   Quality43934041540已通过Windows session预检，接续收取三平台完整门禁终态，
+   不重放未变的宿主完整测试或旧CI，不把正在运行的成绩补签成功。
    Darwin TCP 工程 `bd198a8` 已普通推送、三方一致，`43916079699` 三平台终态已收齐，
    不重放未变的监听宿主 gate 或 CI。
    上批 `43901863960` 与更早 `43880245383` 的终态分别记录，不能代签当前源码。
