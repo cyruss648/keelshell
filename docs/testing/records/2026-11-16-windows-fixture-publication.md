@@ -74,7 +74,41 @@ unittest 6.134s、外层 6.203s，实际 waited。exit7 控制保留
 current 验证 `0/reaped/0.277s`，719 工程输入零 mismatch，测试重放 0。
 非作者原件、作者负例、原 Windows 失败均保持原文，不把原失败覆盖成后续通过。
 
-父先收齐原 `43873806902` 的三平台终态，避免新工程 push 取消仍有价值的运行。
-限定门禁及新非作者复核完成后，封存输入、源码快照、负例、实际命令与原失败，
-普通提交推送并读回本地／tracking／远端完整 SHA。
+原 `43873806902` 三平台终态现已收齐，随后普通提交推送当前工程
+`ee3ad7320e90f40c9d777c500543cc6e909d0484`，本地／tracking／远端完整 SHA 一致，
+读回时工作区干净。25 成员与精确 Git 719 输入验证为 `0/reaped/6.641s`、零 mismatch。
 不清除原失败、未知结果、隔离或清理保留事实；不将本片写成完整产品验收。
+
+## 交付与后续 CI 快照
+
+当前精确 Quality `43880245383` 运行中。Windows `133343901451` 的三项预检 step success，
+完整 gate 进行中；macOS `133343901229`、Ubuntu `133343901650` 也在完整 gate。
+本快照尚无新候选完整原日志，不提前填写新 293 项 Python、exclusive 文件反例、
+Job barrier 或整个 gate 通过。运行中抓 Windows 日志返回 HTTP 404 / BlobNotFound，
+只表示日志暂不可取，不是测试结果。后续终态另行补充，不改写原封存时点的执行 0。
+
+原 958 的 macOS／Ubuntu 完整 gate 与真实 OpenSSH 均 success；
+普通 Rust 分别 `3225/0/48 ignored`、`3218/0/49 ignored`，各 14 项 rustdoc；
+app 分别 `1341/0/2 ignored`、`1342/0/2 ignored`。
+CI app 只有运行声明数与唯一结果核对，不含独立 `--list`。完整原件、
+r2 拒绝输出诊断及 r3 重派生见
+[21 成员终态补充](2026-11-16-windows-zmodem-test-contract-evidence/ci-completion/README.md)，
+验证 `0/reaped/8.131s`，没有重放测试、改源码或清理 target。
+
+当前正常 macOS arm64 包绑定 `ee3ad73` 和本片 719 冻结：
+release build `0/reaped/150.274s`，打包 `0/reaped/0.195s`，
+结构／arm64／minos 15.0 检查 `0/reaped/0.170s`。
+app 52,882,144 字节，SHA-256
+`be1029bda1fe6afc8882d11cbf9a0be789ae32faa587028c3e7fccf2d77f494a`；
+MCP 2,904,560 字节，SHA-256
+`5166352519c48c15f2d02db8986c4d9301ccd8e0d055c736cf9471bd88ce584b`。
+未启动、安装、签名或公证。再次原生 inventory 仍明确报告 Mac 锁屏且自动解锁失败，
+GUI 操作／截图 0，英文工具栏 P2 和完整桌面矩阵保持开放。
+后续纯文档提交不改变工程输入，无需因此重建正常包。
+
+[26 成员交付补充](2026-11-16-windows-fixture-publication-evidence/delivery/README.md)
+保存已完成命令回执、原日志、三方 SHA、源码绑定、当前 CI 快照与包摘要；
+排除 53 MB 应用、共享 target 和活动 watch。两个已完成 reviewer 的四个副本，
+在精确 Git 原件核对后回收共 66,095 字节，Ramanujan、Boyle 均已关闭。
+旧 ZIP／准备候选与 Turing 副本的 58 文件清理按上一批记录保持。
+没有新建用户 chat、工作树、分支或容器。

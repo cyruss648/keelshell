@@ -1,5 +1,28 @@
 # Capability ledger
 
+## 2026-11-16: process-fixture publication barrier and exact CI follow-up
+
+Source `ee3ad7320e90f40c9d777c500543cc6e909d0484` is pushed with matching
+local, tracking and remote SHAs. Only the Python process-test fixture changed;
+the other 718 engineering inputs, all Rust and production behavior are unchanged.
+Observers now require the writer's completed-publication marker before reading
+the identity record; post-publication read errors still fail closed.
+The focused suite ran 72 cases/two skipped; host discovery ran 293/two skipped.
+Two controlled counterexamples failed as expected, and independent review
+approved with no P0–P3 and a separate 72-case/two-skipped run. No unchanged full
+Rust suites were repeated or relabelled as new-input full-gate acceptance.
+
+Exact Quality `43880245383` is in progress. Windows' three preflight steps
+succeeded, but the new Python cases and full gate still await complete logs.
+The prior `95813a7` run completed with the recorded Windows Python failure;
+macOS/Ubuntu full gates and real OpenSSH succeeded, with ordinary Rust
+3225/0/48 and 3218/0/49, plus 14 doctests each. CI app counts are declared runs
+matched to unique results, not an independent compiled `--list` inventory.
+The new arm64 macOS package passed structural checks only; native launch,
+desktop checks, installation, signing and notarization are not signed off.
+See the [fixture record](../testing/records/2026-11-16-windows-fixture-publication.md)
+and [prior CI completion](../testing/records/2026-11-16-windows-zmodem-test-contract-evidence/ci-completion/README.md).
+
 ## 2026-11-16: Windows Zmodem rename test contract
 
 Quality `43867112056` completed with failure at exact source

@@ -1,0 +1,144 @@
+{
+  "schema": "keelshell.windows-zmodem-ci-completion.v1",
+  "source": "95813a76f0ec9b59fd043cd982e33cdc01dd69f8",
+  "run": 43873806902,
+  "engineering_sha256": "96753dee615c9cd7711a48ad769ec5b14f49c45c581b0bb67323bb51ba508766",
+  "count": 21,
+  "archive_bytes": 649722,
+  "archive_sha256": "b3aa1c027aef7d7cca6eefa38731e41d43275266c41103349d97e88a157e2f75",
+  "uncompressed_bytes": 3747526,
+  "entries": [
+    {
+      "path": "ci/inputs-freeze-r1.json",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/inputs-freeze-r1.json",
+      "bytes": 116621,
+      "sha256": "baaa60405cef32b664a345d4a70801a916069a1502f0c26daa657b15b39721b5"
+    },
+    {
+      "path": "ci/parsing-r2-early-rustdoc-diagnostic-r1.json",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/parsing-r2-early-rustdoc-diagnostic-r1.json",
+      "bytes": 304,
+      "sha256": "7e5d999310d2e4029cdde3aaf00911c1bbfcfbf00add0cdd779bffe0476cb77d"
+    },
+    {
+      "path": "ci/source-ci-final-r1.json",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/source-ci-final-r1.json",
+      "bytes": 809,
+      "sha256": "7d2c2ba764e50565fb66c34714fcd85af1dd6ba4dfd1a9754818715d5d6ee783"
+    },
+    {
+      "path": "ci/source-ci-final-r1.log",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/source-ci-final-r1.log",
+      "bytes": 8277,
+      "sha256": "26852f5aea697bd754361ce4bdb3301b6453ff368b51fa8338b95b6db457a7d6"
+    },
+    {
+      "path": "ci/source-ci-scope-notes-r3.md",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/source-ci-scope-notes-r3.md",
+      "bytes": 1502,
+      "sha256": "651277d7e546b5b63deb34357e5c5f780b6dcac2cfab419fc8d3d082805f4c42"
+    },
+    {
+      "path": "ci/source-ci-summary-final-r3.json",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/source-ci-summary-final-r3.json",
+      "bytes": 3874,
+      "sha256": "ab5d1cafcae3211341db081a1382b348866c7b0c966db09531141e9ea2052391"
+    },
+    {
+      "path": "ci/source-ci-watch-r1.json",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/source-ci-watch-r1.json",
+      "bytes": 798,
+      "sha256": "f1880fe1ff5a18b7cfb6b8ad07f7ce23fd8a56b2743a149c09b94f644b92aa5f"
+    },
+    {
+      "path": "ci/source-ci-watch-r1.log",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/source-ci-watch-r1.log",
+      "bytes": 147027,
+      "sha256": "68f8f683ee0197aeac69b9cf1faf26102004f0ddd9638c5a61b0cb1d73a21444"
+    },
+    {
+      "path": "ci/source-macos-active-log-r1.json",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/source-macos-active-log-r1.json",
+      "bytes": 808,
+      "sha256": "808dc0435e8b90cf5940f2fdcbb5da3fc7cccb109eae1f7d337ddb41f94a0424"
+    },
+    {
+      "path": "ci/source-macos-active-log-r1.log",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/source-macos-active-log-r1.log",
+      "bytes": 851083,
+      "sha256": "5d4f5fda777b90492611b9cdac3e487e1dc7c28518f1588d5e783e64c83c9b9f"
+    },
+    {
+      "path": "ci/source-macos-summary-r3.json",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/source-macos-summary-r3.json",
+      "bytes": 490436,
+      "sha256": "519e135cb6ea98b2eced7b6ba6d66ba345ed6717f697ed4a3b9c91e80893c844"
+    },
+    {
+      "path": "ci/source-ubuntu-job-r1.json",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/source-ubuntu-job-r1.json",
+      "bytes": 808,
+      "sha256": "77fa43c46506189b51ab0dec0702786e5564e626b846fb68e8889359c8eb0167"
+    },
+    {
+      "path": "ci/source-ubuntu-job-r1.log",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/source-ubuntu-job-r1.log",
+      "bytes": 870810,
+      "sha256": "fd0e0624d059d96f0c2b4833e0260db0255350babdae40a761de270b833fbfbd"
+    },
+    {
+      "path": "ci/source-ubuntu-summary-r2.json",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/source-ubuntu-summary-r2.json",
+      "bytes": 483158,
+      "sha256": "d1c48fa4101694e13209470fb00d792e1e888b578b924e64bd5348400b63bc31"
+    },
+    {
+      "path": "ci/source-ubuntu-summary-r3.json",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/source-ubuntu-summary-r3.json",
+      "bytes": 489450,
+      "sha256": "b56a673a8f7e4ff2d2080ece7089e3d1a66abfa50cfe06df4c8a6434cc5c95c2"
+    },
+    {
+      "path": "ci/source-windows-job-r1.json",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/source-windows-job-r1.json",
+      "bytes": 807,
+      "sha256": "c450ab7f75226631609367fdfbadb8e1ab1b0d5f5e7b9f52e5eb3d2fe8541cc0"
+    },
+    {
+      "path": "ci/source-windows-job-r1.log",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/source-windows-job-r1.log",
+      "bytes": 184360,
+      "sha256": "2dc66cd5ffca0b6c3a8a9c2fea01adef7e58afbf1d6381022b864176fd949c6b"
+    },
+    {
+      "path": "ci/source-windows-summary-r1.json",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/source-windows-summary-r1.json",
+      "bytes": 80801,
+      "sha256": "1e17a93564acf47376c657a4ddbf8bf0951648fd1f41a8096fadc8d868454f8c"
+    },
+    {
+      "path": "tools/summarize_ci_r2.py",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/summarize_ci_r2.py",
+      "bytes": 5434,
+      "sha256": "ef5932231b3042b45372db02d19abf0bd4368fc6795b295817b2af57a1b87177"
+    },
+    {
+      "path": "tools/summarize_ci_r3.py",
+      "source_path": "work/windows-zmodem-rename-integration-20261116/summarize_ci_r3.py",
+      "bytes": 5815,
+      "sha256": "2c9dff40e07f0d4c5fd95d17bed1f0980b7bd9bfca99e7da8559a37b733f1702"
+    },
+    {
+      "path": "tools/verify.py",
+      "source_path": "docs/testing/records/2026-11-16-windows-zmodem-test-contract-evidence/ci-completion/verify.py",
+      "bytes": 4544,
+      "sha256": "625fd1ba69eaa28d2878df973785993a1cf455d6377a2ba9454ce1a6f9dbe7d9"
+    }
+  ],
+  "ci_status": "completed",
+  "ci_conclusion": "failure",
+  "parser_revision": 3,
+  "windows_full_gate": "FAILED_PYTHON_DISCOVERY",
+  "macos_ubuntu_full_gate_and_openssh": "SUCCESS",
+  "later_ee3ad73_candidate_signed": false
+}

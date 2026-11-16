@@ -1,0 +1,174 @@
+{
+  "schema": "keelshell.windows-fixture-delivery.v1",
+  "source": "ee3ad7320e90f40c9d777c500543cc6e909d0484",
+  "engineering_sha256": "1a516c0280487e62157ad3ee470206ef91c12a08501f12214ef7348c688cfc3a",
+  "count": 26,
+  "archive_bytes": 7408,
+  "archive_sha256": "8ad5e7cb90e9eb7cc88df695aa50ffa6f8cffc7afb62067a7eea5bac674d2123",
+  "uncompressed_bytes": 32595,
+  "entries": [
+    {
+      "path": "batch/commit-bind-r1.json",
+      "source_path": "work/windows-fixture-publication-integration-20261116/commit-bind-r1.json",
+      "bytes": 857,
+      "sha256": "335c797df77661646285209b54ce9c730f0332e7ffbdd75dc71efb2878e8474c"
+    },
+    {
+      "path": "batch/commit-bind-r1.log",
+      "source_path": "work/windows-fixture-publication-integration-20261116/commit-bind-r1.log",
+      "bytes": 396,
+      "sha256": "45c1131f3265ef6ead846c590c8beba202d0d4f361a02a2571a1bfe24f0899fa"
+    },
+    {
+      "path": "batch/source-push-r1.json",
+      "source_path": "work/windows-fixture-publication-integration-20261116/source-push-r1.json",
+      "bytes": 790,
+      "sha256": "c3a7f1ea2972517a4d2ecc9cc9e9afc25da5e617e8db84355ca3627dabc7ad90"
+    },
+    {
+      "path": "batch/source-push-r1.log",
+      "source_path": "work/windows-fixture-publication-integration-20261116/source-push-r1.log",
+      "bytes": 113,
+      "sha256": "0068eda9ca0b21af0f308e4b531e3259d8535aa3dbd78ebc57f122c0f76294fe"
+    },
+    {
+      "path": "batch/prior-ci-evidence-verify-r1.json",
+      "source_path": "work/windows-fixture-publication-integration-20261116/prior-ci-evidence-verify-r1.json",
+      "bytes": 808,
+      "sha256": "49ad70aec692782f315756e20a5ca1d3b7c6356631ef4919160fde029adddc13"
+    },
+    {
+      "path": "batch/prior-ci-evidence-verify-r1.log",
+      "source_path": "work/windows-fixture-publication-integration-20261116/prior-ci-evidence-verify-r1.log",
+      "bytes": 683,
+      "sha256": "1a84afe89c4868f9eaf9c1dfc643e04d530a358903d3195f7b2ebbd1dad4f049"
+    },
+    {
+      "path": "batch/normal-build-r1.json",
+      "source_path": "work/windows-fixture-publication-integration-20261116/normal-build-r1.json",
+      "bytes": 814,
+      "sha256": "fddee3cdf6efde76cdc7da489a16e19d81e125b562d2b772cd0150e05a2b7e72"
+    },
+    {
+      "path": "batch/normal-build-r1.log",
+      "source_path": "work/windows-fixture-publication-integration-20261116/normal-build-r1.log",
+      "bytes": 448,
+      "sha256": "2de61c779ad0f46b956a3c089bc9ab5d2524d66e2902b082690d053be73cb9a0"
+    },
+    {
+      "path": "batch/package-r1.json",
+      "source_path": "work/windows-fixture-publication-integration-20261116/package-r1.json",
+      "bytes": 1153,
+      "sha256": "d892d22ae4332e86774bc2b4d3fdc4982b0ba43a41e412751a2c51e478ca2d6f"
+    },
+    {
+      "path": "batch/package-r1.log",
+      "source_path": "work/windows-fixture-publication-integration-20261116/package-r1.log",
+      "bytes": 235,
+      "sha256": "417fa493eab9492c6fdb2370308a06fd053e4afdb60434415986fe892695bca9"
+    },
+    {
+      "path": "batch/native-package-inspect-r1.json",
+      "source_path": "work/windows-fixture-publication-integration-20261116/native-package-inspect-r1.json",
+      "bytes": 907,
+      "sha256": "c44cc4ef3b7ea18d0e6af3e87a3810b1e620098c613d5c59f41706242acd8484"
+    },
+    {
+      "path": "batch/native-package-inspect-r1.log",
+      "source_path": "work/windows-fixture-publication-integration-20261116/native-package-inspect-r1.log",
+      "bytes": 3779,
+      "sha256": "79827b3f3d7e9467a74edb386b030286c493010847ad1f8d39b4f13a53497ae8"
+    },
+    {
+      "path": "batch/evidence-verify-r1.json",
+      "source_path": "work/windows-fixture-publication-integration-20261116/evidence-verify-r1.json",
+      "bytes": 794,
+      "sha256": "fdb7f97d542b067a8a89888bc411e829bd05644577821ca7734f55d8fe118f59"
+    },
+    {
+      "path": "batch/evidence-verify-r1.log",
+      "source_path": "work/windows-fixture-publication-integration-20261116/evidence-verify-r1.log",
+      "bytes": 363,
+      "sha256": "4d4ab4ec5d20e67d6cce6f4e97ea129a5541e54ed9d0bca7310984fba6346228"
+    },
+    {
+      "path": "batch/source-ci-runs-r1.json",
+      "source_path": "work/windows-fixture-publication-integration-20261116/source-ci-runs-r1.json",
+      "bytes": 895,
+      "sha256": "d60e645c75252f695c184ea1cda2e3ced34b6f63cc1c2c115dad40d9f535a0ed"
+    },
+    {
+      "path": "batch/source-ci-runs-r1.log",
+      "source_path": "work/windows-fixture-publication-integration-20261116/source-ci-runs-r1.log",
+      "bytes": 228,
+      "sha256": "6f73c38d0ac94ce29ce69685f6d1c0df7135c3858e071181e8ab1dd70bf3990c"
+    },
+    {
+      "path": "batch/source-ci-snapshot-r3.json",
+      "source_path": "work/windows-fixture-publication-integration-20261116/source-ci-snapshot-r3.json",
+      "bytes": 809,
+      "sha256": "6d512b39d48a779c1c25e9e9ff936e51aad7f288385b1243cff1ac24f15693d1"
+    },
+    {
+      "path": "batch/source-ci-snapshot-r3.log",
+      "source_path": "work/windows-fixture-publication-integration-20261116/source-ci-snapshot-r3.log",
+      "bytes": 7651,
+      "sha256": "f16fdf7f430e92e1a561e8a8f5bd98f725c952c203065f536af1fcea74238247"
+    },
+    {
+      "path": "batch/source-windows-active-log-r1.json",
+      "source_path": "work/windows-fixture-publication-integration-20261116/source-windows-active-log-r1.json",
+      "bytes": 805,
+      "sha256": "55494e5c82fdb103c5293ce3ee7d2e5b7e572c17baf0fa81db5187df1304123a"
+    },
+    {
+      "path": "batch/source-windows-active-log-r1.log",
+      "source_path": "work/windows-fixture-publication-integration-20261116/source-windows-active-log-r1.log",
+      "bytes": 228,
+      "sha256": "dc582d638224cdd961a2c933ae739c44715b18c7a7d797a3eb67cd411bbba69e"
+    },
+    {
+      "path": "batch/source-delivery-r1.json",
+      "source_path": "work/windows-fixture-publication-integration-20261116/source-delivery-r1.json",
+      "bytes": 1039,
+      "sha256": "4336c73817d49da126a619ade9d37e323c1df823c883156e123d37e6dddeb889"
+    },
+    {
+      "path": "batch/normal-package-binding-r1.json",
+      "source_path": "work/windows-fixture-publication-integration-20261116/normal-package-binding-r1.json",
+      "bytes": 1618,
+      "sha256": "dfef7ba21ef6c6bc204bd73df78747e43c413385bd53edf142bf5e9efaae33f6"
+    },
+    {
+      "path": "batch/owned-cleanup-r1.json",
+      "source_path": "work/windows-fixture-publication-integration-20261116/owned-cleanup-r1.json",
+      "bytes": 1060,
+      "sha256": "7d3515aa52a264bbc0aec9c796a3f851a89e7a7852d63c5e82299859d28d5eb5"
+    },
+    {
+      "path": "batch/native-availability-r1.json",
+      "source_path": "work/windows-fixture-publication-integration-20261116/native-availability-r1.json",
+      "bytes": 379,
+      "sha256": "a42c671bf4c435d5f169f047c3d8eb6d1063571ab8fbee389cef6cb02e6622a5"
+    },
+    {
+      "path": "tools/verify.py",
+      "source_path": "docs/testing/records/2026-11-16-windows-fixture-publication-evidence/delivery/verify.py",
+      "bytes": 4505,
+      "sha256": "5c7a68171e88c24b55f6fe0b56a30234ef69cde3a4d3c896dce63a47c06163d2"
+    },
+    {
+      "path": "package/package-manifest.json",
+      "source_path": "work/windows-fixture-publication-integration-20261116/package-r1/package-manifest.json",
+      "bytes": 1238,
+      "sha256": "5e93d5aa2f71f3d28f7b61ff4d64c7928d260377e99325d602ac56f1bc1756ec"
+    }
+  ],
+  "ci_at_seal": "IN_PROGRESS",
+  "excluded": [
+    "active watcher",
+    "Cargo target",
+    "app binaries",
+    "other task resources"
+  ]
+}

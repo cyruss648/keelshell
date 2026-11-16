@@ -127,3 +127,20 @@ macOS `133321519808`、Ubuntu `133321520197` 的完整 gate 正在运行。
 [补充报告](2026-11-16-windows-zmodem-test-contract-evidence/independent-evidence-review/REPORT.md)。
 未重复 Turing 源码评审、未执行测试／Cargo、未查询新 CI；不代签后续 Windows
 结果或 Python 新片。已收取并关闭。
+
+## 精确 CI 终态
+
+Quality `43873806902` 已 completed/failure，watch `1/reaped/1576.244s`；
+三平台原日志及最终元数据全部收取，没有取消或重跑。
+Windows 结果如上；macOS `133321519808`、Ubuntu `133321520197` 的完整 gate
+与真实 OpenSSH 均 success。普通 Rust 分别 `3225/0/48 ignored`、
+`3218/0/49 ignored`，各有 14 项 rustdoc 通过；app 为
+`1341/0/2 ignored`、`1342/0/2 ignored`，运行声明数与逐名结果匹配。
+这里没有独立的 CI app `--list`，不与宿主显式编译库存混同。
+
+[21 成员 CI 封存](2026-11-16-windows-zmodem-test-contract-evidence/ci-completion/README.md)
+验证 `0/reaped/8.131s`，93 成员基线／719 Git 输入与新 CI 原件均零 mismatch。
+macOS 的 stderr Doc-tests 头先于上一普通套件的 stdout 尾部；r2 拒绝不完整归属，
+没有写错误摘要。r3 保持当前测试运行到实际摘要，记录文档子运行而不猜 crate，
+两平台各 92 个普通套件和全部文档子运行逐项匹配。原解析器／诊断保持，
+没有重跑测试、CI 或清理缓存。
