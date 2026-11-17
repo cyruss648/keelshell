@@ -10,6 +10,29 @@ SHA-256 分别为 `3b6e75e988ef096fd7ec4941241f9a03299c0f1e3933a3100ee5ac7af8496
 
 ## 当前实现与验证
 
+监控读取的及时取消已实现，见[ADR0161](adr/0161-monitor-read-cancellation.md)及
+[本批记录](testing/records/2026-11-17-monitor-read-cancellation.md)。
+generation撤权唤醒exec及探针锁等待，旧请求返回Cancelled；
+复用既有channel owner有界回收，不宣称远端进程终止、不重放写入。
+旧实现红控制6通过／12失败／1忽略，修后同套18通过／0失败／1忽略；
+能力缓存10项及真实Darwin SSH15项通过，自有SSH资源已清理。
+首轮完整门禁因新增测试三处expect_used停止，第二轮因旧traceroute生命周期测试
+未证明最终工具启动即超时而失败；两次原件与旧超时阶段UNKNOWN保留。
+只固定该测试的版本／数字解析前置条件，保留真实最终进程、期限和kill/wait；
+独立Python14项通过。最终777输入r3 aggregate
+`6d495b849c63e00dfc7ba8b867f3fa8b5ba3481de9e4b66669dee77f40fa22d5`。
+最终完整门禁`0/reaped/709.145348s`：普通Rust3466/0/68 ignored、
+15rustdoc、Python主526 run/3 skipped；fmt、严格Clippy、依赖政策和三个controller通过。
+96普通二进制库存逐名及前后摘要相等，777输入前后相等。
+Turing the 2nd限定批准r2五文件，独立r1预编译12项通过、r2独立runtime0；
+Heisenberg the 2nd限定批准r3唯一Python修订，独立14项通过。
+两位P0–P3全0且已关闭，集成未由reviewer独立联网重跑。
+本批没有新正常包／原生操作，当前工程CI与原生验收不借用前批成功。
+本轮官方直接依赖复查37包／113声明全部通过，前次registry失败保留；
+Rust／Cargo仍1.100.0、不设toolchain pin或rust-version。
+固定SexyZ发送空文件失败已由上游严格小于条件定位，不修改本方合规ZRPOS0；
+只关闭该原因UNKNOWN，兼容OPEN、原8／10及另一实现缺OO保持。
+
 MCP 客户端模板与未知记录增量的实现与限定工程验证完成，基线`f4562ad`，见
 [ADR0160](adr/0160-mcp-client-templates-and-unknown-history.md)和
 [本批记录](testing/records/2026-11-17-mcp-client-history.md)。
@@ -35,9 +58,14 @@ P0–P3全0，独立347原件检查/13报告读回通过并关闭，完整原生
 当前正常新包`work/mcp-client-native-20261117/package-r1/KeelShell.app`，
 app SHA`70045d6ff4f278a8a9df8bea075dcaa6bb65b3304895924101af588c90c2f110`，
 没有安装；首轮旧包仍单独保留，不再当作本批入口。
-UTC06:20:45新Quality44026933453的macOS已success，Windows/Ubuntu仍进行中；
-Windows API44026933510/SSH44026933475为API状态success，
-尚不由状态代签本批三平台原件。
+新Quality44026933453及Windows API44026933510／SSH44026933475均已completed/success；
+Windows／macOS／Ubuntu普通Rust3442／3455／3448通过、0失败，各15rustdoc；
+Python主526 run、skip53／3／3，macOS／Ubuntu OpenSSH各18及forwarding各6通过。
+7原始ZIP／172成员、4个artifact digest及131原件已封存；
+新非作者Anscombe离线2301检查通过、限定批准、P0–P3全0且已关闭，
+见[精确CI终态](testing/records/2026-11-17-mcp-client-history-evidence/ci-completion/README.md)。
+seal HOLD、master cleanup125、非master自然255／1及native_gui=UNRUN保持，
+不代签当前取消增量、原生矩阵或发行。
 
 本地转发的原 SSH 生命周期增量已完成实现／本机验证，基线 `660645f`，见
 [ADR0159](adr/0159-local-forward-transport-lifetime.md)和

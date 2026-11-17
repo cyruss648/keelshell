@@ -20,6 +20,19 @@
 
 ## 当前批次与接续顺序
 
+监控读取取消已实现，受控SSH18通过／1忽略、能力缓存10项、
+真实Darwin OpenSSH监控15项通过；旧实现12项取消红控制失败保留。
+两轮门禁的expect_used及旧traceroute工装失败保留；后者仅固定前置条件，
+保留真实最终工具、期限与kill/wait，历史超时阶段UNKNOWN不改写。
+777输入r3冻结前后相等；最终完整门禁`0/reaped/709.145348s`，
+普通Rust3466/0/68 ignored、15rustdoc、Python主526 run/3 skipped通过，
+96普通二进制逐名库存及前后摘要相等。新非作者Turing the 2nd批准原五文件、
+Heisenberg the 2nd批准r3唯一Python修订，P0–P3全0且均已关闭；
+独立执行分别为r1预编译12项和独立Python14项，未独立联网重跑集成。
+见[ADR0161](adr/0161-monitor-read-cancellation.md)
+及[记录](testing/records/2026-11-17-monitor-read-cancellation.md)。
+本批不扩大成实际Windows取消、原生或完整产品验收。
+
 MCP接入与提案记录增量的实现与限定工程验证完成：纯Codex／Claude模板和原生显式复制、
 保留Unknown的批量清理、独立准确提案核对已实现；核对不执行／重试或改写状态。
 专项MCP37／renderer13通过；实际renderer经独立Python解析41TOML／40JSON和1拒绝通过。
@@ -35,9 +48,13 @@ MCP接入与提案记录增量的实现与限定工程验证完成：纯Codex／
 不重复未变工程的完整门禁。工程f910e001已普通推送、三方一致，
 777新输入/769旧输入/574成员Git绑定通过；原图非作者Boole实际查看11张，
 限定ship、P0–P3全0，独立347检查/13报告读回通过并关闭；
-90成员交付原件已封存。本批Quality44026933453的macOS已success、
-Windows/Ubuntu仍进行中，
-两Windows工作流为API状态success，新三平台终态单独验。
+90成员交付原件已封存。本批Quality44026933453及两个Windows工作流均已success；
+Windows／macOS／Ubuntu普通Rust3442／3455／3448通过、0失败，各15rustdoc，
+Python主526 run、skip53／3／3。7原始ZIP／172成员和4个artifact digest相等，
+131原件封存；新非作者Anscombe离线2301检查通过、限定批准并已关闭，
+见[精确CI](testing/records/2026-11-17-mcp-client-history-evidence/ci-completion/README.md)。
+原seal HOLD、cleanup125／自然255和1、API isolatedSSH skipped及native_gui UNRUN保留；
+不代签当前取消工程或完整native／发行。
 
 本地转发的原SSH生命周期增量已整合，见[ADR0159](adr/0159-local-forward-transport-lifetime.md)及
 [本批记录](testing/records/2026-11-17-tunnel-transport-lifetime.md)。

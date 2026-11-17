@@ -1,0 +1,400 @@
+{
+  "schema_version": 1,
+  "members": 65,
+  "logical_bytes": 6929349,
+  "bytes": 2645499,
+  "sha256": "8c2dc6266654802f2eced3bd73cbb70ba4c00cc1af73300bff44e435089135b6",
+  "excluded": [],
+  "files": [
+    {
+      "member": "review/REVIEW.md",
+      "source": "work/mcp-source-ci-review-20261117/REVIEW.md",
+      "bytes": 11779,
+      "sha256": "eab572b5de2e596fe308432ed28183410b5c0ae263239b5e8cc699582f5d62af"
+    },
+    {
+      "member": "review/SHA256SUMS",
+      "source": "work/mcp-source-ci-review-20261117/SHA256SUMS",
+      "bytes": 6133,
+      "sha256": "6336318cc5f223c3a11ae0b50f0bb9da4a0fd7c4f8a7b04c7b8ff1c2e2ef66bb"
+    },
+    {
+      "member": "review/api.json",
+      "source": "work/mcp-source-ci-review-20261117/api.json",
+      "bytes": 3725,
+      "sha256": "adb646c8eb17e03c9dcf7a3cf90755381a059ce944bb12cd2235d81e52d20c33"
+    },
+    {
+      "member": "review/baseline.json",
+      "source": "work/mcp-source-ci-review-20261117/baseline.json",
+      "bytes": 20468,
+      "sha256": "d3a55a11c04fe179842b01fe31139171abec6b6bf9b6e36dc6c9bed6e981464a"
+    },
+    {
+      "member": "review/checks.json",
+      "source": "work/mcp-source-ci-review-20261117/checks.json",
+      "bytes": 413025,
+      "sha256": "4b81e398dbed4494b154c74b3bffb15f886d8443ba091370a466438dbf7be87d"
+    },
+    {
+      "member": "review/commands.json",
+      "source": "work/mcp-source-ci-review-20261117/commands.json",
+      "bytes": 13972,
+      "sha256": "03fb49d663e9ca5b8132807bf8a94fc5a8fc83a5aee206ae6af5c79b8b38c16b"
+    },
+    {
+      "member": "review/decision.json",
+      "source": "work/mcp-source-ci-review-20261117/decision.json",
+      "bytes": 883,
+      "sha256": "11159f4150868939494471f80bc01cac6e3df4adeea15577cac59365ecfbc118"
+    },
+    {
+      "member": "review/evidence.txt",
+      "source": "work/mcp-source-ci-review-20261117/evidence.txt",
+      "bytes": 23914,
+      "sha256": "8e03832dc3c8ff0ca1f4d9ac4cc2b942aca3417736e70ecaa887b85878bdec2b"
+    },
+    {
+      "member": "review/final-readback.json",
+      "source": "work/mcp-source-ci-review-20261117/final-readback.json",
+      "bytes": 2481,
+      "sha256": "cd9d48682f9d93bb9efdbf6a0d447045dde0092f854b60fbc1eeb91dc56ebb64"
+    },
+    {
+      "member": "review/interop.json",
+      "source": "work/mcp-source-ci-review-20261117/interop.json",
+      "bytes": 14913,
+      "sha256": "d1d61a89e0b2704db015aa74c2c49a4fb6db3605b20d075d4440d9335cf9f69b"
+    },
+    {
+      "member": "review/inventories.json",
+      "source": "work/mcp-source-ci-review-20261117/inventories.json",
+      "bytes": 2650289,
+      "sha256": "e3fb78076aedddb9eb65567c2bb985dff56fc47cf123f071be4ba12b0f0a5153"
+    },
+    {
+      "member": "review/r1-checks.json",
+      "source": "work/mcp-source-ci-review-20261117/r1-checks.json",
+      "bytes": 404495,
+      "sha256": "197e188397ed65faeda580399f6eeb7bf21f99da9d8a1507c30ac29550916869"
+    },
+    {
+      "member": "review/r1-commands.json",
+      "source": "work/mcp-source-ci-review-20261117/r1-commands.json",
+      "bytes": 13967,
+      "sha256": "d0450d9c599e2a05bbaa464bdf742e72d0648675ad6b69feba766f8cd3691824"
+    },
+    {
+      "member": "review/r1-verification.json",
+      "source": "work/mcp-source-ci-review-20261117/r1-verification.json",
+      "bytes": 1783,
+      "sha256": "e65a808db6154dc8f7da72c2db930f6bcf72dedac7f841482e41347f994ca8c4"
+    },
+    {
+      "member": "review/r1-verify.py",
+      "source": "work/mcp-source-ci-review-20261117/r1-verify.py",
+      "bytes": 32982,
+      "sha256": "ccc956ca318314b8fdc34f513b21469120db8bfd78c918eb48bbef20d420a909"
+    },
+    {
+      "member": "review/r2-checks.json",
+      "source": "work/mcp-source-ci-review-20261117/r2-checks.json",
+      "bytes": 413051,
+      "sha256": "873fa17fbf26426993d5d7703a7093f5f6de9a368adac373e2550cdf7bfc85ad"
+    },
+    {
+      "member": "review/r2-commands.json",
+      "source": "work/mcp-source-ci-review-20261117/r2-commands.json",
+      "bytes": 13969,
+      "sha256": "3a96182c47f109cb022e8d62cbe39fe4440d7f0e0878ca3b5e5b62a75e95a755"
+    },
+    {
+      "member": "review/r2-verification.json",
+      "source": "work/mcp-source-ci-review-20261117/r2-verification.json",
+      "bytes": 1782,
+      "sha256": "da3e0199d8acc9998b4833f4996dc263da56bac9dfcfbe3fad6cd9ef10fa439c"
+    },
+    {
+      "member": "review/r2-verify.py",
+      "source": "work/mcp-source-ci-review-20261117/r2-verify.py",
+      "bytes": 38983,
+      "sha256": "d8e99a19645ee359ec94001b1f4e508b55b1db752b6367e74906ec7c18258b1d"
+    },
+    {
+      "member": "review/scope.json",
+      "source": "work/mcp-source-ci-review-20261117/scope.json",
+      "bytes": 1398,
+      "sha256": "bd60c2b7f2590b444d0eb1c34e3fbbbd6699e304bab6ddceed1e0deb28d8ac45"
+    },
+    {
+      "member": "review/source/.github/actions/setup-build/action.yml",
+      "source": "work/mcp-source-ci-review-20261117/source/.github/actions/setup-build/action.yml",
+      "bytes": 1893,
+      "sha256": "fe9ee75aedf43f6679253202b43d608b502c1f1698518f2200ee42c4d5c92a95"
+    },
+    {
+      "member": "review/source/.github/workflows/ci.yml",
+      "source": "work/mcp-source-ci-review-20261117/source/.github/workflows/ci.yml",
+      "bytes": 4213,
+      "sha256": "a33e1e1c21739949361991a8ccc89f98dfb90cd6af1939118c9d9bf7857774c8"
+    },
+    {
+      "member": "review/source/.github/workflows/release.yml",
+      "source": "work/mcp-source-ci-review-20261117/source/.github/workflows/release.yml",
+      "bytes": 6193,
+      "sha256": "5340ddee4401d8f980f51b0f92be1e87f39bf578cf1f5029f8ffc31f0709ab0c"
+    },
+    {
+      "member": "review/source/.github/workflows/windows-monitor-ssh.yml",
+      "source": "work/mcp-source-ci-review-20261117/source/.github/workflows/windows-monitor-ssh.yml",
+      "bytes": 2539,
+      "sha256": "65d7aa9b16fca91533b23b25ac68234d5bba553b3dd0d8ea5dd91631109197a9"
+    },
+    {
+      "member": "review/source/.github/workflows/windows-monitor.yml",
+      "source": "work/mcp-source-ci-review-20261117/source/.github/workflows/windows-monitor.yml",
+      "bytes": 3885,
+      "sha256": "fc58ef732a866bb9364ec4040c3ef145405ef9adde78a1ca6470d15bd15ee6de"
+    },
+    {
+      "member": "review/source/.github/workflows/windows-native-crash.yml",
+      "source": "work/mcp-source-ci-review-20261117/source/.github/workflows/windows-native-crash.yml",
+      "bytes": 4938,
+      "sha256": "c713cc19ca838ba341e4345b402533ba972cbae27d632ba3fdfc8fa64be7e420"
+    },
+    {
+      "member": "review/source/AGENTS.md",
+      "source": "work/mcp-source-ci-review-20261117/source/AGENTS.md",
+      "bytes": 2770,
+      "sha256": "edd4266f9c01e41ed4384a3bf9c1861b39114abe916819ad1d603c9e9d8601bb"
+    },
+    {
+      "member": "review/source/context/docs/HANDOFF.md",
+      "source": "work/mcp-source-ci-review-20261117/source/context/docs/HANDOFF.md",
+      "bytes": 21126,
+      "sha256": "59f508b31e774fabb2138203e94c85ea43b1ba9c06a061bcb6cc24b7d7e238dd"
+    },
+    {
+      "member": "review/source/context/docs/ROADMAP.md",
+      "source": "work/mcp-source-ci-review-20261117/source/context/docs/ROADMAP.md",
+      "bytes": 18736,
+      "sha256": "25d59d769c74867ce749c1ec55e513d950729da988e2bd8a9db2e81e7d94cd00"
+    },
+    {
+      "member": "review/source/context/docs/testing/records/2026-11-17-tunnel-transport-lifetime-evidence/ci-completion/originals.tar.gz",
+      "source": "work/mcp-source-ci-review-20261117/source/context/docs/testing/records/2026-11-17-tunnel-transport-lifetime-evidence/ci-completion/originals.tar.gz",
+      "bytes": 2046994,
+      "sha256": "88c25669ca00d7d0a6f6609ecad08e57feffcc06ac0c523248428615abccc4e2"
+    },
+    {
+      "member": "review/source/crates/keelshell-session/src/monitor/platform.rs",
+      "source": "work/mcp-source-ci-review-20261117/source/crates/keelshell-session/src/monitor/platform.rs",
+      "bytes": 7061,
+      "sha256": "6c14b3dec6cd1dd71f46672ee92f38fe3f9137f40fc20833516231ad42b30cef"
+    },
+    {
+      "member": "review/source/crates/keelshell-session/src/monitor/windows/ASSEMBLY.md",
+      "source": "work/mcp-source-ci-review-20261117/source/crates/keelshell-session/src/monitor/windows/ASSEMBLY.md",
+      "bytes": 5257,
+      "sha256": "8c5c07456abb2d7347cc29c7de5fdc561ae75f95daa71aa6119cf13d8c7ae8f3"
+    },
+    {
+      "member": "review/source/crates/keelshell-session/src/monitor/windows/common.ps1",
+      "source": "work/mcp-source-ci-review-20261117/source/crates/keelshell-session/src/monitor/windows/common.ps1",
+      "bytes": 1315,
+      "sha256": "f08ce95a93bd6a38f4955934dedc7edcb28fc9da8faa0c57a0273bd164cf15d8"
+    },
+    {
+      "member": "review/source/crates/keelshell-session/src/monitor/windows/probe.ps1",
+      "source": "work/mcp-source-ci-review-20261117/source/crates/keelshell-session/src/monitor/windows/probe.ps1",
+      "bytes": 25,
+      "sha256": "52ab610daaabf4bdc74c392a4116fceeb6e3ac7f8ad43b56fc1f3667a3dcb9c2"
+    },
+    {
+      "member": "review/source/crates/keelshell-session/src/monitor/windows/processes.ps1",
+      "source": "work/mcp-source-ci-review-20261117/source/crates/keelshell-session/src/monitor/windows/processes.ps1",
+      "bytes": 252,
+      "sha256": "c3b48289177189fadc802a7d7e046863af8f14e4090d1b5c088122c821bec130"
+    },
+    {
+      "member": "review/source/crates/keelshell-session/src/monitor/windows/resources.ps1",
+      "source": "work/mcp-source-ci-review-20261117/source/crates/keelshell-session/src/monitor/windows/resources.ps1",
+      "bytes": 1588,
+      "sha256": "1417e9e4724245fdea7522498303ac8848078abe8b216aa413272459b25c1e54"
+    },
+    {
+      "member": "review/source/crates/keelshell-session/src/monitor/windows/sockets.ps1",
+      "source": "work/mcp-source-ci-review-20261117/source/crates/keelshell-session/src/monitor/windows/sockets.ps1",
+      "bytes": 392,
+      "sha256": "f01e786fdfa1fede950c9c865ea604749ec6710f9aab50ee3e29a10f6405d492"
+    },
+    {
+      "member": "review/source/crates/keelshell-session/src/monitor/windows.rs",
+      "source": "work/mcp-source-ci-review-20261117/source/crates/keelshell-session/src/monitor/windows.rs",
+      "bytes": 19857,
+      "sha256": "67b89e608abde6e7a3d9f207803f7eb52b46f8a7b1dc3984cb95350a252aa1a9"
+    },
+    {
+      "member": "review/source/crates/keelshell-session/tests/windows_monitor.rs",
+      "source": "work/mcp-source-ci-review-20261117/source/crates/keelshell-session/tests/windows_monitor.rs",
+      "bytes": 26767,
+      "sha256": "084205c33cb0e7cd38af4fb900c5ed1ab796f124a6c710fe03811b634b62c284"
+    },
+    {
+      "member": "review/source/crates/keelshell-session/tests/windows_openssh_monitor.rs",
+      "source": "work/mcp-source-ci-review-20261117/source/crates/keelshell-session/tests/windows_openssh_monitor.rs",
+      "bytes": 45577,
+      "sha256": "883694c29ad190aef7c8097b7d674a6d81fd02d0729fe3b873b31ddba3f00424"
+    },
+    {
+      "member": "review/source/docs/HANDOFF.md",
+      "source": "work/mcp-source-ci-review-20261117/source/docs/HANDOFF.md",
+      "bytes": 19259,
+      "sha256": "db92e5e8c597da46315ae663733d519bf146d3fa6dbf660215ad6f6205bd9bf2"
+    },
+    {
+      "member": "review/source/docs/ROADMAP.md",
+      "source": "work/mcp-source-ci-review-20261117/source/docs/ROADMAP.md",
+      "bytes": 17942,
+      "sha256": "5837099a8a23b0b0c098bd7a6e82b39a0cec15809b447345e60f46b2995b5562"
+    },
+    {
+      "member": "review/source/f910.commit",
+      "source": "work/mcp-source-ci-review-20261117/source/f910.commit",
+      "bytes": 294,
+      "sha256": "bc4e8d8905ba7049e3ee51c8ecef25d1262834cd99c983a8b7112bd54badbec2"
+    },
+    {
+      "member": "review/source/scripts/check.py",
+      "source": "work/mcp-source-ci-review-20261117/source/scripts/check.py",
+      "bytes": 4572,
+      "sha256": "0fdec38618e108478ebe3c6596f65bc6cbd1955c03f70756205f5662c3899bf9"
+    },
+    {
+      "member": "review/source/scripts/openssh_interop.py",
+      "source": "work/mcp-source-ci-review-20261117/source/scripts/openssh_interop.py",
+      "bytes": 29898,
+      "sha256": "909ccb5393c4598ff2c409b07096358d3240a27ffae2a8c6f0894b54a1b6698d"
+    },
+    {
+      "member": "review/source/scripts/windows_monitor/debug_job.py",
+      "source": "work/mcp-source-ci-review-20261117/source/scripts/windows_monitor/debug_job.py",
+      "bytes": 42395,
+      "sha256": "b59f3b2f8ea50d52161701934efb47329e7c88872b3f9dae3c66ab2eee5aa8e0"
+    },
+    {
+      "member": "review/source/scripts/windows_monitor/ssh.py",
+      "source": "work/mcp-source-ci-review-20261117/source/scripts/windows_monitor/ssh.py",
+      "bytes": 27313,
+      "sha256": "12d17617a36fba00e4e05a65007b2c2b6672854c5018d7309a68c19cd773e8ea"
+    },
+    {
+      "member": "review/source/scripts/windows_monitor_lab.py",
+      "source": "work/mcp-source-ci-review-20261117/source/scripts/windows_monitor_lab.py",
+      "bytes": 66899,
+      "sha256": "22f349d06996f61a78dc19b7a9f355ad36704b62e45e8a4bafa4a24374a9bafa"
+    },
+    {
+      "member": "review/source/scripts/windows_monitor_ssh.py",
+      "source": "work/mcp-source-ci-review-20261117/source/scripts/windows_monitor_ssh.py",
+      "bytes": 727,
+      "sha256": "48d0e9293250dcb8da19aebf378a49dfb138f2213b99ad90cda464c68ddd21ea"
+    },
+    {
+      "member": "review/source-bindings.json",
+      "source": "work/mcp-source-ci-review-20261117/source-bindings.json",
+      "bytes": 18764,
+      "sha256": "1ca0f3d6fcbc51a3e3d882cd4183d5c9386896dfda31dd28d1a221bc35113230"
+    },
+    {
+      "member": "review/supplement.json",
+      "source": "work/mcp-source-ci-review-20261117/supplement.json",
+      "bytes": 953,
+      "sha256": "6013318b81f0b4200688eebda23b4d80ea20ef6e5ffafbd586851b75a40f350d"
+    },
+    {
+      "member": "review/supplement.py",
+      "source": "work/mcp-source-ci-review-20261117/supplement.py",
+      "bytes": 2041,
+      "sha256": "e43486ca6ae8d926bbeb0d1254f1fac20a2399dcba1d0ba95ba1c0492f52240e"
+    },
+    {
+      "member": "review/verification.json",
+      "source": "work/mcp-source-ci-review-20261117/verification.json",
+      "bytes": 1782,
+      "sha256": "0d758ee7bef9df729a29f6cbf64bfe974781627bdf50fe2d86e396d0fc14efe8"
+    },
+    {
+      "member": "review/verify-r1.receipt.json",
+      "source": "work/mcp-source-ci-review-20261117/verify-r1.receipt.json",
+      "bytes": 454,
+      "sha256": "bbcfdd66f9aece5a854475a2673df74d5a1b25f353c17a80bdd67f7b62862812"
+    },
+    {
+      "member": "review/verify-r1.stderr",
+      "source": "work/mcp-source-ci-review-20261117/verify-r1.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "review/verify-r1.stdout",
+      "source": "work/mcp-source-ci-review-20261117/verify-r1.stdout",
+      "bytes": 5854,
+      "sha256": "705d859ee396fd7df2fd2ac403fdcacf210986aae9fb8e45f2ff54b3291965ba"
+    },
+    {
+      "member": "review/verify-r2.receipt.json",
+      "source": "work/mcp-source-ci-review-20261117/verify-r2.receipt.json",
+      "bytes": 454,
+      "sha256": "510bea16709c1fdf187ebfe8250546c78aac75ef228f3816c16142ee37306a75"
+    },
+    {
+      "member": "review/verify-r2.stderr",
+      "source": "work/mcp-source-ci-review-20261117/verify-r2.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "review/verify-r2.stdout",
+      "source": "work/mcp-source-ci-review-20261117/verify-r2.stdout",
+      "bytes": 2999,
+      "sha256": "420a38fe2133f467d2e1d57c4b5bf89174e2cb4b9bb6b9f5706ddd519282b12d"
+    },
+    {
+      "member": "review/verify-r3.receipt.json",
+      "source": "work/mcp-source-ci-review-20261117/verify-r3.receipt.json",
+      "bytes": 454,
+      "sha256": "c82b97929abb7e6da45b690f89e76f7d9118bbe921b250aad9a8cbe25c7071a3"
+    },
+    {
+      "member": "review/verify-r3.stderr",
+      "source": "work/mcp-source-ci-review-20261117/verify-r3.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "review/verify-r3.stdout",
+      "source": "work/mcp-source-ci-review-20261117/verify-r3.stdout",
+      "bytes": 1793,
+      "sha256": "64472018e3e598edecfb883951673533866697cdb374031bcd65d88b02331f3e"
+    },
+    {
+      "member": "review/verify.py",
+      "source": "work/mcp-source-ci-review-20261117/verify.py",
+      "bytes": 39428,
+      "sha256": "8962a677b77e4ee70b06405ef215475ce2205e44e8c2dec0689dcf6862528742"
+    },
+    {
+      "member": "review/windows.json",
+      "source": "work/mcp-source-ci-review-20261117/windows.json",
+      "bytes": 306174,
+      "sha256": "bf4730273f4c8e2da628c2fa3a80aa27998c4ba9db3d6b29fb04c368fc4579c5"
+    },
+    {
+      "member": "review/zip-members.json",
+      "source": "work/mcp-source-ci-review-20261117/zip-members.json",
+      "bytes": 33530,
+      "sha256": "990e5aeb3b22de89aa12d79e2f8edb43ee1c16837eb13046bf719559db32e661"
+    }
+  ]
+}

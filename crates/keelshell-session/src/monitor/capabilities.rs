@@ -159,6 +159,7 @@ impl CapabilityReport {
 pub(super) struct CapabilityCache {
     generation: AtomicU64,
     revision: AtomicU64,
+    invalidated: tokio::sync::Notify,
     observations: tokio::sync::Mutex<CacheContents>,
     pub(super) probe_gate: tokio::sync::Mutex<()>,
 }
@@ -173,6 +174,21 @@ impl CapabilityCache {
     pub fn invalidate_pending(&self) {
         self.generation.fetch_add(1, Ordering::AcqRel);
         self.revision.fetch_add(1, Ordering::AcqRel);
+        self.invalidated.notify_waiters();
+    }
+
+    pub(super) async fn wait_invalidated(&self, generation: u64) {
+        loop {
+            let notified = self.invalidated.notified();
+            tokio::pin!(notified);
+            // Register before checking the generation: cancellation between
+            // that check and await must wake every reader, including gate waiters.
+            notified.as_mut().enable();
+            if !self.is_current(generation) {
+                return;
+            }
+            notified.await;
+        }
     }
 
     pub async fn reset(&self) {

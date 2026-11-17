@@ -618,12 +618,21 @@ impl LinuxMonitor {
     /// Forget observations before an explicit, read-only capability recheck.
     ///
     /// The cache belongs only to this monitor's authenticated SSH session.
+    /// Pending read-only collectors and probe admission waits are cancelled.
+    /// Their channel owners perform bounded cleanup; this does not establish
+    /// remote process termination. Failed channel cleanup can abort the shared
+    /// transport under the existing SSH ownership contract.
     pub async fn reset_capabilities(&self) {
         self.capabilities.reset().await;
     }
 
     /// Revoke publication by already running checks without blocking the caller.
     /// Used when a panel pauses or retires its authenticated session authority.
+    ///
+    /// Pending read-only collectors and probe admission waits are woken without
+    /// waiting for the remote response. Completed observations remain cached.
+    /// Cancellation closes the owned channel but is no proof that the remote
+    /// process stopped; uncertain writes and reviewed mutations are unaffected.
     pub fn invalidate_pending_capabilities(&self) {
         self.capabilities.invalidate_pending();
     }

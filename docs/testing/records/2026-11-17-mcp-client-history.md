@@ -142,3 +142,21 @@ Git 绑定后按完整文件集及原字节核对回收父级/reviewer 两目录
 不由旧 cdf1e171 的 CI 成功或本机门禁推断新三平台终态。
 UTC06:20:45 后次实际 API 快照为 macOS success、Ubuntu/Windows in_progress；
 两 Windows 工作流为 success，仍未下载和验收本批新原始测试/artifact。
+
+## 精确 CI 终态补充
+
+后次实际GET读回：Quality`44026933453`、API`44026933510`及真实SSH`44026933475`
+均attempt1、completed/success。Windows／macOS／Ubuntu普通Rust3442／3455／3448
+通过、0失败，ignored66／68／69，各15rustdoc；Python主526 run、skip53／3／3。
+macOS／Ubuntu真实OpenSSH各18项及forwarding各6项通过。
+API lab111 run／3 skip、capture replay1通过；SSH lab96 run／1 skip及真实Rust1通过。
+平台preflight、packaging与内嵌helper单列，不与主Rust重复相加。
+
+7原始ZIP共172成员、4个artifact服务端digest相等；完整API／命令等131件原件已封存。
+新非作者Anscombe独立2301项离线检查通过、限定APPROVE、P0–P3全0，已实际关闭；
+65成员复核原件含两轮工装误解原schema的失败，均保留，不改写成产品失败。
+原seal HOLD、master cleanup125／非自然终态、非master自然255×5及1×1、
+API isolatedSSH skipped与native_gui=UNRUN保持。
+精确计数、Git来源与限定边界从
+[CI终态封存](2026-11-17-mcp-client-history-evidence/ci-completion/README.md)接续；
+此补充不代签后续监控取消工程、供应商客户端、原生矩阵或发行。

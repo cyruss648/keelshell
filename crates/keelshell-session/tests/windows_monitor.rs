@@ -2,11 +2,15 @@
 //! Neither fixture replay nor a Windows runner is native desktop acceptance.
 
 use std::{
+    collections::{HashMap, HashSet},
+    future::Future,
     path::PathBuf,
+    pin::Pin,
     sync::{
         Arc, Mutex,
         atomic::{AtomicBool, AtomicUsize, Ordering},
     },
+    task::Poll,
     time::Duration,
 };
 
@@ -23,21 +27,67 @@ use russh::{
     server,
 };
 use serde_json::json;
-use tokio::sync::Semaphore;
+use tokio::{
+    sync::{Semaphore, watch},
+    task::JoinSet,
+};
 
 type TestResult<T = ()> = Result<T, Box<dyn std::error::Error + Send + Sync>>;
+const CANCEL_BUDGET: Duration = Duration::from_secs(1);
+const IO_BUDGET: Duration = Duration::from_secs(2);
+const PLAIN_EXEC: &str = "fixture ordinary exec";
+const PLAIN_STDOUT: &[u8] = b"ordinary stdout\0payload\r\n";
+const PLAIN_STDERR: &[u8] = b"ordinary stderr\r\n";
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum Operation {
     Posix = 0,
     Probe = 1,
     Resources = 2,
     Processes = 3,
     Sockets = 4,
+    PlainExec = 5,
+}
+
+struct HeldReply {
+    channel: Mutex<Option<russh::ChannelId>>,
+    started: Semaphore,
+    release: Semaphore,
+    finished: Semaphore,
+}
+
+impl HeldReply {
+    fn new() -> Self {
+        Self {
+            channel: Mutex::new(None),
+            started: Semaphore::new(0),
+            release: Semaphore::new(0),
+            finished: Semaphore::new(0),
+        }
+    }
+
+    async fn wait_sent<F: Future>(&self, pending: Pin<&mut F>) -> TestResult<russh::ChannelId> {
+        tokio::select! {
+            _ = pending => Err("reader completed before its held exec was observed".into()),
+            permit = tokio::time::timeout(IO_BUDGET, self.started.acquire()) => {
+                permit??.forget();
+                self.channel.lock().map_err(|_| "held channel lock")?
+                    .ok_or_else(|| "missing held channel".into())
+            }
+        }
+    }
+
+    async fn release_and_wait(&self) -> TestResult {
+        self.release.add_permits(1);
+        tokio::time::timeout(IO_BUDGET, self.finished.acquire())
+            .await??
+            .forget();
+        Ok(())
+    }
 }
 
 struct Control {
-    counts: [AtomicUsize; 5],
+    counts: [AtomicUsize; 6],
     commands: Mutex<Vec<String>>,
     unconfirmed: AtomicBool,
     missing_processes: AtomicBool,
@@ -46,9 +96,11 @@ struct Control {
     hold_open_at: AtomicUsize,
     open_started: Semaphore,
     open_release: Semaphore,
-    hold_probe: AtomicBool,
-    probe_started: Semaphore,
-    probe_release: Semaphore,
+    open_channel: Mutex<Option<russh::ChannelId>>,
+    held_replies: Mutex<Vec<(Operation, Arc<HeldReply>)>>,
+    closed: watch::Sender<HashSet<russh::ChannelId>>,
+    jobs: Mutex<JoinSet<TestResult>>,
+    socket: Mutex<Option<std::net::TcpStream>>,
     captures: Option<[Vec<u8>; 4]>,
 }
 
@@ -64,9 +116,11 @@ impl Default for Control {
             hold_open_at: AtomicUsize::new(0),
             open_started: Semaphore::new(0),
             open_release: Semaphore::new(0),
-            hold_probe: AtomicBool::new(false),
-            probe_started: Semaphore::new(0),
-            probe_release: Semaphore::new(0),
+            open_channel: Mutex::new(None),
+            held_replies: Mutex::new(Vec::new()),
+            closed: watch::channel(HashSet::new()).0,
+            jobs: Mutex::new(JoinSet::new()),
+            socket: Mutex::new(None),
             captures: None,
         }
     }
@@ -75,6 +129,52 @@ impl Default for Control {
 impl Control {
     fn count(&self, operation: Operation) -> usize {
         self.counts[operation as usize].load(Ordering::Acquire)
+    }
+
+    fn hold_reply(&self, operation: Operation) -> TestResult<Arc<HeldReply>> {
+        let held = Arc::new(HeldReply::new());
+        self.held_replies
+            .lock()
+            .map_err(|_| "held replies lock")?
+            .push((operation, held.clone()));
+        Ok(held)
+    }
+
+    fn spawn(&self, job: impl Future<Output = TestResult> + Send + 'static) -> TestResult {
+        self.jobs
+            .lock()
+            .map_err(|_| "fixture jobs lock")?
+            .spawn(job);
+        Ok(())
+    }
+
+    async fn wait_open<F: Future>(&self, pending: Pin<&mut F>) -> TestResult<russh::ChannelId> {
+        tokio::select! {
+            _ = pending => Err("reader completed before its held open was observed".into()),
+            permit = tokio::time::timeout(IO_BUDGET, self.open_started.acquire()) => {
+                permit??.forget();
+                self.open_channel.lock().map_err(|_| "open channel lock")?
+                    .ok_or_else(|| "missing held open channel".into())
+            }
+        }
+    }
+
+    async fn wait_closed(&self, channel: russh::ChannelId) -> TestResult {
+        let mut closed = self.closed.subscribe();
+        tokio::time::timeout(CANCEL_BUDGET, closed.wait_for(|ids| ids.contains(&channel)))
+            .await??;
+        Ok(())
+    }
+
+    fn stop(&self) {
+        if let Ok(mut jobs) = self.jobs.lock() {
+            jobs.abort_all();
+        }
+        if let Ok(socket) = self.socket.lock()
+            && let Some(socket) = socket.as_ref()
+        {
+            let _ = socket.shutdown(std::net::Shutdown::Both);
+        }
     }
 }
 
@@ -109,7 +209,7 @@ fn frame(operation: Operation, failure: Option<&str>) -> Vec<u8> {
                 {"protocol":"udp","address":"::1","port":"5353","pid":"42"}
             ]}),
         ),
-        Operation::Posix => return Vec::new(),
+        Operation::Posix | Operation::PlainExec => return Vec::new(),
     };
     let mut encoded = serde_json::to_vec(&json!({
         "version":1,"operation":name,"platform":"Windows","runtime":"WindowsPowerShell",
@@ -123,6 +223,9 @@ fn frame(operation: Operation, failure: Option<&str>) -> Vec<u8> {
 }
 
 fn operation(command: &str) -> TestResult<Operation> {
+    if command == PLAIN_EXEC {
+        return Ok(Operation::PlainExec);
+    }
     if command.contains("@@KS:monitor-platform:1@@") {
         return Ok(Operation::Posix);
     }
@@ -154,7 +257,10 @@ fn operation(command: &str) -> TestResult<Operation> {
     }
 }
 
-struct Peer(Arc<Control>);
+struct Peer {
+    state: Arc<Control>,
+    channels: HashMap<russh::ChannelId, russh::Channel<server::Msg>>,
+}
 
 impl server::Handler for Peer {
     type Error = russh::Error;
@@ -173,20 +279,45 @@ impl server::Handler for Peer {
 
     async fn channel_open_session(
         &mut self,
-        _: russh::Channel<server::Msg>,
+        channel: russh::Channel<server::Msg>,
         reply: server::ChannelOpenHandle,
         _: &mut server::Session,
     ) -> Result<(), Self::Error> {
-        let ordinal = self.0.opened.fetch_add(1, Ordering::AcqRel) + 1;
-        if self.0.hold_open_at.load(Ordering::Acquire) == ordinal {
-            self.0.open_started.add_permits(1);
-            tokio::time::timeout(Duration::from_secs(3), self.0.open_release.acquire())
-                .await
-                .map_err(|_| russh::Error::Disconnect)?
-                .map_err(|_| russh::Error::Disconnect)?
-                .forget();
+        let id = channel.id();
+        self.channels.insert(id, channel);
+        let ordinal = self.state.opened.fetch_add(1, Ordering::AcqRel) + 1;
+        if self.state.hold_open_at.load(Ordering::Acquire) == ordinal {
+            *self
+                .state
+                .open_channel
+                .lock()
+                .map_err(|_| russh::Error::Disconnect)? = Some(id);
+            self.state.open_started.add_permits(1);
+            let state = self.state.clone();
+            self.state
+                .spawn(async move {
+                    tokio::time::timeout(Duration::from_secs(3), state.open_release.acquire())
+                        .await??
+                        .forget();
+                    reply.accept().await;
+                    Ok(())
+                })
+                .map_err(|_| russh::Error::Disconnect)?;
+        } else {
+            reply.accept().await;
         }
-        reply.accept().await;
+        Ok(())
+    }
+
+    async fn channel_close(
+        &mut self,
+        id: russh::ChannelId,
+        _: &mut server::Session,
+    ) -> Result<(), Self::Error> {
+        self.channels.remove(&id);
+        self.state.closed.send_modify(|closed| {
+            closed.insert(id);
+        });
         Ok(())
     }
 
@@ -198,34 +329,26 @@ impl server::Handler for Peer {
     ) -> Result<(), Self::Error> {
         let command = std::str::from_utf8(data).map_err(|_| russh::Error::Disconnect)?;
         let operation = operation(command).map_err(|_| russh::Error::Disconnect)?;
-        self.0
+        self.state
             .commands
             .lock()
             .map_err(|_| russh::Error::Disconnect)?
             .push(command.to_owned());
-        self.0.counts[operation as usize].fetch_add(1, Ordering::Release);
+        self.state.counts[operation as usize].fetch_add(1, Ordering::Release);
         session.channel_success(id)?;
-        if matches!(operation, Operation::Probe) && self.0.hold_probe.swap(false, Ordering::AcqRel)
-        {
-            self.0.probe_started.add_permits(1);
-            self.0
-                .probe_release
-                .acquire()
-                .await
-                .map_err(|_| russh::Error::Disconnect)?
-                .forget();
-        }
         let missing = matches!(operation, Operation::Processes)
-            && self.0.missing_processes.load(Ordering::Acquire);
+            && self.state.missing_processes.load(Ordering::Acquire);
         let denied = matches!(operation, Operation::Resources)
-            && self.0.denied_resources.load(Ordering::Acquire);
+            && self.state.denied_resources.load(Ordering::Acquire);
         let failed_probe =
-            matches!(operation, Operation::Probe) && self.0.unconfirmed.load(Ordering::Acquire);
-        let body = if matches!(operation, Operation::Posix) {
+            matches!(operation, Operation::Probe) && self.state.unconfirmed.load(Ordering::Acquire);
+        let body = if matches!(operation, Operation::PlainExec) {
+            PLAIN_STDOUT.to_vec()
+        } else if matches!(operation, Operation::Posix) {
             Vec::new()
         } else if failed_probe {
             b"untrusted shell diagnostic\r\n".to_vec()
-        } else if let Some(captures) = &self.0.captures {
+        } else if let Some(captures) = &self.state.captures {
             captures[operation as usize - 1].clone()
         } else {
             frame(
@@ -239,14 +362,64 @@ impl server::Handler for Peer {
                 },
             )
         };
-        for chunk in body.chunks(4096) {
-            session.data(id, chunk.to_vec())?;
-        }
-        let status = if matches!(operation, Operation::Posix) || missing || denied || failed_probe {
+        let status = if matches!(operation, Operation::PlainExec) {
+            23
+        } else if matches!(operation, Operation::Posix) || missing || denied || failed_probe {
             1
         } else {
             0
         };
+        let held = {
+            let mut replies = self
+                .state
+                .held_replies
+                .lock()
+                .map_err(|_| russh::Error::Disconnect)?;
+            replies
+                .iter()
+                .position(|(candidate, _)| *candidate == operation)
+                .map(|index| replies.remove(index).1)
+        };
+        if let Some(held) = held {
+            *held.channel.lock().map_err(|_| russh::Error::Disconnect)? = Some(id);
+            held.started.add_permits(1);
+            let handle = session.handle();
+            self.state
+                .spawn(async move {
+                    // The handler must remain free to receive this channel's CLOSE.
+                    tokio::time::timeout(Duration::from_secs(10), held.release.acquire())
+                        .await??
+                        .forget();
+                    for chunk in body.chunks(4096) {
+                        handle
+                            .data(id, chunk.to_vec())
+                            .await
+                            .map_err(|_| "delayed stdout")?;
+                    }
+                    if operation == Operation::PlainExec {
+                        handle
+                            .extended_data(id, 1, PLAIN_STDERR.to_vec())
+                            .await
+                            .map_err(|_| "delayed stderr")?;
+                    }
+                    handle
+                        .exit_status_request(id, status)
+                        .await
+                        .map_err(|_| "delayed status")?;
+                    handle.eof(id).await.map_err(|_| "delayed EOF")?;
+                    handle.close(id).await.map_err(|_| "delayed CLOSE")?;
+                    held.finished.add_permits(1);
+                    Ok(())
+                })
+                .map_err(|_| russh::Error::Disconnect)?;
+            return Ok(());
+        }
+        for chunk in body.chunks(4096) {
+            session.data(id, chunk.to_vec())?;
+        }
+        if operation == Operation::PlainExec {
+            session.extended_data(id, 1, PLAIN_STDERR.to_vec())?;
+        }
         session.exit_status_request(id, status)?;
         session.eof(id)?;
         session.close(id)?;
@@ -258,11 +431,12 @@ struct Fixture {
     session: SshSession,
     state: Arc<Control>,
     address: std::net::SocketAddr,
-    task: tokio::task::JoinHandle<()>,
+    task: tokio::task::JoinHandle<TestResult>,
 }
 
 impl Drop for Fixture {
     fn drop(&mut self) {
+        self.state.stop();
         self.task.abort();
     }
 }
@@ -278,21 +452,37 @@ impl Fixture {
             ..Default::default()
         });
         let state = Arc::new(control);
-        let peer = Peer(state.clone());
+        let peer = Peer {
+            state: state.clone(),
+            channels: HashMap::new(),
+        };
+        let server_state = state.clone();
         let task = tokio::spawn(async move {
-            if let Ok(Ok((socket, _))) =
-                tokio::time::timeout(Duration::from_secs(5), listener.accept()).await
-                && let Ok(connection) = server::run_stream(config, socket, peer).await
-            {
-                let _ = connection.await;
-            }
+            let (socket, _) =
+                tokio::time::timeout(Duration::from_secs(5), listener.accept()).await??;
+            let socket = socket.into_std()?;
+            *server_state
+                .socket
+                .lock()
+                .map_err(|_| "server socket lock")? = Some(socket.try_clone()?);
+            let socket = tokio::net::TcpStream::from_std(socket)?;
+            server::run_stream(config, socket, peer).await?.await?;
+            TestResult::Ok(())
         });
         let mut options = SshOptions::new(address.ip().to_string(), "fixture");
         options.port = address.port();
         options.expected_host_key = Some(fingerprint);
         options.auth = SshAuth::Password(zeroize::Zeroizing::new("test-only".into()));
         options.timeout = Duration::from_secs(3);
-        let session = SshSession::connect(options).await?;
+        let session = match SshSession::connect(options).await {
+            Ok(session) => session,
+            Err(error) => {
+                state.stop();
+                task.abort();
+                let _ = task.await;
+                return Err(error.into());
+            }
+        };
         Ok(Self {
             session,
             state,
@@ -302,20 +492,340 @@ impl Fixture {
     }
 
     async fn close(mut self) -> TestResult {
-        self.session.close().await?;
-        if tokio::time::timeout(Duration::from_secs(2), &mut self.task)
-            .await
-            .is_err()
-        {
-            self.task.abort();
-            let _ = tokio::time::timeout(Duration::from_secs(2), &mut self.task).await?;
+        let mut jobs = {
+            let mut registered = self.state.jobs.lock().map_err(|_| "fixture jobs lock")?;
+            std::mem::take(&mut *registered)
+        };
+        jobs.abort_all();
+        let workers = tokio::time::timeout(IO_BUDGET, async {
+            while let Some(result) = jobs.join_next().await {
+                match result {
+                    Ok(result) => result?,
+                    Err(error) if error.is_cancelled() => {}
+                    Err(error) => return Err(error.into()),
+                }
+            }
+            TestResult::Ok(())
+        })
+        .await;
+        let disconnected = self.session.close().await;
+        let server = tokio::time::timeout(IO_BUDGET, &mut self.task).await;
+        if server.is_err() {
+            self.state.stop();
+            // Closing the duplicate socket also stops russh's internal session.
+            let _ = tokio::time::timeout(IO_BUDGET, &mut self.task).await?;
         }
+        workers??;
+        disconnected?;
+        server???;
         assert!(
             tokio::net::TcpStream::connect(self.address).await.is_err(),
             "owned listener survived"
         );
         Ok(())
     }
+
+    async fn run(case: impl AsyncFnOnce(&Self) -> TestResult) -> TestResult {
+        let fixture = Self::new(Control::default()).await?;
+        let result = {
+            let mut pending = Box::pin(case(&fixture));
+            tokio::time::timeout(
+                Duration::from_secs(15),
+                std::future::poll_fn(|cx| {
+                    match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                        pending.as_mut().poll(cx)
+                    })) {
+                        Ok(Poll::Pending) => Poll::Pending,
+                        Ok(Poll::Ready(result)) => Poll::Ready(Ok(result)),
+                        Err(panic) => Poll::Ready(Err(panic)),
+                    }
+                }),
+            )
+            .await
+        };
+        let cleanup = fixture.close().await;
+        match result? {
+            Ok(result) => result?,
+            Err(panic) => std::panic::resume_unwind(panic),
+        }
+        cleanup
+    }
+}
+
+async fn collect(monitor: &LinuxMonitor, operation: Operation) -> Result<(), MonitorError> {
+    match operation {
+        Operation::Resources => monitor.snapshot().await.map(|_| ()),
+        Operation::Processes => monitor.processes().await.map(|_| ()),
+        Operation::Sockets => monitor.listening_sockets().await.map(|_| ()),
+        _ => unreachable!("only read collectors enter this helper"),
+    }
+}
+
+async fn revoke(monitor: &LinuxMonitor, reset: bool) {
+    if reset {
+        monitor.reset_capabilities().await;
+    } else {
+        monitor.invalidate_pending_capabilities();
+    }
+}
+
+async fn cancelled<T>(pending: impl Future<Output = Result<T, MonitorError>>) -> TestResult {
+    match tokio::time::timeout(CANCEL_BUDGET, pending).await? {
+        Err(MonitorError::Cancelled) => Ok(()),
+        Err(error) => Err(format!("expected Cancelled before SSH timeout, got {error:?}").into()),
+        Ok(_) => Err("revoked reader completed successfully".into()),
+    }
+}
+
+async fn poll_pending<F: Future>(mut pending: Pin<&mut F>) {
+    std::future::poll_fn(|cx| {
+        assert!(
+            pending.as_mut().poll(cx).is_pending(),
+            "reader must still be pending"
+        );
+        Poll::Ready(())
+    })
+    .await;
+}
+
+async fn ordinary_exec(session: &SshSession) -> TestResult {
+    let output = tokio::time::timeout(IO_BUDGET, session.exec(PLAIN_EXEC)).await??;
+    assert_eq!(output.stdout, PLAIN_STDOUT);
+    assert_eq!(output.stderr, PLAIN_STDERR);
+    assert_eq!(output.exit_status, Some(23));
+    Ok(())
+}
+
+async fn sent_collector_case(operation: Operation, reset: bool) -> TestResult {
+    Fixture::run(async move |fixture| {
+        let monitor = LinuxMonitor::new(fixture.session.clone());
+        for collector in [
+            Operation::Resources,
+            Operation::Processes,
+            Operation::Sockets,
+        ] {
+            collect(&monitor, collector).await?;
+        }
+        let before = monitor.capabilities().await;
+        let report = monitor.capability_report().await;
+        let held = fixture.state.hold_reply(operation)?;
+        let mut pending = Box::pin(collect(&monitor, operation));
+        let channel = held.wait_sent(pending.as_mut()).await?;
+        assert_eq!(
+            fixture.state.count(operation),
+            2,
+            "{operation:?} exec was sent"
+        );
+
+        revoke(&monitor, reset).await;
+        cancelled(pending.as_mut()).await?;
+        fixture.state.wait_closed(channel).await?;
+        assert_eq!(held.release.available_permits(), 0);
+        assert_eq!(held.finished.available_permits(), 0, "peer has not replied");
+        assert!(!monitor.accepts_capability_report(&report));
+        let expected = if reset { Default::default() } else { before };
+        assert_eq!(monitor.capabilities().await, expected);
+
+        held.release_and_wait().await?;
+        ordinary_exec(&fixture.session).await?;
+        assert_eq!(
+            monitor.capabilities().await,
+            expected,
+            "late reply cannot refresh cache"
+        );
+        collect(&monitor, operation).await?;
+        let after = monitor.capabilities().await;
+        let observation = match operation {
+            Operation::Resources => after.resources,
+            Operation::Processes => after.processes,
+            Operation::Sockets => after.sockets,
+            _ => unreachable!("collector case"),
+        };
+        assert_eq!(observation.state, CapabilityState::Available);
+        assert!(observation.checked_at.is_some());
+        assert_eq!(after.environment, before.environment);
+        assert_eq!(fixture.state.count(operation), 3);
+        assert_eq!(
+            fixture.state.count(Operation::Posix),
+            if reset { 2 } else { 1 }
+        );
+        assert_eq!(
+            fixture.state.count(Operation::Probe),
+            if reset { 2 } else { 1 }
+        );
+        Ok(())
+    })
+    .await
+}
+
+#[tokio::test]
+async fn invalidate_sent_resources_returns_cancelled_and_preserves_cache() -> TestResult {
+    sent_collector_case(Operation::Resources, false).await
+}
+
+#[tokio::test]
+async fn reset_sent_resources_returns_cancelled_and_clears_cache() -> TestResult {
+    sent_collector_case(Operation::Resources, true).await
+}
+
+#[tokio::test]
+async fn invalidate_sent_processes_returns_cancelled_and_preserves_cache() -> TestResult {
+    sent_collector_case(Operation::Processes, false).await
+}
+
+#[tokio::test]
+async fn reset_sent_processes_returns_cancelled_and_clears_cache() -> TestResult {
+    sent_collector_case(Operation::Processes, true).await
+}
+
+#[tokio::test]
+async fn invalidate_sent_sockets_returns_cancelled_and_preserves_cache() -> TestResult {
+    sent_collector_case(Operation::Sockets, false).await
+}
+
+#[tokio::test]
+async fn reset_sent_sockets_returns_cancelled_and_clears_cache() -> TestResult {
+    sent_collector_case(Operation::Sockets, true).await
+}
+
+async fn identity_and_gate_case(reset: bool) -> TestResult {
+    for operation in [Operation::Posix, Operation::Probe] {
+        Fixture::run(async move |fixture| {
+            let monitor = LinuxMonitor::new(fixture.session.clone());
+            let held = fixture.state.hold_reply(operation)?;
+            let mut leader = Box::pin(collect(&monitor, Operation::Resources));
+            let channel = held.wait_sent(leader.as_mut()).await?;
+            let mut waiters = [
+                Box::pin(collect(&monitor, Operation::Resources)),
+                Box::pin(collect(&monitor, Operation::Processes)),
+                Box::pin(collect(&monitor, Operation::Sockets)),
+            ];
+            for waiter in &mut waiters {
+                poll_pending(waiter.as_mut()).await;
+            }
+            let report = monitor.capability_report().await;
+            revoke(&monitor, reset).await;
+
+            // Keep the leader unpolled, retaining probe_gate: each waiter must
+            // notice invalidation without waiting for that mutex to be released.
+            for waiter in &mut waiters {
+                cancelled(waiter.as_mut()).await?;
+            }
+            assert_eq!(held.finished.available_permits(), 0);
+            cancelled(leader.as_mut()).await?;
+            fixture.state.wait_closed(channel).await?;
+            assert!(!monitor.accepts_capability_report(&report));
+            assert_eq!(monitor.capabilities().await, Default::default());
+            for collector in [
+                Operation::Resources,
+                Operation::Processes,
+                Operation::Sockets,
+            ] {
+                assert_eq!(
+                    fixture.state.count(collector),
+                    0,
+                    "no stale collector dispatch"
+                );
+            }
+            assert_eq!(fixture.state.count(Operation::Posix), 1);
+            assert_eq!(
+                fixture.state.count(Operation::Probe),
+                usize::from(operation == Operation::Probe)
+            );
+
+            held.release_and_wait().await?;
+            ordinary_exec(&fixture.session).await?;
+            assert_eq!(monitor.capabilities().await, Default::default());
+            assert_eq!(monitor.processes().await?.len(), 2);
+            assert_eq!(fixture.state.count(Operation::Posix), 2);
+            assert_eq!(
+                fixture.state.count(Operation::Probe),
+                1 + usize::from(operation == Operation::Probe)
+            );
+            assert_eq!(fixture.state.count(Operation::Resources), 0);
+            assert_eq!(fixture.state.count(Operation::Processes), 1);
+            Ok(())
+        })
+        .await?;
+    }
+    Ok(())
+}
+
+#[tokio::test]
+async fn invalidate_identity_and_probe_gate_waiters_return_cancelled() -> TestResult {
+    identity_and_gate_case(false).await
+}
+
+#[tokio::test]
+async fn reset_identity_and_probe_gate_waiters_return_cancelled() -> TestResult {
+    identity_and_gate_case(true).await
+}
+
+#[tokio::test]
+async fn cancelled_generation_leaves_new_generation_and_plain_exec_channels_alive() -> TestResult {
+    for reset in [false, true] {
+        Fixture::run(async move |fixture| {
+            let monitor = LinuxMonitor::new(fixture.session.clone());
+            monitor.snapshot().await?;
+            let before = monitor.capabilities().await;
+            let old = fixture.state.hold_reply(Operation::Resources)?;
+            let mut old_reader = Box::pin(monitor.snapshot());
+            let old_channel = old.wait_sent(old_reader.as_mut()).await?;
+
+            let sibling_monitor = LinuxMonitor::new(fixture.session.clone());
+            let sibling = fixture.state.hold_reply(Operation::Processes)?;
+            let mut sibling_reader = Box::pin(sibling_monitor.processes());
+            let sibling_channel = sibling.wait_sent(sibling_reader.as_mut()).await?;
+            let ordinary = fixture.state.hold_reply(Operation::PlainExec)?;
+            let mut exec = Box::pin(fixture.session.exec(PLAIN_EXEC));
+            let exec_channel = ordinary.wait_sent(exec.as_mut()).await?;
+
+            revoke(&monitor, reset).await;
+            let new = fixture.state.hold_reply(Operation::Resources)?;
+            let mut new_reader = Box::pin(monitor.snapshot());
+            let new_channel = new.wait_sent(new_reader.as_mut()).await?;
+            assert_ne!(old_channel, new_channel);
+            // Admit the new generation before polling the old cancellation so
+            // old cleanup runs while all three unaffected channels are live.
+            cancelled(old_reader.as_mut()).await?;
+            fixture.state.wait_closed(old_channel).await?;
+            for channel in [new_channel, sibling_channel, exec_channel] {
+                assert!(!fixture.state.closed.borrow().contains(&channel));
+            }
+            old.release_and_wait().await?;
+            ordinary_exec(&fixture.session).await?;
+            poll_pending(new_reader.as_mut()).await;
+            poll_pending(sibling_reader.as_mut()).await;
+            poll_pending(exec.as_mut()).await;
+            assert_eq!(
+                monitor.capabilities().await.resources,
+                if reset {
+                    Default::default()
+                } else {
+                    before.resources
+                }
+            );
+
+            new.release_and_wait().await?;
+            let sample = tokio::time::timeout(IO_BUDGET, new_reader.as_mut()).await??;
+            assert_eq!(sample.cpu, CpuSample::ReportedPercent(25.));
+            let current = monitor.capabilities().await;
+            assert_eq!(current.resources.state, CapabilityState::Available);
+            sibling.release_and_wait().await?;
+            let processes = tokio::time::timeout(IO_BUDGET, sibling_reader.as_mut()).await??;
+            assert_eq!(processes.iter().map(|p| p.pid).collect::<Vec<_>>(), [0, 42]);
+            ordinary.release_and_wait().await?;
+            let output = tokio::time::timeout(IO_BUDGET, exec.as_mut()).await??;
+            assert_eq!(output.stdout, PLAIN_STDOUT);
+            assert_eq!(output.stderr, PLAIN_STDERR);
+            assert_eq!(output.exit_status, Some(23));
+            assert_eq!(monitor.capabilities().await, current);
+            ordinary_exec(&fixture.session).await?;
+            Ok(())
+        })
+        .await?;
+    }
+    Ok(())
 }
 
 #[tokio::test]
@@ -459,32 +969,27 @@ async fn windows_resource_permission_cache_preserves_age_until_explicit_recheck(
 #[tokio::test]
 async fn windows_pending_identity_cannot_start_a_collector_after_reset() -> TestResult {
     tokio::time::timeout(Duration::from_secs(15), async {
-        let fixture = Fixture::new(Control {
-            hold_probe: AtomicBool::new(true),
-            ..Control::default()
+        Fixture::run(async |fixture| {
+            let monitor = LinuxMonitor::new(fixture.session.clone());
+            let held = fixture.state.hold_reply(Operation::Probe)?;
+            let pending_monitor = monitor.clone();
+            let mut pending = Box::pin(async move { pending_monitor.snapshot().await });
+            let channel = held.wait_sent(pending.as_mut()).await?;
+            monitor.reset_capabilities().await;
+            cancelled(pending.as_mut()).await?;
+            fixture.state.wait_closed(channel).await?;
+            held.release_and_wait().await?;
+            assert_eq!(fixture.state.count(Operation::Resources), 0);
+            assert_eq!(monitor.capabilities().await.environment, None);
+            assert_eq!(
+                monitor.capabilities().await.resources.state,
+                CapabilityState::Unknown
+            );
+            assert_eq!(monitor.processes().await?.len(), 2);
+            assert_eq!(fixture.state.count(Operation::Probe), 2);
+            Ok(())
         })
-        .await?;
-        let monitor = LinuxMonitor::new(fixture.session.clone());
-        let pending_monitor = monitor.clone();
-        let pending = tokio::spawn(async move { pending_monitor.snapshot().await });
-        tokio::time::timeout(
-            Duration::from_secs(3),
-            fixture.state.probe_started.acquire(),
-        )
-        .await??
-        .forget();
-        monitor.reset_capabilities().await;
-        fixture.state.probe_release.add_permits(1);
-        assert!(matches!(pending.await?, Err(MonitorError::Cancelled)));
-        assert_eq!(fixture.state.count(Operation::Resources), 0);
-        assert_eq!(monitor.capabilities().await.environment, None);
-        assert_eq!(
-            monitor.capabilities().await.resources.state,
-            CapabilityState::Unknown
-        );
-        assert_eq!(monitor.processes().await?.len(), 2);
-        assert_eq!(fixture.state.count(Operation::Probe), 2);
-        fixture.close().await
+        .await
     })
     .await?
 }
@@ -495,31 +1000,29 @@ async fn revoked_identity_channel_admission_never_dispatches_posix_or_windows_pr
     tokio::time::timeout(Duration::from_secs(20), async {
         for ordinal in [1, 2] {
             for reset in [false, true] {
-                let fixture = Fixture::new(Control {
-                    hold_open_at: AtomicUsize::new(ordinal),
-                    ..Control::default()
+                Fixture::run(async move |fixture| {
+                    fixture.state.hold_open_at.store(ordinal, Ordering::Release);
+                    let monitor = LinuxMonitor::new(fixture.session.clone());
+                    let reader = monitor.clone();
+                    let mut pending = Box::pin(async move { reader.snapshot().await });
+                    let channel = fixture.state.wait_open(pending.as_mut()).await?;
+                    revoke(&monitor, reset).await;
+                    cancelled(pending.as_mut()).await?;
+                    assert!(!fixture.state.closed.borrow().contains(&channel));
+                    fixture.state.open_release.add_permits(1);
+                    fixture.state.wait_closed(channel).await?;
+                    assert_eq!(fixture.state.count(Operation::Posix), ordinal - 1);
+                    assert_eq!(fixture.state.count(Operation::Probe), 0);
+                    assert_eq!(fixture.state.count(Operation::Resources), 0);
+                    assert_eq!(monitor.capabilities().await.environment, None);
+                    assert_eq!(
+                        monitor.capabilities().await.resources.state,
+                        CapabilityState::Unknown
+                    );
+                    ordinary_exec(&fixture.session).await?;
+                    Ok(())
                 })
                 .await?;
-                let monitor = LinuxMonitor::new(fixture.session.clone());
-                let reader = monitor.clone();
-                let pending = tokio::spawn(async move { reader.snapshot().await });
-                fixture.state.open_started.acquire().await?.forget();
-                if reset {
-                    monitor.reset_capabilities().await;
-                } else {
-                    monitor.invalidate_pending_capabilities();
-                }
-                fixture.state.open_release.add_permits(1);
-                assert!(matches!(pending.await?, Err(MonitorError::Cancelled)));
-                assert_eq!(fixture.state.count(Operation::Posix), ordinal - 1);
-                assert_eq!(fixture.state.count(Operation::Probe), 0);
-                assert_eq!(fixture.state.count(Operation::Resources), 0);
-                assert_eq!(monitor.capabilities().await.environment, None);
-                assert_eq!(
-                    monitor.capabilities().await.resources.state,
-                    CapabilityState::Unknown
-                );
-                fixture.close().await?;
             }
         }
         TestResult::Ok(())
@@ -537,54 +1040,55 @@ async fn revoked_cached_collector_channel_admission_never_dispatches_any_read_op
             Operation::Sockets,
         ] {
             for reset in [false, true] {
-                let fixture = Fixture::new(Control::default()).await?;
-                let monitor = LinuxMonitor::new(fixture.session.clone());
-                monitor.snapshot().await?;
-                let before = monitor.capabilities().await;
-                let commands = fixture
-                    .state
-                    .commands
-                    .lock()
-                    .map_err(|_| "commands lock")?
-                    .len();
-                let report = monitor.capability_report().await;
-                fixture.state.hold_open_at.store(
-                    fixture.state.opened.load(Ordering::Acquire) + 1,
-                    Ordering::Release,
-                );
-                let reader = monitor.clone();
-                let pending = tokio::spawn(async move {
-                    match operation {
-                        Operation::Resources => reader.snapshot().await.map(|_| ()),
-                        Operation::Processes => reader.processes().await.map(|_| ()),
-                        Operation::Sockets => reader.listening_sockets().await.map(|_| ()),
-                        _ => unreachable!("only read collectors enter this fixture"),
-                    }
-                });
-                fixture.state.open_started.acquire().await?.forget();
-                if reset {
-                    monitor.reset_capabilities().await;
-                } else {
-                    monitor.invalidate_pending_capabilities();
-                }
-                fixture.state.open_release.add_permits(1);
-                assert!(matches!(pending.await?, Err(MonitorError::Cancelled)));
-                assert_eq!(
-                    fixture
+                Fixture::run(async move |fixture| {
+                    let monitor = LinuxMonitor::new(fixture.session.clone());
+                    monitor.snapshot().await?;
+                    let before = monitor.capabilities().await;
+                    let commands = fixture
                         .state
                         .commands
                         .lock()
                         .map_err(|_| "commands lock")?
-                        .len(),
-                    commands,
-                    "{operation:?} must not send exec after revoked admission"
-                );
-                assert!(!monitor.accepts_capability_report(&report));
-                assert_eq!(
-                    monitor.capabilities().await,
-                    if reset { Default::default() } else { before }
-                );
-                fixture.close().await?;
+                        .len();
+                    let report = monitor.capability_report().await;
+                    fixture.state.hold_open_at.store(
+                        fixture.state.opened.load(Ordering::Acquire) + 1,
+                        Ordering::Release,
+                    );
+                    let reader = monitor.clone();
+                    let mut pending = Box::pin(async move {
+                        match operation {
+                            Operation::Resources => reader.snapshot().await.map(|_| ()),
+                            Operation::Processes => reader.processes().await.map(|_| ()),
+                            Operation::Sockets => reader.listening_sockets().await.map(|_| ()),
+                            _ => unreachable!("only read collectors enter this fixture"),
+                        }
+                    });
+                    let channel = fixture.state.wait_open(pending.as_mut()).await?;
+                    revoke(&monitor, reset).await;
+                    cancelled(pending.as_mut()).await?;
+                    assert!(!fixture.state.closed.borrow().contains(&channel));
+                    fixture.state.open_release.add_permits(1);
+                    fixture.state.wait_closed(channel).await?;
+                    assert_eq!(
+                        fixture
+                            .state
+                            .commands
+                            .lock()
+                            .map_err(|_| "commands lock")?
+                            .len(),
+                        commands,
+                        "{operation:?} must not send exec after revoked admission"
+                    );
+                    assert!(!monitor.accepts_capability_report(&report));
+                    assert_eq!(
+                        monitor.capabilities().await,
+                        if reset { Default::default() } else { before }
+                    );
+                    ordinary_exec(&fixture.session).await?;
+                    Ok(())
+                })
+                .await?;
             }
         }
         TestResult::Ok(())

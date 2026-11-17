@@ -81,30 +81,39 @@ impl LinuxMonitor {
         max_bytes: usize,
     ) -> MonitorResult<ExecOutput> {
         self.ensure_current(generation)?;
-        let output = self
-            .session
-            .exec_limited_guarded(command, max_bytes, || {
+        let output = tokio::select! {
+            biased;
+            _ = self.capabilities.wait_invalidated(generation) => {
+                return Err(MonitorError::Cancelled);
+            }
+            output = self.session.exec_limited_guarded(command, max_bytes, || {
                 self.capabilities.is_current(generation)
-            })
-            .await?;
+            }) => output,
+        };
+        // A dropped exec retains its existing independent channel-open/CLOSE
+        // owner. Local cancellation never proves the remote process terminated.
         self.ensure_current(generation)?;
-        output.ok_or(MonitorError::Cancelled)
+        output?.ok_or(MonitorError::Cancelled)
     }
 
     pub(super) async fn route(&self, generation: u64) -> MonitorResult<Route> {
         self.ensure_current(generation)?;
         // Only the first caller probes. The lock wait is bounded separately
         // from each SSH command, which retains the connection's exec deadline.
-        let _admission = tokio::time::timeout(
-            std::time::Duration::from_secs(60),
-            self.capabilities.probe_gate.lock(),
-        )
-        .await
-        .map_err(|_| {
-            MonitorError::Session(crate::SessionError::Timeout(
-                "monitoring platform probe admission",
-            ))
-        })?;
+        let _admission = tokio::select! {
+            biased;
+            _ = self.capabilities.wait_invalidated(generation) => {
+                return Err(MonitorError::Cancelled);
+            }
+            admission = tokio::time::timeout(
+                std::time::Duration::from_secs(60),
+                self.capabilities.probe_gate.lock(),
+            ) => admission.map_err(|_| {
+                MonitorError::Session(crate::SessionError::Timeout(
+                    "monitoring platform probe admission",
+                ))
+            })?,
+        };
         self.ensure_current(generation)?;
         if let Some(route) = self.capabilities.route().await {
             self.ensure_current(generation)?;

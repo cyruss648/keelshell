@@ -1,0 +1,1102 @@
+{
+  "schema_version": 1,
+  "members": 182,
+  "logical_bytes": 3505658,
+  "bytes": 734239,
+  "sha256": "eb3617e9356239c6ef2ed8225aeadab1dfaf724d62fce657938c141862e3f5f4",
+  "excluded": [],
+  "files": [
+    {
+      "member": "parent/after-final-gate-r3.json",
+      "source": "work/monitor-cancellation-20261117/after-final-gate-r3.json",
+      "bytes": 143209,
+      "sha256": "77f0651a42d1774742d7d14c9b911988a071e485651e7336ae655c4c49195d82"
+    },
+    {
+      "member": "parent/archive-fixture-review-r1/command.log",
+      "source": "work/monitor-cancellation-20261117/archive-fixture-review-r1/command.log",
+      "bytes": 172,
+      "sha256": "8ab97ad1ab9fd25cbc92d9b20c3cd69af94cb27a5cbe5d88bdbf870a7e46c0da"
+    },
+    {
+      "member": "parent/archive-fixture-review-r1/result.json",
+      "source": "work/monitor-cancellation-20261117/archive-fixture-review-r1/result.json",
+      "bytes": 587,
+      "sha256": "64b30f5071450a1237dd0af1f0f1ef72ae14ffa1170d1f8c7664f593b6eeaa0b"
+    },
+    {
+      "member": "parent/archive-peer-diagnosis-r1/command.log",
+      "source": "work/monitor-cancellation-20261117/archive-peer-diagnosis-r1/command.log",
+      "bytes": 638,
+      "sha256": "4898079102b7c84c11003c27f622936d34896c190f45cc3b8f3f654696cfe2a7"
+    },
+    {
+      "member": "parent/archive-peer-diagnosis-r1/result.json",
+      "source": "work/monitor-cancellation-20261117/archive-peer-diagnosis-r1/result.json",
+      "bytes": 1187,
+      "sha256": "b72e9f907d1a00b0add47c8a2a98ca958fda03da19ccf03ee21a3368905e5232"
+    },
+    {
+      "member": "parent/archive-previous-source-ci-r1/command.log",
+      "source": "work/monitor-cancellation-20261117/archive-previous-source-ci-r1/command.log",
+      "bytes": 176,
+      "sha256": "55eb1e92d44abb7e0649da54f791e105fe177357d90db619a43098380676012a"
+    },
+    {
+      "member": "parent/archive-previous-source-ci-r1/result.json",
+      "source": "work/monitor-cancellation-20261117/archive-previous-source-ci-r1/result.json",
+      "bytes": 582,
+      "sha256": "c9b13a96a38a9529bf7b3afdddc43ce3c99f695ea4dea4a62650ab36f5d66337"
+    },
+    {
+      "member": "parent/archive-previous-source-ci-review-r1/command.log",
+      "source": "work/monitor-cancellation-20261117/archive-previous-source-ci-review-r1/command.log",
+      "bytes": 175,
+      "sha256": "33923bb40a86866fef56eafc09d55f957fb016b41e3ff019bc9e1068b373324d"
+    },
+    {
+      "member": "parent/archive-previous-source-ci-review-r1/result.json",
+      "source": "work/monitor-cancellation-20261117/archive-previous-source-ci-review-r1/result.json",
+      "bytes": 582,
+      "sha256": "d1da9465528798ba16195a4aaa2f7e28ac24a5e30fbc9cf5b0f93ecd45fa42f2"
+    },
+    {
+      "member": "parent/archive-source-review-r1/command.log",
+      "source": "work/monitor-cancellation-20261117/archive-source-review-r1/command.log",
+      "bytes": 320,
+      "sha256": "535dc1144a0fbba24ea34930aa6a855a9c6d799958495d431af83c7833c0f772"
+    },
+    {
+      "member": "parent/archive-source-review-r1/result.json",
+      "source": "work/monitor-cancellation-20261117/archive-source-review-r1/result.json",
+      "bytes": 792,
+      "sha256": "3320babadce4a9b41a39ab3bc95c677833137011b9fe1ee558efa0758b1efd3f"
+    },
+    {
+      "member": "parent/before/crates/keelshell-session/src/monitor/capabilities.rs",
+      "source": "work/monitor-cancellation-20261117/before/crates/keelshell-session/src/monitor/capabilities.rs",
+      "bytes": 11541,
+      "sha256": "052827cbffde222b2b8bf894cdf78328168a9dd90800fdd5432b85dae15e8a0e"
+    },
+    {
+      "member": "parent/before/crates/keelshell-session/src/monitor/platform.rs",
+      "source": "work/monitor-cancellation-20261117/before/crates/keelshell-session/src/monitor/platform.rs",
+      "bytes": 7061,
+      "sha256": "6c14b3dec6cd1dd71f46672ee92f38fe3f9137f40fc20833516231ad42b30cef"
+    },
+    {
+      "member": "parent/before/crates/keelshell-session/src/monitor.rs",
+      "source": "work/monitor-cancellation-20261117/before/crates/keelshell-session/src/monitor.rs",
+      "bytes": 78741,
+      "sha256": "931ac018e003317f07f7de2266e5d467c036609d83c907918e8f5b51a8ef1279"
+    },
+    {
+      "member": "parent/before-final-gate-r1.json",
+      "source": "work/monitor-cancellation-20261117/before-final-gate-r1.json",
+      "bytes": 143209,
+      "sha256": "cb8b38e4fe3f9006fcdb864777e295c0c2433c097f027e4c0354371912bee0a5"
+    },
+    {
+      "member": "parent/before.json",
+      "source": "work/monitor-cancellation-20261117/before.json",
+      "bytes": 519,
+      "sha256": "f200815ec38ab65f7aa45ef60ac272cbdb368d346c726145b4dfcdbed5aab781"
+    },
+    {
+      "member": "parent/candidate-inputs-r1.json",
+      "source": "work/monitor-cancellation-20261117/candidate-inputs-r1.json",
+      "bytes": 143209,
+      "sha256": "cb8b38e4fe3f9006fcdb864777e295c0c2433c097f027e4c0354371912bee0a5"
+    },
+    {
+      "member": "parent/candidate-inputs-r2.json",
+      "source": "work/monitor-cancellation-20261117/candidate-inputs-r2.json",
+      "bytes": 143209,
+      "sha256": "a27a0d6d6a353399b738c9c08116843e820faf801f1915666bf978a13cfa4cfe"
+    },
+    {
+      "member": "parent/candidate-inputs-r3.json",
+      "source": "work/monitor-cancellation-20261117/candidate-inputs-r3.json",
+      "bytes": 143209,
+      "sha256": "77f0651a42d1774742d7d14c9b911988a071e485651e7336ae655c4c49195d82"
+    },
+    {
+      "member": "parent/darwin-ssh-r1/generate-client-key.log",
+      "source": "work/monitor-cancellation-20261117/darwin-ssh-r1/generate-client-key.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "parent/darwin-ssh-r1/generate-host-key.log",
+      "source": "work/monitor-cancellation-20261117/darwin-ssh-r1/generate-host-key.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "parent/darwin-ssh-r1/openssh-version.log",
+      "source": "work/monitor-cancellation-20261117/darwin-ssh-r1/openssh-version.log",
+      "bytes": 31,
+      "sha256": "6faf9904aac9ceb0fce08762e25a5a83dd82596100e2a6d2c6102da5eb7feaa7"
+    },
+    {
+      "member": "parent/darwin-ssh-r1/result.json",
+      "source": "work/monitor-cancellation-20261117/darwin-ssh-r1/result.json",
+      "bytes": 2093,
+      "sha256": "0f5f4958147ff5c957ca578407ae8e08cac74636338d4bc780f7961320be9b73"
+    },
+    {
+      "member": "parent/darwin-ssh-r1/sshd.log",
+      "source": "work/monitor-cancellation-20261117/darwin-ssh-r1/sshd.log",
+      "bytes": 1328,
+      "sha256": "51779c244a8bd755673aa0b8e3d3b600b86180316413d0526cb40d37a5d7298a"
+    },
+    {
+      "member": "parent/darwin-ssh-r1/tests.log",
+      "source": "work/monitor-cancellation-20261117/darwin-ssh-r1/tests.log",
+      "bytes": 1633,
+      "sha256": "8878bbb6294c01a596f3ea65db2825ec9dcd4a393b62f9affa4d2987868a3b5f"
+    },
+    {
+      "member": "parent/darwin-ssh-r1/validate-sshd-config.log",
+      "source": "work/monitor-cancellation-20261117/darwin-ssh-r1/validate-sshd-config.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "parent/darwin-ssh-regression-r1/command.log",
+      "source": "work/monitor-cancellation-20261117/darwin-ssh-regression-r1/command.log",
+      "bytes": 317,
+      "sha256": "bba87c735f5c744347ef77fb3211c72a0a31db1272ac7e3f397ee1da4230c863"
+    },
+    {
+      "member": "parent/darwin-ssh-regression-r1/result.json",
+      "source": "work/monitor-cancellation-20261117/darwin-ssh-regression-r1/result.json",
+      "bytes": 502,
+      "sha256": "a3341be740e6fb2268b2014239e64147b94d1b2cb0c9c860d2eee97b494b1dc8"
+    },
+    {
+      "member": "parent/dependencies-r1.json",
+      "source": "work/monitor-cancellation-20261117/dependencies-r1.json",
+      "bytes": 58248,
+      "sha256": "a12fb8ff580e44fca0579f91bffa3bde14843770d48c942303df4bfa9daa3558"
+    },
+    {
+      "member": "parent/dependencies-r2.json",
+      "source": "work/monitor-cancellation-20261117/dependencies-r2.json",
+      "bytes": 60807,
+      "sha256": "c5e309ed1072b70836938ce55459ec4126d899dfc31740f802ca397297a824a1"
+    },
+    {
+      "member": "parent/dependency-freshness-r1/command.log",
+      "source": "work/monitor-cancellation-20261117/dependency-freshness-r1/command.log",
+      "bytes": 1932,
+      "sha256": "e330e21e6f6244ea5b5afa8b7e9d025338f1a78ccc51cd11680ff2664dec79b8"
+    },
+    {
+      "member": "parent/dependency-freshness-r1/result.json",
+      "source": "work/monitor-cancellation-20261117/dependency-freshness-r1/result.json",
+      "bytes": 467,
+      "sha256": "ee0a4435cbf9b4d371aa0560955ba0c8ec552047b4d925917ed27ed7f46a2f5a"
+    },
+    {
+      "member": "parent/dependency-freshness-r2/command.log",
+      "source": "work/monitor-cancellation-20261117/dependency-freshness-r2/command.log",
+      "bytes": 84,
+      "sha256": "c703db9a19c30441e948b124e220fa210aa51f02d5cbe5131ab1fd54344d9137"
+    },
+    {
+      "member": "parent/dependency-freshness-r2/result.json",
+      "source": "work/monitor-cancellation-20261117/dependency-freshness-r2/result.json",
+      "bytes": 514,
+      "sha256": "2e254142a330d3e98c7d3bafc93a9081ebe2c1bb205cac2b95732ce69ed71d8e"
+    },
+    {
+      "member": "parent/final-gate-r1/command.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r1/command.log",
+      "bytes": 10493,
+      "sha256": "e66d4084f5837a21166529abc866471824a6653ea4a8a680a7b3f8152e490537"
+    },
+    {
+      "member": "parent/final-gate-r1/result.json",
+      "source": "work/monitor-cancellation-20261117/final-gate-r1/result.json",
+      "bytes": 369,
+      "sha256": "a00d35622e4af46844c5dc8c6c4ae15c2cd42f27f0f0259913e31ecb4695eac0"
+    },
+    {
+      "member": "parent/final-gate-r2/command.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r2/command.log",
+      "bytes": 473630,
+      "sha256": "c8d0de57bcb88dd709f5b5bd19c80856b06bb150839df845dee44427d3ae8da8"
+    },
+    {
+      "member": "parent/final-gate-r2/result.json",
+      "source": "work/monitor-cancellation-20261117/final-gate-r2/result.json",
+      "bytes": 370,
+      "sha256": "dca34168abda220597f402c78149715e6d29972c3a18d76466d3fa29e86f0919"
+    },
+    {
+      "member": "parent/final-gate-r3/command.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3/command.log",
+      "bytes": 674779,
+      "sha256": "6c2d567af8d3ae30b081e1a6425a63adeba591a17d11b264eab338e6cad1d596"
+    },
+    {
+      "member": "parent/final-gate-r3/result.json",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3/result.json",
+      "bytes": 368,
+      "sha256": "21fbc155b0009c8e25c9414f161a9fc432342cf6b3a8a54d511f20013c01b33e"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/000.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/000.log",
+      "bytes": 12148,
+      "sha256": "48426e0302fc83802000b8dea870dc8ead22752e4001b199b028762883646ce5"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/001.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/001.log",
+      "bytes": 1356,
+      "sha256": "7108fb713c11198aec22fc4dee03f66751b6ab3ed362cae5e02b366e193995a9"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/002.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/002.log",
+      "bytes": 320,
+      "sha256": "ad2c25f3b7d66649b73410da333754eed4dfe59df210141241b64b5bbfb6b242"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/003.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/003.log",
+      "bytes": 383,
+      "sha256": "efc5bfa7fd42cf3ab73e28a9c3ae7aac76b4254e1e143bfeeb963a69af6aecc7"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/004.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/004.log",
+      "bytes": 319,
+      "sha256": "13269e271232968b67560a6e12f7b5f9a001d45240d01a2aa3ad9cc9584011fd"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/005.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/005.log",
+      "bytes": 104,
+      "sha256": "cc6016343e18019c5ae3da20e751772364124960d70b3f97ab96dda8a16fb6d2"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/006.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/006.log",
+      "bytes": 1138,
+      "sha256": "317c99a7c49a1815b64416464a1f9ba65d39d102dcaf1c23ad3b7a8469f4b933"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/007.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/007.log",
+      "bytes": 1219,
+      "sha256": "99fce2a422755398790254287c77ace65cfe290b2b7e53ca8201e9500a3ce23e"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/008.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/008.log",
+      "bytes": 150203,
+      "sha256": "12fd2179e51df547f674a9bb17c54f27453a27d315bbff9181cb4dbcf2e3b830"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/009.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/009.log",
+      "bytes": 23272,
+      "sha256": "d86f9f0b169e392a8295cd203da145f0beb372bae6388f5c7e651a1bebed9581"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/010.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/010.log",
+      "bytes": 332,
+      "sha256": "d9c8b07fbc33ebcdcafc315931db742bb387db232d7634f7571b964c7d1d69d8"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/011.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/011.log",
+      "bytes": 1063,
+      "sha256": "a00ee9112d41dcf67e008726f0f8d226392660207b3e91dbaffd4c98fd6d64f4"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/012.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/012.log",
+      "bytes": 2577,
+      "sha256": "901e5469f4a2f549589ae17ecae17e6e96c06a57556724b641941d6bedd504d1"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/013.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/013.log",
+      "bytes": 2700,
+      "sha256": "ee36ae6b8d4a4e195c8666801e5d7db88ed11a05c4ce7065b5daff070f5e7770"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/014.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/014.log",
+      "bytes": 152,
+      "sha256": "22d1f477389c343ea3c8c9f4e749ce788656d48aec096e8db395cfebd5217b17"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/015.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/015.log",
+      "bytes": 420,
+      "sha256": "35bc9022c408f6641afa5d0bf99d773fec4d0dcef508888078d3b89a6cf1e8e4"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/016.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/016.log",
+      "bytes": 255,
+      "sha256": "463dd7c0a1e91e1f142d4e721c002f81793a1a3be8e7b698faa0275f2d47cfe6"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/017.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/017.log",
+      "bytes": 332,
+      "sha256": "f1fb3def2f05c1e69f3c31054a355ae27c93e30fbc053cb1841fffec24294f3a"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/018.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/018.log",
+      "bytes": 1687,
+      "sha256": "2609129b4f82c1045b56c75b3110c207074c80aea50f868dd35edfa4049d21c4"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/019.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/019.log",
+      "bytes": 1627,
+      "sha256": "01e9dc5362f1d70e094cea3648a4ff6516809eceefb35c709a4e997695de737a"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/020.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/020.log",
+      "bytes": 697,
+      "sha256": "59603ee9fb1bd1fd4608cf468aa0389761183f23d764c34fef34476ad6afbcec"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/021.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/021.log",
+      "bytes": 152,
+      "sha256": "1ba5b85c00d02ab6d950da5acdaf5536167171a15f6f2ef64638752a963f7cc3"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/022.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/022.log",
+      "bytes": 490,
+      "sha256": "724f9751d1bca8ab2d28fcc57c5c3613895786e3083945091545fb36458f3c94"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/023.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/023.log",
+      "bytes": 169,
+      "sha256": "11f0b45fe13a45c0f2fb08e611f2884f10db66f22e77578669872decac5b3362"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/024.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/024.log",
+      "bytes": 278,
+      "sha256": "202c9d16bb49825a78c4224bdb3395f4306078004f2410e4152a328cc2008a86"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/025.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/025.log",
+      "bytes": 274,
+      "sha256": "9802211e1eee2e5756015ab0ba13855623718b4e0ea7265c5ce4057e10efd911"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/026.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/026.log",
+      "bytes": 517,
+      "sha256": "e753583357ecbb239d096e01b24fc0bb9b2f03a9750dfdc70ccd979e0826765b"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/027.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/027.log",
+      "bytes": 1399,
+      "sha256": "1f216e005e0ee5df1b4ac8c3c8ec928cde8012bfcc2e6e9b3ad6b43bd536ce63"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/028.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/028.log",
+      "bytes": 420,
+      "sha256": "bf18db952a839a21864f01b99a8288afeb31f56b640a2285a8b6abcc8593de59"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/029.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/029.log",
+      "bytes": 451,
+      "sha256": "22806826b6161c512a1fc5e3c91ed5c46c4b291008171bf34e6f38331ab4fe56"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/030.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/030.log",
+      "bytes": 1476,
+      "sha256": "dc03df35c86af078971e2a9d3a793d4f31c5aa4129b73fa73e79ced551caae54"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/031.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/031.log",
+      "bytes": 436,
+      "sha256": "45f0547af19ff7c4ae3d29df71e40a8abb9480b9745f0d6072da4ea520fa4883"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/032.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/032.log",
+      "bytes": 792,
+      "sha256": "0e87702f9591030f0b59b01c654bd4a84ba7ea5a385a9f0136dad94ed50d4e2c"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/033.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/033.log",
+      "bytes": 889,
+      "sha256": "cd9ddf735515c336b814b1bda79b13a03ce6aa9190dfa20f7da053e9be929b74"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/034.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/034.log",
+      "bytes": 852,
+      "sha256": "ca2cefc86a9d1d11dcf098aa9697a4b23375134cba3bd7cbeac5ae4106126071"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/035.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/035.log",
+      "bytes": 1496,
+      "sha256": "abf2380362b813be64e641d7b0f895cdb33ad0e48e9d6df642afa6efef915b86"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/036.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/036.log",
+      "bytes": 1393,
+      "sha256": "5ada23a1c3152e70a5595900aed7323a9af0f58328bfb86740aa04bbe3f51f2f"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/037.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/037.log",
+      "bytes": 110,
+      "sha256": "2313b8d14be09a8a55e74287f321fa35dbf4664dc0b13ba5ec42ec41176d0560"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/038.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/038.log",
+      "bytes": 2065,
+      "sha256": "da28ca6b6a8d3c9d90a184142787a2b4a2ff919da42302ef28aac7e15045eac6"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/039.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/039.log",
+      "bytes": 533,
+      "sha256": "ee2f93179f877aead452c5e203d45ff1a13465b3d53fecd42781f7167f565e5d"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/040.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/040.log",
+      "bytes": 1020,
+      "sha256": "776cf65a661dd9da33508358dcbd1e0f3cdf99628c91c9e1cdc7e29c453fc2b9"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/041.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/041.log",
+      "bytes": 339,
+      "sha256": "0ff2280f293fd30829e4ef2602753ee9f0c8350fee383ede57431aa1702d063a"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/042.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/042.log",
+      "bytes": 1434,
+      "sha256": "e01da2ccff487395c551d39d88598eee016f1810fd38f9130bff5aeccdc2013a"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/043.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/043.log",
+      "bytes": 932,
+      "sha256": "2b5c5be6654d2b1da12ebdb5da3cb831cbbcf6741e2eb68dfa9802055706b9c8"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/044.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/044.log",
+      "bytes": 1134,
+      "sha256": "2f79804bb456cb7463ba9a8d5951fb913de40083cc6aa8903c1cc7106e70ce27"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/045.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/045.log",
+      "bytes": 412,
+      "sha256": "71e9f70db98a747bea28fd8f6d6984cc8f8a50d3a4aceff07355aa5c2278b33d"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/046.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/046.log",
+      "bytes": 242,
+      "sha256": "ef0a4007296919f116f2d7b79867322f297e1afcaee1b0e407b47209eccb0e1b"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/047.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/047.log",
+      "bytes": 748,
+      "sha256": "20e67905d1353527c3a48934c9d3dba74f5acfa5bbe28dc3c3249c3eddac24c9"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/048.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/048.log",
+      "bytes": 727,
+      "sha256": "778c2bdd4d60b0d55af0f2a10b728dfb2a0499cdd71945edbf20f8779b01181b"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/049.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/049.log",
+      "bytes": 571,
+      "sha256": "65ec6a7851471ed44f581d49071294574855d42d69275185f45838ae435eb4b7"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/050.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/050.log",
+      "bytes": 2306,
+      "sha256": "58999d92944dbc2a6f28fcdbfb6e689a66c34f9ba770236f519c12963f1be71b"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/051.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/051.log",
+      "bytes": 524,
+      "sha256": "d7d0972bda3a76ce8ce0253d79a70991196ce32e7d3376d95b818b64aeb0aaea"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/052.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/052.log",
+      "bytes": 98,
+      "sha256": "99800939897d79444ad0e94cb0b566ab24e6bd6ddb8d622ca184dbbf29637db8"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/053.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/053.log",
+      "bytes": 340,
+      "sha256": "85dbad018670905ba5aaca0744b52034cebad96e5254c1843bb84b7738da0658"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/054.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/054.log",
+      "bytes": 90,
+      "sha256": "2fb858ed73208a192ee6e0f19e8162ba568c7dabead76773e25822c3989b8e01"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/055.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/055.log",
+      "bytes": 871,
+      "sha256": "15278c9505f632b03a28a797f342675e1b3a9e2fca9d97345562d7665c57d292"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/056.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/056.log",
+      "bytes": 7523,
+      "sha256": "9aef54af1e1bb3c973c0be4e491c1c49c6a6cb42eb1e7a2fd1f709926221278a"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/057.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/057.log",
+      "bytes": 2006,
+      "sha256": "65b813b98ae553c01f256408b5f26f8018feb44c6a3ef9ea567a457abc08ddeb"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/058.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/058.log",
+      "bytes": 22,
+      "sha256": "414c144fa67f1df75f7b14a69af5641637772e81c4c3fa0a171e3228adbb922e"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/059.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/059.log",
+      "bytes": 1246,
+      "sha256": "7d88cc2ca2947c47429fee80ef9a28f2bd35a1f64b527a34c8e7dbdfa4a2f0ea"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/060.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/060.log",
+      "bytes": 922,
+      "sha256": "96a54d991e4dceed6c8f935cab0647d81c10f403b4907273bb82551575945f6a"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/061.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/061.log",
+      "bytes": 1101,
+      "sha256": "c600f5de0b7ccf650def67c24ecafbfed12c79cedff60189a0d48a1e52d9947b"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/062.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/062.log",
+      "bytes": 229,
+      "sha256": "88d3e5d82db7b3c65d327b91356046a51621044a0799d060d040c1bf7c427b41"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/063.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/063.log",
+      "bytes": 852,
+      "sha256": "7959893dd537756018e53980e18ffbf4feafbcb048305cef8d396d1ee02cce76"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/064.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/064.log",
+      "bytes": 378,
+      "sha256": "ae052a4644f0da2e0e0918fa940555f082fbb7c27f702978186d85da6b7803af"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/065.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/065.log",
+      "bytes": 1561,
+      "sha256": "e0dc680748eee8f791098fea3dd16119725d7a0b9161ae25e10d9b2cd3949283"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/066.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/066.log",
+      "bytes": 40928,
+      "sha256": "2732d442054e1fb4db821accac01d00031be8453f4951ccaab49d9c44686813a"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/067.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/067.log",
+      "bytes": 1173,
+      "sha256": "4590438387ea4c2206ce0976b483ae3778c19449db91e8611161689d21672364"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/068.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/068.log",
+      "bytes": 1709,
+      "sha256": "e9c7006ab076c796ad008397c2174a14b97b89f1acd42b900589618085ec2922"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/069.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/069.log",
+      "bytes": 831,
+      "sha256": "3a8187d3657ffeeecbf26a6a9de725dc1f1e55500261642e6922156bad437e31"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/070.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/070.log",
+      "bytes": 1036,
+      "sha256": "28187648b77d49f4b02174c98d4403f7a5d8b800e125f92a0a0529a13254e6d3"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/071.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/071.log",
+      "bytes": 1060,
+      "sha256": "d029f0afae8ab3c3ed7265df0cdcacba4c79f8a8da029229b6e7dca409a01b70"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/072.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/072.log",
+      "bytes": 225,
+      "sha256": "50f9edbab619f0e2fd55d314881765fa50f917ea4c26edbc7de88839d03a8cfc"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/073.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/073.log",
+      "bytes": 322,
+      "sha256": "7a68ea0475d5daf3f2a2922f0adad97ebc72304f57dd2f7648ca1d5accdf2534"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/074.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/074.log",
+      "bytes": 429,
+      "sha256": "7b0c52877952ef3f9a3c5a59f29a91d2dca07265a5c7e0b6cefc2cf2ce77e8d1"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/075.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/075.log",
+      "bytes": 119,
+      "sha256": "39bcf82e692a699f1b48b78f66dd275b3648a3c4aef820542ae2c075882088ed"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/076.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/076.log",
+      "bytes": 152,
+      "sha256": "36e5470b574beee97fa982be86476a78e4c62f6904aafa479767b024d72f46ce"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/077.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/077.log",
+      "bytes": 1482,
+      "sha256": "048425936c953e9b125467c2212494fd2296c5a46d5bc6e9fa7a29ff54c2ef51"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/078.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/078.log",
+      "bytes": 954,
+      "sha256": "357e324aff406cb971fbf4ddddecc600101c7c3f0871350cba61896f8c1a07aa"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/079.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/079.log",
+      "bytes": 369,
+      "sha256": "2c367cc4fa5fef593c7e11a7901422a0a6d0d5d1d1f8a3a1861436d989f36280"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/080.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/080.log",
+      "bytes": 2829,
+      "sha256": "4e283e8cfd84788f9c76b5ffe3c3ec6dbd84a70aeb1fe0d62787f95f4bede784"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/081.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/081.log",
+      "bytes": 14820,
+      "sha256": "001a8dbd8fd3d426bb258f2a510e2bb500e5ed48ad62b4491987b5622aa88347"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/082.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/082.log",
+      "bytes": 206,
+      "sha256": "cb27a7a59b0e3ddbd6de6e03e2f18aa894a0839e2f2e5542b7a217e4492fb028"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/083.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/083.log",
+      "bytes": 836,
+      "sha256": "c9ecbafccff2c49de98aef3a10147f1df90e0978fd3b5a5c0014427dfd825db6"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/084.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/084.log",
+      "bytes": 828,
+      "sha256": "a14850dabb05b1acef17a755d27ea500eb6a59e662da76639b7c0709d0e43cd1"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/085.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/085.log",
+      "bytes": 885,
+      "sha256": "e8582069b55eba474bccf132643d77029401d69e7f9c86280e0260038e697b1e"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/086.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/086.log",
+      "bytes": 765,
+      "sha256": "7e5358ddf3f43be5ae857c73ac8f1ff2eb98312f8f356b590c24b460577a1abf"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/087.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/087.log",
+      "bytes": 822,
+      "sha256": "f314d0567e37f83165466812600cfc9d00e1b2fbaf457bf2972a5f54892ba568"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/088.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/088.log",
+      "bytes": 1191,
+      "sha256": "e8a15749337ce37c6cc7d8ac62e7f4c5860612c3269bae2659fe23d0c6a6ba3a"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/089.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/089.log",
+      "bytes": 4706,
+      "sha256": "3aebed19073edf10e24c15c692332f381fd703679d57911a006add766f76f090"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/090.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/090.log",
+      "bytes": 1425,
+      "sha256": "47730156b951a7f27166ffdf02874c16d4956e8081b7ec0fbfc5bce69b981187"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/091.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/091.log",
+      "bytes": 81,
+      "sha256": "9582e552a609b0c07dc16f46032c0a2fd5f23ce343dcd21bed0f30fb3736346f"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/092.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/092.log",
+      "bytes": 188,
+      "sha256": "a36c4c7128bf8677b66040ff90a474bf7dba36000fe2a14dd0155c28ab570f6c"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/093.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/093.log",
+      "bytes": 976,
+      "sha256": "8ff4b8f657e9dc69f8652abe8a1a096391769a4d02d26087641915932b4184fd"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/094.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/094.log",
+      "bytes": 2137,
+      "sha256": "1f1e79d50230d457fc2ed0f7f6b3ec80c7e12db784f76a383af87d9a7a1a16ee"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/095.log",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/095.log",
+      "bytes": 1162,
+      "sha256": "c1e76e3a92ddf2d960a53ff5036556af58e786876254d0a9754d5aeece1002f3"
+    },
+    {
+      "member": "parent/final-gate-r3-inventory/summary.json",
+      "source": "work/monitor-cancellation-20261117/final-gate-r3-inventory/summary.json",
+      "bytes": 757267,
+      "sha256": "e35a4c57a9b7d9bb9962bced47c5ed557fc5732ed70f8cf9676b057e9efc325b"
+    },
+    {
+      "member": "parent/final-gate-summary.json",
+      "source": "work/monitor-cancellation-20261117/final-gate-summary.json",
+      "bytes": 1006,
+      "sha256": "e2d303c429dc41eb8ee087b3b9fceaab0a045fca0ac6f06eeb141bbe947dfba4"
+    },
+    {
+      "member": "parent/final-inventory-r3/command.log",
+      "source": "work/monitor-cancellation-20261117/final-inventory-r3/command.log",
+      "bytes": 2320,
+      "sha256": "bbe63a404ced2eb1a15f8a3a8020d8cf8508c1bafb6d83a78cfe83752c649839"
+    },
+    {
+      "member": "parent/final-inventory-r3/result.json",
+      "source": "work/monitor-cancellation-20261117/final-inventory-r3/result.json",
+      "bytes": 432,
+      "sha256": "b0c51168d8a24b26779def094c771db60e21f649164e50bba3d632fbf3fb8938"
+    },
+    {
+      "member": "parent/format-r1/command.log",
+      "source": "work/monitor-cancellation-20261117/format-r1/command.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "parent/format-r1/result.json",
+      "source": "work/monitor-cancellation-20261117/format-r1/result.json",
+      "bytes": 356,
+      "sha256": "538b6c4949a221218b6097b5d234120901a0b965ed25bc91b5955873d0663933"
+    },
+    {
+      "member": "parent/format-r2/command.log",
+      "source": "work/monitor-cancellation-20261117/format-r2/command.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "parent/format-r2/result.json",
+      "source": "work/monitor-cancellation-20261117/format-r2/result.json",
+      "bytes": 356,
+      "sha256": "cc6e43103576d5f83616f9ae819e9c365fbd63fd5bce489651c390c784699dec"
+    },
+    {
+      "member": "parent/freeze-after-final-gate-r3/command.log",
+      "source": "work/monitor-cancellation-20261117/freeze-after-final-gate-r3/command.log",
+      "bytes": 169,
+      "sha256": "120417175df495371c265ec42110f001994c8eef4d8f16670b80f8b1135aae99"
+    },
+    {
+      "member": "parent/freeze-after-final-gate-r3/result.json",
+      "source": "work/monitor-cancellation-20261117/freeze-after-final-gate-r3/result.json",
+      "bytes": 460,
+      "sha256": "bc17ab312e38de96494969ce68869594d6b22705b974eccec139b22fd45f05ad"
+    },
+    {
+      "member": "parent/freeze-before-final-gate-r1/command.log",
+      "source": "work/monitor-cancellation-20261117/freeze-before-final-gate-r1/command.log",
+      "bytes": 170,
+      "sha256": "a06db926f05871263fecd21a4fbdd0d2783223e66e663276ec9ef4d2661d3b74"
+    },
+    {
+      "member": "parent/freeze-before-final-gate-r1/result.json",
+      "source": "work/monitor-cancellation-20261117/freeze-before-final-gate-r1/result.json",
+      "bytes": 461,
+      "sha256": "885e671a8ac8f7504cbf97c5171fc5e0958cda6b9cccd96c38ed1467b5ca8ffe"
+    },
+    {
+      "member": "parent/freeze-candidate-r1/command.log",
+      "source": "work/monitor-cancellation-20261117/freeze-candidate-r1/command.log",
+      "bytes": 169,
+      "sha256": "a07979de28f1974669d740622685164cd7e9ce3e27be82225b819d0fb1583289"
+    },
+    {
+      "member": "parent/freeze-candidate-r1/result.json",
+      "source": "work/monitor-cancellation-20261117/freeze-candidate-r1/result.json",
+      "bytes": 428,
+      "sha256": "ae99fc2c850e85b0ee56ff1bca7c462e58a9a7b13dfa55dde43db0808660b415"
+    },
+    {
+      "member": "parent/freeze-candidate-r2/command.log",
+      "source": "work/monitor-cancellation-20261117/freeze-candidate-r2/command.log",
+      "bytes": 169,
+      "sha256": "f90ebca279e983de745b584dd71e824cda21787fe6831faec481ce8f2c365d9c"
+    },
+    {
+      "member": "parent/freeze-candidate-r2/result.json",
+      "source": "work/monitor-cancellation-20261117/freeze-candidate-r2/result.json",
+      "bytes": 428,
+      "sha256": "67423126441057f205a8aef434fbf44c609c3d200c500c47a41b746f6a231ba6"
+    },
+    {
+      "member": "parent/freeze-candidate-r3/command.log",
+      "source": "work/monitor-cancellation-20261117/freeze-candidate-r3/command.log",
+      "bytes": 169,
+      "sha256": "fe1b40bcd29d896790f0335bbb50f3b19e59da62b277ccf20ff3e77d0970bf35"
+    },
+    {
+      "member": "parent/freeze-candidate-r3/result.json",
+      "source": "work/monitor-cancellation-20261117/freeze-candidate-r3/result.json",
+      "bytes": 428,
+      "sha256": "a87a848a92349faa26735f5838420acd9bdcfa52654c315b035f03abe1ae40d5"
+    },
+    {
+      "member": "parent/implementation-r1/crates/keelshell-session/src/monitor/capabilities/tests.rs",
+      "source": "work/monitor-cancellation-20261117/implementation-r1/crates/keelshell-session/src/monitor/capabilities/tests.rs",
+      "bytes": 10654,
+      "sha256": "89605379f5215518dc3cd6d61da67aa09c339999e76565bbd88114883461d402"
+    },
+    {
+      "member": "parent/implementation-r1/crates/keelshell-session/src/monitor/capabilities.rs",
+      "source": "work/monitor-cancellation-20261117/implementation-r1/crates/keelshell-session/src/monitor/capabilities.rs",
+      "bytes": 12125,
+      "sha256": "273646f5b3110818a8c05cee1fc6fb913e5e2c3fcf40b1b6f97b875caca42a17"
+    },
+    {
+      "member": "parent/implementation-r1/crates/keelshell-session/src/monitor/platform.rs",
+      "source": "work/monitor-cancellation-20261117/implementation-r1/crates/keelshell-session/src/monitor/platform.rs",
+      "bytes": 7613,
+      "sha256": "48cb6cbd5bc2f4773583bd4c377e02b8c100c863999660f1c4d11a3fec0a0cd8"
+    },
+    {
+      "member": "parent/implementation-r1/crates/keelshell-session/src/monitor.rs",
+      "source": "work/monitor-cancellation-20261117/implementation-r1/crates/keelshell-session/src/monitor.rs",
+      "bytes": 79365,
+      "sha256": "64ffdb03e1602dbc6c2af511cc4dcb5dc707d6296d39a7bb869465cfb1ea0882"
+    },
+    {
+      "member": "parent/inputs.py",
+      "source": "work/monitor-cancellation-20261117/inputs.py",
+      "bytes": 1726,
+      "sha256": "82d991234b85185b6634233640ebfbc58eda5ed4d2ea27ec4cb247cad775a383"
+    },
+    {
+      "member": "parent/monitor-capabilities-green-r1/command.log",
+      "source": "work/monitor-cancellation-20261117/monitor-capabilities-green-r1/command.log",
+      "bytes": 2587,
+      "sha256": "52856fa3888f2368c90432b4efc0bb9dab7383da4766478ec7f680dd462b31ef"
+    },
+    {
+      "member": "parent/monitor-capabilities-green-r1/result.json",
+      "source": "work/monitor-cancellation-20261117/monitor-capabilities-green-r1/result.json",
+      "bytes": 468,
+      "sha256": "398ce7ab3b176dc50edcdec5a4614d35a8de09bf0ff845e16a9a6eedcfe027a5"
+    },
+    {
+      "member": "parent/monitor-focused-green-r1/command.log",
+      "source": "work/monitor-cancellation-20261117/monitor-focused-green-r1/command.log",
+      "bytes": 3392,
+      "sha256": "9b064dfae8a9014245b76c01eb80e7a595cb07c4ebbbbc00f58a8bba6f6f6e0c"
+    },
+    {
+      "member": "parent/monitor-focused-green-r1/result.json",
+      "source": "work/monitor-cancellation-20261117/monitor-focused-green-r1/result.json",
+      "bytes": 487,
+      "sha256": "9a05f96191eea87b7943c1f1fcfbd374dcb04fc4db22e705e0005155f84cb606"
+    },
+    {
+      "member": "parent/monitor-red-control-r1/command.log",
+      "source": "work/monitor-cancellation-20261117/monitor-red-control-r1/command.log",
+      "bytes": 5041,
+      "sha256": "4a4329fa6e54a2a9d5f2c0cacc86cca183207f51d56a2ff53ec38fe7d6931a93"
+    },
+    {
+      "member": "parent/monitor-red-control-r1/result.json",
+      "source": "work/monitor-cancellation-20261117/monitor-red-control-r1/result.json",
+      "bytes": 402,
+      "sha256": "cdd41c1299f0b73cd048c6ed23cf5405832cf02b221f3e550466837fd360a37d"
+    },
+    {
+      "member": "parent/monitor-unit-green-r1/command.log",
+      "source": "work/monitor-cancellation-20261117/monitor-unit-green-r1/command.log",
+      "bytes": 933,
+      "sha256": "db2e13d96619fae79f06c44707b16335912b00c08f31399caff7d6c56937eda2"
+    },
+    {
+      "member": "parent/monitor-unit-green-r1/result.json",
+      "source": "work/monitor-cancellation-20261117/monitor-unit-green-r1/result.json",
+      "bytes": 489,
+      "sha256": "3ae983b4a3ebbd3888618436bd88db58f551fb9f377070fe55dc9ac1c181d418"
+    },
+    {
+      "member": "parent/precommit-inputs-r3.json",
+      "source": "work/monitor-cancellation-20261117/precommit-inputs-r3.json",
+      "bytes": 143209,
+      "sha256": "77f0651a42d1774742d7d14c9b911988a071e485651e7336ae655c4c49195d82"
+    },
+    {
+      "member": "parent/protected-resources-before.json",
+      "source": "work/monitor-cancellation-20261117/protected-resources-before.json",
+      "bytes": 2122,
+      "sha256": "d86e211d31ab098ccedd80d4da37d987371589b42773d232b753ff0ba14f0172"
+    },
+    {
+      "member": "parent/protected-resources-wide-before.json",
+      "source": "work/monitor-cancellation-20261117/protected-resources-wide-before.json",
+      "bytes": 2566,
+      "sha256": "3b1bde158f960d593701202268013e6c8a28bf59d2df90223f61273a84f82ef2"
+    },
+    {
+      "member": "parent/red-control-result.json",
+      "source": "work/monitor-cancellation-20261117/red-control-result.json",
+      "bytes": 349,
+      "sha256": "54f879751ba2659d8714da8ce093ff27ced0616c6f4e3b90726cea7512db8631"
+    },
+    {
+      "member": "parent/red_control.py",
+      "source": "work/monitor-cancellation-20261117/red_control.py",
+      "bytes": 2255,
+      "sha256": "781dc0da95256d98853e275507da9d71507abd841beb5c8f828a35559b60dcfa"
+    },
+    {
+      "member": "parent/reviewer-binary-cleanup.json",
+      "source": "work/monitor-cancellation-20261117/reviewer-binary-cleanup.json",
+      "bytes": 668,
+      "sha256": "470c7abb457d0b4ec925c62055cf9b09e1cd8b4a7cb99a1168407e55b381b0bc"
+    },
+    {
+      "member": "parent/run.py",
+      "source": "work/monitor-cancellation-20261117/run.py",
+      "bytes": 1720,
+      "sha256": "a04a95d4cb34450a37d19790a597f11c9e1417e8cc9d9fbd8efe7410353962fd"
+    },
+    {
+      "member": "parent/session-clippy-r2/command.log",
+      "source": "work/monitor-cancellation-20261117/session-clippy-r2/command.log",
+      "bytes": 358,
+      "sha256": "92b1bd5bc1a37dbc2cf8649c02bbb0b6582a8638ba0f4d294a70ecb4c4d81091"
+    },
+    {
+      "member": "parent/session-clippy-r2/result.json",
+      "source": "work/monitor-cancellation-20261117/session-clippy-r2/result.json",
+      "bytes": 454,
+      "sha256": "ae26b1230623f9360567361de38921bb921e625b0ace9c67c1a860f4bbec9aa0"
+    },
+    {
+      "member": "parent/traceroute-fixture-before.json",
+      "source": "work/monitor-cancellation-20261117/traceroute-fixture-before.json",
+      "bytes": 263,
+      "sha256": "4cec5ba7592e788798816ce5628abd7890ef55179de3320942819c7826155351"
+    },
+    {
+      "member": "parent/traceroute-fixture-before.py",
+      "source": "work/monitor-cancellation-20261117/traceroute-fixture-before.py",
+      "bytes": 15513,
+      "sha256": "e296acd311758166ef11de016bcbc2c54017bcdb7a0b488f29ed1a2921679e4a"
+    },
+    {
+      "member": "parent/traceroute-fixture-focused-r1/command.log",
+      "source": "work/monitor-cancellation-20261117/traceroute-fixture-focused-r1/command.log",
+      "bytes": 113,
+      "sha256": "959a2821cdffb0fd737cce0eee67d5acac3cd96a82a83cf007b177a96294786e"
+    },
+    {
+      "member": "parent/traceroute-fixture-focused-r1/result.json",
+      "source": "work/monitor-cancellation-20261117/traceroute-fixture-focused-r1/result.json",
+      "bytes": 444,
+      "sha256": "d7152643b81265dc603239a3bf54cd18f1ffe48e8bc7e151b7dfc3258c211a24"
+    },
+    {
+      "member": "parent/verify_gate_inventory.previous.py",
+      "source": "work/monitor-cancellation-20261117/verify_gate_inventory.previous.py",
+      "bytes": 4848,
+      "sha256": "d2c38393f6a28e33bc788876fcb3a08c6ab152a25500ca6d7a0e97cdd52f6e51"
+    },
+    {
+      "member": "parent/verify_gate_inventory.py",
+      "source": "work/monitor-cancellation-20261117/verify_gate_inventory.py",
+      "bytes": 4853,
+      "sha256": "238ecb37bfe1a492775eceba17ac869b8e535bc558f68a3074dc464aa7a8321d"
+    }
+  ]
+}

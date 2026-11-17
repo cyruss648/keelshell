@@ -1,0 +1,392 @@
+{
+  "schema_version": 1,
+  "members": 63,
+  "logical_bytes": 3160238,
+  "bytes": 419259,
+  "sha256": "268dc58292505c99ce4f81a2a5fcc57231814d905ae962ed6dc40400f99a1f92",
+  "excluded": [
+    "work/monitor-cancellation-review-20261117/bin",
+    "work/monitor-cancellation-review-20261117/home",
+    "work/monitor-cancellation-review-20261117/tmp"
+  ],
+  "files": [
+    {
+      "member": "review/REVIEW.md",
+      "source": "work/monitor-cancellation-review-20261117/REVIEW.md",
+      "bytes": 17147,
+      "sha256": "20c19e47afc6f99e8679dc5823985f258a16558a941d9bdebb92aaf1ee1d7b32"
+    },
+    {
+      "member": "review/SHA256MANIFEST.json",
+      "source": "work/monitor-cancellation-review-20261117/SHA256MANIFEST.json",
+      "bytes": 10440,
+      "sha256": "cd00c2d3fbaaef2e39e9a644ac9ac3c312a91f4f7d3af588652c8b4ce58ffecd"
+    },
+    {
+      "member": "review/audit.py",
+      "source": "work/monitor-cancellation-review-20261117/audit.py",
+      "bytes": 4206,
+      "sha256": "c451e16eb294cbd7d71267ff3f6b6cfbf401e4d23e5322ba88aeaed686434acd"
+    },
+    {
+      "member": "review/binary-copies.json",
+      "source": "work/monitor-cancellation-review-20261117/binary-copies.json",
+      "bytes": 2929,
+      "sha256": "fe0c088e106240061505faa485ace6f2beda7567ef76adcb09350ded842337db"
+    },
+    {
+      "member": "review/binary-final.jsonl",
+      "source": "work/monitor-cancellation-review-20261117/binary-final.jsonl",
+      "bytes": 3012,
+      "sha256": "20dc11a86820a54d2ba0df6c4b5c0b0be4ff0a0eb45a16a11c9b6895d93fdc12"
+    },
+    {
+      "member": "review/binary-precopy.json",
+      "source": "work/monitor-cancellation-review-20261117/binary-precopy.json",
+      "bytes": 2143,
+      "sha256": "f1dc097d9c4d4fbf81e9d626ce4f34bbefc8a5d7dde7c1e08c9129d444596f28"
+    },
+    {
+      "member": "review/candidate-inputs-r1.json",
+      "source": "work/monitor-cancellation-review-20261117/candidate-inputs-r1.json",
+      "bytes": 143209,
+      "sha256": "cb8b38e4fe3f9006fcdb864777e295c0c2433c097f027e4c0354371912bee0a5"
+    },
+    {
+      "member": "review/candidate-inputs-r2.json",
+      "source": "work/monitor-cancellation-review-20261117/candidate-inputs-r2.json",
+      "bytes": 143209,
+      "sha256": "a27a0d6d6a353399b738c9c08116843e820faf801f1915666bf978a13cfa4cfe"
+    },
+    {
+      "member": "review/checks-r1-during-update.json",
+      "source": "work/monitor-cancellation-review-20261117/checks-r1-during-update.json",
+      "bytes": 23271,
+      "sha256": "1a1e8c1389a35477632015490612980ce2612a408b62bf32bb12d385cf94f275"
+    },
+    {
+      "member": "review/checks.json",
+      "source": "work/monitor-cancellation-review-20261117/checks.json",
+      "bytes": 27043,
+      "sha256": "177ad1ec00dbd2d47492a02f0067fee85e0f8d12298223148dd5822bda3ee4b3"
+    },
+    {
+      "member": "review/commands.json",
+      "source": "work/monitor-cancellation-review-20261117/commands.json",
+      "bytes": 20577,
+      "sha256": "4b62cb9b3e642fa8f3a4ace4d7caf8351748d743a0fc2a609e0b5313841bbb76"
+    },
+    {
+      "member": "review/commands.jsonl",
+      "source": "work/monitor-cancellation-review-20261117/commands.jsonl",
+      "bytes": 13674,
+      "sha256": "079bc08dedc73c33ddc6ba582aa9fa598276b974fa5c9516d72ade5d984e3329"
+    },
+    {
+      "member": "review/decision.json",
+      "source": "work/monitor-cancellation-review-20261117/decision.json",
+      "bytes": 1891,
+      "sha256": "ddd7b0c4872a757d3ef2bae34098a1968889aa4a2588cd348918b8586a537cd1"
+    },
+    {
+      "member": "review/inputs-before.json",
+      "source": "work/monitor-cancellation-review-20261117/inputs-before.json",
+      "bytes": 143298,
+      "sha256": "ea0b05570964bd7f42d9dbae090f5db5caea584a9a7f0bd5a5584e721b9f45e7"
+    },
+    {
+      "member": "review/inputs-final-r2.json",
+      "source": "work/monitor-cancellation-review-20261117/inputs-final-r2.json",
+      "bytes": 143450,
+      "sha256": "c6e71baacc4f9b1d58e9dfe868b3efe755b20df4446be39b4cf04fbdd057c4c3"
+    },
+    {
+      "member": "review/integration-test-delta.json",
+      "source": "work/monitor-cancellation-review-20261117/integration-test-delta.json",
+      "bytes": 1553,
+      "sha256": "9336ccfee68b7924e67308e32a05c17d68afdbbfa200e6dc8bb33add5642aa29"
+    },
+    {
+      "member": "review/logs/0161-monitor-read-cancellation.md.txt",
+      "source": "work/monitor-cancellation-review-20261117/logs/0161-monitor-read-cancellation.md.txt",
+      "bytes": 2149,
+      "sha256": "a84ace3e741ae977dd948974c64d36197e81d0afe65ef92b2c95edc432319e00"
+    },
+    {
+      "member": "review/logs/2026-11-17-monitor-read-cancellation.md.txt",
+      "source": "work/monitor-cancellation-review-20261117/logs/2026-11-17-monitor-read-cancellation.md.txt",
+      "bytes": 3886,
+      "sha256": "b641f3a5d1b52e0a1619ca93128084708ff70347c9f1bb1df4a84fcafe5cc281"
+    },
+    {
+      "member": "review/logs/MONITOR_CAPABILITIES.md.txt",
+      "source": "work/monitor-cancellation-review-20261117/logs/MONITOR_CAPABILITIES.md.txt",
+      "bytes": 7759,
+      "sha256": "88c0501e5d3b2d95ec5375d1511b041aa00ae6ab8c8c7462136cb738be44490c"
+    },
+    {
+      "member": "review/logs/WINDOWS_MONITORING.md.txt",
+      "source": "work/monitor-cancellation-review-20261117/logs/WINDOWS_MONITORING.md.txt",
+      "bytes": 5927,
+      "sha256": "b15fe77e4b63fff1f41226c09faec7c89b871fb1bc59d1e53cfd1708b09033e8"
+    },
+    {
+      "member": "review/logs/base-source-0.log",
+      "source": "work/monitor-cancellation-review-20261117/logs/base-source-0.log",
+      "bytes": 78741,
+      "sha256": "931ac018e003317f07f7de2266e5d467c036609d83c907918e8f5b51a8ef1279"
+    },
+    {
+      "member": "review/logs/base-source-1.log",
+      "source": "work/monitor-cancellation-review-20261117/logs/base-source-1.log",
+      "bytes": 11541,
+      "sha256": "052827cbffde222b2b8bf894cdf78328168a9dd90800fdd5432b85dae15e8a0e"
+    },
+    {
+      "member": "review/logs/base-source-2.log",
+      "source": "work/monitor-cancellation-review-20261117/logs/base-source-2.log",
+      "bytes": 7061,
+      "sha256": "6c14b3dec6cd1dd71f46672ee92f38fe3f9137f40fc20833516231ad42b30cef"
+    },
+    {
+      "member": "review/logs/base-source-3.log",
+      "source": "work/monitor-cancellation-review-20261117/logs/base-source-3.log",
+      "bytes": 8842,
+      "sha256": "bbedbf6265a46461362bec07d15e55baa3691c3810353013c7897b5b3e7dba42"
+    },
+    {
+      "member": "review/logs/base-source-4.log",
+      "source": "work/monitor-cancellation-review-20261117/logs/base-source-4.log",
+      "bytes": 26767,
+      "sha256": "084205c33cb0e7cd38af4fb900c5ed1ab796f124a6c710fe03811b634b62c284"
+    },
+    {
+      "member": "review/logs/base-source-5.log",
+      "source": "work/monitor-cancellation-review-20261117/logs/base-source-5.log",
+      "bytes": 67254,
+      "sha256": "4d63d7ad0ec131cf9321d4d83a55736393ce778c956fb0f2cabdee900734776a"
+    },
+    {
+      "member": "review/logs/base-source-6.log",
+      "source": "work/monitor-cancellation-review-20261117/logs/base-source-6.log",
+      "bytes": 8627,
+      "sha256": "d1f89dd1c86ba161d03c7b7fa9279c5ced59d04a77d36fc3b54714aad3fa16aa"
+    },
+    {
+      "member": "review/logs/before-head.log",
+      "source": "work/monitor-cancellation-review-20261117/logs/before-head.log",
+      "bytes": 41,
+      "sha256": "6e12f588f90c8e8f7bf74cf12f3f0df0ad2df2d6e799133cad4e12211a3df6db"
+    },
+    {
+      "member": "review/logs/before-names.log",
+      "source": "work/monitor-cancellation-review-20261117/logs/before-names.log",
+      "bytes": 1006353,
+      "sha256": "4e9f7cdca16e0a36e6c21af79af3c8d7fb2f084b01466786d58c34731f7be749"
+    },
+    {
+      "member": "review/logs/candidate-diff.log",
+      "source": "work/monitor-cancellation-review-20261117/logs/candidate-diff.log",
+      "bytes": 48242,
+      "sha256": "0d232ee08084a43c40ad13ab703abd12fb4524f6bdcebaae9e0caf259a54e6d0"
+    },
+    {
+      "member": "review/logs/capabilities.log",
+      "source": "work/monitor-cancellation-review-20261117/logs/capabilities.log",
+      "bytes": 2211,
+      "sha256": "31e94b40c440a780cb841f2c187fbd69a8ce48e5326724ff3cf0a660ea036ca7"
+    },
+    {
+      "member": "review/logs/changed-names-before.log",
+      "source": "work/monitor-cancellation-review-20261117/logs/changed-names-before.log",
+      "bytes": 383,
+      "sha256": "d816b0eeef153797f80736f477563be47a895697494e7127ea13165947f1b052"
+    },
+    {
+      "member": "review/logs/darwin-ssh-regression-r1-parent.log",
+      "source": "work/monitor-cancellation-review-20261117/logs/darwin-ssh-regression-r1-parent.log",
+      "bytes": 317,
+      "sha256": "bba87c735f5c744347ef77fb3211c72a0a31db1272ac7e3f397ee1da4230c863"
+    },
+    {
+      "member": "review/logs/final-gate-r1-command.log",
+      "source": "work/monitor-cancellation-review-20261117/logs/final-gate-r1-command.log",
+      "bytes": 10493,
+      "sha256": "e66d4084f5837a21166529abc866471824a6653ea4a8a680a7b3f8152e490537"
+    },
+    {
+      "member": "review/logs/final-gate-r1-result.json",
+      "source": "work/monitor-cancellation-review-20261117/logs/final-gate-r1-result.json",
+      "bytes": 369,
+      "sha256": "a00d35622e4af46844c5dc8c6c4ae15c2cd42f27f0f0259913e31ecb4695eac0"
+    },
+    {
+      "member": "review/logs/final-r2-head.log",
+      "source": "work/monitor-cancellation-review-20261117/logs/final-r2-head.log",
+      "bytes": 41,
+      "sha256": "6e12f588f90c8e8f7bf74cf12f3f0df0ad2df2d6e799133cad4e12211a3df6db"
+    },
+    {
+      "member": "review/logs/final-r2-names.log",
+      "source": "work/monitor-cancellation-review-20261117/logs/final-r2-names.log",
+      "bytes": 1006833,
+      "sha256": "d59752ef938e32480bd73b9916ede09efd80b3456e4320a9902f5d0574d7d112"
+    },
+    {
+      "member": "review/logs/format-r2-command.log",
+      "source": "work/monitor-cancellation-review-20261117/logs/format-r2-command.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "review/logs/format-r2-result.json",
+      "source": "work/monitor-cancellation-review-20261117/logs/format-r2-result.json",
+      "bytes": 356,
+      "sha256": "cc6e43103576d5f83616f9ae819e9c365fbd63fd5bce489651c390c784699dec"
+    },
+    {
+      "member": "review/logs/integration-ignored-inventory.log",
+      "source": "work/monitor-cancellation-review-20261117/logs/integration-ignored-inventory.log",
+      "bytes": 85,
+      "sha256": "75544c78bdd757c8aca609d7e9d2a04d4e8203b8267369648c87671c4fc54316"
+    },
+    {
+      "member": "review/logs/inventory-monitor-capabilities-green-r1.log",
+      "source": "work/monitor-cancellation-review-20261117/logs/inventory-monitor-capabilities-green-r1.log",
+      "bytes": 40903,
+      "sha256": "a471526d353a6f88b24235de8803f7de21b933805ade8655f8e4224a9bd6b1c7"
+    },
+    {
+      "member": "review/logs/inventory-monitor-focused-green-r1.log",
+      "source": "work/monitor-cancellation-review-20261117/logs/inventory-monitor-focused-green-r1.log",
+      "bytes": 1401,
+      "sha256": "cf3471e36a93bb8a799d9f9b855ede5420d4b9cb55b096a819ecf839c6bdba6b"
+    },
+    {
+      "member": "review/logs/lib-ignored-inventory.log",
+      "source": "work/monitor-cancellation-review-20261117/logs/lib-ignored-inventory.log",
+      "bytes": 484,
+      "sha256": "e7fd735128457261e1c1a467f6f4a12acdda86efced02b4840133909c873c522"
+    },
+    {
+      "member": "review/logs/monitor-capabilities-green-r1-parent.log",
+      "source": "work/monitor-cancellation-review-20261117/logs/monitor-capabilities-green-r1-parent.log",
+      "bytes": 2587,
+      "sha256": "52856fa3888f2368c90432b4efc0bb9dab7383da4766478ec7f680dd462b31ef"
+    },
+    {
+      "member": "review/logs/monitor-focused-green-r1-parent.log",
+      "source": "work/monitor-cancellation-review-20261117/logs/monitor-focused-green-r1-parent.log",
+      "bytes": 3392,
+      "sha256": "9b064dfae8a9014245b76c01eb80e7a595cb07c4ebbbbc00f58a8bba6f6f6e0c"
+    },
+    {
+      "member": "review/logs/monitor-red-control-r1-parent.log",
+      "source": "work/monitor-cancellation-review-20261117/logs/monitor-red-control-r1-parent.log",
+      "bytes": 5041,
+      "sha256": "4a4329fa6e54a2a9d5f2c0cacc86cca183207f51d56a2ff53ec38fe7d6931a93"
+    },
+    {
+      "member": "review/logs/platform.log",
+      "source": "work/monitor-cancellation-review-20261117/logs/platform.log",
+      "bytes": 527,
+      "sha256": "d2d1c587940e26179b986302a12b49afbc6647ef102acebd5472684620595cc3"
+    },
+    {
+      "member": "review/logs/session-clippy-r2-command.log",
+      "source": "work/monitor-cancellation-review-20261117/logs/session-clippy-r2-command.log",
+      "bytes": 358,
+      "sha256": "92b1bd5bc1a37dbc2cf8649c02bbb0b6582a8638ba0f4d294a70ecb4c4d81091"
+    },
+    {
+      "member": "review/logs/session-clippy-r2-result.json",
+      "source": "work/monitor-cancellation-review-20261117/logs/session-clippy-r2-result.json",
+      "bytes": 454,
+      "sha256": "ae26b1230623f9360567361de38921bb921e625b0ace9c67c1a860f4bbec9aa0"
+    },
+    {
+      "member": "review/logs/status-before.log",
+      "source": "work/monitor-cancellation-review-20261117/logs/status-before.log",
+      "bytes": 789,
+      "sha256": "0504e157c384abe41d1e52d7e2f988f3b0de09c53ad89d69f840e3ac01d274ef"
+    },
+    {
+      "member": "review/logs/status-final.log",
+      "source": "work/monitor-cancellation-review-20261117/logs/status-final.log",
+      "bytes": 1284,
+      "sha256": "568b4fac2db040c8f36883c5d51bbd0d5d79b4a1fcf55d9bf336e73d25d4bf0d"
+    },
+    {
+      "member": "review/logs/tokio-notify-reference.txt",
+      "source": "work/monitor-cancellation-review-20261117/logs/tokio-notify-reference.txt",
+      "bytes": 50373,
+      "sha256": "e3f395913051b554ff3b791d17ce75d0200d7dcac156e64abce079a8f0c276ad"
+    },
+    {
+      "member": "review/logs/unit-r1-r2.diff",
+      "source": "work/monitor-cancellation-review-20261117/logs/unit-r1-r2.diff",
+      "bytes": 1655,
+      "sha256": "341f9d506eb9c2022796885d835dd0d574eda83a4c3d6e13a397091d4178e71a"
+    },
+    {
+      "member": "review/logs/whitespace-final.log",
+      "source": "work/monitor-cancellation-review-20261117/logs/whitespace-final.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "review/logs/whitespace.log",
+      "source": "work/monitor-cancellation-review-20261117/logs/whitespace.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "review/parent-evidence.json",
+      "source": "work/monitor-cancellation-review-20261117/parent-evidence.json",
+      "bytes": 2806,
+      "sha256": "528af1e56532b1c0d249d1edf58bb1abf38296ea0bf765b59e8edfcb3b014935"
+    },
+    {
+      "member": "review/r1-r2-binding.json",
+      "source": "work/monitor-cancellation-review-20261117/r1-r2-binding.json",
+      "bytes": 938,
+      "sha256": "d52a122179544e150c2b2f76f01b5a743797eac352576659bdf025d8862b56f6"
+    },
+    {
+      "member": "review/readonly.sb",
+      "source": "work/monitor-cancellation-review-20261117/readonly.sb",
+      "bytes": 227,
+      "sha256": "f49fb06cc40cab7c688264398432e499d288574d64be093ff0bd3a16d7ae1d25"
+    },
+    {
+      "member": "review/source-comparison.json",
+      "source": "work/monitor-cancellation-review-20261117/source-comparison.json",
+      "bytes": 1911,
+      "sha256": "5ac47441040e2abee12e0f4fd3d5c2e622a732428c7d3fc2742dd26569631a31"
+    },
+    {
+      "member": "review/source-review.json",
+      "source": "work/monitor-cancellation-review-20261117/source-review.json",
+      "bytes": 8015,
+      "sha256": "e430e22cfbb31d98fd5bafc162ade59c7198b70006a5045e010f444529ccd7b0"
+    },
+    {
+      "member": "review/unit-r1-source.rs",
+      "source": "work/monitor-cancellation-review-20261117/unit-r1-source.rs",
+      "bytes": 10654,
+      "sha256": "89605379f5215518dc3cd6d61da67aa09c339999e76565bbd88114883461d402"
+    },
+    {
+      "member": "review/unit-r2-source-observed.rs",
+      "source": "work/monitor-cancellation-review-20261117/unit-r2-source-observed.rs",
+      "bytes": 10786,
+      "sha256": "755d20775e715addacc3e65e7055b967f1818037d669158ccbfd31e787997553"
+    },
+    {
+      "member": "review/verify.py",
+      "source": "work/monitor-cancellation-review-20261117/verify.py",
+      "bytes": 10323,
+      "sha256": "e9d3426e8b7d30e8172f95d8b06686d71b489586fd4b05f1d7079466038688f1"
+    }
+  ]
+}

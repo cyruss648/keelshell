@@ -1,6 +1,67 @@
 use super::*;
 use crate::monitor::{Snapshot, tests::SAMPLE};
 
+#[tokio::test]
+async fn invalidation_before_first_poll_still_cancels_the_old_generation() {
+    let cache = CapabilityCache::default();
+    let (generation, _) = cache.begin(Capability::Resources).await;
+    let waiting = cache.wait_invalidated(generation);
+    cache.invalidate_pending();
+    cache.invalidate_pending();
+    assert!(
+        tokio::time::timeout(std::time::Duration::from_secs(1), waiting)
+            .await
+            .is_ok(),
+        "invalidation must remain observable before registration"
+    );
+}
+
+#[tokio::test]
+async fn invalidation_wakes_all_registered_readers_but_not_the_new_generation() {
+    use std::{
+        future::Future as _,
+        task::{Context, Poll, Waker},
+    };
+
+    let cache = CapabilityCache::default();
+    let (generation, _) = cache.begin(Capability::Resources).await;
+    let mut readers: Vec<_> = (0..32)
+        .map(|_| Box::pin(cache.wait_invalidated(generation)))
+        .collect();
+    for reader in &mut readers {
+        assert!(matches!(
+            reader
+                .as_mut()
+                .poll(&mut Context::from_waker(Waker::noop())),
+            Poll::Pending
+        ));
+    }
+    cache.invalidate_pending();
+    for reader in readers {
+        assert!(
+            tokio::time::timeout(std::time::Duration::from_secs(1), reader)
+                .await
+                .is_ok(),
+            "every registered reader must observe revocation"
+        );
+    }
+    let (current, _) = cache.begin(Capability::Resources).await;
+    let mut reader = Box::pin(cache.wait_invalidated(current));
+    assert!(matches!(
+        reader
+            .as_mut()
+            .poll(&mut Context::from_waker(Waker::noop())),
+        Poll::Pending
+    ));
+    cache.invalidate_pending();
+    assert!(
+        tokio::time::timeout(std::time::Duration::from_secs(1), reader)
+            .await
+            .is_ok(),
+        "new generation cancels only on its own revocation"
+    );
+}
+
 fn with_capacity(body: &str, status: &str) -> String {
     let core = SAMPLE
         .split_once("@@KS:df@@")

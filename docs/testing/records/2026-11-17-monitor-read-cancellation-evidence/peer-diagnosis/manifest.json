@@ -1,0 +1,503 @@
+{
+  "schema_version": 1,
+  "members": 81,
+  "logical_bytes": 202880,
+  "bytes": 50725,
+  "sha256": "e8e4fc6c9f1edce224f59b03e8bdfafad0d71b2d93a8cd2040ca0a26e55c7c47",
+  "excluded": [
+    "work/zmodem-empty-peer-diagnosis-20261117/commands/protocol-and-completion-excerpts.stdout",
+    "work/zmodem-empty-peer-diagnosis-20261117/commands/protocol-locations.stdout",
+    "work/zmodem-empty-peer-diagnosis-20261117/commands/source-excerpts.stdout",
+    "work/zmodem-empty-peer-diagnosis-20261117/commands/source-locations.stdout",
+    "work/zmodem-empty-peer-diagnosis-20261117/commands/zero-data-send-excerpt.stdout",
+    "work/zmodem-empty-peer-diagnosis-20261117/downloads"
+  ],
+  "files": [
+    {
+      "member": "diagnosis/REPORT.md",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/REPORT.md",
+      "bytes": 11069,
+      "sha256": "c7caf50a74a54caf76b2d1792232d32cfa94cc9fefbbcf0f83040fd260d7a384"
+    },
+    {
+      "member": "diagnosis/archive-readback.json",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/archive-readback.json",
+      "bytes": 2113,
+      "sha256": "262dd830c6ed43d054d0449289ab9ef569a77a89b41eaa42644761c6f2951b3b"
+    },
+    {
+      "member": "diagnosis/archive-selected-read.json",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/archive-selected-read.json",
+      "bytes": 3612,
+      "sha256": "68685563f18ef2d67d8429b902f93dbb0a99a6ba0f3b851f487ebcd096423af2"
+    },
+    {
+      "member": "diagnosis/archived-receipts/parent/mac-sexyz-r7/result.json",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/archived-receipts/parent/mac-sexyz-r7/result.json",
+      "bytes": 2829,
+      "sha256": "908a25c67a0db042d1306f205bffb66da9af253e25d8bf43d3672482ddb541dd"
+    },
+    {
+      "member": "diagnosis/archived-receipts/parent/mac-sexyz-r7/tests.log",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/archived-receipts/parent/mac-sexyz-r7/tests.log",
+      "bytes": 8950,
+      "sha256": "5f405842fe265e604391479210059fcaf5931996bbb02e6bcad2e9b1c33b9177"
+    },
+    {
+      "member": "diagnosis/archived-receipts/parent/protocol-reference-r1.json",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/archived-receipts/parent/protocol-reference-r1.json",
+      "bytes": 519,
+      "sha256": "559d9fd0ab38718e871e2b77ec66b1c0d9b4c4688ddb7510a9db082e505ab367"
+    },
+    {
+      "member": "diagnosis/archived-receipts/sexyz-preparation/README.md",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/archived-receipts/sexyz-preparation/README.md",
+      "bytes": 15894,
+      "sha256": "2a45ddbee5ae5af9113c7779473245959f060be5531968312b6cb640253b92cb"
+    },
+    {
+      "member": "diagnosis/archived-receipts/sexyz-preparation/evidence/final-audit.json",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/archived-receipts/sexyz-preparation/evidence/final-audit.json",
+      "bytes": 3155,
+      "sha256": "b30aeb2dd67e7797e268a296e6dca607ddfc7a40116af7760763e3b203af1a5b"
+    },
+    {
+      "member": "diagnosis/archived-receipts/sexyz-preparation/logs/upstream-archive-fetch-r1.json",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/archived-receipts/sexyz-preparation/logs/upstream-archive-fetch-r1.json",
+      "bytes": 1579,
+      "sha256": "1bf63db9b35e7b23835043358770fd91a721ecc8a7182a968adffa61951d30fa"
+    },
+    {
+      "member": "diagnosis/archived-receipts/sexyz-preparation/logs/upstream-commit-fetch-r1.json",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/archived-receipts/sexyz-preparation/logs/upstream-commit-fetch-r1.json",
+      "bytes": 1575,
+      "sha256": "c48653301579e98fdc553068da158cb9498bb35506fd50ddd1a1bda361a2911f"
+    },
+    {
+      "member": "diagnosis/archived-receipts/sexyz-preparation/logs/upstream-head-r1.json",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/archived-receipts/sexyz-preparation/logs/upstream-head-r1.json",
+      "bytes": 1396,
+      "sha256": "18f11aaa0b5b3c49146ff9ca38d6e0a049bafa31bc2264d40ce4e9cd2fd99c7a"
+    },
+    {
+      "member": "diagnosis/archived-receipts/sexyz-preparation/peer.json",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/archived-receipts/sexyz-preparation/peer.json",
+      "bytes": 8130,
+      "sha256": "24dbc5be16fb1d3f7ebd226878c061b5e055b88c2b21efb0e2d2bb8a0d1d24a1"
+    },
+    {
+      "member": "diagnosis/archived-source-baseline-selection.json",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/archived-source-baseline-selection.json",
+      "bytes": 572,
+      "sha256": "e17bb4f5abec28745d11641fd901d0c0ab79fd520a490dad87638f35e496e45e"
+    },
+    {
+      "member": "diagnosis/audit.py",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/audit.py",
+      "bytes": 2111,
+      "sha256": "9faa59b05f0735176602048971bf9ee6d7168e654ffce4e9e9908d97298cb3cf"
+    },
+    {
+      "member": "diagnosis/commands/archive-selected-read.json",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/archive-selected-read.json",
+      "bytes": 536,
+      "sha256": "b06cc76ffd6587c092b7bf4c2a19a0edb45498692040f0ea93d3364010c3b157"
+    },
+    {
+      "member": "diagnosis/commands/archive-selected-read.stderr",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/archive-selected-read.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "diagnosis/commands/archive-selected-read.stdout",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/archive-selected-read.stdout",
+      "bytes": 19732,
+      "sha256": "7d5cd9316caebda28196c7fe2022afbbbb22e311a0e152b99f5805700cf07f12"
+    },
+    {
+      "member": "diagnosis/commands/archived-r7-and-baseline.json",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/archived-r7-and-baseline.json",
+      "bytes": 542,
+      "sha256": "1131a7e55ce2881a53acbc1d8272482e611bad3161244cd655b9d7023a50e641"
+    },
+    {
+      "member": "diagnosis/commands/archived-r7-and-baseline.stderr",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/archived-r7-and-baseline.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "diagnosis/commands/archived-r7-and-baseline.stdout",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/archived-r7-and-baseline.stdout",
+      "bytes": 6856,
+      "sha256": "cdcdf42579148bd34c6174d85327741328f22acf48fdef0e2e0b9d8ebd7f6416"
+    },
+    {
+      "member": "diagnosis/commands/auxiliary-locations.json",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/auxiliary-locations.json",
+      "bytes": 838,
+      "sha256": "8efa58ba45488fdfa4978c8394415b6684bbb3d83e255edb351fd2c56f0f630e"
+    },
+    {
+      "member": "diagnosis/commands/auxiliary-locations.stderr",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/auxiliary-locations.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "diagnosis/commands/auxiliary-locations.stdout",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/auxiliary-locations.stdout",
+      "bytes": 6248,
+      "sha256": "064f0c8d707c0609cb7d76888205c74c647c5b8bcb72c9eefd84cd13acb4d29b"
+    },
+    {
+      "member": "diagnosis/commands/fetch-protocol-r2.json",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/fetch-protocol-r2.json",
+      "bytes": 1170,
+      "sha256": "47bb21c92fa7940433046c97c5dc7276a2a0b5c3e75e0158b14389e8abfd8d7e"
+    },
+    {
+      "member": "diagnosis/commands/fetch-protocol-r2.stderr",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/fetch-protocol-r2.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "diagnosis/commands/fetch-protocol-r2.stdout",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/fetch-protocol-r2.stdout",
+      "bytes": 142,
+      "sha256": "6b16d279b9b97ece86b63d55d37c2500b2a1ea66a3dc312aadc64c743e2f47b2"
+    },
+    {
+      "member": "diagnosis/commands/fetch-sexyz-c.json",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/fetch-sexyz-c.json",
+      "bytes": 1053,
+      "sha256": "5b0365f8e0f6ddc7760932b50dca11bfc2c4ca8afa53b1d222f0d4eca5b8c617"
+    },
+    {
+      "member": "diagnosis/commands/fetch-sexyz-c.stderr",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/fetch-sexyz-c.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "diagnosis/commands/fetch-sexyz-c.stdout",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/fetch-sexyz-c.stdout",
+      "bytes": 16668,
+      "sha256": "1ebc480fdb57c40ede8bb92295f60fceea3fcba73c9b86f4dadaa284f996e2eb"
+    },
+    {
+      "member": "diagnosis/commands/fetch-zmodem-c.json",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/fetch-zmodem-c.json",
+      "bytes": 1060,
+      "sha256": "08030fb51a26d260180c75212ead1344403dd3bdcc17a367c16505ddd22e2c3b"
+    },
+    {
+      "member": "diagnosis/commands/fetch-zmodem-c.stderr",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/fetch-zmodem-c.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "diagnosis/commands/fetch-zmodem-c.stdout",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/fetch-zmodem-c.stdout",
+      "bytes": 16673,
+      "sha256": "eb59058e21b6ff9f09c8dea93f0c55d5f22935bc4a15a3e5ee2675bdc270d5eb"
+    },
+    {
+      "member": "diagnosis/commands/fetch-zmodem-h.json",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/fetch-zmodem-h.json",
+      "bytes": 1060,
+      "sha256": "d4d7726da81325b97d71f566eecedea32deeebb6d5c241fc064a00cb375b0ebb"
+    },
+    {
+      "member": "diagnosis/commands/fetch-zmodem-h.stderr",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/fetch-zmodem-h.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "diagnosis/commands/fetch-zmodem-h.stdout",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/fetch-zmodem-h.stdout",
+      "bytes": 16672,
+      "sha256": "a6dd4d982cc9214efb2f8d17db820c15b7220b214533f80ef92ee85ad6f0f2e7"
+    },
+    {
+      "member": "diagnosis/commands/fetch-zmodem-wip-20261004-txt.json",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/fetch-zmodem-wip-20261004-txt.json",
+      "bytes": 1071,
+      "sha256": "f684a7c0f8299aa39babc396882bef3f51e07c62aaaa7da9303ddc5169b535f0"
+    },
+    {
+      "member": "diagnosis/commands/fetch-zmodem-wip-20261004-txt.stderr",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/fetch-zmodem-wip-20261004-txt.stderr",
+      "bytes": 85,
+      "sha256": "ef4ee73c6ea6ee820562d728c0cab96494e2d79ef37c332b822c363fb970f62a"
+    },
+    {
+      "member": "diagnosis/commands/fetch-zmodem-wip-20261004-txt.stdout",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/fetch-zmodem-wip-20261004-txt.stdout",
+      "bytes": 1641,
+      "sha256": "b0b2142d7bcf3bb71094672f849ed07d401ffa2f8b85d688ca0b70e27ad92449"
+    },
+    {
+      "member": "diagnosis/commands/final-readback.json",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/final-readback.json",
+      "bytes": 657,
+      "sha256": "fcfa495862a3534e9367b66f203e63d26d70e279e68e90d3bfa70df5675ace28"
+    },
+    {
+      "member": "diagnosis/commands/final-readback.stderr",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/final-readback.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "diagnosis/commands/final-readback.stdin",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/final-readback.stdin",
+      "bytes": 1927,
+      "sha256": "e861b38b99eb004d4ed2f8ec2206cf23cf55963cb986341cbcdafe11b0a59c40"
+    },
+    {
+      "member": "diagnosis/commands/final-readback.stdout",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/final-readback.stdout",
+      "bytes": 275,
+      "sha256": "9db72ea6c19f298c281cd221e13b76da12919198000f8fbb50dd899cf9bf5348"
+    },
+    {
+      "member": "diagnosis/commands/git-final.json",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/git-final.json",
+      "bytes": 574,
+      "sha256": "ff9c7b7701cd78b5f558ff29d2fd7dc6f8128f211f15330de59bf44914bfa388"
+    },
+    {
+      "member": "diagnosis/commands/git-final.stderr",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/git-final.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "diagnosis/commands/git-final.stdout",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/git-final.stdout",
+      "bytes": 213,
+      "sha256": "fc52f41f71c54277f6fa3b4ad453dcca8216c7871169cc4198bc72ea19219dd3"
+    },
+    {
+      "member": "diagnosis/commands/git-initial.json",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/git-initial.json",
+      "bytes": 578,
+      "sha256": "e423ad2063236c27b700156eb8a5c84c5b6b3d087fc20f919875a5a13e5ed802"
+    },
+    {
+      "member": "diagnosis/commands/git-initial.stderr",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/git-initial.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "diagnosis/commands/git-initial.stdout",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/git-initial.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "diagnosis/commands/head-final.json",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/head-final.json",
+      "bytes": 521,
+      "sha256": "14a65f67fa4187b8f573bbff9be830c5ccf068d8cb7c7bc498eaaa63ec14865b"
+    },
+    {
+      "member": "diagnosis/commands/head-final.stderr",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/head-final.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "diagnosis/commands/head-final.stdout",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/head-final.stdout",
+      "bytes": 41,
+      "sha256": "6e12f588f90c8e8f7bf74cf12f3f0df0ad2df2d6e799133cad4e12211a3df6db"
+    },
+    {
+      "member": "diagnosis/commands/head-initial.json",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/head-initial.json",
+      "bytes": 524,
+      "sha256": "e4bfbaa30125e3c73bb8ef98916d2c5003688b69bbccccf2ae57843c50aeee92"
+    },
+    {
+      "member": "diagnosis/commands/head-initial.stderr",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/head-initial.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "diagnosis/commands/head-initial.stdout",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/head-initial.stdout",
+      "bytes": 41,
+      "sha256": "6e12f588f90c8e8f7bf74cf12f3f0df0ad2df2d6e799133cad4e12211a3df6db"
+    },
+    {
+      "member": "diagnosis/commands/locate-interop.json",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/locate-interop.json",
+      "bytes": 551,
+      "sha256": "93901a86a448cffc25f0f545fdc72b48d9fc1391cb4b1ff9d12b3008a58a50c3"
+    },
+    {
+      "member": "diagnosis/commands/locate-interop.stderr",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/locate-interop.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "diagnosis/commands/locate-interop.stdout",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/locate-interop.stdout",
+      "bytes": 3660,
+      "sha256": "c4d0640d3443f9e5d3b8376e4838423e275dc477353582aac084d70b19747eef"
+    },
+    {
+      "member": "diagnosis/commands/protocol-and-completion-excerpts.json",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/protocol-and-completion-excerpts.json",
+      "bytes": 559,
+      "sha256": "7811d7a529520e4543d359e208abc27043d9621a27453bc81120a79d8de1a16d"
+    },
+    {
+      "member": "diagnosis/commands/protocol-and-completion-excerpts.stderr",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/protocol-and-completion-excerpts.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "diagnosis/commands/protocol-locations.json",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/protocol-locations.json",
+      "bytes": 692,
+      "sha256": "af88c09dd293977a649a122387fc5914db65b0352fa1ef53e573794923820756"
+    },
+    {
+      "member": "diagnosis/commands/protocol-locations.stderr",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/protocol-locations.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "diagnosis/commands/source-excerpts.json",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/source-excerpts.json",
+      "bytes": 525,
+      "sha256": "9ce365a33760dc2aefcb558a18110d1f1b68b6a26c5b9fb2b52389c96d1a77c5"
+    },
+    {
+      "member": "diagnosis/commands/source-excerpts.stderr",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/source-excerpts.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "diagnosis/commands/source-locations.json",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/source-locations.json",
+      "bytes": 697,
+      "sha256": "4b682b78f8293103446aa10fd9920558dd6dc6e8564dcfbf2641af5a12ecf97b"
+    },
+    {
+      "member": "diagnosis/commands/source-locations.stderr",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/source-locations.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "diagnosis/commands/verify-evidence-r1.json",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/verify-evidence-r1.json",
+      "bytes": 590,
+      "sha256": "929642a8ffc86d089edc520b75326b0deecb3b402ad161dd92542d448727a851"
+    },
+    {
+      "member": "diagnosis/commands/verify-evidence-r1.stderr",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/verify-evidence-r1.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "diagnosis/commands/verify-evidence-r1.stdout",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/verify-evidence-r1.stdout",
+      "bytes": 2712,
+      "sha256": "23bbf4cf63e36be300fe4de976ed7d11d9f4abc95111115fde8431a2ded96e48"
+    },
+    {
+      "member": "diagnosis/commands/zero-data-send-excerpt.json",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/zero-data-send-excerpt.json",
+      "bytes": 610,
+      "sha256": "65006fa97845a06d0539e5b3e89e917b0c07adc21a2dbb1b096bbef3a0aef1a6"
+    },
+    {
+      "member": "diagnosis/commands/zero-data-send-excerpt.stderr",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/commands/zero-data-send-excerpt.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "diagnosis/final-readback.json",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/final-readback.json",
+      "bytes": 16299,
+      "sha256": "e5732f6984a851eed3157fc15d941f7cb28e425830fe5dcdfbcb13271cbeef0d"
+    },
+    {
+      "member": "diagnosis/http/protocol-r2.headers",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/http/protocol-r2.headers",
+      "bytes": 327,
+      "sha256": "c170e48836e0177388a50649f4419400595a730c82f7b3dccaa2d16f0ff4c478"
+    },
+    {
+      "member": "diagnosis/http/sexyz.c.headers",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/http/sexyz.c.headers",
+      "bytes": 941,
+      "sha256": "33cf2ba8f9826bf39a719537fe59c5e01889484d53d58e7ab989a591a9ab2b2e"
+    },
+    {
+      "member": "diagnosis/http/zmodem-wip-20261004.txt.headers",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/http/zmodem-wip-20261004.txt.headers",
+      "bytes": 39,
+      "sha256": "f55260227c507b4e203ec14ceb78ce8e64d11734111bed9bd18936a3bd4d48f3"
+    },
+    {
+      "member": "diagnosis/http/zmodem.c.headers",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/http/zmodem.c.headers",
+      "bytes": 942,
+      "sha256": "0fcbdefc15005ee8eff001c03a797642dedaf7e60c601c955dc59b27185c0173"
+    },
+    {
+      "member": "diagnosis/http/zmodem.h.headers",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/http/zmodem.h.headers",
+      "bytes": 938,
+      "sha256": "12ff41af3ca0254a5e1f3bbb7c1f8120fb7f1ca88df6d653854cf3d93db8a8a8"
+    },
+    {
+      "member": "diagnosis/input-manifest.json",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/input-manifest.json",
+      "bytes": 782,
+      "sha256": "580789f0b04da28b844d2284e6fa04b8ac145647979224e9ea87dc59b5163700"
+    },
+    {
+      "member": "diagnosis/inputs-reviewed.json",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/inputs-reviewed.json",
+      "bytes": 1119,
+      "sha256": "17b5997b7790a99568dda30a5bf91ef4519efab25c7c25036fade1365dad5e16"
+    },
+    {
+      "member": "diagnosis/predicate-analysis.json",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/predicate-analysis.json",
+      "bytes": 1248,
+      "sha256": "90d8d7bcdbb3deda3c7b2e761ff5062cf819964fabaffe67ef53554f7638ca83"
+    },
+    {
+      "member": "diagnosis/sources-manifest.json",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/sources-manifest.json",
+      "bytes": 2364,
+      "sha256": "827e99588b168b1ebc9949d4a37f992da1e4c65d47d52d8e2fbbb433d54ef9d5"
+    },
+    {
+      "member": "diagnosis/verify_evidence.py",
+      "source": "work/zmodem-empty-peer-diagnosis-20261117/verify_evidence.py",
+      "bytes": 6383,
+      "sha256": "6034929e628dbd87f8e561620df8eee42afb29d581db14310b06d77a2208444e"
+    }
+  ]
+}

@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "members": 18,
+  "logical_bytes": 101242,
+  "bytes": 29186,
+  "sha256": "e433b5df30a4de29bdd0530b52e2fa450a2aced554b9ad0af6b4e66a7c91c108",
+  "excluded": [],
+  "files": [
+    {
+      "member": "review/COMMANDS.md",
+      "source": "work/traceroute-fixture-review-20261117/COMMANDS.md",
+      "bytes": 2771,
+      "sha256": "8bb8461a8a75503f572f1538c062117f2a42972fba4810be985658bddde584b1"
+    },
+    {
+      "member": "review/REVIEW.md",
+      "source": "work/traceroute-fixture-review-20261117/REVIEW.md",
+      "bytes": 6027,
+      "sha256": "843fe33523099f981c4515d623c9c0625a4649d16f2359483f1ccd3f1a6dd2b4"
+    },
+    {
+      "member": "review/SHA256SUMS",
+      "source": "work/traceroute-fixture-review-20261117/SHA256SUMS",
+      "bytes": 1404,
+      "sha256": "1ee6633c6181945435f3bdddad3f232c5c7880fa88038b11f9c1fcde2d4f0289"
+    },
+    {
+      "member": "review/command.log",
+      "source": "work/traceroute-fixture-review-20261117/command.log",
+      "bytes": 2217,
+      "sha256": "5a5dc1875321309951627453446739c0b1d125d730429f1d9f1393297c5e2588"
+    },
+    {
+      "member": "review/commands.json",
+      "source": "work/traceroute-fixture-review-20261117/commands.json",
+      "bytes": 3238,
+      "sha256": "e2f08e292a58dab17d779c118044b1b55363ac181df5b275dadc8c26963e3278"
+    },
+    {
+      "member": "review/complete.diff",
+      "source": "work/traceroute-fixture-review-20261117/complete.diff",
+      "bytes": 2367,
+      "sha256": "06688a4bdfa795e2f087cbfe6fb2c8145c96549a9973717f1013e6f26c862e49"
+    },
+    {
+      "member": "review/decision.json",
+      "source": "work/traceroute-fixture-review-20261117/decision.json",
+      "bytes": 3724,
+      "sha256": "e7b3f1fa9f993fb6fb6f64d22e2a06624d74042371db83ceb69158d2852cc511"
+    },
+    {
+      "member": "review/final-receipt.json",
+      "source": "work/traceroute-fixture-review-20261117/final-receipt.json",
+      "bytes": 1121,
+      "sha256": "abd51c6098455b90249b5d4714176ecddcef45bf20668821f04fc219e64d5d2a"
+    },
+    {
+      "member": "review/input-audit.json",
+      "source": "work/traceroute-fixture-review-20261117/input-audit.json",
+      "bytes": 3899,
+      "sha256": "4eaf1ab09b3b37768f90f581fe6d655bf033d5b5e98d90c421253c744518ac01"
+    },
+    {
+      "member": "review/postcheck.json",
+      "source": "work/traceroute-fixture-review-20261117/postcheck.json",
+      "bytes": 414,
+      "sha256": "c6ccd7e5136b4da53bf3402687e2d97a4360e5a2e6f58db2e7da1aabf422d205"
+    },
+    {
+      "member": "review/r2-failure-excerpt.log",
+      "source": "work/traceroute-fixture-review-20261117/r2-failure-excerpt.log",
+      "bytes": 2695,
+      "sha256": "a168d7e6406a07f7e48610ececa3cc00267b072ccdae0b0115750743b3f09be6"
+    },
+    {
+      "member": "review/r2-test_traceroute.py",
+      "source": "work/traceroute-fixture-review-20261117/r2-test_traceroute.py",
+      "bytes": 15513,
+      "sha256": "e296acd311758166ef11de016bcbc2c54017bcdb7a0b488f29ed1a2921679e4a"
+    },
+    {
+      "member": "review/review.py",
+      "source": "work/traceroute-fixture-review-20261117/review.py",
+      "bytes": 9303,
+      "sha256": "81d9e1ab81e79e217994f127f1c3379b732336e95955fda39d8c08c1184ba66f"
+    },
+    {
+      "member": "review/run-result.json",
+      "source": "work/traceroute-fixture-review-20261117/run-result.json",
+      "bytes": 1542,
+      "sha256": "76bfeb065049277672e16b187d78216b95fa88a7442b860b537ded1660b2bb07"
+    },
+    {
+      "member": "review/source/icmp.py",
+      "source": "work/traceroute-fixture-review-20261117/source/icmp.py",
+      "bytes": 13748,
+      "sha256": "62ddc24e7eb90f6e49edf0591c9fbeed85fd6fd9892b6f72350a057a3317ac08"
+    },
+    {
+      "member": "review/source/probe.py",
+      "source": "work/traceroute-fixture-review-20261117/source/probe.py",
+      "bytes": 4313,
+      "sha256": "064ac76d9a646d54c36b69bc763bcf5289ea6a7449dff0c234871f64670a6cfb"
+    },
+    {
+      "member": "review/source/tests/test_traceroute.py",
+      "source": "work/traceroute-fixture-review-20261117/source/tests/test_traceroute.py",
+      "bytes": 16175,
+      "sha256": "ed8ffc411714fb603096dd3c816362e4f6c59dcc1ffb8238b20e839f19091a15"
+    },
+    {
+      "member": "review/source/traceroute.py",
+      "source": "work/traceroute-fixture-review-20261117/source/traceroute.py",
+      "bytes": 10771,
+      "sha256": "5264c2e224ad1b0543d50b31f73278ee734ba699f2239ba55b07a2fe8c25f86b"
+    }
+  ]
+}

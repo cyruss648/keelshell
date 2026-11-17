@@ -253,8 +253,10 @@ class AdapterTests(unittest.TestCase):
         pidfile = self.root / "pid"
         self.write_tool(body=f"pathlib.Path({str(pidfile)!r}).write_text(str(os.getpid()))\n"
                         "time.sleep(30)\n")
-        # Replace discovery and Linux platform only in this offline driver;
-        # the full production supervisor and owned stage runner remain real.
+        # This case proves the final tool's lifetime, not discovery/admission.
+        # Fix version and numeric resolution so an earlier stage timeout cannot
+        # masquerade as the intended tool timeout. Other cases run admission.
+        # The production supervisor, final process runner and deadlines stay real.
         source = (SOURCE / "icmp.py").read_text() + "\n" + (SOURCE / "traceroute.py").read_text()
         source += ("\nsys.platform='linux'\n"
                    f"TRACE_FIXTURE={str(self.tool)!r}\n"
@@ -264,7 +266,11 @@ class AdapterTests(unittest.TestCase):
                    "_production_run=icmp_run_owned\n"
                    "def icmp_run_owned(argv,*args,**kwargs):\n"
                    " if argv[0] in ('/usr/bin/traceroute','/bin/traceroute'):\n"
+                   "  if argv[1:]==['--version']:\n"
+                   "   return 'exited',0,b'',TRACE_VERSION\n"
                    "  argv=[TRACE_FIXTURE]+argv[1:]\n"
+                   " elif argv[0]==sys.executable and argv[-2]==TRACE_RESOLVER:\n"
+                   "  return 'exited',0,b'[\"127.0.0.1\"]',b''\n"
                    " return _production_run(argv,*args,**kwargs)\n")
         source += (SOURCE / "probe.py").read_text()
         encoded = base64.b64encode(json.dumps(REQUEST).encode()).decode()
@@ -284,6 +290,9 @@ class AdapterTests(unittest.TestCase):
         self.assertEqual(out.count(b"KEELSHELL_DIAGNOSTIC_V1\n"), 1)
         report = json.loads(out.split(b"\n", 1)[1])
         self.assertEqual(report["status"], "timeout")
+        self.assertEqual(report["traceroute"]["reason"], "deadline")
+        self.assertEqual(report["traceroute"]["implementation"], "linux_traceroute_2_1_5")
+        self.assertEqual(report["traceroute"]["address"], "127.0.0.1")
         self.assertFalse(report["traceroute"]["hops"])
         pid = int(pidfile.read_text())
         with self.assertRaises(ProcessLookupError):
