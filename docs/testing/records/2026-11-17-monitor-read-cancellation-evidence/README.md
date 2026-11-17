@@ -43,5 +43,7 @@ python3 -B docs/testing/records/2026-11-17-monitor-read-cancellation-evidence/ve
 该工装离线核对提交内六个归档的完整成员集／摘要、r3的777个Git输入、
 r2→r3唯一文件差异、两份独立批准、最终门禁／库存，以及前批f910的777个Git输入。
 它不重跑测试、不访问target、网络或桌面，也不把历史CI重绑定到新工程。
-后续普通推送、三方SHA读回与按字节回收记录另行补入交付封存；
-只回收已封存自有副本，保留唯一target和两份正常应用包。
+工程`6ae91d2e90668e7d9c04a2a7eea7c5de1bf6d3d4`已普通推送、三方SHA相等；
+540成员和新旧各777输入Git绑定通过。六目录／549文件按原件摘要回收，
+唯一target及两正常包保持。[22成员交付回执](delivery/README.md)保留实际结果，
+不递归预填后续docs-only提交。已回收的work路径不作为维护入口。

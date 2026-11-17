@@ -1,0 +1,142 @@
+{
+  "schema_version": 1,
+  "members": 22,
+  "logical_bytes": 62636,
+  "bytes": 9731,
+  "sha256": "2251bb10e234886f8140c8e63861298e9bd86d84d3940c7f8db83824bb274c0f",
+  "excluded": [],
+  "files": [
+    {
+      "member": "delivery/archive-parent-r1/command.log",
+      "source": "work/monitor-cancellation-finalize-20261117/archive-parent-r1/command.log",
+      "bytes": 175,
+      "sha256": "b0eadc65b6e73f6dd64c171b4c0c26889f5e3bcca8f5cae7da4707b4a8761d2e"
+    },
+    {
+      "member": "delivery/archive-parent-r1/result.json",
+      "source": "work/monitor-cancellation-finalize-20261117/archive-parent-r1/result.json",
+      "bytes": 578,
+      "sha256": "c51050beacaf59371f7b231b756b73f1d0b44512e71744982488f6aeba35d181"
+    },
+    {
+      "member": "delivery/archive_evidence.py",
+      "source": "work/monitor-cancellation-finalize-20261117/archive_evidence.py",
+      "bytes": 3177,
+      "sha256": "53b9d35420469c4589e669970b6d085d68cff0be8c0c581230df12e7bdebbc10"
+    },
+    {
+      "member": "delivery/cleanup-expanded-r1/command.log",
+      "source": "work/monitor-cancellation-finalize-20261117/cleanup-expanded-r1/command.log",
+      "bytes": 2824,
+      "sha256": "452a9bd77a505f4c7e3d5853eaae3480e6b0451ce1c836e1e07bdaeb6067060e"
+    },
+    {
+      "member": "delivery/cleanup-expanded-r1/result.json",
+      "source": "work/monitor-cancellation-finalize-20261117/cleanup-expanded-r1/result.json",
+      "bytes": 454,
+      "sha256": "ef75afa2c4a0a56b132d3046b34e62a2cb8c96ea1fd5400609a746f09660e3c2"
+    },
+    {
+      "member": "delivery/cleanup-result.json",
+      "source": "work/monitor-cancellation-finalize-20261117/cleanup-result.json",
+      "bytes": 1113,
+      "sha256": "5cc3a7a40b277bc0d0ee329d1cfb98b453b89df84633028e3fe39e5f050498cb"
+    },
+    {
+      "member": "delivery/cleanup.py",
+      "source": "work/monitor-cancellation-finalize-20261117/cleanup.py",
+      "bytes": 4493,
+      "sha256": "59c0e32882b57ee6aae568577cc6f0b01f6b3a8e185d73680ad7a4927e081604"
+    },
+    {
+      "member": "delivery/commit-source-r1/command.log",
+      "source": "work/monitor-cancellation-finalize-20261117/commit-source-r1/command.log",
+      "bytes": 2281,
+      "sha256": "05367c6ec8b94cf7af4f620126e985ec50737a76af99c48dedf3ed22d644f908"
+    },
+    {
+      "member": "delivery/commit-source-r1/result.json",
+      "source": "work/monitor-cancellation-finalize-20261117/commit-source-r1/result.json",
+      "bytes": 829,
+      "sha256": "f579e49df04c877c67113572dab09bd67c35c88afc9911649b1dcb363ccb7f77"
+    },
+    {
+      "member": "delivery/exact-source-ci-snapshot-r1/command.log",
+      "source": "work/monitor-cancellation-finalize-20261117/exact-source-ci-snapshot-r1/command.log",
+      "bytes": 37978,
+      "sha256": "0443de3202c3dfb2db9d3b88de04dd8de011cc741f2f73767f0e6dbb68ba3585"
+    },
+    {
+      "member": "delivery/exact-source-ci-snapshot-r1/result.json",
+      "source": "work/monitor-cancellation-finalize-20261117/exact-source-ci-snapshot-r1/result.json",
+      "bytes": 449,
+      "sha256": "7d3e03ac47f604db38353ce2dfe683c54bbbc949255919c555e1ce310cd793d8"
+    },
+    {
+      "member": "delivery/precommit-input-check-r1/command.log",
+      "source": "work/monitor-cancellation-finalize-20261117/precommit-input-check-r1/command.log",
+      "bytes": 169,
+      "sha256": "068acb578d86c4f4bfcdaf91d95ba6bee0a3c83b025a8d8279763e37354a0042"
+    },
+    {
+      "member": "delivery/precommit-input-check-r1/result.json",
+      "source": "work/monitor-cancellation-finalize-20261117/precommit-input-check-r1/result.json",
+      "bytes": 460,
+      "sha256": "ac8009375c92f970eff789a9c189e4f8843e18374c5ed666c61602e1fe82abe2"
+    },
+    {
+      "member": "delivery/push-source-r1/command.log",
+      "source": "work/monitor-cancellation-finalize-20261117/push-source-r1/command.log",
+      "bytes": 146,
+      "sha256": "7ed55fefe93c0ce17fae81adc53af52a30eda1b80c16f1fdef868fa2f1bb3f27"
+    },
+    {
+      "member": "delivery/push-source-r1/result.json",
+      "source": "work/monitor-cancellation-finalize-20261117/push-source-r1/result.json",
+      "bytes": 401,
+      "sha256": "e6f7563d2db14b715bd0b018f073c93b4da080e092d7b9ba2268752ce43d25ba"
+    },
+    {
+      "member": "delivery/readback.py",
+      "source": "work/monitor-cancellation-finalize-20261117/readback.py",
+      "bytes": 1371,
+      "sha256": "e9bbc5a751d3846a9be04678f865ace228db86013d7b1048fe4a7157b93222f5"
+    },
+    {
+      "member": "delivery/remote-readback-source-r1/command.log",
+      "source": "work/monitor-cancellation-finalize-20261117/remote-readback-source-r1/command.log",
+      "bytes": 561,
+      "sha256": "3b7dfd8c7c4aa1abaa4505c2bce987b65fe92e41b25ad2457ad6ddf459b2e0fb"
+    },
+    {
+      "member": "delivery/remote-readback-source-r1/result.json",
+      "source": "work/monitor-cancellation-finalize-20261117/remote-readback-source-r1/result.json",
+      "bytes": 481,
+      "sha256": "3e02f5d0332a19372ae9cf8a21142dabef4fb74519e340198fac62a0146a23a2"
+    },
+    {
+      "member": "delivery/run.py",
+      "source": "work/monitor-cancellation-finalize-20261117/run.py",
+      "bytes": 1720,
+      "sha256": "a04a95d4cb34450a37d19790a597f11c9e1417e8cc9d9fbd8efe7410353962fd"
+    },
+    {
+      "member": "delivery/source-readback-r1.json",
+      "source": "work/monitor-cancellation-finalize-20261117/source-readback-r1.json",
+      "bytes": 585,
+      "sha256": "d3cf5f79fa8d9504027356a6442f4d1f112a9e2693d326154434f85ce64c4ac8"
+    },
+    {
+      "member": "delivery/verify-git-binding-r1/command.log",
+      "source": "work/monitor-cancellation-finalize-20261117/verify-git-binding-r1/command.log",
+      "bytes": 1899,
+      "sha256": "3a7ab9fa8073eb5d6aa79782de20b4113437d3e9c9adfec165206db97ce227f4"
+    },
+    {
+      "member": "delivery/verify-git-binding-r1/result.json",
+      "source": "work/monitor-cancellation-finalize-20261117/verify-git-binding-r1/result.json",
+      "bytes": 492,
+      "sha256": "d0d4432ba1f4cb50130bde009949c5114e4d41d9dcff3285664ba5ed7c8cfcef"
+    }
+  ]
+}

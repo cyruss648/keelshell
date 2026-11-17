@@ -28,6 +28,15 @@ Turing the 2nd限定批准r2五文件，独立r1预编译12项通过、r2独立r
 Heisenberg the 2nd限定批准r3唯一Python修订，独立14项通过。
 两位P0–P3全0且已关闭，集成未由reviewer独立联网重跑。
 本批没有新正常包／原生操作，当前工程CI与原生验收不借用前批成功。
+工程`6ae91d2e90668e7d9c04a2a7eea7c5de1bf6d3d4`已普通提交／推送，
+local／tracking／remote三方相等、读回干净；777新输入／777旧f910输入及
+540归档成员的精确Git绑定通过，`0/reaped/0.325499s`。
+按完整文件集／摘要回收6自有目录、549文件／20,925,270逻辑字节，
+包含9个仅按已封存来源回执核对的第三方正文／长摘录；target和两正常包保持。
+新Quality44040248864、Windows API44040248806及SSH44040248746在
+UTC07:38:44读回均in_progress，不预填成功。
+维护从[本批封存](testing/records/2026-11-17-monitor-read-cancellation-evidence/README.md)
+及交付回执接续，已回收work副本不再作为入口。
 本轮官方直接依赖复查37包／113声明全部通过，前次registry失败保留；
 Rust／Cargo仍1.100.0、不设toolchain pin或rust-version。
 固定SexyZ发送空文件失败已由上游严格小于条件定位，不修改本方合规ZRPOS0；

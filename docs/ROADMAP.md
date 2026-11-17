@@ -32,6 +32,12 @@ Heisenberg the 2nd批准r3唯一Python修订，P0–P3全0且均已关闭；
 见[ADR0161](adr/0161-monitor-read-cancellation.md)
 及[记录](testing/records/2026-11-17-monitor-read-cancellation.md)。
 本批不扩大成实际Windows取消、原生或完整产品验收。
+工程`6ae91d2`已普通推送、三方SHA相等、读回干净；
+777新／777旧f910输入与540成员Git绑定通过。
+六个自有目录／549文件已按原件摘要回收，唯一target及两正常包保持。
+新Quality44040248864／Windows API44040248806／SSH44040248746
+在UTC07:38:44均in_progress；从[交付原件](testing/records/2026-11-17-monitor-read-cancellation-evidence/delivery/README.md)
+接续，不重复未变工程的完整门禁。
 
 MCP接入与提案记录增量的实现与限定工程验证完成：纯Codex／Claude模板和原生显式复制、
 保留Unknown的批量清理、独立准确提案核对已实现；核对不执行／重试或改写状态。
