@@ -1,0 +1,94 @@
+{
+  "started_utc": "2026-11-17T04:53:27.409702+00:00",
+  "steps": [
+    {
+      "name": "commit",
+      "returncode": 0
+    },
+    {
+      "name": "head",
+      "returncode": 0
+    },
+    {
+      "name": "git-binding",
+      "returncode": 0
+    },
+    {
+      "name": "push",
+      "returncode": 0
+    },
+    {
+      "name": "tracking",
+      "returncode": 0
+    },
+    {
+      "name": "remote",
+      "returncode": 0
+    },
+    {
+      "name": "status",
+      "returncode": 0
+    }
+  ],
+  "processes": [
+    {
+      "name": "commit",
+      "pid": 29075
+    },
+    {
+      "name": "head",
+      "pid": 29082
+    },
+    {
+      "name": "git-binding",
+      "pid": 29085
+    },
+    {
+      "name": "push",
+      "pid": 29096
+    },
+    {
+      "name": "tracking",
+      "pid": 29194
+    },
+    {
+      "name": "remote",
+      "pid": 29197
+    },
+    {
+      "name": "status",
+      "pid": 29219
+    }
+  ],
+  "boundary": "Authorized ordinary feature commit and push; pending receipt files are docs only.",
+  "source": "cdf1e171f2f9b179f09db230f4739696d02fe80d",
+  "git_binding": {
+    "source": "cdf1e171f2f9b179f09db230f4739696d02fe80d",
+    "engineering_inputs": 769,
+    "aggregate_sha256": "83e2e1b00ba4d373a407030c79538f8a5039347931236344315ad8b70844a5b7",
+    "archives": [
+      {
+        "path": "docs/testing/records/2026-11-17-tunnel-transport-lifetime-evidence",
+        "members": 271,
+        "sha256": "ea318ba1a4ad23a7a8708215a8fb2b373d06f6fbf748750a3a775e49110fbb47"
+      },
+      {
+        "path": "docs/testing/records/2026-11-17-independent-zmodem-peers-evidence/ci-completion",
+        "members": 207,
+        "sha256": "a8202205d13b283ee24e605f23891db000780bdc336c220e00bab27dbbaddc85"
+      }
+    ],
+    "members": 478,
+    "all_exact_git_blobs_equal": true,
+    "boundary": "Offline Git/archive verification; no product tests, network or target access."
+  },
+  "local": "cdf1e171f2f9b179f09db230f4739696d02fe80d",
+  "tracking": "cdf1e171f2f9b179f09db230f4739696d02fe80d",
+  "remote": "cdf1e171f2f9b179f09db230f4739696d02fe80d",
+  "three_way_equal": true,
+  "pending_owned_docs": [],
+  "cleanup_confirmed": true,
+  "reaped": true,
+  "elapsed_seconds": 6.437591624999186,
+  "wrapper_exit": 0
+}

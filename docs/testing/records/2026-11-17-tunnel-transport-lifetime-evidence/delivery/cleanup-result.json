@@ -1,0 +1,113 @@
+{
+  "git_source": "cdf1e171f2f9b179f09db230f4739696d02fe80d",
+  "archives": [
+    {
+      "path": "docs/testing/records/2026-11-17-tunnel-transport-lifetime-evidence/originals.tar.gz",
+      "sha256": "ea318ba1a4ad23a7a8708215a8fb2b373d06f6fbf748750a3a775e49110fbb47",
+      "git_source": "cdf1e171f2f9b179f09db230f4739696d02fe80d"
+    },
+    {
+      "path": "docs/testing/records/2026-11-17-independent-zmodem-peers-evidence/ci-completion/originals.tar.gz",
+      "sha256": "a8202205d13b283ee24e605f23891db000780bdc336c220e00bab27dbbaddc85",
+      "git_source": "cdf1e171f2f9b179f09db230f4739696d02fe80d"
+    }
+  ],
+  "removed": [
+    {
+      "path": "work/tunnel-lifecycle-20261117",
+      "files": 145,
+      "logical_bytes": 3096821
+    },
+    {
+      "path": "work/tunnel-lifecycle-harness-review-20261117",
+      "files": 20,
+      "logical_bytes": 185026
+    },
+    {
+      "path": "work/tunnel-lifecycle-final-review-20261117",
+      "files": 94,
+      "logical_bytes": 2399902
+    },
+    {
+      "path": "work/zmodem-independent-finalize-20261117",
+      "files": 12,
+      "logical_bytes": 8928
+    },
+    {
+      "path": "work/zmodem-peer-ci-completion-20261117",
+      "files": 186,
+      "logical_bytes": 4238107
+    },
+    {
+      "path": "work/zmodem-peer-ci-review-20261117",
+      "files": 21,
+      "logical_bytes": 1130453
+    }
+  ],
+  "files": 478,
+  "logical_bytes": 11059237,
+  "protected_before": {
+    "target_device": 16777231,
+    "target_inode": 269342313,
+    "package_files": [
+      {
+        "path": "work/windows-monitor-delivery-20261117/package-r2/KeelShell.app/Contents/Info.plist",
+        "bytes": 993,
+        "sha256": "dd22add85ade50271b72d6e67859f36c19c9a64c88df25bf51d5a161a1973c70"
+      },
+      {
+        "path": "work/windows-monitor-delivery-20261117/package-r2/KeelShell.app/Contents/MacOS/keelshell-app",
+        "bytes": 53139680,
+        "sha256": "127526280ffc1409abe9f6519c0f8d5818c4fedf66a22468737bd8e0217e35bf"
+      },
+      {
+        "path": "work/windows-monitor-delivery-20261117/package-r2/KeelShell.app/Contents/MacOS/keelshell-mcp",
+        "bytes": 2905168,
+        "sha256": "bb415f3ae3ae7ca62bdb78abe752b50f5a3a796dc65ec99490f54ee28cb3f693"
+      },
+      {
+        "path": "work/windows-monitor-delivery-20261117/package-r2/KeelShell.app/Contents/PkgInfo",
+        "bytes": 8,
+        "sha256": "82502191c9484b04d685374f9879a0066069c49b8acae7a04b01d38d07e8eca0"
+      },
+      {
+        "path": "work/windows-monitor-delivery-20261117/package-r2/KeelShell.app/Contents/Resources/KeelShell.icns",
+        "bytes": 995855,
+        "sha256": "781f0bb16c48eb7dbd2281aae9b2b1267d59bab64b428b82333add377b107425"
+      }
+    ]
+  },
+  "protected_after": {
+    "target_device": 16777231,
+    "target_inode": 269342313,
+    "package_files": [
+      {
+        "path": "work/windows-monitor-delivery-20261117/package-r2/KeelShell.app/Contents/Info.plist",
+        "bytes": 993,
+        "sha256": "dd22add85ade50271b72d6e67859f36c19c9a64c88df25bf51d5a161a1973c70"
+      },
+      {
+        "path": "work/windows-monitor-delivery-20261117/package-r2/KeelShell.app/Contents/MacOS/keelshell-app",
+        "bytes": 53139680,
+        "sha256": "127526280ffc1409abe9f6519c0f8d5818c4fedf66a22468737bd8e0217e35bf"
+      },
+      {
+        "path": "work/windows-monitor-delivery-20261117/package-r2/KeelShell.app/Contents/MacOS/keelshell-mcp",
+        "bytes": 2905168,
+        "sha256": "bb415f3ae3ae7ca62bdb78abe752b50f5a3a796dc65ec99490f54ee28cb3f693"
+      },
+      {
+        "path": "work/windows-monitor-delivery-20261117/package-r2/KeelShell.app/Contents/PkgInfo",
+        "bytes": 8,
+        "sha256": "82502191c9484b04d685374f9879a0066069c49b8acae7a04b01d38d07e8eca0"
+      },
+      {
+        "path": "work/windows-monitor-delivery-20261117/package-r2/KeelShell.app/Contents/Resources/KeelShell.icns",
+        "bytes": 995855,
+        "sha256": "781f0bb16c48eb7dbd2281aae9b2b1267d59bab64b428b82333add377b107425"
+      }
+    ]
+  },
+  "all_sources_verified_before_deletion": true,
+  "boundary": "Only exact archived task-owned files; no disk-space delta claim."
+}

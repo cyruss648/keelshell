@@ -22,7 +22,17 @@ SHA-256 分别为 `3b6e75e988ef096fd7ec4941241f9a03299c0f1e3933a3100ee5ac7af8496
 冻结后的完整门禁r2通过：普通Rust3435/0/68 ignored、14rustdoc，
 Python主526 run／3 skipped；fmt、严格Clippy、依赖政策及三个controller gate通过。
 95普通套件逐名库存和二进制前后摘要相等，769输入前后不变；
-首轮测试helper Clippy失败原件保留，提交推送／精确新CI待交付。
+首轮测试helper Clippy失败原件保留。工程
+`cdf1e171f2f9b179f09db230f4739696d02fe80d`已普通提交／推送，
+local／tracking／remote三方一致；769输入和478归档成员精确Git绑定通过。
+271成员[本批原件](testing/records/2026-11-17-tunnel-transport-lifetime-evidence/README.md)
+及207成员旧CI原件均已持久化；5位自有agent已关闭。
+按完整文件集核对后回收6目录／478文件／11,059,237逻辑字节，
+另2份reviewer二进制副本核对原target后已回收，target及正常旧包前后相同。
+旧work目录已不存在，从[交付记录](testing/records/2026-11-17-tunnel-transport-lifetime-evidence/delivery/README.md)接续。
+新Windows API44020265273及SSH44020265248现已completed/success，当前只按API状态记录；
+Quality44020265369三平台仍in_progress，未观察到失败job。
+精确新CI终态／artifact与原生／发行分别待验。
 769工程输入r2 aggregate
 `83e2e1b00ba4d373a407030c79538f8a5039347931236344315ad8b70844a5b7`；
 唯一target连续归属本checkout，不clean、不并行Cargo。

@@ -1,0 +1,94 @@
+{
+  "started_utc": "2026-11-17T04:57:50.248968+00:00",
+  "source": "cdf1e171f2f9b179f09db230f4739696d02fe80d",
+  "steps": [
+    {
+      "name": "quality",
+      "returncode": 0
+    },
+    {
+      "name": "windows-api",
+      "returncode": 0
+    },
+    {
+      "name": "windows-ssh",
+      "returncode": 0
+    },
+    {
+      "name": "quality-jobs",
+      "returncode": 0
+    }
+  ],
+  "processes": [
+    {
+      "name": "quality",
+      "pid": 32251
+    },
+    {
+      "name": "windows-api",
+      "pid": 32268
+    },
+    {
+      "name": "windows-ssh",
+      "pid": 32281
+    },
+    {
+      "name": "quality-jobs",
+      "pid": 32296
+    }
+  ],
+  "runs": [
+    {
+      "id": 44020265369,
+      "name": "Quality",
+      "head_sha": "cdf1e171f2f9b179f09db230f4739696d02fe80d",
+      "status": "in_progress",
+      "conclusion": null,
+      "run_attempt": 1,
+      "updated_at": "2026-11-17T04:53:46Z"
+    },
+    {
+      "id": 44020265273,
+      "name": "Windows monitor integration",
+      "head_sha": "cdf1e171f2f9b179f09db230f4739696d02fe80d",
+      "status": "completed",
+      "conclusion": "success",
+      "run_attempt": 1,
+      "updated_at": "2026-11-17T04:56:28Z"
+    },
+    {
+      "id": 44020265248,
+      "name": "Windows OpenSSH monitor integration",
+      "head_sha": "cdf1e171f2f9b179f09db230f4739696d02fe80d",
+      "status": "completed",
+      "conclusion": "success",
+      "run_attempt": 1,
+      "updated_at": "2026-11-17T04:56:46Z"
+    }
+  ],
+  "quality_jobs": [
+    {
+      "id": 133827817935,
+      "name": "native (windows-2025)",
+      "status": "in_progress",
+      "conclusion": null
+    },
+    {
+      "id": 133827818182,
+      "name": "native (ubuntu-24.04)",
+      "status": "in_progress",
+      "conclusion": null
+    },
+    {
+      "id": 133827818303,
+      "name": "native (macos-26)",
+      "status": "in_progress",
+      "conclusion": null
+    }
+  ],
+  "observed_failed_jobs": [],
+  "cleanup_confirmed": true,
+  "reaped": true,
+  "elapsed_seconds": 3.2365677089983365,
+  "wrapper_exit": 0
+}

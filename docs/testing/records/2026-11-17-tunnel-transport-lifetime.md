@@ -1,6 +1,6 @@
 # 本地转发与原 SSH 生命周期 — 2026-11-17
 
-状态：实现／本机工程验证通过，远端交付进行中；
+状态：实现／本机工程验证通过，工程已提交推送；精确新CI与原生另验。
 基线 `660645fbe77cee2b8af2740f3277a70e9f968048`。
 本记录不关闭完整产品、持久化隧道阶段、FILE-05、三平台原生或发行。
 
@@ -77,8 +77,8 @@ Rust workspace测试及controller尚未运行。原件保留，不计作完整�
 - 冻结前后769输入及aggregate相同，唯一target连续归属本checkout，不clean。
 
 同一r2的真实OpenSSH6项再次通过：runner `passed / 2.197s`，18观察身份全部停止、
-祖先无未知、临时密钥目录删除。新r2只修测试helper，不继承旧r1包或二进制作为新结果。
-提交推送与自有资源清理进行中；精确新CI、Windows真实OpenSSH forwarding、
+祖先无未知、临时密钥目录删除。r2重新编译并实际执行修订后的测试helper，
+保留r1原标签与日志。精确新CI、Windows真实OpenSSH forwarding、
 原生桌面与发行仍单独验收。
 
 可在已有OpenSSH工具的macOS／Linux宿主上重新运行独立套件：
@@ -89,3 +89,28 @@ python3 -B scripts/openssh_interop.py --forwarding
 
 每次生成新的隔离服务器和凭据，不复用旧receipt目录。若更换源码目录但共享target，
 先遵循[共享target合同](../SHARED_TARGET.md)，不能仅从Cargo退出0推定新用例已编译。
+
+## 持久原件和交付
+
+工程`cdf1e171f2f9b179f09db230f4739696d02fe80d`已普通提交／推送，
+local／tracking／remote三方SHA一致，交付控制 `0/reaped/6.437592s`。
+769输入及两归档478成员均与精确Git blob相等；原始回执见
+[交付记录](2026-11-17-tunnel-transport-lifetime-evidence/delivery/README.md)。
+
+[本批归档](2026-11-17-tunnel-transport-lifetime-evidence/README.md)保存271成员、
+5,690,677逻辑字节，SHA256
+`ea318ba1a4ad23a7a8708215a8fb2b373d06f6fbf748750a3a775e49110fbb47`。
+旧工程CI另封存207成员，旧765输入已独立绑定旧de9768c。
+Pauli、Curie、Averroes、Volta、Feynman五位本批agent均已关闭。
+
+先逐字节核对2份reviewer副本等于保留target后，回收63,816,528逻辑字节；
+不把临时测试二进制提交到Git。工程推送与Git绑定后，逐件及完整文件集核对后
+回收6个自有目录、478文件、11,059,237逻辑字节，其中包括前批剩余finalize目录。
+唯一target device16777231／inode269342313及正常旧包完整5文件摘要前后相同。
+这些是文件长度合计，不声称物理可用空间差值；未创建用户chat、worktree或容器。
+
+新源码Quality44020265369、Windows API44020265273、Windows SSH44020265248
+初态均in_progress，attempt1且head精确为cdf1e171；不由前批de9768c的成功代签。
+后次API读取显示两个Windows工作流completed/success，Quality三平台仍in_progress，
+未观察到失败job。这一后次快照未下载或复核新的CI artifact。
+旧work路径已回收，只从Git内原件和当前交接接续。

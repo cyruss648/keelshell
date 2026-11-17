@@ -28,7 +28,13 @@ Closing／Closed准入、bind竞态、原连接断线后的listener／streams回
 独立45Python／父级预编译16项通过，P2关闭且agent已关闭；
 769输入冻结后的完整门禁r2通过：普通Rust3435/0/68 ignored、14rustdoc，
 Python主526 run／3 skipped，95普通套件逐名库存／二进制摘要及输入前后相等。
-首轮Clippy失败保留；提交推送及精确新CI待交付。
+首轮Clippy失败保留。工程`cdf1e171`已普通推送、三方SHA一致，
+769输入／478归档成员精确Git绑定通过；5位自有agent关闭，
+6目录／478文件按原件核对回收，target与正常旧包保持。
+Windows API44020265273／SSH44020265248现为API状态success，
+Quality44020265369三平台仍in_progress、未观察失败job，
+见[交付](testing/records/2026-11-17-tunnel-transport-lifetime-evidence/delivery/README.md)；
+不由旧de9768c的三平台成功代签。
 uuid锁更新1.29.3后，完整官方直接依赖新快照37包／113声明全部通过。
 原生再次锁屏、GUI操作／截图0；三平台原生及完整隧道阶段继续开放。
 

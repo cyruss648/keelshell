@@ -16,7 +16,12 @@ precompiled binary, without an independent rebuild. The frozen r2 engineering
 gate passed 3,435 ordinary Rust tests, 14 rustdoc tests and the 526-case main
 Python run with three skips. All 95 ordinary suites match their exact compiled
 inventories and binary digests remain unchanged. The initial test-helper Clippy
-failure is retained. Exact new source CI is pending delivery. See the [lifecycle record](../testing/records/2026-11-17-tunnel-transport-lifetime.md).
+failure is retained. Source `cdf1e171f2f9b179f09db230f4739696d02fe80d` is
+pushed with matching local, tracking and remote SHAs; 769 inputs and 478 archived
+members match exact Git blobs. The two new Windows monitor workflows report
+success in the API; new Quality remains in progress on all three platforms,
+without an observed failed job. New artifacts and final Quality remain separate
+from the completed older source CI. See the [lifecycle record](../testing/records/2026-11-17-tunnel-transport-lifetime.md).
 Windows real OpenSSH forwarding, native desktop and release acceptance remain open.
 
 ## 2026-11-17: scoped native English toolbar observation
