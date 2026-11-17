@@ -28,6 +28,13 @@ CRC16／CRC32首个完整ZDATA及同shell继续输入有通过，空文件／缺
 审核后有界首帧完整CRC向量匹配。完整产品、FILE-05、三平台原生和发行不关闭。
 本轮官方依赖复查42／113声明通过、71项registry相关失败，后次有界复查超时，
 完整最新仍UNKNOWN。唯一target连续归属本checkout，不clean；没有新增用户chat／worktree。
+工程`de9768c183c22f1051baabd529600667697247a1`已普通提交／推送，三方SHA一致、
+读回干净；765输入／623成员精确Git绑定通过。按原件核对回收六目录、
+3,087文件／232,321,717逻辑字节，target及正常包摘要保持。
+所有五位作者／reviewer已关闭，旧work副本不能继续使用；
+后续从[交付原件](testing/records/2026-11-17-independent-zmodem-peers-evidence/delivery/README.md)接续。
+同源码Windows OpenSSH44013808220及API44013808184已success，
+Quality44013808155仍in_progress，三平台最终CI与artifact／native分别待验。
 
 Windows真实OpenSSH修复工程`660e90d6f7c7111853db7b73f4ca2344f633700d`
 已普通提交／推送，local／tracking／remote三方一致且读回干净。

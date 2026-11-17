@@ -139,3 +139,11 @@ Python主523 run／0失败／3 skipped，fmt、严格Clippy、声明政策和三
 原`work/zmodem-independent-peer-20261117/`及上游／review副本只供交付过程；
 Git绑定后按归属回收。正常应用包和唯一target保留。
 本批没有重新构建／启动原生包，不把旧正常包当作此协议增量的原生验收。
+
+工程`de9768c183c22f1051baabd529600667697247a1`已普通推送，
+local／tracking／remote一致且读回干净；765输入和623成员精确Git绑定通过。
+六个本批副本已回收，正常包与target身份／摘要不变。
+提交、推送、回收及精确CI初态／后次快照见
+[21成员交付封存](2026-11-17-independent-zmodem-peers-evidence/delivery/README.md)。
+两个Windows工作流success仅按API状态记录，Quality三平台仍待终态；
+尚未独立复核其下载原件，不由本机门禁或peer结果代签。

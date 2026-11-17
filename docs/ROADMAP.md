@@ -29,6 +29,10 @@
 最终r7下lrzsz9／10、SexyZ8／10，单文件空传／缺OO边界保持；
 冻结后完整门禁已通过：Rust3419/0/62 ignored、14 rustdoc、Python主523 run/3 skipped；
 94普通套件逐名库存、765输入前后核对通过，不关闭FILE-05／旧lrzsz边界。
+工程`de9768c`已普通推送、三方SHA一致；623成员原件与765输入Git绑定通过，
+六个自有临时目录已回收，五位agent已关闭。
+Windows SSH44013808220／API44013808184为success，Quality44013808155待终态，
+见[交付快照](testing/records/2026-11-17-independent-zmodem-peers-evidence/delivery/README.md)。
 
 Windows 真实 OpenSSH 监控联调本机工程已完成，基线 `bfbea7b`：
 隔离服务器、原进程调试接纳与公开 Rust 路由用例已整合，
