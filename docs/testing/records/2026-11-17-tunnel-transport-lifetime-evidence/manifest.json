@@ -1,0 +1,1657 @@
+{
+  "archive": "originals.tar.gz",
+  "bytes": 1241738,
+  "sha256": "ea318ba1a4ad23a7a8708215a8fb2b373d06f6fbf748750a3a775e49110fbb47",
+  "members": 271,
+  "logical_bytes": 5690677,
+  "selection": [
+    {
+      "prefix": "parent",
+      "source": "work/tunnel-lifecycle-20261117",
+      "files": 145
+    },
+    {
+      "prefix": "first-review",
+      "source": "work/tunnel-lifecycle-harness-review-20261117",
+      "files": 20
+    },
+    {
+      "prefix": "final-review",
+      "source": "work/tunnel-lifecycle-final-review-20261117",
+      "files": 94
+    },
+    {
+      "prefix": "previous-delivery",
+      "source": "work/zmodem-independent-finalize-20261117",
+      "files": 12
+    }
+  ],
+  "files": [
+    {
+      "member": "parent/agent-lifecycle.json",
+      "source": "work/tunnel-lifecycle-20261117/agent-lifecycle.json",
+      "bytes": 1116,
+      "sha256": "33d400602ff879fdeb41373e42452121f6ca0002930cbef8bac648f8106a00de"
+    },
+    {
+      "member": "parent/candidate-inputs-after-gate-r2.json",
+      "source": "work/tunnel-lifecycle-20261117/candidate-inputs-after-gate-r2.json",
+      "bytes": 141694,
+      "sha256": "0dda219e081d4c136f25560afdbd129f509ca73821c5978e1e396adfa3ddc7b8"
+    },
+    {
+      "member": "parent/candidate-inputs-r1.json",
+      "source": "work/tunnel-lifecycle-20261117/candidate-inputs-r1.json",
+      "bytes": 141694,
+      "sha256": "4aa57dafb480d75457295d37b00610e020108e2d7703a5aed05d5d1fe5827387"
+    },
+    {
+      "member": "parent/candidate-inputs-r2.json",
+      "source": "work/tunnel-lifecycle-20261117/candidate-inputs-r2.json",
+      "bytes": 141694,
+      "sha256": "0dda219e081d4c136f25560afdbd129f509ca73821c5978e1e396adfa3ddc7b8"
+    },
+    {
+      "member": "parent/cleanup.py",
+      "source": "work/tunnel-lifecycle-20261117/cleanup.py",
+      "bytes": 5941,
+      "sha256": "99bbbfa094553c25b2e14c75e1ed3086d358b6e9bc157eb13c9ed7cafcc22f47"
+    },
+    {
+      "member": "parent/dependency-freshness/command.log",
+      "source": "work/tunnel-lifecycle-20261117/dependency-freshness/command.log",
+      "bytes": 651,
+      "sha256": "489137221c58e9c04fe5f61ee2575a963cba78b305f804c8a50a07c8545a18d2"
+    },
+    {
+      "member": "parent/dependency-freshness/result.json",
+      "source": "work/tunnel-lifecycle-20261117/dependency-freshness/result.json",
+      "bytes": 648,
+      "sha256": "09fb32e94034e084b2a7b5a49fe0ff551849e6c62385f63c83e54f29f4bd89ec"
+    },
+    {
+      "member": "parent/dependency-freshness-r2/command.log",
+      "source": "work/tunnel-lifecycle-20261117/dependency-freshness-r2/command.log",
+      "bytes": 84,
+      "sha256": "f24241b5d7f53ff406ae186e12fe90e1c6457b3df1c3af3b8dde250fb3958e5d"
+    },
+    {
+      "member": "parent/dependency-freshness-r2/result.json",
+      "source": "work/tunnel-lifecycle-20261117/dependency-freshness-r2/result.json",
+      "bytes": 618,
+      "sha256": "0580df4467002575b7b74c717c998874d450050951a34573ceafe757f36c03d2"
+    },
+    {
+      "member": "parent/dependency-freshness-r2.json",
+      "source": "work/tunnel-lifecycle-20261117/dependency-freshness-r2.json",
+      "bytes": 60807,
+      "sha256": "8cd8e5c0ee8082ddb2078f525abc261ada32d2d5ba9c29f647b9ee14e7345f70"
+    },
+    {
+      "member": "parent/dependency-freshness.json",
+      "source": "work/tunnel-lifecycle-20261117/dependency-freshness.json",
+      "bytes": 60578,
+      "sha256": "4f80ec857062a97175f185de5bc51aeb19d0774af29c5fbac9589135243e24ed"
+    },
+    {
+      "member": "parent/final-gate-r1/command.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r1/command.log",
+      "bytes": 10402,
+      "sha256": "1a185450f1579587c178b6b3c5ca3f69dc5e0452b884e62871e96b7f05ef7b34"
+    },
+    {
+      "member": "parent/final-gate-r1/result.json",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r1/result.json",
+      "bytes": 495,
+      "sha256": "6853fee042fb0a1b6c5fa2844651286c3757d6afee8cb06744f5fc3cf6beb91d"
+    },
+    {
+      "member": "parent/final-gate-r2/command.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2/command.log",
+      "bytes": 673709,
+      "sha256": "10a0135d48922f49241bfa4ded220c4cfe456085ca1fc94392cffe41a8748a2b"
+    },
+    {
+      "member": "parent/final-gate-r2/result.json",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2/result.json",
+      "bytes": 459,
+      "sha256": "39dd908d64e292d3a853e6fc196840e8cc64fedaf18f206d7d73ad470106b3cc"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/000.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/000.log",
+      "bytes": 12148,
+      "sha256": "48426e0302fc83802000b8dea870dc8ead22752e4001b199b028762883646ce5"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/001.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/001.log",
+      "bytes": 1356,
+      "sha256": "7108fb713c11198aec22fc4dee03f66751b6ab3ed362cae5e02b366e193995a9"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/002.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/002.log",
+      "bytes": 320,
+      "sha256": "ad2c25f3b7d66649b73410da333754eed4dfe59df210141241b64b5bbfb6b242"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/003.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/003.log",
+      "bytes": 383,
+      "sha256": "efc5bfa7fd42cf3ab73e28a9c3ae7aac76b4254e1e143bfeeb963a69af6aecc7"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/004.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/004.log",
+      "bytes": 319,
+      "sha256": "13269e271232968b67560a6e12f7b5f9a001d45240d01a2aa3ad9cc9584011fd"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/005.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/005.log",
+      "bytes": 104,
+      "sha256": "cc6016343e18019c5ae3da20e751772364124960d70b3f97ab96dda8a16fb6d2"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/006.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/006.log",
+      "bytes": 1138,
+      "sha256": "317c99a7c49a1815b64416464a1f9ba65d39d102dcaf1c23ad3b7a8469f4b933"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/007.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/007.log",
+      "bytes": 1219,
+      "sha256": "99fce2a422755398790254287c77ace65cfe290b2b7e53ca8201e9500a3ce23e"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/008.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/008.log",
+      "bytes": 149399,
+      "sha256": "9c8aa9297baab03d8c4c0151ad7a1929061eeaa1890ccb2d8a6fdff55fcaf033"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/009.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/009.log",
+      "bytes": 23272,
+      "sha256": "d86f9f0b169e392a8295cd203da145f0beb372bae6388f5c7e651a1bebed9581"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/010.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/010.log",
+      "bytes": 332,
+      "sha256": "d9c8b07fbc33ebcdcafc315931db742bb387db232d7634f7571b964c7d1d69d8"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/011.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/011.log",
+      "bytes": 1063,
+      "sha256": "a00ee9112d41dcf67e008726f0f8d226392660207b3e91dbaffd4c98fd6d64f4"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/012.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/012.log",
+      "bytes": 2577,
+      "sha256": "901e5469f4a2f549589ae17ecae17e6e96c06a57556724b641941d6bedd504d1"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/013.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/013.log",
+      "bytes": 2700,
+      "sha256": "ee36ae6b8d4a4e195c8666801e5d7db88ed11a05c4ce7065b5daff070f5e7770"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/014.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/014.log",
+      "bytes": 152,
+      "sha256": "22d1f477389c343ea3c8c9f4e749ce788656d48aec096e8db395cfebd5217b17"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/015.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/015.log",
+      "bytes": 420,
+      "sha256": "35bc9022c408f6641afa5d0bf99d773fec4d0dcef508888078d3b89a6cf1e8e4"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/016.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/016.log",
+      "bytes": 255,
+      "sha256": "463dd7c0a1e91e1f142d4e721c002f81793a1a3be8e7b698faa0275f2d47cfe6"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/017.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/017.log",
+      "bytes": 332,
+      "sha256": "f1fb3def2f05c1e69f3c31054a355ae27c93e30fbc053cb1841fffec24294f3a"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/018.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/018.log",
+      "bytes": 1687,
+      "sha256": "2609129b4f82c1045b56c75b3110c207074c80aea50f868dd35edfa4049d21c4"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/019.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/019.log",
+      "bytes": 1627,
+      "sha256": "01e9dc5362f1d70e094cea3648a4ff6516809eceefb35c709a4e997695de737a"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/020.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/020.log",
+      "bytes": 697,
+      "sha256": "59603ee9fb1bd1fd4608cf468aa0389761183f23d764c34fef34476ad6afbcec"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/021.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/021.log",
+      "bytes": 152,
+      "sha256": "1ba5b85c00d02ab6d950da5acdaf5536167171a15f6f2ef64638752a963f7cc3"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/022.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/022.log",
+      "bytes": 490,
+      "sha256": "724f9751d1bca8ab2d28fcc57c5c3613895786e3083945091545fb36458f3c94"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/023.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/023.log",
+      "bytes": 169,
+      "sha256": "11f0b45fe13a45c0f2fb08e611f2884f10db66f22e77578669872decac5b3362"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/024.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/024.log",
+      "bytes": 278,
+      "sha256": "202c9d16bb49825a78c4224bdb3395f4306078004f2410e4152a328cc2008a86"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/025.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/025.log",
+      "bytes": 274,
+      "sha256": "9802211e1eee2e5756015ab0ba13855623718b4e0ea7265c5ce4057e10efd911"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/026.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/026.log",
+      "bytes": 517,
+      "sha256": "e753583357ecbb239d096e01b24fc0bb9b2f03a9750dfdc70ccd979e0826765b"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/027.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/027.log",
+      "bytes": 1399,
+      "sha256": "1f216e005e0ee5df1b4ac8c3c8ec928cde8012bfcc2e6e9b3ad6b43bd536ce63"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/028.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/028.log",
+      "bytes": 420,
+      "sha256": "bf18db952a839a21864f01b99a8288afeb31f56b640a2285a8b6abcc8593de59"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/029.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/029.log",
+      "bytes": 451,
+      "sha256": "22806826b6161c512a1fc5e3c91ed5c46c4b291008171bf34e6f38331ab4fe56"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/030.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/030.log",
+      "bytes": 1476,
+      "sha256": "dc03df35c86af078971e2a9d3a793d4f31c5aa4129b73fa73e79ced551caae54"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/031.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/031.log",
+      "bytes": 436,
+      "sha256": "45f0547af19ff7c4ae3d29df71e40a8abb9480b9745f0d6072da4ea520fa4883"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/032.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/032.log",
+      "bytes": 792,
+      "sha256": "0e87702f9591030f0b59b01c654bd4a84ba7ea5a385a9f0136dad94ed50d4e2c"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/033.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/033.log",
+      "bytes": 889,
+      "sha256": "cd9ddf735515c336b814b1bda79b13a03ce6aa9190dfa20f7da053e9be929b74"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/034.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/034.log",
+      "bytes": 852,
+      "sha256": "ca2cefc86a9d1d11dcf098aa9697a4b23375134cba3bd7cbeac5ae4106126071"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/035.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/035.log",
+      "bytes": 1496,
+      "sha256": "abf2380362b813be64e641d7b0f895cdb33ad0e48e9d6df642afa6efef915b86"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/036.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/036.log",
+      "bytes": 1393,
+      "sha256": "5ada23a1c3152e70a5595900aed7323a9af0f58328bfb86740aa04bbe3f51f2f"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/037.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/037.log",
+      "bytes": 110,
+      "sha256": "2313b8d14be09a8a55e74287f321fa35dbf4664dc0b13ba5ec42ec41176d0560"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/038.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/038.log",
+      "bytes": 2065,
+      "sha256": "da28ca6b6a8d3c9d90a184142787a2b4a2ff919da42302ef28aac7e15045eac6"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/039.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/039.log",
+      "bytes": 533,
+      "sha256": "ee2f93179f877aead452c5e203d45ff1a13465b3d53fecd42781f7167f565e5d"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/040.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/040.log",
+      "bytes": 1020,
+      "sha256": "776cf65a661dd9da33508358dcbd1e0f3cdf99628c91c9e1cdc7e29c453fc2b9"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/041.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/041.log",
+      "bytes": 339,
+      "sha256": "0ff2280f293fd30829e4ef2602753ee9f0c8350fee383ede57431aa1702d063a"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/042.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/042.log",
+      "bytes": 1434,
+      "sha256": "e01da2ccff487395c551d39d88598eee016f1810fd38f9130bff5aeccdc2013a"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/043.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/043.log",
+      "bytes": 932,
+      "sha256": "2b5c5be6654d2b1da12ebdb5da3cb831cbbcf6741e2eb68dfa9802055706b9c8"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/044.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/044.log",
+      "bytes": 1134,
+      "sha256": "2f79804bb456cb7463ba9a8d5951fb913de40083cc6aa8903c1cc7106e70ce27"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/045.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/045.log",
+      "bytes": 412,
+      "sha256": "71e9f70db98a747bea28fd8f6d6984cc8f8a50d3a4aceff07355aa5c2278b33d"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/046.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/046.log",
+      "bytes": 242,
+      "sha256": "ef0a4007296919f116f2d7b79867322f297e1afcaee1b0e407b47209eccb0e1b"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/047.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/047.log",
+      "bytes": 748,
+      "sha256": "20e67905d1353527c3a48934c9d3dba74f5acfa5bbe28dc3c3249c3eddac24c9"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/048.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/048.log",
+      "bytes": 727,
+      "sha256": "778c2bdd4d60b0d55af0f2a10b728dfb2a0499cdd71945edbf20f8779b01181b"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/049.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/049.log",
+      "bytes": 571,
+      "sha256": "65ec6a7851471ed44f581d49071294574855d42d69275185f45838ae435eb4b7"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/050.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/050.log",
+      "bytes": 2306,
+      "sha256": "58999d92944dbc2a6f28fcdbfb6e689a66c34f9ba770236f519c12963f1be71b"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/051.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/051.log",
+      "bytes": 524,
+      "sha256": "d7d0972bda3a76ce8ce0253d79a70991196ce32e7d3376d95b818b64aeb0aaea"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/052.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/052.log",
+      "bytes": 98,
+      "sha256": "99800939897d79444ad0e94cb0b566ab24e6bd6ddb8d622ca184dbbf29637db8"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/053.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/053.log",
+      "bytes": 340,
+      "sha256": "85dbad018670905ba5aaca0744b52034cebad96e5254c1843bb84b7738da0658"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/054.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/054.log",
+      "bytes": 90,
+      "sha256": "2fb858ed73208a192ee6e0f19e8162ba568c7dabead76773e25822c3989b8e01"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/055.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/055.log",
+      "bytes": 871,
+      "sha256": "15278c9505f632b03a28a797f342675e1b3a9e2fca9d97345562d7665c57d292"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/056.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/056.log",
+      "bytes": 7523,
+      "sha256": "9aef54af1e1bb3c973c0be4e491c1c49c6a6cb42eb1e7a2fd1f709926221278a"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/057.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/057.log",
+      "bytes": 2006,
+      "sha256": "65b813b98ae553c01f256408b5f26f8018feb44c6a3ef9ea567a457abc08ddeb"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/058.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/058.log",
+      "bytes": 22,
+      "sha256": "414c144fa67f1df75f7b14a69af5641637772e81c4c3fa0a171e3228adbb922e"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/059.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/059.log",
+      "bytes": 1246,
+      "sha256": "7d88cc2ca2947c47429fee80ef9a28f2bd35a1f64b527a34c8e7dbdfa4a2f0ea"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/060.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/060.log",
+      "bytes": 1101,
+      "sha256": "c600f5de0b7ccf650def67c24ecafbfed12c79cedff60189a0d48a1e52d9947b"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/061.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/061.log",
+      "bytes": 229,
+      "sha256": "88d3e5d82db7b3c65d327b91356046a51621044a0799d060d040c1bf7c427b41"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/062.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/062.log",
+      "bytes": 852,
+      "sha256": "7959893dd537756018e53980e18ffbf4feafbcb048305cef8d396d1ee02cce76"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/063.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/063.log",
+      "bytes": 378,
+      "sha256": "ae052a4644f0da2e0e0918fa940555f082fbb7c27f702978186d85da6b7803af"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/064.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/064.log",
+      "bytes": 1561,
+      "sha256": "e0dc680748eee8f791098fea3dd16119725d7a0b9161ae25e10d9b2cd3949283"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/065.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/065.log",
+      "bytes": 40723,
+      "sha256": "43cff3e8dab6b52c2880cdc4fc7ffbdcb16e4a1fca96dc74acc68b64602bd0db"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/066.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/066.log",
+      "bytes": 1173,
+      "sha256": "4590438387ea4c2206ce0976b483ae3778c19449db91e8611161689d21672364"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/067.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/067.log",
+      "bytes": 1709,
+      "sha256": "e9c7006ab076c796ad008397c2174a14b97b89f1acd42b900589618085ec2922"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/068.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/068.log",
+      "bytes": 831,
+      "sha256": "3a8187d3657ffeeecbf26a6a9de725dc1f1e55500261642e6922156bad437e31"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/069.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/069.log",
+      "bytes": 1036,
+      "sha256": "28187648b77d49f4b02174c98d4403f7a5d8b800e125f92a0a0529a13254e6d3"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/070.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/070.log",
+      "bytes": 1060,
+      "sha256": "d029f0afae8ab3c3ed7265df0cdcacba4c79f8a8da029229b6e7dca409a01b70"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/071.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/071.log",
+      "bytes": 225,
+      "sha256": "50f9edbab619f0e2fd55d314881765fa50f917ea4c26edbc7de88839d03a8cfc"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/072.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/072.log",
+      "bytes": 322,
+      "sha256": "7a68ea0475d5daf3f2a2922f0adad97ebc72304f57dd2f7648ca1d5accdf2534"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/073.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/073.log",
+      "bytes": 429,
+      "sha256": "7b0c52877952ef3f9a3c5a59f29a91d2dca07265a5c7e0b6cefc2cf2ce77e8d1"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/074.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/074.log",
+      "bytes": 119,
+      "sha256": "39bcf82e692a699f1b48b78f66dd275b3648a3c4aef820542ae2c075882088ed"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/075.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/075.log",
+      "bytes": 152,
+      "sha256": "36e5470b574beee97fa982be86476a78e4c62f6904aafa479767b024d72f46ce"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/076.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/076.log",
+      "bytes": 1482,
+      "sha256": "048425936c953e9b125467c2212494fd2296c5a46d5bc6e9fa7a29ff54c2ef51"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/077.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/077.log",
+      "bytes": 954,
+      "sha256": "357e324aff406cb971fbf4ddddecc600101c7c3f0871350cba61896f8c1a07aa"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/078.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/078.log",
+      "bytes": 369,
+      "sha256": "2c367cc4fa5fef593c7e11a7901422a0a6d0d5d1d1f8a3a1861436d989f36280"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/079.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/079.log",
+      "bytes": 2829,
+      "sha256": "4e283e8cfd84788f9c76b5ffe3c3ec6dbd84a70aeb1fe0d62787f95f4bede784"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/080.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/080.log",
+      "bytes": 14820,
+      "sha256": "001a8dbd8fd3d426bb258f2a510e2bb500e5ed48ad62b4491987b5622aa88347"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/081.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/081.log",
+      "bytes": 206,
+      "sha256": "cb27a7a59b0e3ddbd6de6e03e2f18aa894a0839e2f2e5542b7a217e4492fb028"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/082.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/082.log",
+      "bytes": 836,
+      "sha256": "c9ecbafccff2c49de98aef3a10147f1df90e0978fd3b5a5c0014427dfd825db6"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/083.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/083.log",
+      "bytes": 828,
+      "sha256": "a14850dabb05b1acef17a755d27ea500eb6a59e662da76639b7c0709d0e43cd1"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/084.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/084.log",
+      "bytes": 885,
+      "sha256": "e8582069b55eba474bccf132643d77029401d69e7f9c86280e0260038e697b1e"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/085.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/085.log",
+      "bytes": 765,
+      "sha256": "7e5358ddf3f43be5ae857c73ac8f1ff2eb98312f8f356b590c24b460577a1abf"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/086.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/086.log",
+      "bytes": 822,
+      "sha256": "f314d0567e37f83165466812600cfc9d00e1b2fbaf457bf2972a5f54892ba568"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/087.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/087.log",
+      "bytes": 1191,
+      "sha256": "e8a15749337ce37c6cc7d8ac62e7f4c5860612c3269bae2659fe23d0c6a6ba3a"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/088.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/088.log",
+      "bytes": 4706,
+      "sha256": "3aebed19073edf10e24c15c692332f381fd703679d57911a006add766f76f090"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/089.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/089.log",
+      "bytes": 827,
+      "sha256": "6016c4cd1ca9a2fa88f37a04f72877a2005912488e1d65fcbfe81f52446f471a"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/090.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/090.log",
+      "bytes": 81,
+      "sha256": "9582e552a609b0c07dc16f46032c0a2fd5f23ce343dcd21bed0f30fb3736346f"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/091.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/091.log",
+      "bytes": 188,
+      "sha256": "a36c4c7128bf8677b66040ff90a474bf7dba36000fe2a14dd0155c28ab570f6c"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/092.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/092.log",
+      "bytes": 976,
+      "sha256": "8ff4b8f657e9dc69f8652abe8a1a096391769a4d02d26087641915932b4184fd"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/093.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/093.log",
+      "bytes": 2137,
+      "sha256": "1f1e79d50230d457fc2ed0f7f6b3ec80c7e12db784f76a383af87d9a7a1a16ee"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/094.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/094.log",
+      "bytes": 1162,
+      "sha256": "c1e76e3a92ddf2d960a53ff5036556af58e786876254d0a9754d5aeece1002f3"
+    },
+    {
+      "member": "parent/final-gate-r2-inventory/summary.json",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2-inventory/summary.json",
+      "bytes": 749629,
+      "sha256": "51e23884bb74af6121275f8aa0eb711204aef20c49eb4cb7b43e5fd66c2da0ca"
+    },
+    {
+      "member": "parent/final-gate-r2.log",
+      "source": "work/tunnel-lifecycle-20261117/final-gate-r2.log",
+      "bytes": 673709,
+      "sha256": "10a0135d48922f49241bfa4ded220c4cfe456085ca1fc94392cffe41a8748a2b"
+    },
+    {
+      "member": "parent/final-inventory-r1/command.log",
+      "source": "work/tunnel-lifecycle-20261117/final-inventory-r1/command.log",
+      "bytes": 744,
+      "sha256": "7965b1cd4a3af9fb633d960acdf59ff5233f0b06af35028878380e2b06b2a1af"
+    },
+    {
+      "member": "parent/final-inventory-r1/result.json",
+      "source": "work/tunnel-lifecycle-20261117/final-inventory-r1/result.json",
+      "bytes": 524,
+      "sha256": "9ff8badfec887781dfe8c53097d4ff7e92a10a54a70350bff27dc8c004b418b4"
+    },
+    {
+      "member": "parent/final-local-lifecycle-inventory.json",
+      "source": "work/tunnel-lifecycle-20261117/final-local-lifecycle-inventory.json",
+      "bytes": 2162,
+      "sha256": "342f928fd8d0e4653a172906f0a7644849b331246130709230caca09244f4f3c"
+    },
+    {
+      "member": "parent/forwarding-compile-r1/command.log",
+      "source": "work/tunnel-lifecycle-20261117/forwarding-compile-r1/command.log",
+      "bytes": 615,
+      "sha256": "4b0954bfd1cd9897381ff0e18f2e20bc1b9d00c557e1e944d4c8db990d2c076c"
+    },
+    {
+      "member": "parent/forwarding-compile-r1/result.json",
+      "source": "work/tunnel-lifecycle-20261117/forwarding-compile-r1/result.json",
+      "bytes": 549,
+      "sha256": "8e1de1855c361eb1f2951269248f20b76e249f956a1845cb19488b668291c020"
+    },
+    {
+      "member": "parent/harness-unit-r1/command.log",
+      "source": "work/tunnel-lifecycle-20261117/harness-unit-r1/command.log",
+      "bytes": 132,
+      "sha256": "a8011de86be4a4fe4ff68b8f81f2aef6804e776ebd85f77ea003096bac017305"
+    },
+    {
+      "member": "parent/harness-unit-r1/result.json",
+      "source": "work/tunnel-lifecycle-20261117/harness-unit-r1/result.json",
+      "bytes": 545,
+      "sha256": "81822cb409027a285e2b64fd2daee0ce4e3e7172d3ade2125195c9bc803031eb"
+    },
+    {
+      "member": "parent/initial-archive-selection.json",
+      "source": "work/tunnel-lifecycle-20261117/initial-archive-selection.json",
+      "bytes": 78117,
+      "sha256": "6c167372d30f0b04ce8dbcb76e4576e3e50ced04947eef8b5937df36eef793ad"
+    },
+    {
+      "member": "parent/local-lifecycle-r1/command.log",
+      "source": "work/tunnel-lifecycle-20261117/local-lifecycle-r1/command.log",
+      "bytes": 2212,
+      "sha256": "a4ce116c2e06552a5cb42e016a74d322ff47fee9fc15ba8cd76c5c3d4850a360"
+    },
+    {
+      "member": "parent/local-lifecycle-r1/result.json",
+      "source": "work/tunnel-lifecycle-20261117/local-lifecycle-r1/result.json",
+      "bytes": 580,
+      "sha256": "7dda864d4f06ae7afa6e2c1e5b299b959f8d98313733e386c16f99a950a840f6"
+    },
+    {
+      "member": "parent/openssh-forwarding-r1/generate-client-key.log",
+      "source": "work/tunnel-lifecycle-20261117/openssh-forwarding-r1/generate-client-key.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "parent/openssh-forwarding-r1/generate-host-key.log",
+      "source": "work/tunnel-lifecycle-20261117/openssh-forwarding-r1/generate-host-key.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "parent/openssh-forwarding-r1/openssh-version.log",
+      "source": "work/tunnel-lifecycle-20261117/openssh-forwarding-r1/openssh-version.log",
+      "bytes": 31,
+      "sha256": "6faf9904aac9ceb0fce08762e25a5a83dd82596100e2a6d2c6102da5eb7feaa7"
+    },
+    {
+      "member": "parent/openssh-forwarding-r1/result.json",
+      "source": "work/tunnel-lifecycle-20261117/openssh-forwarding-r1/result.json",
+      "bytes": 2086,
+      "sha256": "76dca0535db348f234c192d859dd78ce354d39c31622c50a47e0014ee6787dc0"
+    },
+    {
+      "member": "parent/openssh-forwarding-r1/sshd.log",
+      "source": "work/tunnel-lifecycle-20261117/openssh-forwarding-r1/sshd.log",
+      "bytes": 581,
+      "sha256": "92ff5b5ee487df06c5a92b37738d96bfedc4afef3d8616310200cb4ab9811ee0"
+    },
+    {
+      "member": "parent/openssh-forwarding-r1/tests.log",
+      "source": "work/tunnel-lifecycle-20261117/openssh-forwarding-r1/tests.log",
+      "bytes": 939,
+      "sha256": "d2a6fc17f5c6d10d06aabd71e7ae5a9a1168062cd460121a09da8230174e5cc4"
+    },
+    {
+      "member": "parent/openssh-forwarding-r1/validate-sshd-config.log",
+      "source": "work/tunnel-lifecycle-20261117/openssh-forwarding-r1/validate-sshd-config.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "parent/openssh-forwarding-r2/generate-client-key.log",
+      "source": "work/tunnel-lifecycle-20261117/openssh-forwarding-r2/generate-client-key.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "parent/openssh-forwarding-r2/generate-host-key.log",
+      "source": "work/tunnel-lifecycle-20261117/openssh-forwarding-r2/generate-host-key.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "parent/openssh-forwarding-r2/openssh-version.log",
+      "source": "work/tunnel-lifecycle-20261117/openssh-forwarding-r2/openssh-version.log",
+      "bytes": 31,
+      "sha256": "6faf9904aac9ceb0fce08762e25a5a83dd82596100e2a6d2c6102da5eb7feaa7"
+    },
+    {
+      "member": "parent/openssh-forwarding-r2/result.json",
+      "source": "work/tunnel-lifecycle-20261117/openssh-forwarding-r2/result.json",
+      "bytes": 2086,
+      "sha256": "bea00a0c00b166530b31043498dce53a5c56b9051606543799637f7256ee2ddf"
+    },
+    {
+      "member": "parent/openssh-forwarding-r2/sshd.log",
+      "source": "work/tunnel-lifecycle-20261117/openssh-forwarding-r2/sshd.log",
+      "bytes": 581,
+      "sha256": "92ff5b5ee487df06c5a92b37738d96bfedc4afef3d8616310200cb4ab9811ee0"
+    },
+    {
+      "member": "parent/openssh-forwarding-r2/tests.log",
+      "source": "work/tunnel-lifecycle-20261117/openssh-forwarding-r2/tests.log",
+      "bytes": 939,
+      "sha256": "8b06143440e639b6b3df94677787f41fdb5efcb9a4a130b3e78fc3233e7b5a2e"
+    },
+    {
+      "member": "parent/openssh-forwarding-r2/validate-sshd-config.log",
+      "source": "work/tunnel-lifecycle-20261117/openssh-forwarding-r2/validate-sshd-config.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "parent/prebuilt-copy-cleanup.json",
+      "source": "work/tunnel-lifecycle-20261117/prebuilt-copy-cleanup.json",
+      "bytes": 892,
+      "sha256": "af4fcda438fabe236941a4f6420706d5f70071b328ecbd4e7b9fb226931c54a8"
+    },
+    {
+      "member": "parent/resources-before.json",
+      "source": "work/tunnel-lifecycle-20261117/resources-before.json",
+      "bytes": 1390,
+      "sha256": "b6603cfe515ca67d88fb0c7349aece35b1e8de19c172d555ad11ac1f6e8c6718"
+    },
+    {
+      "member": "parent/reused-inventory-tool.json",
+      "source": "work/tunnel-lifecycle-20261117/reused-inventory-tool.json",
+      "bytes": 326,
+      "sha256": "9d36fa07d53bc8420319598626093b81c8e1dd880ba412c1be64159e43ff32f7"
+    },
+    {
+      "member": "parent/run.py",
+      "source": "work/tunnel-lifecycle-20261117/run.py",
+      "bytes": 2429,
+      "sha256": "01149e85293689ef087093a6b2bfe9ab6c051cc9e0aa9458f485833deda8ed9b"
+    },
+    {
+      "member": "parent/seal.py",
+      "source": "work/tunnel-lifecycle-20261117/seal.py",
+      "bytes": 2065,
+      "sha256": "02654bf25c45b4cd1693eea8c464ed6c7d961aa46dd731c39cc543d0e616113f"
+    },
+    {
+      "member": "parent/snapshot.py",
+      "source": "work/tunnel-lifecycle-20261117/snapshot.py",
+      "bytes": 1443,
+      "sha256": "4f859f02ec70721da942c5a02e0fe16f805fad5a15728158b45b2fbb557c8666"
+    },
+    {
+      "member": "parent/uuid-lock-update/command.log",
+      "source": "work/tunnel-lifecycle-20261117/uuid-lock-update/command.log",
+      "bytes": 143,
+      "sha256": "8da8de22612e86394566ad89f146430a272f0a74e88fd28edbb028ca1ccb6932"
+    },
+    {
+      "member": "parent/uuid-lock-update/result.json",
+      "source": "work/tunnel-lifecycle-20261117/uuid-lock-update/result.json",
+      "bytes": 499,
+      "sha256": "11fc3214d4b941391b6f3cdc6b4580bbf7732bd0f453de1a288a5190e6b86f59"
+    },
+    {
+      "member": "parent/verify_gate_inventory.py",
+      "source": "work/tunnel-lifecycle-20261117/verify_gate_inventory.py",
+      "bytes": 4011,
+      "sha256": "a6452dab58cfb64ea955b224bb3e33f3dfd74bcfe3630da993216f908508d7cc"
+    },
+    {
+      "member": "first-review/REVIEW.md",
+      "source": "work/tunnel-lifecycle-harness-review-20261117/REVIEW.md",
+      "bytes": 5475,
+      "sha256": "6aa02f04a1d70f0a0524846164c1901f62f9ae4338da0650749c1e91847298c0"
+    },
+    {
+      "member": "first-review/base/.github/workflows/ci.yml",
+      "source": "work/tunnel-lifecycle-harness-review-20261117/base/.github/workflows/ci.yml",
+      "bytes": 4034,
+      "sha256": "22b7fc620bbb47592aa04fc57e4f6bbaffd5bffd571d74ddfea030e2c38c723b"
+    },
+    {
+      "member": "first-review/base/scripts/openssh_interop.py",
+      "source": "work/tunnel-lifecycle-harness-review-20261117/base/scripts/openssh_interop.py",
+      "bytes": 29476,
+      "sha256": "522ffac3f99d227a536c414204ab15bda1784ad72c9dd012da861f1ba22ac3d0"
+    },
+    {
+      "member": "first-review/base/scripts/test_openssh_interop.py",
+      "source": "work/tunnel-lifecycle-harness-review-20261117/base/scripts/test_openssh_interop.py",
+      "bytes": 25449,
+      "sha256": "b6874661947ea313e948d75e8dc3eff7a2fae521ee7e82b8a34c88f6482d9b9a"
+    },
+    {
+      "member": "first-review/final.json",
+      "source": "work/tunnel-lifecycle-harness-review-20261117/final.json",
+      "bytes": 1151,
+      "sha256": "191deafb7420880d323c184bcf5ac9b22a05f9e34945e12319ebcf25839f8bce"
+    },
+    {
+      "member": "first-review/independent-controls.json",
+      "source": "work/tunnel-lifecycle-harness-review-20261117/independent-controls.json",
+      "bytes": 715,
+      "sha256": "d0aa45950739f99687491a6db84602f1bdfe439160cb91dd74f966eea4d1e617"
+    },
+    {
+      "member": "first-review/independent-controls.log",
+      "source": "work/tunnel-lifecycle-harness-review-20261117/independent-controls.log",
+      "bytes": 1615,
+      "sha256": "b2e22bf5dcc14cbbaa6c180587386905b089dca7fa7a2fe169f6fa7a4391c1f3"
+    },
+    {
+      "member": "first-review/integrity.after.json",
+      "source": "work/tunnel-lifecycle-harness-review-20261117/integrity.after.json",
+      "bytes": 6707,
+      "sha256": "f7ddc0fb7d33353adae526c01c18489e20564ede3084e792ce7cc6c9f9cc2f64"
+    },
+    {
+      "member": "first-review/manifest.before.json",
+      "source": "work/tunnel-lifecycle-harness-review-20261117/manifest.before.json",
+      "bytes": 1896,
+      "sha256": "4c2731c6db9279429f6fda7226da8dfb990f007b476da820d4882c1664458bf1"
+    },
+    {
+      "member": "first-review/python-unittest.json",
+      "source": "work/tunnel-lifecycle-harness-review-20261117/python-unittest.json",
+      "bytes": 764,
+      "sha256": "eaef2cd854c2e8c72685bf0ae7cd0f960986f177b4a35c8a2bb1b89972b01ffa"
+    },
+    {
+      "member": "first-review/python-unittest.log",
+      "source": "work/tunnel-lifecycle-harness-review-20261117/python-unittest.log",
+      "bytes": 5677,
+      "sha256": "3f9ead06e62195538232309aeb27cde7b73e0cd425730922ea6fdf7a1a286a44"
+    },
+    {
+      "member": "first-review/scope.diff",
+      "source": "work/tunnel-lifecycle-harness-review-20261117/scope.diff",
+      "bytes": 19130,
+      "sha256": "a7fb574fb9f3467a075e3e154df4cd864d6d2aa17d2de60e4413ba0baf43af25"
+    },
+    {
+      "member": "first-review/snapshot/.github/workflows/ci.yml",
+      "source": "work/tunnel-lifecycle-harness-review-20261117/snapshot/.github/workflows/ci.yml",
+      "bytes": 4213,
+      "sha256": "a33e1e1c21739949361991a8ccc89f98dfb90cd6af1939118c9d9bf7857774c8"
+    },
+    {
+      "member": "first-review/snapshot/crates/keelshell-session/tests/forwarding_openssh.rs",
+      "source": "work/tunnel-lifecycle-harness-review-20261117/snapshot/crates/keelshell-session/tests/forwarding_openssh.rs",
+      "bytes": 11542,
+      "sha256": "631e310c6a0eebf8924d940acdda130a1b71ddb3dcac2a6c28ec72f4a5c98b91"
+    },
+    {
+      "member": "first-review/snapshot/scripts/openssh_interop.py",
+      "source": "work/tunnel-lifecycle-harness-review-20261117/snapshot/scripts/openssh_interop.py",
+      "bytes": 29898,
+      "sha256": "909ccb5393c4598ff2c409b07096358d3240a27ffae2a8c6f0894b54a1b6698d"
+    },
+    {
+      "member": "first-review/snapshot/scripts/test_openssh_interop.py",
+      "source": "work/tunnel-lifecycle-harness-review-20261117/snapshot/scripts/test_openssh_interop.py",
+      "bytes": 29577,
+      "sha256": "842a1da89da11f7ea298e9f7b4d499c72c89b71ff5db5249328bba9976f008dd"
+    },
+    {
+      "member": "first-review/status.after.txt",
+      "source": "work/tunnel-lifecycle-harness-review-20261117/status.after.txt",
+      "bytes": 442,
+      "sha256": "32c274a8e04950e2170a286298c0c9ec1a9439e433f666ec8ee52a978d6b4619"
+    },
+    {
+      "member": "first-review/status.before.txt",
+      "source": "work/tunnel-lifecycle-harness-review-20261117/status.before.txt",
+      "bytes": 326,
+      "sha256": "1a18588a87f709e45488fa41e254643adc1592d6dcd546e3e3a899c25c3258a5"
+    },
+    {
+      "member": "first-review/status.final.txt",
+      "source": "work/tunnel-lifecycle-harness-review-20261117/status.final.txt",
+      "bytes": 442,
+      "sha256": "32c274a8e04950e2170a286298c0c9ec1a9439e433f666ec8ee52a978d6b4619"
+    },
+    {
+      "member": "first-review/test_review_controls.py",
+      "source": "work/tunnel-lifecycle-harness-review-20261117/test_review_controls.py",
+      "bytes": 6497,
+      "sha256": "1439228dfe16f0eca40020f498d353c1b46ecca774083b756ac3c9fbf816a4e3"
+    },
+    {
+      "member": "final-review/REVIEW.md",
+      "source": "work/tunnel-lifecycle-final-review-20261117/REVIEW.md",
+      "bytes": 20515,
+      "sha256": "2c17b59615d942057a81f36d080894038bd92d1785248951fefbd9396628ca30"
+    },
+    {
+      "member": "final-review/audit.py",
+      "source": "work/tunnel-lifecycle-final-review-20261117/audit.py",
+      "bytes": 5942,
+      "sha256": "7ca913887fddd749f191ed4d0c9a1aa713801a72de5ac2efa181fdc7cab8be28"
+    },
+    {
+      "member": "final-review/base/.github/workflows/ci.yml",
+      "source": "work/tunnel-lifecycle-final-review-20261117/base/.github/workflows/ci.yml",
+      "bytes": 4034,
+      "sha256": "22b7fc620bbb47592aa04fc57e4f6bbaffd5bffd571d74ddfea030e2c38c723b"
+    },
+    {
+      "member": "final-review/base/Cargo.lock",
+      "source": "work/tunnel-lifecycle-final-review-20261117/base/Cargo.lock",
+      "bytes": 261885,
+      "sha256": "f4ca2d8302bbad645393729099533b09df238ecc54cb62b9c03fae44c74c37d3"
+    },
+    {
+      "member": "final-review/base/crates/keelshell-session/src/forwarding.rs",
+      "source": "work/tunnel-lifecycle-final-review-20261117/base/crates/keelshell-session/src/forwarding.rs",
+      "bytes": 17062,
+      "sha256": "3ce6a8834d5913a8be2df45070acfcc235b1af3359e4e6ad26e674c51be80e95"
+    },
+    {
+      "member": "final-review/base/scripts/openssh_interop.py",
+      "source": "work/tunnel-lifecycle-final-review-20261117/base/scripts/openssh_interop.py",
+      "bytes": 29476,
+      "sha256": "522ffac3f99d227a536c414204ab15bda1784ad72c9dd012da861f1ba22ac3d0"
+    },
+    {
+      "member": "final-review/base/scripts/test_openssh_interop.py",
+      "source": "work/tunnel-lifecycle-final-review-20261117/base/scripts/test_openssh_interop.py",
+      "bytes": 25449,
+      "sha256": "b6874661947ea313e948d75e8dc3eff7a2fae521ee7e82b8a34c88f6482d9b9a"
+    },
+    {
+      "member": "final-review/base-r2/.github/workflows/ci.yml",
+      "source": "work/tunnel-lifecycle-final-review-20261117/base-r2/.github/workflows/ci.yml",
+      "bytes": 4034,
+      "sha256": "22b7fc620bbb47592aa04fc57e4f6bbaffd5bffd571d74ddfea030e2c38c723b"
+    },
+    {
+      "member": "final-review/base-r2/Cargo.lock",
+      "source": "work/tunnel-lifecycle-final-review-20261117/base-r2/Cargo.lock",
+      "bytes": 261885,
+      "sha256": "f4ca2d8302bbad645393729099533b09df238ecc54cb62b9c03fae44c74c37d3"
+    },
+    {
+      "member": "final-review/base-r2/crates/keelshell-session/src/forwarding.rs",
+      "source": "work/tunnel-lifecycle-final-review-20261117/base-r2/crates/keelshell-session/src/forwarding.rs",
+      "bytes": 17062,
+      "sha256": "3ce6a8834d5913a8be2df45070acfcc235b1af3359e4e6ad26e674c51be80e95"
+    },
+    {
+      "member": "final-review/base-r2/scripts/openssh_interop.py",
+      "source": "work/tunnel-lifecycle-final-review-20261117/base-r2/scripts/openssh_interop.py",
+      "bytes": 29476,
+      "sha256": "522ffac3f99d227a536c414204ab15bda1784ad72c9dd012da861f1ba22ac3d0"
+    },
+    {
+      "member": "final-review/base-r2/scripts/test_openssh_interop.py",
+      "source": "work/tunnel-lifecycle-final-review-20261117/base-r2/scripts/test_openssh_interop.py",
+      "bytes": 25449,
+      "sha256": "b6874661947ea313e948d75e8dc3eff7a2fae521ee7e82b8a34c88f6482d9b9a"
+    },
+    {
+      "member": "final-review/capture_r2_receipt.py",
+      "source": "work/tunnel-lifecycle-final-review-20261117/capture_r2_receipt.py",
+      "bytes": 2567,
+      "sha256": "87854762b84d532eabe6140f6e2207998e527cb8ce809f595fbdd142b34cb178"
+    },
+    {
+      "member": "final-review/collect_evidence.py",
+      "source": "work/tunnel-lifecycle-final-review-20261117/collect_evidence.py",
+      "bytes": 2638,
+      "sha256": "4b1364664d1d1fc717995bd38a2e667dfb65d6d42b4aa0907c336223e2e617c8"
+    },
+    {
+      "member": "final-review/evidence-manifest.json",
+      "source": "work/tunnel-lifecycle-final-review-20261117/evidence-manifest.json",
+      "bytes": 7514,
+      "sha256": "494183ab0e3cfe048fb68e591323f55afa8d93ddb239634c0958abd770320f00"
+    },
+    {
+      "member": "final-review/final.json",
+      "source": "work/tunnel-lifecycle-final-review-20261117/final.json",
+      "bytes": 3069,
+      "sha256": "a4ba9aad127d6ed082e5d768a444191a878622af2dfc3d9f6eb68bc381765db1"
+    },
+    {
+      "member": "final-review/forwarding-openssh-list.json",
+      "source": "work/tunnel-lifecycle-final-review-20261117/forwarding-openssh-list.json",
+      "bytes": 724,
+      "sha256": "b2c9d0eceb8078b69ff7b32fae3e4c995b3b7eec75cf8cefe4b4294a94d1d22d"
+    },
+    {
+      "member": "final-review/forwarding-openssh-list.stderr.log",
+      "source": "work/tunnel-lifecycle-final-review-20261117/forwarding-openssh-list.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "final-review/forwarding-openssh-list.stdout.log",
+      "source": "work/tunnel-lifecycle-final-review-20261117/forwarding-openssh-list.stdout.log",
+      "bytes": 429,
+      "sha256": "7b0c52877952ef3f9a3c5a59f29a91d2dca07265a5c7e0b6cefc2cf2ce77e8d1"
+    },
+    {
+      "member": "final-review/harness-controls.json",
+      "source": "work/tunnel-lifecycle-final-review-20261117/harness-controls.json",
+      "bytes": 811,
+      "sha256": "cc6e48e162ccfc7150ca8e4adf3ad71211e31db545b01abdb8e3c770746ba3b9"
+    },
+    {
+      "member": "final-review/harness-controls.stderr.log",
+      "source": "work/tunnel-lifecycle-final-review-20261117/harness-controls.stderr.log",
+      "bytes": 1615,
+      "sha256": "520013eccbde60a73f3270d0ae7d7c2e3255aba5e519d3d0e67427ddba0df639"
+    },
+    {
+      "member": "final-review/harness-controls.stdout.log",
+      "source": "work/tunnel-lifecycle-final-review-20261117/harness-controls.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "final-review/integrity.before.json",
+      "source": "work/tunnel-lifecycle-final-review-20261117/integrity.before.json",
+      "bytes": 143276,
+      "sha256": "eba36a430caa5110e68ed2e47b7177c24f37deb342bb4315e32987b20dc1de36"
+    },
+    {
+      "member": "final-review/integrity.r2-after.json",
+      "source": "work/tunnel-lifecycle-final-review-20261117/integrity.r2-after.json",
+      "bytes": 143276,
+      "sha256": "d4d16d8d0589991a60bf6b94093344120c3d71f554cb31ae9448f2068b81e453"
+    },
+    {
+      "member": "final-review/integrity.r2-before.json",
+      "source": "work/tunnel-lifecycle-final-review-20261117/integrity.r2-before.json",
+      "bytes": 143276,
+      "sha256": "00150e48b35a6e76036c837fe276ba254b355f8e923693cb0b3581799e5e83e7"
+    },
+    {
+      "member": "final-review/inventory-source-check.json",
+      "source": "work/tunnel-lifecycle-final-review-20261117/inventory-source-check.json",
+      "bytes": 1776,
+      "sha256": "bf6ea9adc7836e92c75dd85d22e92f5b93a83fefa49612d42b810a260f4d3c21"
+    },
+    {
+      "member": "final-review/local-lifecycle-prebuilt.json",
+      "source": "work/tunnel-lifecycle-final-review-20261117/local-lifecycle-prebuilt.json",
+      "bytes": 771,
+      "sha256": "2b2785b66c9f1c44e31d8f9261967b48fb582bb0814f2882564cea0fcc22c503"
+    },
+    {
+      "member": "final-review/local-lifecycle-prebuilt.stderr.log",
+      "source": "work/tunnel-lifecycle-final-review-20261117/local-lifecycle-prebuilt.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "final-review/local-lifecycle-prebuilt.stdout.log",
+      "source": "work/tunnel-lifecycle-final-review-20261117/local-lifecycle-prebuilt.stdout.log",
+      "bytes": 1836,
+      "sha256": "53ab2dc010b23155638fe2716807f5049c0e9e0ee978e24a883f5a00cb8bac4e"
+    },
+    {
+      "member": "final-review/offline-evidence-verification.json",
+      "source": "work/tunnel-lifecycle-final-review-20261117/offline-evidence-verification.json",
+      "bytes": 3889,
+      "sha256": "56172512996b643a113c3846970a8dab28f6fcbc3ccf0b438b49b85ce13d43f3"
+    },
+    {
+      "member": "final-review/offline-evidence.json",
+      "source": "work/tunnel-lifecycle-final-review-20261117/offline-evidence.json",
+      "bytes": 726,
+      "sha256": "39f084aebff543921b7ed7a4cbb052b5ae9718688966582cf1b893d20a61cf50"
+    },
+    {
+      "member": "final-review/offline-evidence.stderr.log",
+      "source": "work/tunnel-lifecycle-final-review-20261117/offline-evidence.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "final-review/offline-evidence.stdout.log",
+      "source": "work/tunnel-lifecycle-final-review-20261117/offline-evidence.stdout.log",
+      "bytes": 746,
+      "sha256": "13125c934659717c46fdda8b810654fce37b41fa2318fa606cc8118f8ce8e550"
+    },
+    {
+      "member": "final-review/originals/work/tunnel-lifecycle-20261117/candidate-inputs-r1.json",
+      "source": "work/tunnel-lifecycle-final-review-20261117/originals/work/tunnel-lifecycle-20261117/candidate-inputs-r1.json",
+      "bytes": 141694,
+      "sha256": "4aa57dafb480d75457295d37b00610e020108e2d7703a5aed05d5d1fe5827387"
+    },
+    {
+      "member": "final-review/originals/work/tunnel-lifecycle-20261117/candidate-inputs-r2.json",
+      "source": "work/tunnel-lifecycle-final-review-20261117/originals/work/tunnel-lifecycle-20261117/candidate-inputs-r2.json",
+      "bytes": 141694,
+      "sha256": "0dda219e081d4c136f25560afdbd129f509ca73821c5978e1e396adfa3ddc7b8"
+    },
+    {
+      "member": "final-review/originals/work/tunnel-lifecycle-20261117/dependency-freshness-r2/command.log",
+      "source": "work/tunnel-lifecycle-final-review-20261117/originals/work/tunnel-lifecycle-20261117/dependency-freshness-r2/command.log",
+      "bytes": 84,
+      "sha256": "f24241b5d7f53ff406ae186e12fe90e1c6457b3df1c3af3b8dde250fb3958e5d"
+    },
+    {
+      "member": "final-review/originals/work/tunnel-lifecycle-20261117/dependency-freshness-r2/result.json",
+      "source": "work/tunnel-lifecycle-final-review-20261117/originals/work/tunnel-lifecycle-20261117/dependency-freshness-r2/result.json",
+      "bytes": 618,
+      "sha256": "0580df4467002575b7b74c717c998874d450050951a34573ceafe757f36c03d2"
+    },
+    {
+      "member": "final-review/originals/work/tunnel-lifecycle-20261117/dependency-freshness-r2.json",
+      "source": "work/tunnel-lifecycle-final-review-20261117/originals/work/tunnel-lifecycle-20261117/dependency-freshness-r2.json",
+      "bytes": 60807,
+      "sha256": "8cd8e5c0ee8082ddb2078f525abc261ada32d2d5ba9c29f647b9ee14e7345f70"
+    },
+    {
+      "member": "final-review/originals/work/tunnel-lifecycle-20261117/final-gate-r1/command.log",
+      "source": "work/tunnel-lifecycle-final-review-20261117/originals/work/tunnel-lifecycle-20261117/final-gate-r1/command.log",
+      "bytes": 10402,
+      "sha256": "1a185450f1579587c178b6b3c5ca3f69dc5e0452b884e62871e96b7f05ef7b34"
+    },
+    {
+      "member": "final-review/originals/work/tunnel-lifecycle-20261117/final-gate-r1/result.json",
+      "source": "work/tunnel-lifecycle-final-review-20261117/originals/work/tunnel-lifecycle-20261117/final-gate-r1/result.json",
+      "bytes": 495,
+      "sha256": "6853fee042fb0a1b6c5fa2844651286c3757d6afee8cb06744f5fc3cf6beb91d"
+    },
+    {
+      "member": "final-review/originals/work/tunnel-lifecycle-20261117/forwarding-compile-r1/command.log",
+      "source": "work/tunnel-lifecycle-final-review-20261117/originals/work/tunnel-lifecycle-20261117/forwarding-compile-r1/command.log",
+      "bytes": 615,
+      "sha256": "4b0954bfd1cd9897381ff0e18f2e20bc1b9d00c557e1e944d4c8db990d2c076c"
+    },
+    {
+      "member": "final-review/originals/work/tunnel-lifecycle-20261117/forwarding-compile-r1/result.json",
+      "source": "work/tunnel-lifecycle-final-review-20261117/originals/work/tunnel-lifecycle-20261117/forwarding-compile-r1/result.json",
+      "bytes": 549,
+      "sha256": "8e1de1855c361eb1f2951269248f20b76e249f956a1845cb19488b668291c020"
+    },
+    {
+      "member": "final-review/originals/work/tunnel-lifecycle-20261117/local-lifecycle-r1/command.log",
+      "source": "work/tunnel-lifecycle-final-review-20261117/originals/work/tunnel-lifecycle-20261117/local-lifecycle-r1/command.log",
+      "bytes": 2212,
+      "sha256": "a4ce116c2e06552a5cb42e016a74d322ff47fee9fc15ba8cd76c5c3d4850a360"
+    },
+    {
+      "member": "final-review/originals/work/tunnel-lifecycle-20261117/local-lifecycle-r1/result.json",
+      "source": "work/tunnel-lifecycle-final-review-20261117/originals/work/tunnel-lifecycle-20261117/local-lifecycle-r1/result.json",
+      "bytes": 580,
+      "sha256": "7dda864d4f06ae7afa6e2c1e5b299b959f8d98313733e386c16f99a950a840f6"
+    },
+    {
+      "member": "final-review/originals/work/tunnel-lifecycle-20261117/openssh-forwarding-r1/generate-client-key.log",
+      "source": "work/tunnel-lifecycle-final-review-20261117/originals/work/tunnel-lifecycle-20261117/openssh-forwarding-r1/generate-client-key.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "final-review/originals/work/tunnel-lifecycle-20261117/openssh-forwarding-r1/generate-host-key.log",
+      "source": "work/tunnel-lifecycle-final-review-20261117/originals/work/tunnel-lifecycle-20261117/openssh-forwarding-r1/generate-host-key.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "final-review/originals/work/tunnel-lifecycle-20261117/openssh-forwarding-r1/openssh-version.log",
+      "source": "work/tunnel-lifecycle-final-review-20261117/originals/work/tunnel-lifecycle-20261117/openssh-forwarding-r1/openssh-version.log",
+      "bytes": 31,
+      "sha256": "6faf9904aac9ceb0fce08762e25a5a83dd82596100e2a6d2c6102da5eb7feaa7"
+    },
+    {
+      "member": "final-review/originals/work/tunnel-lifecycle-20261117/openssh-forwarding-r1/result.json",
+      "source": "work/tunnel-lifecycle-final-review-20261117/originals/work/tunnel-lifecycle-20261117/openssh-forwarding-r1/result.json",
+      "bytes": 2086,
+      "sha256": "76dca0535db348f234c192d859dd78ce354d39c31622c50a47e0014ee6787dc0"
+    },
+    {
+      "member": "final-review/originals/work/tunnel-lifecycle-20261117/openssh-forwarding-r1/sshd.log",
+      "source": "work/tunnel-lifecycle-final-review-20261117/originals/work/tunnel-lifecycle-20261117/openssh-forwarding-r1/sshd.log",
+      "bytes": 581,
+      "sha256": "92ff5b5ee487df06c5a92b37738d96bfedc4afef3d8616310200cb4ab9811ee0"
+    },
+    {
+      "member": "final-review/originals/work/tunnel-lifecycle-20261117/openssh-forwarding-r1/tests.log",
+      "source": "work/tunnel-lifecycle-final-review-20261117/originals/work/tunnel-lifecycle-20261117/openssh-forwarding-r1/tests.log",
+      "bytes": 939,
+      "sha256": "d2a6fc17f5c6d10d06aabd71e7ae5a9a1168062cd460121a09da8230174e5cc4"
+    },
+    {
+      "member": "final-review/originals/work/tunnel-lifecycle-20261117/openssh-forwarding-r1/validate-sshd-config.log",
+      "source": "work/tunnel-lifecycle-final-review-20261117/originals/work/tunnel-lifecycle-20261117/openssh-forwarding-r1/validate-sshd-config.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "final-review/originals/work/tunnel-lifecycle-20261117/openssh-forwarding-r2/generate-client-key.log",
+      "source": "work/tunnel-lifecycle-final-review-20261117/originals/work/tunnel-lifecycle-20261117/openssh-forwarding-r2/generate-client-key.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "final-review/originals/work/tunnel-lifecycle-20261117/openssh-forwarding-r2/generate-host-key.log",
+      "source": "work/tunnel-lifecycle-final-review-20261117/originals/work/tunnel-lifecycle-20261117/openssh-forwarding-r2/generate-host-key.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "final-review/originals/work/tunnel-lifecycle-20261117/openssh-forwarding-r2/openssh-version.log",
+      "source": "work/tunnel-lifecycle-final-review-20261117/originals/work/tunnel-lifecycle-20261117/openssh-forwarding-r2/openssh-version.log",
+      "bytes": 31,
+      "sha256": "6faf9904aac9ceb0fce08762e25a5a83dd82596100e2a6d2c6102da5eb7feaa7"
+    },
+    {
+      "member": "final-review/originals/work/tunnel-lifecycle-20261117/openssh-forwarding-r2/result.json",
+      "source": "work/tunnel-lifecycle-final-review-20261117/originals/work/tunnel-lifecycle-20261117/openssh-forwarding-r2/result.json",
+      "bytes": 2086,
+      "sha256": "bea00a0c00b166530b31043498dce53a5c56b9051606543799637f7256ee2ddf"
+    },
+    {
+      "member": "final-review/originals/work/tunnel-lifecycle-20261117/openssh-forwarding-r2/sshd.log",
+      "source": "work/tunnel-lifecycle-final-review-20261117/originals/work/tunnel-lifecycle-20261117/openssh-forwarding-r2/sshd.log",
+      "bytes": 581,
+      "sha256": "92ff5b5ee487df06c5a92b37738d96bfedc4afef3d8616310200cb4ab9811ee0"
+    },
+    {
+      "member": "final-review/originals/work/tunnel-lifecycle-20261117/openssh-forwarding-r2/tests.log",
+      "source": "work/tunnel-lifecycle-final-review-20261117/originals/work/tunnel-lifecycle-20261117/openssh-forwarding-r2/tests.log",
+      "bytes": 939,
+      "sha256": "8b06143440e639b6b3df94677787f41fdb5efcb9a4a130b3e78fc3233e7b5a2e"
+    },
+    {
+      "member": "final-review/originals/work/tunnel-lifecycle-20261117/openssh-forwarding-r2/validate-sshd-config.log",
+      "source": "work/tunnel-lifecycle-final-review-20261117/originals/work/tunnel-lifecycle-20261117/openssh-forwarding-r2/validate-sshd-config.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "final-review/originals/work/tunnel-lifecycle-harness-review-20261117/REVIEW.md",
+      "source": "work/tunnel-lifecycle-final-review-20261117/originals/work/tunnel-lifecycle-harness-review-20261117/REVIEW.md",
+      "bytes": 5475,
+      "sha256": "6aa02f04a1d70f0a0524846164c1901f62f9ae4338da0650749c1e91847298c0"
+    },
+    {
+      "member": "final-review/originals/work/tunnel-lifecycle-harness-review-20261117/final.json",
+      "source": "work/tunnel-lifecycle-final-review-20261117/originals/work/tunnel-lifecycle-harness-review-20261117/final.json",
+      "bytes": 1151,
+      "sha256": "191deafb7420880d323c184bcf5ac9b22a05f9e34945e12319ebcf25839f8bce"
+    },
+    {
+      "member": "final-review/originals/work/tunnel-lifecycle-harness-review-20261117/test_review_controls.py",
+      "source": "work/tunnel-lifecycle-final-review-20261117/originals/work/tunnel-lifecycle-harness-review-20261117/test_review_controls.py",
+      "bytes": 6497,
+      "sha256": "1439228dfe16f0eca40020f498d353c1b46ecca774083b756ac3c9fbf816a4e3"
+    },
+    {
+      "member": "final-review/parent-r2-receipt.json",
+      "source": "work/tunnel-lifecycle-final-review-20261117/parent-r2-receipt.json",
+      "bytes": 730,
+      "sha256": "812bc6911608585fb439a4ae607fa72e08f82f1d4a7d508939904ca47d5874d6"
+    },
+    {
+      "member": "final-review/parent-r2-receipt.stderr.log",
+      "source": "work/tunnel-lifecycle-final-review-20261117/parent-r2-receipt.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "final-review/parent-r2-receipt.stdout.log",
+      "source": "work/tunnel-lifecycle-final-review-20261117/parent-r2-receipt.stdout.log",
+      "bytes": 936,
+      "sha256": "61f64cbdc4f50b3c46efc89b44bbce2939edcb8021b67c11337f4c05dbd747e9"
+    },
+    {
+      "member": "final-review/parent-r2-verification.json",
+      "source": "work/tunnel-lifecycle-final-review-20261117/parent-r2-verification.json",
+      "bytes": 2166,
+      "sha256": "40b534ebc0189eaa81d0228d83a67b4506dbf98de91ab3406d72803948186c8b"
+    },
+    {
+      "member": "final-review/python-unittest.json",
+      "source": "work/tunnel-lifecycle-final-review-20261117/python-unittest.json",
+      "bytes": 827,
+      "sha256": "7e7bb8f5d0145232a243e38963777da927d725e93aee568be1b92bee768ea1ea"
+    },
+    {
+      "member": "final-review/python-unittest.stderr.log",
+      "source": "work/tunnel-lifecycle-final-review-20261117/python-unittest.stderr.log",
+      "bytes": 5677,
+      "sha256": "b2f7e369a00d04be3cbf1ee1da7511a6dea899e638191ab7534a624e91c4342d"
+    },
+    {
+      "member": "final-review/python-unittest.stdout.log",
+      "source": "work/tunnel-lifecycle-final-review-20261117/python-unittest.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "final-review/r1-to-r2.diff",
+      "source": "work/tunnel-lifecycle-final-review-20261117/r1-to-r2.diff",
+      "bytes": 716,
+      "sha256": "bc1953a0699f3f2a006f8841eb18c5d5abe614027bbeb0e37bcb5a43c4296830"
+    },
+    {
+      "member": "final-review/r1-to-r2.json",
+      "source": "work/tunnel-lifecycle-final-review-20261117/r1-to-r2.json",
+      "bytes": 691,
+      "sha256": "ba9e4399c03f951b415aa83b06dcb8805629cf6173465743431e0d329c3a118c"
+    },
+    {
+      "member": "final-review/scope.r2-before.tracked.diff",
+      "source": "work/tunnel-lifecycle-final-review-20261117/scope.r2-before.tracked.diff",
+      "bytes": 16882,
+      "sha256": "2d9d111aecb8c2e0047bc76c03a6002593c1b5cfa0d7c950072418d412d2858f"
+    },
+    {
+      "member": "final-review/scope.tracked.diff",
+      "source": "work/tunnel-lifecycle-final-review-20261117/scope.tracked.diff",
+      "bytes": 16882,
+      "sha256": "2d9d111aecb8c2e0047bc76c03a6002593c1b5cfa0d7c950072418d412d2858f"
+    },
+    {
+      "member": "final-review/session-lib-list.json",
+      "source": "work/tunnel-lifecycle-final-review-20261117/session-lib-list.json",
+      "bytes": 718,
+      "sha256": "77b35f72799b921991636c08aecc08392cbfd2706a1b8a746a4084e3e2dcd3d2"
+    },
+    {
+      "member": "final-review/session-lib-list.stderr.log",
+      "source": "work/tunnel-lifecycle-final-review-20261117/session-lib-list.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "final-review/session-lib-list.stdout.log",
+      "source": "work/tunnel-lifecycle-final-review-20261117/session-lib-list.stdout.log",
+      "bytes": 40723,
+      "sha256": "43cff3e8dab6b52c2880cdc4fc7ffbdcb16e4a1fca96dc74acc68b64602bd0db"
+    },
+    {
+      "member": "final-review/snapshot/.github/workflows/ci.yml",
+      "source": "work/tunnel-lifecycle-final-review-20261117/snapshot/.github/workflows/ci.yml",
+      "bytes": 4213,
+      "sha256": "a33e1e1c21739949361991a8ccc89f98dfb90cd6af1939118c9d9bf7857774c8"
+    },
+    {
+      "member": "final-review/snapshot/Cargo.lock",
+      "source": "work/tunnel-lifecycle-final-review-20261117/snapshot/Cargo.lock",
+      "bytes": 261885,
+      "sha256": "80c2295fd4d8d24f1c31a5e517daa59ea947d9c158746f239d9b536e776c5953"
+    },
+    {
+      "member": "final-review/snapshot/crates/keelshell-session/src/forwarding/local_lifecycle_tests.rs",
+      "source": "work/tunnel-lifecycle-final-review-20261117/snapshot/crates/keelshell-session/src/forwarding/local_lifecycle_tests.rs",
+      "bytes": 20485,
+      "sha256": "7b6ce1c2f5b7ccc6d82db16d2cf262cc23bebe2b9539cee73a3c45dc128a1976"
+    },
+    {
+      "member": "final-review/snapshot/crates/keelshell-session/src/forwarding.rs",
+      "source": "work/tunnel-lifecycle-final-review-20261117/snapshot/crates/keelshell-session/src/forwarding.rs",
+      "bytes": 20801,
+      "sha256": "3a2c014d001df1ecba12eb520c41ee21e5bfadac5d772cb77eaccc62f6a07572"
+    },
+    {
+      "member": "final-review/snapshot/crates/keelshell-session/tests/forwarding_openssh.rs",
+      "source": "work/tunnel-lifecycle-final-review-20261117/snapshot/crates/keelshell-session/tests/forwarding_openssh.rs",
+      "bytes": 11632,
+      "sha256": "2fa1607a7bdaf5e5a0a6e6593a7adcad961da72a07f53ead28c88f14be5d2dd3"
+    },
+    {
+      "member": "final-review/snapshot/scripts/openssh_interop.py",
+      "source": "work/tunnel-lifecycle-final-review-20261117/snapshot/scripts/openssh_interop.py",
+      "bytes": 29898,
+      "sha256": "909ccb5393c4598ff2c409b07096358d3240a27ffae2a8c6f0894b54a1b6698d"
+    },
+    {
+      "member": "final-review/snapshot/scripts/test_openssh_interop.py",
+      "source": "work/tunnel-lifecycle-final-review-20261117/snapshot/scripts/test_openssh_interop.py",
+      "bytes": 29577,
+      "sha256": "842a1da89da11f7ea298e9f7b4d499c72c89b71ff5db5249328bba9976f008dd"
+    },
+    {
+      "member": "final-review/snapshot-r2/.github/workflows/ci.yml",
+      "source": "work/tunnel-lifecycle-final-review-20261117/snapshot-r2/.github/workflows/ci.yml",
+      "bytes": 4213,
+      "sha256": "a33e1e1c21739949361991a8ccc89f98dfb90cd6af1939118c9d9bf7857774c8"
+    },
+    {
+      "member": "final-review/snapshot-r2/Cargo.lock",
+      "source": "work/tunnel-lifecycle-final-review-20261117/snapshot-r2/Cargo.lock",
+      "bytes": 261885,
+      "sha256": "80c2295fd4d8d24f1c31a5e517daa59ea947d9c158746f239d9b536e776c5953"
+    },
+    {
+      "member": "final-review/snapshot-r2/crates/keelshell-session/src/forwarding/local_lifecycle_tests.rs",
+      "source": "work/tunnel-lifecycle-final-review-20261117/snapshot-r2/crates/keelshell-session/src/forwarding/local_lifecycle_tests.rs",
+      "bytes": 20485,
+      "sha256": "7b6ce1c2f5b7ccc6d82db16d2cf262cc23bebe2b9539cee73a3c45dc128a1976"
+    },
+    {
+      "member": "final-review/snapshot-r2/crates/keelshell-session/src/forwarding.rs",
+      "source": "work/tunnel-lifecycle-final-review-20261117/snapshot-r2/crates/keelshell-session/src/forwarding.rs",
+      "bytes": 20801,
+      "sha256": "3a2c014d001df1ecba12eb520c41ee21e5bfadac5d772cb77eaccc62f6a07572"
+    },
+    {
+      "member": "final-review/snapshot-r2/crates/keelshell-session/tests/forwarding_openssh.rs",
+      "source": "work/tunnel-lifecycle-final-review-20261117/snapshot-r2/crates/keelshell-session/tests/forwarding_openssh.rs",
+      "bytes": 11585,
+      "sha256": "dc29204e94b2c046ea38c1c198f88536a93360d3cfeda3bdc58159bea83b3789"
+    },
+    {
+      "member": "final-review/snapshot-r2/scripts/openssh_interop.py",
+      "source": "work/tunnel-lifecycle-final-review-20261117/snapshot-r2/scripts/openssh_interop.py",
+      "bytes": 29898,
+      "sha256": "909ccb5393c4598ff2c409b07096358d3240a27ffae2a8c6f0894b54a1b6698d"
+    },
+    {
+      "member": "final-review/snapshot-r2/scripts/test_openssh_interop.py",
+      "source": "work/tunnel-lifecycle-final-review-20261117/snapshot-r2/scripts/test_openssh_interop.py",
+      "bytes": 29577,
+      "sha256": "842a1da89da11f7ea298e9f7b4d499c72c89b71ff5db5249328bba9976f008dd"
+    },
+    {
+      "member": "final-review/status.before.txt",
+      "source": "work/tunnel-lifecycle-final-review-20261117/status.before.txt",
+      "bytes": 480,
+      "sha256": "c1658762a656d6433fb7a67a238dd0fede294727f52c3341aa9ac374b5a26fea"
+    },
+    {
+      "member": "final-review/status.r2-after.txt",
+      "source": "work/tunnel-lifecycle-final-review-20261117/status.r2-after.txt",
+      "bytes": 668,
+      "sha256": "7526943909ed68553c83270de603f61d49ad65784ad63e59ff7c3f13b7a7629d"
+    },
+    {
+      "member": "final-review/status.r2-before.txt",
+      "source": "work/tunnel-lifecycle-final-review-20261117/status.r2-before.txt",
+      "bytes": 480,
+      "sha256": "c1658762a656d6433fb7a67a238dd0fede294727f52c3341aa9ac374b5a26fea"
+    },
+    {
+      "member": "final-review/test_review_controls.py",
+      "source": "work/tunnel-lifecycle-final-review-20261117/test_review_controls.py",
+      "bytes": 6497,
+      "sha256": "1439228dfe16f0eca40020f498d353c1b46ecca774083b756ac3c9fbf816a4e3"
+    },
+    {
+      "member": "final-review/verify_evidence.py",
+      "source": "work/tunnel-lifecycle-final-review-20261117/verify_evidence.py",
+      "bytes": 6539,
+      "sha256": "430790239efe76a78095def401a04742d60e6968c944291bc84855855f5f71e1"
+    },
+    {
+      "member": "previous-delivery/auxiliary-cleanup-result.json",
+      "source": "work/zmodem-independent-finalize-20261117/auxiliary-cleanup-result.json",
+      "bytes": 401,
+      "sha256": "847897f2e0336abde90ff7f52bc2e37d636af36eea2aba98cddded6108d7f05c"
+    },
+    {
+      "member": "previous-delivery/delivery-doc-commit-r1.json",
+      "source": "work/zmodem-independent-finalize-20261117/delivery-doc-commit-r1.json",
+      "bytes": 792,
+      "sha256": "787afc6ac80bf7f932b3ba440f00a95e60ff5d5f15afbb8f4f20f7d07e7d3eeb"
+    },
+    {
+      "member": "previous-delivery/delivery-doc-commit-r1.log",
+      "source": "work/zmodem-independent-finalize-20261117/delivery-doc-commit-r1.log",
+      "bytes": 466,
+      "sha256": "9dd83f23e0b9728c3b4472525b3fdbc983f7b148e9f2babc212cddc997d92422"
+    },
+    {
+      "member": "previous-delivery/delivery-doc-push-r1.json",
+      "source": "work/zmodem-independent-finalize-20261117/delivery-doc-push-r1.json",
+      "bytes": 790,
+      "sha256": "6cf4e18c6779d55f7ce66060279ce4a1fe2adba322e6579b0ac790c9ee568e70"
+    },
+    {
+      "member": "previous-delivery/delivery-doc-push-r1.log",
+      "source": "work/zmodem-independent-finalize-20261117/delivery-doc-push-r1.log",
+      "bytes": 113,
+      "sha256": "f08d3938eef7725b76e146c5b4645988e8f56e77e1b5a67e645f1cbe1dbebf7d"
+    },
+    {
+      "member": "previous-delivery/delivery-doc-readback-r1.json",
+      "source": "work/zmodem-independent-finalize-20261117/delivery-doc-readback-r1.json",
+      "bytes": 870,
+      "sha256": "2fbf2aae48718405fdf936f0b0af0cdc05fcb87589524f2bbf78429dd2dc43f1"
+    },
+    {
+      "member": "previous-delivery/delivery-doc-readback-r1.log",
+      "source": "work/zmodem-independent-finalize-20261117/delivery-doc-readback-r1.log",
+      "bytes": 320,
+      "sha256": "62fd1986726fb4e9a6cabde3213eec53d606b35e663c1d22466638479da0129d"
+    },
+    {
+      "member": "previous-delivery/delivery-doc-readback-result-r1.json",
+      "source": "work/zmodem-independent-finalize-20261117/delivery-doc-readback-result-r1.json",
+      "bytes": 1318,
+      "sha256": "43534c50d5b1d981bd01a176a2865eacd5d1fd357b16e5f052cd2f79922a27d9"
+    },
+    {
+      "member": "previous-delivery/delivery-final-git-binding-r1.json",
+      "source": "work/zmodem-independent-finalize-20261117/delivery-final-git-binding-r1.json",
+      "bytes": 881,
+      "sha256": "bf0ffaef565a9e969f685abc93a15d4b7c1464bff3cad4d498bef3f8228e4c5b"
+    },
+    {
+      "member": "previous-delivery/delivery-final-git-binding-r1.log",
+      "source": "work/zmodem-independent-finalize-20261117/delivery-final-git-binding-r1.log",
+      "bytes": 323,
+      "sha256": "cc4db0a5e188c44538568a5f3622517fab4f04eb20b5cb124ba41a170bd45338"
+    },
+    {
+      "member": "previous-delivery/delivery-final-git-binding-result-r1.json",
+      "source": "work/zmodem-independent-finalize-20261117/delivery-final-git-binding-result-r1.json",
+      "bytes": 337,
+      "sha256": "cb22a64321a2afb9e14a73898534c6c046f55bcdd79bad2e72615a2f8f64a812"
+    },
+    {
+      "member": "previous-delivery/final-remote-and-ci-readback.json",
+      "source": "work/zmodem-independent-finalize-20261117/final-remote-and-ci-readback.json",
+      "bytes": 2317,
+      "sha256": "c98149c9810c11b431091b833732bb10b6552bf1d887894e78b90ebe11cfce2f"
+    }
+  ]
+}

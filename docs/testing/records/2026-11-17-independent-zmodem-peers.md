@@ -145,5 +145,11 @@ local／tracking／remote一致且读回干净；765输入和623成员精确Git�
 六个本批副本已回收，正常包与target身份／摘要不变。
 提交、推送、回收及精确CI初态／后次快照见
 [21成员交付封存](2026-11-17-independent-zmodem-peers-evidence/delivery/README.md)。
-两个Windows工作流success仅按API状态记录，Quality三平台仍待终态；
-尚未独立复核其下载原件，不由本机门禁或peer结果代签。
+上述交付快照当时只有两个Windows工作流success的API状态，Quality仍进行中；
+该历史状态保留。后续相同工程的Quality44013808155已三平台自然success，
+Windows／macOS／Ubuntu普通Rust3406／3419／3412通过、0失败，各14rustdoc，
+Python523 run、skip50／3／3；macOS／Linux真实OpenSSH各18通过。
+7原始ZIP／156成员和4个API digest已取得，新非作者Feynman限定批准、
+P0–P3全0、离线5,091＋16检查通过并已实际关闭；207成员终态与765旧Git输入相符；
+见[精确CI终态](2026-11-17-independent-zmodem-peers-evidence/ci-completion/README.md)，
+不从本机门禁或peer结果代签。

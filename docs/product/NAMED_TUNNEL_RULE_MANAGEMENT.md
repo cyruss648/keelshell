@@ -2,6 +2,17 @@
 
 本指南描述 NET-01 的原生 GPUI 管理入口。它只管理已保存 SSH 连接的规则元数据；活动监听器属于创建它们的原 SSH 会话。
 
+## 2026-11-17：本地 listener 的原连接归属
+
+本地转发在传输库内直接观察原 SSH 生命周期，不依赖隧道面板是否可见或继续轮询。
+原连接开始关闭后拒绝新 listener；已启动的 listener 释放本地端口和所属流。
+新认证的连接不会自动继承旧 listener，用户仍需重新审核并显式启动。
+旧 owner 的迟到关闭只作用于旧监听器，不关闭新连接后来创建的同地址监听器。
+
+真实 OpenSSH 套件分别检查本地、远程、SOCKS 的显式停止，以及本地转发断线和
+新旧 owner 隔离；实际结果和剩余跨平台／原生边界见
+[生命周期记录](../testing/records/2026-11-17-tunnel-transport-lifetime.md)。
+
 ## 2026-11-14：重启后的命名隧道显式恢复
 
 本次实现基线为 exact HEAD
@@ -116,7 +127,14 @@ Open **Tunnels** from a saved SSH connection. **New** creates a disabled draft. 
 
 Deletion requires its own confirmation and is rejected while any current or retained panel still owns active instances for that rule. Failed or timed-out remote cleanup retains this protection until cleanup is confirmed or the original SSH transport closes. **Review stop** shows the original configuration, allocated listener and its location, and binds the runtime owner, rule ID and exact current instance IDs in this panel, independently of rule metadata. Confirmation requests cancellation of those original workers only. Stopped rows retain the assigned endpoint and final traffic counts. Removing metadata through an authoritative reload does not remove the ability to stop the original instances. Instances in another SSH tab require separate review in that tab.
 
-Save, delete and start reviews bind state, rule and connection snapshots; stop review binds runtime ownership and workers. Painted controls cannot approve a replacement review. Changed configuration invalidates the draft's review without silently rebasing it. A language change preserves the field text but changes the complete configuration snapshot; cancel the old draft and reopen it against the current state. Failed or uncertain storage blocks further rule saves and named starts across existing and newly opened panels until an authoritative configuration reload or recovery succeeds. Even an identical authoritative snapshot invalidates old reviews and clears this block; an ordinary refresh cannot. This slice has no dedicated tunnel reload/merge control; reopen the app or use an existing configuration reload or recovery entry, then review again.
+Save, delete and start reviews bind state, rule and connection snapshots; stop review binds runtime ownership and workers. Painted controls cannot approve a replacement review. Changed configuration invalidates the draft's review without silently rebasing it. A language change preserves the field text but changes the complete configuration snapshot; cancel the old draft and reopen it against the current state. Failed or uncertain storage blocks further rule saves and named starts across existing and newly opened panels until an authoritative configuration reload or recovery succeeds. Even an identical authoritative snapshot invalidates old reviews and clears this block; an ordinary refresh cannot. **Reload** reads the local configuration in the background while retaining drafts and existing SSH/listener owners. A failed reload keeps writes blocked. Cancel the old draft, edit the latest rule and review again; reload does not merge or replay a draft.
+
+Local forwarding observes its original SSH lifecycle directly in the transport
+library, independently of the visible panel. Closing connections reject new
+listeners and release owned local listeners and streams. A newly authenticated
+connection requires an explicit, separately reviewed start; an old owner's late
+close cannot stop a replacement listener. The [lifecycle record](../testing/records/2026-11-17-tunnel-transport-lifetime.md)
+separates library, real OpenSSH and native platform evidence.
 
 The interface keeps the native theme, bilingual controls, scrollable content and fixed review actions.
 The November 5 repaired package has fresh macOS native evidence with owned Podman/OpenSSH

@@ -20,6 +20,18 @@
 
 ## 当前批次与接续顺序
 
+本地转发的原SSH生命周期增量已整合，见[ADR0159](adr/0159-local-forward-transport-lifetime.md)及
+[本批记录](testing/records/2026-11-17-tunnel-transport-lifetime.md)。
+Closing／Closed准入、bind竞态、原连接断线后的listener／streams回收及新旧owner隔离
+已补齐；库级16项、真实Darwin OpenSSH三方向6项和工装33项通过。
+首轮独立P2的既有sibling流断言已增强；新非作者Curie对r2限定批准、P0–P3全0，
+独立45Python／父级预编译16项通过，P2关闭且agent已关闭；
+769输入冻结后的完整门禁r2通过：普通Rust3435/0/68 ignored、14rustdoc，
+Python主526 run／3 skipped，95普通套件逐名库存／二进制摘要及输入前后相等。
+首轮Clippy失败保留；提交推送及精确新CI待交付。
+uuid锁更新1.29.3后，完整官方直接依赖新快照37包／113声明全部通过。
+原生再次锁屏、GUI操作／截图0；三平台原生及完整隧道阶段继续开放。
+
 独立Zmodem peer交叉联调进行中，见[ADR0158](adr/0158-independent-zmodem-peer-matrix.md)与
 [本批记录](testing/records/2026-11-17-independent-zmodem-peers.md)。
 已修复捕获报文暴露的七字段metadata拒绝，core106项通过；
@@ -31,8 +43,13 @@
 94普通套件逐名库存、765输入前后核对通过，不关闭FILE-05／旧lrzsz边界。
 工程`de9768c`已普通推送、三方SHA一致；623成员原件与765输入Git绑定通过，
 六个自有临时目录已回收，五位agent已关闭。
-Windows SSH44013808220／API44013808184为success，Quality44013808155待终态，
-见[交付快照](testing/records/2026-11-17-independent-zmodem-peers-evidence/delivery/README.md)。
+Windows SSH44013808220／API44013808184为success，Quality44013808155现已三平台success：
+Windows／macOS／Ubuntu普通Rust3406／3419／3412通过、0失败，各14rustdoc；
+Python523 run、skip50／3／3，macOS／Linux真实OpenSSH各18通过。
+原件已取得，非作者Feynman离线5,091＋16检查通过、限定批准、已关闭；
+207成员[精确CI封存](testing/records/2026-11-17-independent-zmodem-peers-evidence/ci-completion/README.md)
+绑定765旧工程输入；旧快照仍保留于
+[交付快照](testing/records/2026-11-17-independent-zmodem-peers-evidence/delivery/README.md)。
 
 Windows 真实 OpenSSH 监控联调本机工程已完成，基线 `bfbea7b`：
 隔离服务器、原进程调试接纳与公开 Rust 路由用例已整合，

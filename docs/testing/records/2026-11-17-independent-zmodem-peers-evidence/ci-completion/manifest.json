@@ -1,0 +1,1263 @@
+{
+  "archive": "originals.tar.gz",
+  "bytes": 1814889,
+  "sha256": "a8202205d13b283ee24e605f23891db000780bdc336c220e00bab27dbbaddc85",
+  "members": 207,
+  "logical_bytes": 5368560,
+  "selection": [
+    {
+      "prefix": "collector",
+      "source": "work/zmodem-peer-ci-completion-20261117",
+      "files": 186
+    },
+    {
+      "prefix": "independent-review",
+      "source": "work/zmodem-peer-ci-review-20261117",
+      "files": 21
+    }
+  ],
+  "files": [
+    {
+      "member": "collector/build_report.py",
+      "source": "work/zmodem-peer-ci-completion-20261117/build_report.py",
+      "bytes": 17897,
+      "sha256": "81c54bdaf220bf4c9fe6a9f5151e936d5c26d2db8dfa2ee8befba4bda97d500f"
+    },
+    {
+      "member": "collector/collect.py",
+      "source": "work/zmodem-peer-ci-completion-20261117/collect.py",
+      "bytes": 10243,
+      "sha256": "ce23a521ad94d822fa2eab498ff7c7a4ebc3629d2266018cd2371c07543adfe4"
+    },
+    {
+      "member": "collector/collection-context.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/collection-context.json",
+      "bytes": 288,
+      "sha256": "f9c125206b37f06c4481ef8863a2a07d1c9de5d6506e2479580a1095f9c6c62e"
+    },
+    {
+      "member": "collector/derived/final-quality-macos-26-tests.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/derived/final-quality-macos-26-tests.json",
+      "bytes": 520646,
+      "sha256": "d9370cd82edeb4d9bee5cc675691880a42a207e255b8d39ce64b6c8fdd51425d"
+    },
+    {
+      "member": "collector/derived/final-quality-ubuntu-24.04-tests.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/derived/final-quality-ubuntu-24.04-tests.json",
+      "bytes": 519668,
+      "sha256": "c636bc47b3e0c78fa10993e502b9b9a1e138567070912c30fdc12d4a80f050ca"
+    },
+    {
+      "member": "collector/derived/final-quality-windows-2025-tests.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/derived/final-quality-windows-2025-tests.json",
+      "bytes": 520218,
+      "sha256": "138d5f53fdf3d820a85895224d381609576908f3dfd3c818965d62fb9504640d"
+    },
+    {
+      "member": "collector/files-manifest.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/files-manifest.json",
+      "bytes": 31991,
+      "sha256": "fb07103474dc43679f493b07ab064732ee64bf3dd941c975ae3ba547f811008e"
+    },
+    {
+      "member": "collector/handoff.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/handoff.json",
+      "bytes": 1338,
+      "sha256": "58ff9eb3d9b6e8bc68d10867fbe464f03dd1c08cb0c9a9c32a8df47f64bb4d97"
+    },
+    {
+      "member": "collector/originals/final-head.txt",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/final-head.txt",
+      "bytes": 41,
+      "sha256": "e71fa41bbb65b08d66dfd94e9ca9d7824c7dd96231ea7bc4237615184307d11b"
+    },
+    {
+      "member": "collector/originals/final-tracked-diff.txt",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/final-tracked-diff.txt",
+      "bytes": 21535,
+      "sha256": "88c03ff208aa76cbea48090150c362bfd8fd1e6ba261c444ae23cd7f8599d7a5"
+    },
+    {
+      "member": "collector/originals/final-tracked-status.txt",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/final-tracked-status.txt",
+      "bytes": 201,
+      "sha256": "aba6ebf93e7f45d1c75fcee5716d5d1c278c402d3092fb0bce799447bd060192"
+    },
+    {
+      "member": "collector/originals/initial-head.txt",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/initial-head.txt",
+      "bytes": 41,
+      "sha256": "e71fa41bbb65b08d66dfd94e9ca9d7824c7dd96231ea7bc4237615184307d11b"
+    },
+    {
+      "member": "collector/originals/initial-tracked-diff.txt",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/initial-tracked-diff.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/originals/initial-tracked-status.txt",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/initial-tracked-status.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/originals/obs01-quality-artifacts.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/obs01-quality-artifacts.json",
+      "bytes": 32,
+      "sha256": "244563f989470892c537c9a4622920af0d228ee4528f7d00c64a06d6cd95856c"
+    },
+    {
+      "member": "collector/originals/obs01-quality-jobs.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/obs01-quality-jobs.json",
+      "bytes": 8973,
+      "sha256": "d66b15ac9e747288be31c76b9183705184e2b10c1c7b56b6e69866f16434f265"
+    },
+    {
+      "member": "collector/originals/obs01-quality-run.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/obs01-quality-run.json",
+      "bytes": 12259,
+      "sha256": "defe3373d625106171a6f2ed328c141cb40cf05f56461555559e9fcd43489079"
+    },
+    {
+      "member": "collector/originals/obs01-windows_monitor-artifacts.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/obs01-windows_monitor-artifacts.json",
+      "bytes": 766,
+      "sha256": "2d6d34e2c2323f1572212fab730f04b052ca94a38fefff92ccb114687c872738"
+    },
+    {
+      "member": "collector/originals/obs01-windows_monitor-jobs.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/obs01-windows_monitor-jobs.json",
+      "bytes": 3775,
+      "sha256": "42eb193c08e1208154f272a340c8318f14b5b9c78b92ce475037561df0a1686f"
+    },
+    {
+      "member": "collector/originals/obs01-windows_monitor-run.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/obs01-windows_monitor-run.json",
+      "bytes": 12293,
+      "sha256": "503762d3e8e8f8e996a846564337796611803cfbfb840b48228ac8483c48b4d1"
+    },
+    {
+      "member": "collector/originals/obs01-windows_ssh-artifacts.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/obs01-windows_ssh-artifacts.json",
+      "bytes": 767,
+      "sha256": "5d38007d2b5b51ecea10ff5cc4554b0219b91b54ccc5b98313ba67c75afa69f7"
+    },
+    {
+      "member": "collector/originals/obs01-windows_ssh-jobs.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/obs01-windows_ssh-jobs.json",
+      "bytes": 2877,
+      "sha256": "d1859ce35ed68185056e31c1e88f52d924699e001026cbcaaf5b5c7dd34835ba"
+    },
+    {
+      "member": "collector/originals/obs01-windows_ssh-run.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/obs01-windows_ssh-run.json",
+      "bytes": 12305,
+      "sha256": "861aacb29d0ee0611820a52839f899ba7b889bec0cdb9a2eede5c13a9acc0676"
+    },
+    {
+      "member": "collector/originals/obs02-quality-artifacts.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/obs02-quality-artifacts.json",
+      "bytes": 32,
+      "sha256": "244563f989470892c537c9a4622920af0d228ee4528f7d00c64a06d6cd95856c"
+    },
+    {
+      "member": "collector/originals/obs02-quality-jobs.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/obs02-quality-jobs.json",
+      "bytes": 8973,
+      "sha256": "d66b15ac9e747288be31c76b9183705184e2b10c1c7b56b6e69866f16434f265"
+    },
+    {
+      "member": "collector/originals/obs02-quality-run.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/obs02-quality-run.json",
+      "bytes": 12259,
+      "sha256": "defe3373d625106171a6f2ed328c141cb40cf05f56461555559e9fcd43489079"
+    },
+    {
+      "member": "collector/originals/obs03-quality-artifacts.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/obs03-quality-artifacts.json",
+      "bytes": 32,
+      "sha256": "244563f989470892c537c9a4622920af0d228ee4528f7d00c64a06d6cd95856c"
+    },
+    {
+      "member": "collector/originals/obs03-quality-jobs.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/obs03-quality-jobs.json",
+      "bytes": 8973,
+      "sha256": "d66b15ac9e747288be31c76b9183705184e2b10c1c7b56b6e69866f16434f265"
+    },
+    {
+      "member": "collector/originals/obs03-quality-run.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/obs03-quality-run.json",
+      "bytes": 12259,
+      "sha256": "defe3373d625106171a6f2ed328c141cb40cf05f56461555559e9fcd43489079"
+    },
+    {
+      "member": "collector/originals/obs04-quality-artifacts.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/obs04-quality-artifacts.json",
+      "bytes": 32,
+      "sha256": "244563f989470892c537c9a4622920af0d228ee4528f7d00c64a06d6cd95856c"
+    },
+    {
+      "member": "collector/originals/obs04-quality-jobs.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/obs04-quality-jobs.json",
+      "bytes": 8973,
+      "sha256": "d66b15ac9e747288be31c76b9183705184e2b10c1c7b56b6e69866f16434f265"
+    },
+    {
+      "member": "collector/originals/obs04-quality-run.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/obs04-quality-run.json",
+      "bytes": 12259,
+      "sha256": "defe3373d625106171a6f2ed328c141cb40cf05f56461555559e9fcd43489079"
+    },
+    {
+      "member": "collector/originals/obs05-quality-artifacts.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/obs05-quality-artifacts.json",
+      "bytes": 32,
+      "sha256": "244563f989470892c537c9a4622920af0d228ee4528f7d00c64a06d6cd95856c"
+    },
+    {
+      "member": "collector/originals/obs05-quality-jobs.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/obs05-quality-jobs.json",
+      "bytes": 8973,
+      "sha256": "d66b15ac9e747288be31c76b9183705184e2b10c1c7b56b6e69866f16434f265"
+    },
+    {
+      "member": "collector/originals/obs05-quality-run.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/obs05-quality-run.json",
+      "bytes": 12259,
+      "sha256": "defe3373d625106171a6f2ed328c141cb40cf05f56461555559e9fcd43489079"
+    },
+    {
+      "member": "collector/originals/obs06-quality-artifacts.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/obs06-quality-artifacts.json",
+      "bytes": 754,
+      "sha256": "eb53b9938558a23d74afe781b4647510fdd2e6817139dc70e1edaf09292dd94f"
+    },
+    {
+      "member": "collector/originals/obs06-quality-jobs.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/obs06-quality-jobs.json",
+      "bytes": 9384,
+      "sha256": "a43e33f110859ff90555f4d285059da4b1a2909bc4ab0ce1fa1f45cff8d0466f"
+    },
+    {
+      "member": "collector/originals/obs06-quality-run.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/obs06-quality-run.json",
+      "bytes": 12259,
+      "sha256": "defe3373d625106171a6f2ed328c141cb40cf05f56461555559e9fcd43489079"
+    },
+    {
+      "member": "collector/originals/obs07-quality-artifacts.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/obs07-quality-artifacts.json",
+      "bytes": 1479,
+      "sha256": "826d8ad1c4fc70be3cf6f270c4488b2e354d814225d209bb7e79a439b9d0c0e2"
+    },
+    {
+      "member": "collector/originals/obs07-quality-jobs.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/obs07-quality-jobs.json",
+      "bytes": 10206,
+      "sha256": "4963528d62da101c82c4a9b6bc72f4f656edd6b775e0e427f9ab1bb1c308effd"
+    },
+    {
+      "member": "collector/originals/obs07-quality-run.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/obs07-quality-run.json",
+      "bytes": 12262,
+      "sha256": "13678dad4ace57929f6c127a4766e05491957e00bbb6a540e4190cedade4b0e1"
+    },
+    {
+      "member": "collector/originals/obs07-windows_monitor-artifacts.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/obs07-windows_monitor-artifacts.json",
+      "bytes": 766,
+      "sha256": "2d6d34e2c2323f1572212fab730f04b052ca94a38fefff92ccb114687c872738"
+    },
+    {
+      "member": "collector/originals/obs07-windows_monitor-jobs.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/obs07-windows_monitor-jobs.json",
+      "bytes": 3775,
+      "sha256": "42eb193c08e1208154f272a340c8318f14b5b9c78b92ce475037561df0a1686f"
+    },
+    {
+      "member": "collector/originals/obs07-windows_monitor-run.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/obs07-windows_monitor-run.json",
+      "bytes": 12293,
+      "sha256": "503762d3e8e8f8e996a846564337796611803cfbfb840b48228ac8483c48b4d1"
+    },
+    {
+      "member": "collector/originals/obs07-windows_ssh-artifacts.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/obs07-windows_ssh-artifacts.json",
+      "bytes": 767,
+      "sha256": "5d38007d2b5b51ecea10ff5cc4554b0219b91b54ccc5b98313ba67c75afa69f7"
+    },
+    {
+      "member": "collector/originals/obs07-windows_ssh-jobs.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/obs07-windows_ssh-jobs.json",
+      "bytes": 2877,
+      "sha256": "d1859ce35ed68185056e31c1e88f52d924699e001026cbcaaf5b5c7dd34835ba"
+    },
+    {
+      "member": "collector/originals/obs07-windows_ssh-run.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/obs07-windows_ssh-run.json",
+      "bytes": 12305,
+      "sha256": "861aacb29d0ee0611820a52839f899ba7b889bec0cdb9a2eede5c13a9acc0676"
+    },
+    {
+      "member": "collector/originals/quality-artifact-14298698102-archive.zip",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/quality-artifact-14298698102-archive.zip",
+      "bytes": 2949,
+      "sha256": "a35224434805e8fc0751e21118aa3f09513ac5c2d485b82a510d80e4571473d5"
+    },
+    {
+      "member": "collector/originals/quality-artifact-14298698102-metadata.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/quality-artifact-14298698102-metadata.json",
+      "bytes": 722,
+      "sha256": "8956d07bd8f714d076cb5cd251a8291c83bf8e0abae629dbd4a9ff3336956808"
+    },
+    {
+      "member": "collector/originals/quality-artifact-14299297187-archive.zip",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/quality-artifact-14299297187-archive.zip",
+      "bytes": 3020,
+      "sha256": "e3ceeafa607b3d8984d3333e8fcedf262b024acf06680de64aed66fa29d48b2e"
+    },
+    {
+      "member": "collector/originals/quality-artifact-14299297187-metadata.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/quality-artifact-14299297187-metadata.json",
+      "bytes": 724,
+      "sha256": "3534d2dc254480b6ab356d156dd9fd9b86e80b3edc79158b54c17173a9b5e935"
+    },
+    {
+      "member": "collector/originals/quality-attempt1-logs.zip",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/quality-attempt1-logs.zip",
+      "bytes": 1022192,
+      "sha256": "fe3492b3e06709f21cbbc47879c8a6d7c51afd1aa4d9b99f6d94f5eb3ac55fc5"
+    },
+    {
+      "member": "collector/originals/quality-job-133806809062-logs-retry2.txt",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/quality-job-133806809062-logs-retry2.txt",
+      "bytes": 901506,
+      "sha256": "d8d5e60602f1de25074b4f7f2a47cc380e5234f075c4c15c7403864014c59b12"
+    },
+    {
+      "member": "collector/originals/quality-job-133806809062-logs.txt",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/quality-job-133806809062-logs.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/originals/source-quality-workflow.yml",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/source-quality-workflow.yml",
+      "bytes": 4034,
+      "sha256": "22b7fc620bbb47592aa04fc57e4f6bbaffd5bffd571d74ddfea030e2c38c723b"
+    },
+    {
+      "member": "collector/originals/source-summary-parser.py",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/source-summary-parser.py",
+      "bytes": 5836,
+      "sha256": "9c40d7842009f02d5c25bbe51d6bd5e7ba32d5cb199ac6497f2bd018c421091c"
+    },
+    {
+      "member": "collector/originals/source-windows_monitor-workflow.yml",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/source-windows_monitor-workflow.yml",
+      "bytes": 3885,
+      "sha256": "fc58ef732a866bb9364ec4040c3ef145405ef9adde78a1ca6470d15bd15ee6de"
+    },
+    {
+      "member": "collector/originals/source-windows_ssh-workflow.yml",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/source-windows_ssh-workflow.yml",
+      "bytes": 2539,
+      "sha256": "65d7aa9b16fca91533b23b25ac68234d5bba553b3dd0d8ea5dd91631109197a9"
+    },
+    {
+      "member": "collector/originals/windows_monitor-artifact-14297134286-archive.zip",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/windows_monitor-artifact-14297134286-archive.zip",
+      "bytes": 46759,
+      "sha256": "b4bbfd8b1dad5c422d828838a62967ddf3d8bc4643bfb134ac5fe63c0be260ec"
+    },
+    {
+      "member": "collector/originals/windows_monitor-artifact-14297134286-metadata.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/windows_monitor-artifact-14297134286-metadata.json",
+      "bytes": 734,
+      "sha256": "6ee672ec006b2d2a54291c84f2aa6e62ed5b9ee404a0b40b033f40c09a7e8bcb"
+    },
+    {
+      "member": "collector/originals/windows_monitor-attempt1-logs.zip",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/windows_monitor-attempt1-logs.zip",
+      "bytes": 31964,
+      "sha256": "7a0c9c0f7c01ae25bad4312eda6b191a58c959e6ed875e099796ba0a8e24078d"
+    },
+    {
+      "member": "collector/originals/windows_ssh-artifact-14297682987-archive.zip",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/windows_ssh-artifact-14297682987-archive.zip",
+      "bytes": 54124,
+      "sha256": "57137eb39a25f0fd7887ec7ccbe09f1901e7f68f09f98fc8d88b64d363528920"
+    },
+    {
+      "member": "collector/originals/windows_ssh-artifact-14297682987-metadata.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/windows_ssh-artifact-14297682987-metadata.json",
+      "bytes": 735,
+      "sha256": "cd59528a3f558f791a7fb1383f0b196b070ec2fd4ac948ceb536e3bacdde0c38"
+    },
+    {
+      "member": "collector/originals/windows_ssh-attempt1-logs.zip",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals/windows_ssh-attempt1-logs.zip",
+      "bytes": 32063,
+      "sha256": "6ef7b34d28ab7313fcb422505386fb8243e0e49637968951ffe23ffa92af6923"
+    },
+    {
+      "member": "collector/originals-list.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/originals-list.json",
+      "bytes": 29417,
+      "sha256": "b71eb1b0a1fe9008918b709a0f8c9a6fb9e5f67018422fc02fb1fd9700195315"
+    },
+    {
+      "member": "collector/receipts/exact-source-quality-workflow.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/exact-source-quality-workflow.json",
+      "bytes": 543,
+      "sha256": "0c6756a0314b39b0694a0c98042067300064f47a7b84b509afb23cf2afa92d1e"
+    },
+    {
+      "member": "collector/receipts/exact-source-quality-workflow.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/exact-source-quality-workflow.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/exact-source-summary-parser.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/exact-source-summary-parser.json",
+      "bytes": 597,
+      "sha256": "01c2dbb2f7afac3f63e3c649392372d7568aad3cada07929a14aec54d70f0f78"
+    },
+    {
+      "member": "collector/receipts/exact-source-summary-parser.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/exact-source-summary-parser.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/exact-source-windows_monitor-workflow.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/exact-source-windows_monitor-workflow.json",
+      "bytes": 572,
+      "sha256": "4a52fc36d64f5c1b7e45541e860459014d3dbc1ee5c17f3f81eab9735e21f744"
+    },
+    {
+      "member": "collector/receipts/exact-source-windows_monitor-workflow.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/exact-source-windows_monitor-workflow.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/exact-source-windows_ssh-workflow.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/exact-source-windows_ssh-workflow.json",
+      "bytes": 568,
+      "sha256": "c799189e01123c00d62bcdb6fc5dad656334d577cb101f78e540e50aab13c64f"
+    },
+    {
+      "member": "collector/receipts/exact-source-windows_ssh-workflow.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/exact-source-windows_ssh-workflow.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/final-head.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/final-head.json",
+      "bytes": 453,
+      "sha256": "f2e505822b56c317923e6a9c7d220e449493c8e054d84bb33f076220c2b65a44"
+    },
+    {
+      "member": "collector/receipts/final-head.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/final-head.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/final-tracked-diff.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/final-tracked-diff.json",
+      "bytes": 520,
+      "sha256": "c34aec39c62bfc6753f65c9519f060616bcb964902bd1d12db3ef7fa3b391c6d"
+    },
+    {
+      "member": "collector/receipts/final-tracked-diff.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/final-tracked-diff.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/final-tracked-status.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/final-tracked-status.json",
+      "bytes": 536,
+      "sha256": "5e88b3039abd0339c3fb3ad4a7f4c445e518c283b40b01ea6b22b294144a6f0e"
+    },
+    {
+      "member": "collector/receipts/final-tracked-status.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/final-tracked-status.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/initial-head.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/initial-head.json",
+      "bytes": 362,
+      "sha256": "1abe2a7f704d9d20b3239df257d0ffbd403c6719846d8ada2f0263c7d29b966d"
+    },
+    {
+      "member": "collector/receipts/initial-head.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/initial-head.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/initial-tracked-diff.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/initial-tracked-diff.json",
+      "bytes": 425,
+      "sha256": "943a6028baa06574318eeb06dcd30ee2498eaf7f625d0bed9267b2b06fe2c2ae"
+    },
+    {
+      "member": "collector/receipts/initial-tracked-diff.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/initial-tracked-diff.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/initial-tracked-status.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/initial-tracked-status.json",
+      "bytes": 443,
+      "sha256": "debab0317a0a84a3dff0462566176e5f264d8f5a53be8024e3ef74e5f8087049"
+    },
+    {
+      "member": "collector/receipts/initial-tracked-status.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/initial-tracked-status.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/obs01-quality-artifacts.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs01-quality-artifacts.json",
+      "bytes": 577,
+      "sha256": "9fd8269d1f7b7e0bd174b9a6cf6195cb41a99370dd7cd13b97e40961b5a8e2e5"
+    },
+    {
+      "member": "collector/receipts/obs01-quality-artifacts.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs01-quality-artifacts.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/obs01-quality-jobs.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs01-quality-jobs.json",
+      "bytes": 575,
+      "sha256": "a808514a889c7ff2720aa73ec8908d8178d79344720b4d8c4bba537107947fd0"
+    },
+    {
+      "member": "collector/receipts/obs01-quality-jobs.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs01-quality-jobs.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/obs01-quality-run.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs01-quality-run.json",
+      "bytes": 545,
+      "sha256": "cbc1141cf49f40a9012afb4dafdbb4c7b2a983cdcd3a4b0c80197fce0c95d0b6"
+    },
+    {
+      "member": "collector/receipts/obs01-quality-run.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs01-quality-run.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/obs01-windows_monitor-artifacts.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs01-windows_monitor-artifacts.json",
+      "bytes": 592,
+      "sha256": "0db548e89f7f6ef630e8d322f943a6b619019c79dfcede02715257d6ba5e1f66"
+    },
+    {
+      "member": "collector/receipts/obs01-windows_monitor-artifacts.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs01-windows_monitor-artifacts.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/obs01-windows_monitor-jobs.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs01-windows_monitor-jobs.json",
+      "bytes": 591,
+      "sha256": "d1b13de4d90a97aff7dd4f0ac8ce90f2c4f91ce11a6370aad00409fc86bcc63a"
+    },
+    {
+      "member": "collector/receipts/obs01-windows_monitor-jobs.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs01-windows_monitor-jobs.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/obs01-windows_monitor-run.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs01-windows_monitor-run.json",
+      "bytes": 560,
+      "sha256": "f1884057df39ea20b2428eb1f3585e46157804f4f162a2f3b99d183bfa076675"
+    },
+    {
+      "member": "collector/receipts/obs01-windows_monitor-run.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs01-windows_monitor-run.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/obs01-windows_ssh-artifacts.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs01-windows_ssh-artifacts.json",
+      "bytes": 586,
+      "sha256": "b2d26ff1a41627aa09df1af2c9bf93589955bd287458336f3775934009c2e706"
+    },
+    {
+      "member": "collector/receipts/obs01-windows_ssh-artifacts.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs01-windows_ssh-artifacts.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/obs01-windows_ssh-jobs.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs01-windows_ssh-jobs.json",
+      "bytes": 583,
+      "sha256": "c6c72a09099e2a7cbb5debbfca2ee949d8992330cbd147631675865ea7505349"
+    },
+    {
+      "member": "collector/receipts/obs01-windows_ssh-jobs.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs01-windows_ssh-jobs.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/obs01-windows_ssh-run.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs01-windows_ssh-run.json",
+      "bytes": 553,
+      "sha256": "1254fdcd6a917adf87709aad44091b7ad9c6990331bf53545fd1d0b120f7f84b"
+    },
+    {
+      "member": "collector/receipts/obs01-windows_ssh-run.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs01-windows_ssh-run.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/obs02-quality-artifacts.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs02-quality-artifacts.json",
+      "bytes": 672,
+      "sha256": "f8eee1036726b91c1652440d8ee5b433444438399e9880b0c34c5e0c747ec65f"
+    },
+    {
+      "member": "collector/receipts/obs02-quality-artifacts.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs02-quality-artifacts.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/obs02-quality-jobs.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs02-quality-jobs.json",
+      "bytes": 670,
+      "sha256": "11114c2aded7c770af0027ba9ff64b4fb6a4519d457dd98a9a02ad6707f3cc39"
+    },
+    {
+      "member": "collector/receipts/obs02-quality-jobs.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs02-quality-jobs.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/obs02-quality-run.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs02-quality-run.json",
+      "bytes": 640,
+      "sha256": "16226c43679b928da30aa7b5e5813eb5780d47d207b634ad4a74f30b655cc297"
+    },
+    {
+      "member": "collector/receipts/obs02-quality-run.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs02-quality-run.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/obs03-quality-artifacts.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs03-quality-artifacts.json",
+      "bytes": 672,
+      "sha256": "1ea3cbd7961e06e24194191c0e406fcf05ddb2a34686b62db7ee8783b994b9b7"
+    },
+    {
+      "member": "collector/receipts/obs03-quality-artifacts.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs03-quality-artifacts.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/obs03-quality-jobs.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs03-quality-jobs.json",
+      "bytes": 669,
+      "sha256": "ecb3d7848c17a27ca7e87314b4f6bf93d7850b1fe4ebf4da3b2f47fc901aac87"
+    },
+    {
+      "member": "collector/receipts/obs03-quality-jobs.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs03-quality-jobs.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/obs03-quality-run.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs03-quality-run.json",
+      "bytes": 640,
+      "sha256": "fda06e40927487c91b8dbe1be83cea6b8bc7c23e17f8da3f0bc890ee5e54c84a"
+    },
+    {
+      "member": "collector/receipts/obs03-quality-run.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs03-quality-run.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/obs04-quality-artifacts.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs04-quality-artifacts.json",
+      "bytes": 672,
+      "sha256": "5e2d7a897a6b822a4b9d19d98d569b06f4b562b23a1fbb07b90db6913461b61a"
+    },
+    {
+      "member": "collector/receipts/obs04-quality-artifacts.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs04-quality-artifacts.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/obs04-quality-jobs.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs04-quality-jobs.json",
+      "bytes": 670,
+      "sha256": "083e0293ea30bd0f514705a4b7a8053458471d983aaf123f4d28e4bfd1bc3586"
+    },
+    {
+      "member": "collector/receipts/obs04-quality-jobs.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs04-quality-jobs.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/obs04-quality-run.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs04-quality-run.json",
+      "bytes": 640,
+      "sha256": "afa0c7a5902293b79de01087f694f8fc6b429642e7f65363e5fe60821489b1e2"
+    },
+    {
+      "member": "collector/receipts/obs04-quality-run.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs04-quality-run.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/obs05-quality-artifacts.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs05-quality-artifacts.json",
+      "bytes": 672,
+      "sha256": "9c2fe7a3840a4fef7d62c46cdef348da89dec9b944afab821f204e1c54437220"
+    },
+    {
+      "member": "collector/receipts/obs05-quality-artifacts.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs05-quality-artifacts.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/obs05-quality-jobs.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs05-quality-jobs.json",
+      "bytes": 670,
+      "sha256": "d101bd76a26db646033c76c6aed3a8c42d59fff84c0c26539f05af836048e910"
+    },
+    {
+      "member": "collector/receipts/obs05-quality-jobs.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs05-quality-jobs.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/obs05-quality-run.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs05-quality-run.json",
+      "bytes": 640,
+      "sha256": "d1d46f3f6717ba6b1036663e0728d74d9a68fefcd22af961bf38dce71a1e8329"
+    },
+    {
+      "member": "collector/receipts/obs05-quality-run.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs05-quality-run.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/obs06-quality-artifacts.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs06-quality-artifacts.json",
+      "bytes": 673,
+      "sha256": "fbaf7b00b205c4ef8cc9f7971866b0bc92b434fd16c71b3ad27160a606d98520"
+    },
+    {
+      "member": "collector/receipts/obs06-quality-artifacts.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs06-quality-artifacts.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/obs06-quality-jobs.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs06-quality-jobs.json",
+      "bytes": 670,
+      "sha256": "c009c8f9334e45a9a8cba029f1621162832c2751617d7a2895ca6fefa5ebdfe3"
+    },
+    {
+      "member": "collector/receipts/obs06-quality-jobs.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs06-quality-jobs.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/obs06-quality-run.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs06-quality-run.json",
+      "bytes": 640,
+      "sha256": "e93bcc260152448f278be249a9d2f44fc4d572b3f9078dd36ec66a0396fa0d51"
+    },
+    {
+      "member": "collector/receipts/obs06-quality-run.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs06-quality-run.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/obs07-quality-artifacts.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs07-quality-artifacts.json",
+      "bytes": 706,
+      "sha256": "7229a14e85700e409f268902c4ede892011735855a59f2e4ed7322f88f1c11ed"
+    },
+    {
+      "member": "collector/receipts/obs07-quality-artifacts.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs07-quality-artifacts.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/obs07-quality-jobs.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs07-quality-jobs.json",
+      "bytes": 703,
+      "sha256": "43382d772aa9d628dc6df7939516522dd74fdebab5835025a37d2174bcfe51f6"
+    },
+    {
+      "member": "collector/receipts/obs07-quality-jobs.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs07-quality-jobs.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/obs07-quality-run.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs07-quality-run.json",
+      "bytes": 672,
+      "sha256": "a20340e1b9a405bc616c2e83b526c1a754e57757f332a532ed2e28173372a80d"
+    },
+    {
+      "member": "collector/receipts/obs07-quality-run.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs07-quality-run.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/obs07-windows_monitor-artifacts.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs07-windows_monitor-artifacts.json",
+      "bytes": 721,
+      "sha256": "8f065a0dfa6341d0a137ae00ed97e51fc76c493547fbaf5f5174f5f42c4c7d39"
+    },
+    {
+      "member": "collector/receipts/obs07-windows_monitor-artifacts.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs07-windows_monitor-artifacts.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/obs07-windows_monitor-jobs.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs07-windows_monitor-jobs.json",
+      "bytes": 718,
+      "sha256": "cc4faaaa407ec67b313da43ec74f96a763e74f6077ee832c4ebdf4eed981deeb"
+    },
+    {
+      "member": "collector/receipts/obs07-windows_monitor-jobs.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs07-windows_monitor-jobs.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/obs07-windows_monitor-run.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs07-windows_monitor-run.json",
+      "bytes": 688,
+      "sha256": "5f5e7ab0d05d48c508c808e67431deca40d132794aefd556e8f0fda3b3ef4a39"
+    },
+    {
+      "member": "collector/receipts/obs07-windows_monitor-run.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs07-windows_monitor-run.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/obs07-windows_ssh-artifacts.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs07-windows_ssh-artifacts.json",
+      "bytes": 713,
+      "sha256": "7bf5d1a685ee14ecf494d52455d2bad52ef3bf429983e25596854a7a4b739a3f"
+    },
+    {
+      "member": "collector/receipts/obs07-windows_ssh-artifacts.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs07-windows_ssh-artifacts.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/obs07-windows_ssh-jobs.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs07-windows_ssh-jobs.json",
+      "bytes": 710,
+      "sha256": "d0382f30916bd2d42a1a893953f8b33e7d218156a26ff3591648dd8115f77410"
+    },
+    {
+      "member": "collector/receipts/obs07-windows_ssh-jobs.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs07-windows_ssh-jobs.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/obs07-windows_ssh-run.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs07-windows_ssh-run.json",
+      "bytes": 680,
+      "sha256": "2612a9ff10226f810ef26de187e45e2b4b4b8bb881a7206ff538288fc45c08b9"
+    },
+    {
+      "member": "collector/receipts/obs07-windows_ssh-run.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/obs07-windows_ssh-run.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/quality-artifact-14298698102-archive.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/quality-artifact-14298698102-archive.json",
+      "bytes": 685,
+      "sha256": "239091eab11c0638ad2f6d26056bddfffb7ee7d41c8df1981468a1a3b0e565d5"
+    },
+    {
+      "member": "collector/receipts/quality-artifact-14298698102-archive.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/quality-artifact-14298698102-archive.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/quality-artifact-14298698102-metadata.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/quality-artifact-14298698102-metadata.json",
+      "bytes": 683,
+      "sha256": "225cf7e8171cfc0a438649ef58876b5da0dbc73e9d031e23c89db33943c71202"
+    },
+    {
+      "member": "collector/receipts/quality-artifact-14298698102-metadata.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/quality-artifact-14298698102-metadata.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/quality-artifact-14299297187-archive.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/quality-artifact-14299297187-archive.json",
+      "bytes": 717,
+      "sha256": "1c8b3d026b9440d2225dbe5b3344a89fd6166d2741c909bd00c82ae54099e59f"
+    },
+    {
+      "member": "collector/receipts/quality-artifact-14299297187-archive.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/quality-artifact-14299297187-archive.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/quality-artifact-14299297187-metadata.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/quality-artifact-14299297187-metadata.json",
+      "bytes": 715,
+      "sha256": "7bad7b6dee7c2fdad800e18ce4b63b317f360c7efa39bf9bda2b0011a12b7bcf"
+    },
+    {
+      "member": "collector/receipts/quality-artifact-14299297187-metadata.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/quality-artifact-14299297187-metadata.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/quality-attempt1-logs.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/quality-attempt1-logs.json",
+      "bytes": 697,
+      "sha256": "ca76c75a5dfcd17c3c16c65a1cdec35af74614e80170b004e4c121ed145f78f2"
+    },
+    {
+      "member": "collector/receipts/quality-attempt1-logs.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/quality-attempt1-logs.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/quality-job-133806809062-logs-retry2.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/quality-job-133806809062-logs-retry2.json",
+      "bytes": 716,
+      "sha256": "ef60bf93d6c7c22275d91abb8db23f13c4fcf72b54578ebce85402c303009227"
+    },
+    {
+      "member": "collector/receipts/quality-job-133806809062-logs-retry2.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/quality-job-133806809062-logs-retry2.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/quality-job-133806809062-logs.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/quality-job-133806809062-logs.json",
+      "bytes": 665,
+      "sha256": "0191e5f04cc4f26c3f92028a1ee32a2044ebcfdd20208214691b52c1a9e3d5ae"
+    },
+    {
+      "member": "collector/receipts/quality-job-133806809062-logs.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/quality-job-133806809062-logs.stderr",
+      "bytes": 99,
+      "sha256": "8b6407b2fdbca54bf3d53fb93e79a3560dbe59567fa5044cfee4bed1b5b6e467"
+    },
+    {
+      "member": "collector/receipts/windows_monitor-artifact-14297134286-archive.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/windows_monitor-artifact-14297134286-archive.json",
+      "bytes": 702,
+      "sha256": "9ef413958ec686cfcff31c99a683793b6804d303b4e4ebf7d3f612b82c0bb7bc"
+    },
+    {
+      "member": "collector/receipts/windows_monitor-artifact-14297134286-archive.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/windows_monitor-artifact-14297134286-archive.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/windows_monitor-artifact-14297134286-metadata.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/windows_monitor-artifact-14297134286-metadata.json",
+      "bytes": 698,
+      "sha256": "60892ada7f0a9471d51a25f06ada37095c1bb4728e9b95435469dfc5010e57df"
+    },
+    {
+      "member": "collector/receipts/windows_monitor-artifact-14297134286-metadata.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/windows_monitor-artifact-14297134286-metadata.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/windows_monitor-attempt1-logs.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/windows_monitor-attempt1-logs.json",
+      "bytes": 679,
+      "sha256": "12ed83cda65fa3ee10624df457a9c822e34f92c559c937130ad878f132493ac9"
+    },
+    {
+      "member": "collector/receipts/windows_monitor-attempt1-logs.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/windows_monitor-attempt1-logs.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/windows_ssh-artifact-14297682987-archive.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/windows_ssh-artifact-14297682987-archive.json",
+      "bytes": 694,
+      "sha256": "b923e624ebd2e15ad7f59e7b2d0e532fb19ed073a147847f6b4da2781286ecdf"
+    },
+    {
+      "member": "collector/receipts/windows_ssh-artifact-14297682987-archive.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/windows_ssh-artifact-14297682987-archive.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/windows_ssh-artifact-14297682987-metadata.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/windows_ssh-artifact-14297682987-metadata.json",
+      "bytes": 691,
+      "sha256": "cd64fbd3bdceb04744c17b7fd986dc649833e4758f3c05e6b64fbaf746902e1b"
+    },
+    {
+      "member": "collector/receipts/windows_ssh-artifact-14297682987-metadata.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/windows_ssh-artifact-14297682987-metadata.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/receipts/windows_ssh-attempt1-logs.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/windows_ssh-attempt1-logs.json",
+      "bytes": 671,
+      "sha256": "c89704d8359c3a9ec5ed028c09b900c8cc1e254a03ad970f0bbf85ccc1b6b7cf"
+    },
+    {
+      "member": "collector/receipts/windows_ssh-attempt1-logs.stderr",
+      "source": "work/zmodem-peer-ci-completion-20261117/receipts/windows_ssh-attempt1-logs.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/report-expanded-precompact.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/report-expanded-precompact.json",
+      "bytes": 37788,
+      "sha256": "24b08b675a061f463727c29d96749f987f02d7507cc4654675794f6dee05b971"
+    },
+    {
+      "member": "collector/report-obs02.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/report-obs02.json",
+      "bytes": 10238,
+      "sha256": "d489931fcad9e861b9019b48f3dc9889229eed696a355ec9697a2e74462848b4"
+    },
+    {
+      "member": "collector/report-obs06.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/report-obs06.json",
+      "bytes": 11863,
+      "sha256": "e50da718419ca14801e4fc37a6d3fd6cb186eba29059b78314bfdef066de2c44"
+    },
+    {
+      "member": "collector/report.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/report.json",
+      "bytes": 17463,
+      "sha256": "d2f2bf1d4899ae7bfdc5b81e34d85e024f4b4284a498da011c0730e4654e90ba"
+    },
+    {
+      "member": "collector/verification.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/verification.json",
+      "bytes": 11923,
+      "sha256": "e428f088ee7b28e16212e3baa925c5ec57898eeac9017744ca07d240666c5cf5"
+    },
+    {
+      "member": "collector/zip-manifests-final.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/zip-manifests-final.json",
+      "bytes": 37110,
+      "sha256": "697106f32dbdbaca40a431a3f2e472d3d97d84fd5e93d6be8ec083ef33f62f0d"
+    },
+    {
+      "member": "collector/zip-manifests-initial.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/zip-manifests-initial.json",
+      "bytes": 21237,
+      "sha256": "324e21831580cc48435a0f3c7e3c567489439823c55e1ba294f9da2459d7dd06"
+    },
+    {
+      "member": "collector/zip-manifests-obs02.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/zip-manifests-obs02.json",
+      "bytes": 23355,
+      "sha256": "bc8cce474478991499e2c5a5af921832631bb09a5bcfe581f1369293ac16e78b"
+    },
+    {
+      "member": "collector/zip-manifests-obs06.json",
+      "source": "work/zmodem-peer-ci-completion-20261117/zip-manifests-obs06.json",
+      "bytes": 26076,
+      "sha256": "6bbd650f82a47f9a5d9ed5efa8816554fb70e31900c5c043c680b3085f98c536"
+    },
+    {
+      "member": "independent-review/REVIEW.md",
+      "source": "work/zmodem-peer-ci-review-20261117/REVIEW.md",
+      "bytes": 20011,
+      "sha256": "36455a94e8517e247a2637c1df78e4e51cb0e9b4f6a7d538f648d90ce2c42f9a"
+    },
+    {
+      "member": "independent-review/attempt-1.stderr.txt",
+      "source": "work/zmodem-peer-ci-review-20261117/attempt-1.stderr.txt",
+      "bytes": 607,
+      "sha256": "522e900c05f6be7d4a8ab1c8c68a05091583731e3a1c746a3b9e0487c4285ca1"
+    },
+    {
+      "member": "independent-review/attempt-1.stdout.txt",
+      "source": "work/zmodem-peer-ci-review-20261117/attempt-1.stdout.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "independent-review/attempt-2.stderr.txt",
+      "source": "work/zmodem-peer-ci-review-20261117/attempt-2.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "independent-review/attempt-2.stdout.txt",
+      "source": "work/zmodem-peer-ci-review-20261117/attempt-2.stdout.txt",
+      "bytes": 2275,
+      "sha256": "11d3a3a21abe7de7713fc07737b31c0388e5af5ac9a7db1c477f610c02f52feb"
+    },
+    {
+      "member": "independent-review/attempt-3.stderr.txt",
+      "source": "work/zmodem-peer-ci-review-20261117/attempt-3.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "independent-review/attempt-3.stdout.txt",
+      "source": "work/zmodem-peer-ci-review-20261117/attempt-3.stdout.txt",
+      "bytes": 1868,
+      "sha256": "06496e4b2456e77070265734a1bbbb64deb22b8f3678afae187e9e25113cf70b"
+    },
+    {
+      "member": "independent-review/checks.jsonl",
+      "source": "work/zmodem-peer-ci-review-20261117/checks.jsonl",
+      "bytes": 604472,
+      "sha256": "7ad72b2d994dc1968633b88eeaf1e98712a6f52efa189129f7c92b202105d078"
+    },
+    {
+      "member": "independent-review/collector-recomputed.json",
+      "source": "work/zmodem-peer-ci-review-20261117/collector-recomputed.json",
+      "bytes": 42659,
+      "sha256": "db0746c3725e7298adfb7097d83e3d8c18cde9149f8c7e9fbf2e947efb06ea81"
+    },
+    {
+      "member": "independent-review/commands.json",
+      "source": "work/zmodem-peer-ci-review-20261117/commands.json",
+      "bytes": 4659,
+      "sha256": "ffe7b11986946d3b24f411ddac75cedefa3d1720348998581cdaa469db853a06"
+    },
+    {
+      "member": "independent-review/delivery-verification.json",
+      "source": "work/zmodem-peer-ci-review-20261117/delivery-verification.json",
+      "bytes": 1742,
+      "sha256": "fc86aae0fee7e3765b3dcaa70421e7c4db9abe89c8aad5175bc84a7d97b6af11"
+    },
+    {
+      "member": "independent-review/git-commands.json",
+      "source": "work/zmodem-peer-ci-review-20261117/git-commands.json",
+      "bytes": 2492,
+      "sha256": "4aa0ccbadb9bd04e34ecbfdcf7930d7e2c839de0e0a3a546de111dac8a3537af"
+    },
+    {
+      "member": "independent-review/input-snapshot.json",
+      "source": "work/zmodem-peer-ci-review-20261117/input-snapshot.json",
+      "bytes": 30115,
+      "sha256": "57269adc872531a3a9281c2eda619057288f9ac6bef9b6260f83f7659f4f9419"
+    },
+    {
+      "member": "independent-review/json-documents.json",
+      "source": "work/zmodem-peer-ci-review-20261117/json-documents.json",
+      "bytes": 18827,
+      "sha256": "ce993539ed0e86659a5619d6243693844665a5ca4cd5950f16b069b52a8cec56"
+    },
+    {
+      "member": "independent-review/results.json",
+      "source": "work/zmodem-peer-ci-review-20261117/results.json",
+      "bytes": 13058,
+      "sha256": "fe0efe256efa11244621fe93635bd3e0b94a9d6a6953d0b84fac4b90c3a00106"
+    },
+    {
+      "member": "independent-review/review-files-manifest.json",
+      "source": "work/zmodem-peer-ci-review-20261117/review-files-manifest.json",
+      "bytes": 3197,
+      "sha256": "a1adf8e02515ee37941d9d6aab8179f4676c248d35e2e06874b4178f454573c7"
+    },
+    {
+      "member": "independent-review/review.py",
+      "source": "work/zmodem-peer-ci-review-20261117/review.py",
+      "bytes": 38579,
+      "sha256": "7404b6c380dea029a1baf2bf070ff5cba54fcd6308bb2879cb1f0370908927ae"
+    },
+    {
+      "member": "independent-review/reviewer-parser-error.json",
+      "source": "work/zmodem-peer-ci-review-20261117/reviewer-parser-error.json",
+      "bytes": 75,
+      "sha256": "f9bfaeb0e1896991dd2049d283a7febec9305e6362aa2c0a2787f219bab07f6a"
+    },
+    {
+      "member": "independent-review/source-recomputed.json",
+      "source": "work/zmodem-peer-ci-review-20261117/source-recomputed.json",
+      "bytes": 141225,
+      "sha256": "0da3ca5e2e9971b7ed9ccaa746913f9c9fffb8a753a1619650608ac07a769f39"
+    },
+    {
+      "member": "independent-review/suites-recomputed.json",
+      "source": "work/zmodem-peer-ci-review-20261117/suites-recomputed.json",
+      "bytes": 168862,
+      "sha256": "1b2499a94e4c1f032a118fd85433fc8dd1f1aa3595704030eb082db9682b859d"
+    },
+    {
+      "member": "independent-review/zip-recomputed.json",
+      "source": "work/zmodem-peer-ci-review-20261117/zip-recomputed.json",
+      "bytes": 35730,
+      "sha256": "7a5f14ff339a74c0bd162147fc49147766849f455cf370e1204cea945bdbc321"
+    }
+  ]
+}

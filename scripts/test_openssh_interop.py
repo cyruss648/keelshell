@@ -15,6 +15,86 @@ from unittest.mock import MagicMock, patch
 import openssh_interop as interop
 
 
+@unittest.skipUnless(os.name == "posix", "The OpenSSH harness requires POSIX")
+class ForwardingPolicyTests(unittest.TestCase):
+    def _run_without_processes(self, forwarding):
+        with tempfile.TemporaryDirectory(prefix="keelshell-forwarding-policy-") as scratch:
+            root = Path(scratch)
+            output = root / "receipt"
+            server = MagicMock(pid=101, returncode=None)
+            server.poll.return_value = None
+            tests = MagicMock(pid=102, returncode=0)
+            tests.poll.return_value = 0
+            observed = {}
+
+            def start(_runner, name, command, environment=None):
+                observed[name] = list(command)
+                if name == "sshd":
+                    observed["config"] = Path(command[-1]).read_text()
+                    return server
+                self.assertEqual(name, "tests")
+                (output / "tests.log").write_text(
+                    "test result: ok. 6 passed; 0 failed; 0 ignored;\n"
+                )
+                return tests
+
+            arguments = ["openssh_interop.py", "--output", str(output)]
+            if forwarding:
+                arguments.append("--forwarding")
+            with patch.object(interop, "ROOT", root), \
+                    patch.object(interop.platform, "system", return_value="Linux"), \
+                    patch.object(sys, "argv", arguments), \
+                    patch.object(interop.os, "umask"), \
+                    patch.object(interop.signal, "signal", return_value=None), \
+                    patch.object(interop, "executable", side_effect=lambda name, *rest: "/fixture-" + name), \
+                    patch.object(interop.Runner, "run"), \
+                    patch.object(interop.Runner, "start", autospec=True, side_effect=start), \
+                    patch.object(interop.Runner, "wait"), \
+                    patch.object(interop, "wait_for_server"), \
+                    patch.object(interop.subprocess, "Popen") as popen, \
+                    contextlib.redirect_stdout(io.StringIO()), \
+                    contextlib.redirect_stderr(io.StringIO()):
+                self.assertEqual(interop.main(), 0)
+                popen.assert_not_called()
+            self.assertTrue(json.loads((output / "result.json").read_text())["cleanup"]["temporary_directory_removed"])
+            return observed
+
+    def test_forwarding_suite_enables_only_the_loopback_forwarding_policy(self):
+        observed = self._run_without_processes(True)
+        config = observed["config"].splitlines()
+        self.assertIn("ListenAddress 127.0.0.1", config)
+        self.assertIn("AllowTcpForwarding yes", config)
+        self.assertIn("PermitOpen 127.0.0.1:*", config)
+        self.assertIn("PermitListen 127.0.0.1:*", config)
+        self.assertIn("GatewayPorts no", config)
+        self.assertIn("AllowStreamLocalForwarding no", config)
+        self.assertIn("PermitTunnel no", config)
+        self.assertIn("PermitTTY no", config)
+        command = observed["tests"]
+        self.assertEqual(command[command.index("--test") + 1], "forwarding_openssh")
+        self.assertIn("--ignored", command)
+        self.assertNotIn("zmodem_openssh", command)
+
+    def test_ordinary_suite_keeps_tcp_forwarding_disabled(self):
+        observed = self._run_without_processes(False)
+        self.assertIn("AllowTcpForwarding no", observed["config"].splitlines())
+        self.assertEqual(
+            observed["tests"][observed["tests"].index("--test") + 1],
+            "openssh_interop",
+        )
+
+    def test_forwarding_cannot_be_combined_with_another_suite(self):
+        for other in ("--zmodem", "--monitor-darwin"):
+            with self.subTest(other=other), \
+                    patch.object(sys, "argv", ["openssh_interop.py", "--forwarding", other]), \
+                    patch.object(interop, "create_output") as output, \
+                    contextlib.redirect_stderr(io.StringIO()):
+                with self.assertRaises(SystemExit) as result:
+                    interop.main()
+                self.assertEqual(result.exception.code, 2)
+                output.assert_not_called()
+
+
 class ZmodemPeerArgsTests(unittest.TestCase):
     def test_only_undefined_arguments_get_the_legacy_default(self):
         first = interop.zmodem_peer_args(None, "PEER_ARGS")

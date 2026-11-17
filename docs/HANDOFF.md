@@ -10,6 +10,25 @@ SHA-256 分别为 `3b6e75e988ef096fd7ec4941241f9a03299c0f1e3933a3100ee5ac7af8496
 
 ## 当前实现与验证
 
+本地转发的原 SSH 生命周期增量已完成实现／本机验证，基线 `660645f`，见
+[ADR0159](adr/0159-local-forward-transport-lifetime.md)和
+[本批记录](testing/records/2026-11-17-tunnel-transport-lifetime.md)。
+已补齐 Closing／Closed 准入、bind 前后核对、原连接 watch 与 50ms 本地状态兜底；
+监听任务自行释放端口并回收所属流，不依赖面板轮询，不迁移到新连接。
+库级16项及真实Darwin OpenSSH三方向6项通过；工装33项通过。
+首位非作者发现两用例未证明既有sibling流存活，已修为停止前后同一流交换；
+原P2和原件保留，新非作者Curie对r2限定批准、P0–P3全0，
+独立45Python及父级预编译16项通过、旧P2关闭并已实际关闭；
+冻结后的完整门禁r2通过：普通Rust3435/0/68 ignored、14rustdoc，
+Python主526 run／3 skipped；fmt、严格Clippy、依赖政策及三个controller gate通过。
+95普通套件逐名库存和二进制前后摘要相等，769输入前后不变；
+首轮测试helper Clippy失败原件保留，提交推送／精确新CI待交付。
+769工程输入r2 aggregate
+`83e2e1b00ba4d373a407030c79538f8a5039347931236344315ad8b70844a5b7`；
+唯一target连续归属本checkout，不clean、不并行Cargo。
+uuid锁已从1.29.2更新1.29.3，声明仍1.29；新完整官方快照37包／113声明全部通过，
+取代前批的最新性UNKNOWN，不改写其registry失败。当前桌面又锁定，GUI操作／截图0。
+
 独立Zmodem peer交叉联调当前候选已完成实现与源码复核，基线`ac7ec43`，见
 [ADR0158](adr/0158-independent-zmodem-peer-matrix.md)与
 [进行中记录](testing/records/2026-11-17-independent-zmodem-peers.md)。
@@ -34,7 +53,12 @@ CRC16／CRC32首个完整ZDATA及同shell继续输入有通过，空文件／缺
 所有五位作者／reviewer已关闭，旧work副本不能继续使用；
 后续从[交付原件](testing/records/2026-11-17-independent-zmodem-peers-evidence/delivery/README.md)接续。
 同源码Windows OpenSSH44013808220及API44013808184已success，
-Quality44013808155仍in_progress，三平台最终CI与artifact／native分别待验。
+Quality44013808155现已三平台completed/success；Windows／macOS／Ubuntu普通Rust
+3406／3419／3412通过、0失败，各14rustdoc，Python523 run、skip50／3／3；
+macOS／Linux真实OpenSSH各18通过。原始ZIP／artifact已取得，
+新非作者Feynman离线5,091＋16检查通过、限定批准、P0–P3全0并已关闭。
+207成员终态封存见[精确CI](testing/records/2026-11-17-independent-zmodem-peers-evidence/ci-completion/README.md)，
+765旧工程Git输入相符；不扩大到当前隧道增量、原生或发行。
 
 Windows真实OpenSSH修复工程`660e90d6f7c7111853db7b73f4ca2344f633700d`
 已普通提交／推送，local／tracking／remote三方一致且读回干净。
@@ -135,8 +159,9 @@ Python 主 discovery 各 293 run，skipped 为 34／2／2；包装与 helper 独
   凭据默认短暂驻留，显式保存只用 OS store 或认证加密 vault，不写明文或主密码。
 - 保留 UNKNOWN、quarantine、pending mutation 与 close hold，不自动重放未知写入。
 - 直接 registry 依赖只用 x.y，Cargo.lock 保留 patch；不 pin toolchain、不设 rust-version。
-  本机已观察 Rust/Cargo1.100.0；zip 锁更新9.6.1、声明9.6。三轮官方复查未全部成功，
-  最新完整新鲜度仍 UNKNOWN，不拼接部分成功或用旧回执代签。
+  本机已观察 Rust/Cargo1.100.0；zip锁9.6.1、声明9.6，uuid锁1.29.3、声明1.29。
+  2026-11-17本批最新完整官方metadata快照37包／113声明全部通过；
+  前批部分失败保留，不扩大到间接依赖、Actions或未来版本。
 - 用户已授权及时普通提交／推送和 tag Releases、本地 Podman 联调；不含覆盖安装或遥测。
   当前分支 `feature/editor-unicode-codec-20261114`；不强推，读回三方 SHA。
   `origin/main` 独立状态文档不直接覆盖。

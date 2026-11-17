@@ -5,10 +5,12 @@ mod socks;
 pub use socks::{DynamicForward, DynamicForwardOptions};
 
 use std::collections::BTreeMap;
+use std::future::Future;
 use std::io;
 use std::net::SocketAddr;
 use std::sync::atomic::{AtomicU64, AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
+use std::time::Duration;
 
 use russh::{Channel, ChannelOpenFailure, client};
 use tokio::io::{AsyncRead, AsyncReadExt, AsyncWrite, AsyncWriteExt};
@@ -16,7 +18,7 @@ use tokio::net::{TcpListener, TcpStream};
 use tokio::sync::{Notify, Semaphore, watch};
 use tokio::task::{JoinHandle, JoinSet};
 
-use crate::ssh::{SshSession, deadline};
+use crate::ssh::{ConnectionState, SshSession, deadline};
 use crate::{Result, SessionError};
 
 /// Thread-safe cumulative payload counters for one forwarding listener.
@@ -202,7 +204,8 @@ impl Drop for PendingRemoteForward {
 }
 
 /// A local listener tunneled to one remote host. Dropping it aborts the listener
-/// and every connection still owned by that listener.
+/// and every connection still owned by that listener. The listener also stops
+/// when its original SSH connection starts closing or its transport stops.
 pub struct LocalForward {
     address: SocketAddr,
     traffic: TrafficStats,
@@ -218,8 +221,8 @@ impl LocalForward {
     ///
     /// The application uses this to surface an unexpected listener failure and
     /// release the worker that owns the forwarding row. A task can finish on
-    /// its own when accepting a new local connection fails, so checking only
-    /// the shared SSH session is insufficient.
+    /// its own when accepting a new local connection fails or the owning SSH
+    /// connection stops, so checking only the shared SSH session is insufficient.
     pub fn is_closed(&self) -> bool {
         self.task.is_finished()
     }
@@ -310,10 +313,61 @@ impl Drop for RemoteForward {
     }
 }
 
+fn local_forward_admission(session: &SshSession) -> Result<()> {
+    // is_closed reports stopped protocol/transport workers, not Closing.
+    if session.connection_state() != ConnectionState::Connected || session.is_closed() {
+        return Err(SessionError::Closed);
+    }
+    Ok(())
+}
+
+async fn local_forward_shutdown(
+    session: &SshSession,
+    state: &mut watch::Receiver<ConnectionState>,
+) {
+    loop {
+        // A new subscription considers its current value seen. Inspect it
+        // before waiting, and never keep a watch borrow across an await.
+        if *state.borrow_and_update() != ConnectionState::Connected || session.is_closed() {
+            return;
+        }
+        tokio::select! {
+            changed = state.changed() => {
+                if changed.is_err() {
+                    return;
+                }
+            },
+            // Transport shutdown can precede the lifecycle callback, especially
+            // under protocol backpressure. Keep this fallback library-owned.
+            _ = tokio::time::sleep(Duration::from_millis(50)) => {},
+        }
+    }
+}
+
+async fn bind_local_forward(
+    session: &SshSession,
+    bind: impl Future<Output = io::Result<TcpListener>>,
+) -> Result<(TcpListener, watch::Receiver<ConnectionState>)> {
+    let mut state = session.subscribe_state();
+    local_forward_admission(session)?;
+    let listener = tokio::select! {
+        biased;
+        _ = local_forward_shutdown(session, &mut state) => return Err(SessionError::Closed),
+        listener = bind => listener,
+    };
+    // Binding may have yielded while the original connection was retired.
+    local_forward_admission(session)?;
+    Ok((listener?, state))
+}
+
 impl SshSession {
     /// Listen locally and forward accepted streams through direct-tcpip. The
     /// binding address is explicit so callers can choose loopback by default.
     /// At most 64 streams are active; additional connections are rejected.
+    ///
+    /// Returns [`SessionError::Closed`] if the connection is closing or closed,
+    /// including shutdown observed during setup. The listener and its owned
+    /// streams stop with this exact SSH connection; they never reconnect.
     pub async fn forward_local(
         &self,
         bind: SocketAddr,
@@ -323,34 +377,72 @@ impl SshSession {
         if remote_host.is_empty() || remote_port == 0 {
             return Err(SessionError::Invalid("forward destination must be set"));
         }
-        let listener = TcpListener::bind(bind).await?;
+        let (listener, mut state) = bind_local_forward(self, TcpListener::bind(bind)).await?;
         let address = listener.local_addr()?;
         let traffic = TrafficStats::default();
         let worker_traffic = traffic.clone();
         let session = self.clone();
         let task = tokio::spawn(async move {
             let mut streams = JoinSet::new();
+            let shutdown = local_forward_shutdown(&session, &mut state);
+            tokio::pin!(shutdown);
             loop {
                 tokio::select! {
+                    biased;
+                    _ = &mut shutdown => break,
+                    _ = streams.join_next(), if !streams.is_empty() => {},
                     incoming = listener.accept() => {
-                        let Ok((mut socket, peer)) = incoming else { break; };
-                        if streams.len() >= 64 { continue; }
-                        let session = session.clone(); let destination = remote_host.clone();
+                        let Ok((mut socket, peer)) = incoming else {
+                            break;
+                        };
+                        if local_forward_admission(&session).is_err() {
+                            break;
+                        }
+                        if streams.len() >= 64 {
+                            continue;
+                        }
+                        let session = session.clone();
+                        let destination = remote_host.clone();
                         let traffic = worker_traffic.clone();
                         streams.spawn(async move {
-                            let channel = tokio::time::timeout(session.timeout, session.handle.channel_open_direct_tcpip(destination, u32::from(remote_port), peer.ip().to_string(), u32::from(peer.port()))).await;
-                            if let Ok(Ok(channel)) = channel { let mut stream = channel.into_stream(); let _ = copy_bidirectional_counted(&mut socket, &mut stream, traffic).await; }
+                            if local_forward_admission(&session).is_err() {
+                                return;
+                            }
+                            let channel = tokio::time::timeout(
+                                session.timeout,
+                                session.handle.channel_open_direct_tcpip(
+                                    destination,
+                                    u32::from(remote_port),
+                                    peer.ip().to_string(),
+                                    u32::from(peer.port()),
+                                ),
+                            )
+                            .await;
+                            if let Ok(Ok(channel)) = channel {
+                                let mut stream = channel.into_stream();
+                                if local_forward_admission(&session).is_ok() {
+                                    let _ = copy_bidirectional_counted(&mut socket, &mut stream, traffic).await;
+                                }
+                            }
                         });
                     },
-                    _ = streams.join_next(), if !streams.is_empty() => {},
                 }
             }
+            drop(listener);
+            // Reap cancellations so natural task completion also confirms that
+            // this listener's local sockets have been dropped.
+            streams.shutdown().await;
         });
-        Ok(LocalForward {
+        let owner = LocalForward {
             address,
             traffic,
             task,
-        })
+        };
+        if let Err(error) = local_forward_admission(self) {
+            owner.close().await;
+            return Err(error);
+        }
+        Ok(owner)
     }
 
     /// Ask the SSH server to listen and forward to an explicit local target.
@@ -538,3 +630,7 @@ mod tests {
         assert!(owner.is_closed());
     }
 }
+
+#[cfg(test)]
+#[path = "forwarding/local_lifecycle_tests.rs"]
+mod local_lifecycle_tests;

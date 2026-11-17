@@ -1,5 +1,24 @@
 # Capability ledger
 
+## 2026-11-17: original transport lifetime for local forwarding
+
+Local forwarding now rejects Closing/Closed connections before, during and after
+bind, observes its original SSH state directly and releases its own listener and
+streams without an app poller. A newly authenticated connection requires a new
+explicit start; a retained old owner cannot take over or close its replacement.
+Sixteen library regressions and six actual Darwin OpenSSH forwarding checks have
+passed. The OpenSSH cases also cover local/remote sibling streams already active
+before a stop and SOCKS stop. A first independent P2 exposed the weaker sibling
+assertion; its report is retained, the tests are strengthened and a new non-author
+has approved r2 with zero P0-P3 findings. Independent Python checks passed 45
+cases; the 16 Rust cases were independently rerun from the parent's exact
+precompiled binary, without an independent rebuild. The frozen r2 engineering
+gate passed 3,435 ordinary Rust tests, 14 rustdoc tests and the 526-case main
+Python run with three skips. All 95 ordinary suites match their exact compiled
+inventories and binary digests remain unchanged. The initial test-helper Clippy
+failure is retained. Exact new source CI is pending delivery. See the [lifecycle record](../testing/records/2026-11-17-tunnel-transport-lifetime.md).
+Windows real OpenSSH forwarding, native desktop and release acceptance remain open.
+
 ## 2026-11-17: scoped native English toolbar observation
 
 The normal macOS arm64 package at `5d2df2f` was run with a new isolated data

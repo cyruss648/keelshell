@@ -418,6 +418,8 @@ def main():
                         help="Run real raw-PTY Zmodem tests; requires KEELSHELL_ZMODEM_RZ and KEELSHELL_ZMODEM_SZ; optional _ARGS JSON arrays default to [\"-b\",\"-vv\"]")
     suite.add_argument("--monitor-darwin", action="store_true",
                        help="Run resource/process monitoring tests against this macOS host")
+    suite.add_argument("--forwarding", action="store_true",
+                       help="Run loopback-only local/remote/SOCKS forwarding lifecycle tests")
     arguments = parser.parse_args()
     if platform.system() not in ("Darwin", "Linux"):
         parser.error("OpenSSH interoperability is supported only on macOS and Linux; Windows is not supported")
@@ -437,6 +439,8 @@ def main():
         test_command.append("--show-output")
     if arguments.monitor_darwin:
         test_command[test_command.index("openssh_interop")] = "darwin_monitor_interop"
+    if arguments.forwarding:
+        test_command[test_command.index("openssh_interop")] = "forwarding_openssh"
     overall_deadline = start + arguments.timeout
     os.umask(0o077)
     output = create_output(arguments.output)
@@ -503,7 +507,9 @@ def main():
                     "KbdInteractiveAuthentication no", "PermitEmptyPasswords no", "UsePAM no",
                     "StrictModes yes", "UseDNS no", "PermitRootLogin prohibit-password",
                     "PermitUserEnvironment no", "AllowAgentForwarding no",
-                    "AllowTcpForwarding no", "AllowStreamLocalForwarding no", "PermitTunnel no",
+                    "AllowTcpForwarding " + ("yes" if arguments.forwarding else "no"),
+                    "PermitOpen 127.0.0.1:*", "PermitListen 127.0.0.1:*", "GatewayPorts no",
+                    "AllowStreamLocalForwarding no", "PermitTunnel no",
                     "X11Forwarding no", "PermitTTY " + ("yes" if arguments.zmodem else "no"), "LoginGraceTime 10", "MaxAuthTries 2",
                     "MaxSessions 8", "LogLevel ERROR", "Subsystem sftp internal-sftp", "",
                 ]), encoding="utf-8")
