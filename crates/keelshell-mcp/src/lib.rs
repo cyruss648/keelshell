@@ -23,12 +23,14 @@
 #![deny(missing_docs)]
 
 mod backend;
+mod client_config;
 mod ipc;
 mod policy;
 mod server;
 mod transport;
 
 pub use backend::*;
+pub use client_config::{McpClientKind, client_configuration_template};
 pub use ipc::*;
 pub use policy::*;
 pub use server::KeelShellMcpServer;

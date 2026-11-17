@@ -10,6 +10,21 @@ SHA-256 分别为 `3b6e75e988ef096fd7ec4941241f9a03299c0f1e3933a3100ee5ac7af8496
 
 ## 当前实现与验证
 
+MCP 客户端模板与未知记录增量的实现与限定工程验证完成，基线`f4562ad`，见
+[ADR0160](adr/0160-mcp-client-templates-and-unknown-history.md)和
+[本批记录](testing/records/2026-11-17-mcp-client-history.md)。
+原生入口分别复制Codex／Claude模板与当前敏感启动能力；批量清理不再删除未知结果，
+独立核对只解除准确提案的关闭限制，保留Unknown／原内容／quarantine。
+修订后MCP37项、renderer13项通过，真实编译renderer的独立Python解析41TOML／40JSON
+及1插值路径拒绝通过；原编译和首提案布局失败保留。
+777非docs输入冻结前后相等。新非作者Cicero限定源码/功能批准、P0–P3全0，
+独立预编译62项通过且已关闭；32项饱和和确认后quarantine仅源码复核。
+最终完整门禁`0/reaped/815.372858s`：Rust3455/0/68 ignored、15rustdoc、
+Python主526 run/3 skipped，fmt/严格Clippy/依赖政策/三个controller通过。
+96普通套件逐名库存及二进制摘要相等；首轮库存工装不识别两条内嵌Python前缀，
+已修解析而未重跑产品测试，原失败保留。精确提交/推送/Git绑定随后记录。
+本批再次实际观察为锁屏、GUI操作／截图0，没有用旧包代签。
+
 本地转发的原 SSH 生命周期增量已完成实现／本机验证，基线 `660645f`，见
 [ADR0159](adr/0159-local-forward-transport-lifetime.md)和
 [本批记录](testing/records/2026-11-17-tunnel-transport-lifetime.md)。
@@ -30,9 +45,11 @@ local／tracking／remote三方一致；769输入和478归档成员精确Git绑�
 按完整文件集核对后回收6目录／478文件／11,059,237逻辑字节，
 另2份reviewer二进制副本核对原target后已回收，target及正常旧包前后相同。
 旧work目录已不存在，从[交付记录](testing/records/2026-11-17-tunnel-transport-lifetime-evidence/delivery/README.md)接续。
-新Windows API44020265273及SSH44020265248现已completed/success，当前只按API状态记录；
-Quality44020265369三平台仍in_progress，未观察到失败job。
-精确新CI终态／artifact与原生／发行分别待验。
+新Windows API44020265273及SSH44020265248、Quality44020265369均已completed/success；
+Windows／Ubuntu／macOS普通Rust3422／3428／3435通过、0失败，各14rustdoc。
+Python主526 run、skip53／3／3；7个原始ZIP、172成员、4个artifact digest相等，
+77项离线检查通过、0差异，独立终态原件复核另记。isolated-SSH skipped、
+native_gui=UNRUN和历史HOLD／cleanup非全exit0保留，不扩大为原生或发行。
 769工程输入r2 aggregate
 `83e2e1b00ba4d373a407030c79538f8a5039347931236344315ad8b70844a5b7`；
 唯一target连续归属本checkout，不clean、不并行Cargo。

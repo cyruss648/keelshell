@@ -29,6 +29,9 @@ struct Action {
     label: String,
     deadline: Instant,
     state: ActionState,
+    // A human may release the close hold after checking the remote outcome.
+    // This never upgrades OutcomeUnknown or authorizes a retry.
+    unknown_acknowledged: bool,
     output: String,
     session: keelshell_session::SshSession,
 }
@@ -110,6 +113,8 @@ pub(super) struct McpState {
     targets: Vec<Target>,
     actions: Vec<Action>,
     pub(super) reviewing: Option<uuid::Uuid>,
+    pub(super) unknown_reviewing: Option<uuid::Uuid>,
+    client_kind: keelshell_mcp::McpClientKind,
     preparing_files: usize,
     // Each completion releases only its own reservation, including after a
     // failed regrant changes the UI revision without replacing authority.
@@ -136,10 +141,9 @@ pub(super) struct McpState {
 impl McpState {
     pub(super) fn window_close_idle(&self) -> bool {
         self.config_recovery_idle()
-            && self
-                .actions
-                .iter()
-                .all(|action| !matches!(action.state, ActionState::OutcomeUnknown))
+            && self.actions.iter().all(|action| {
+                !matches!(action.state, ActionState::OutcomeUnknown) || action.unknown_acknowledged
+            })
     }
     pub(super) fn config_recovery_idle(&self) -> bool {
         self.host.is_none()
@@ -167,6 +171,8 @@ impl McpState {
             targets: Vec::new(),
             actions: Vec::new(),
             reviewing: None,
+            unknown_reviewing: None,
+            client_kind: keelshell_mcp::McpClientKind::CodexCli,
             preparing_files: 0,
             preparing_file_ids: BTreeSet::new(),
             #[cfg(test)]
@@ -197,6 +203,7 @@ impl McpState {
         self.targets.clear();
         self.busy = false;
         self.reviewing = None;
+        self.unknown_reviewing = None;
         self.clear_file_preparations();
         #[cfg(test)]
         {
@@ -241,6 +248,21 @@ impl Drop for McpState {
 }
 
 impl Workspace {
+    #[cfg(test)]
+    pub(in crate::workspace) fn mcp_test_unknown_acknowledged(
+        &self,
+        id: uuid::Uuid,
+    ) -> Option<bool> {
+        self.mcp
+            .actions
+            .iter()
+            .find(|action| action.proposal.id() == id)
+            .map(|action| action.unknown_acknowledged)
+    }
+    #[cfg(test)]
+    pub(in crate::workspace) fn mcp_test_set_companion(&mut self, path: std::path::PathBuf) {
+        self.mcp.executable = Some(path);
+    }
     #[cfg(test)]
     pub(in crate::workspace) fn mcp_test_preparing_count(&self) -> usize {
         assert_eq!(self.mcp.preparing_files, self.mcp.preparing_file_ids.len());
@@ -449,6 +471,7 @@ impl Workspace {
                             label,
                             deadline: Instant::now() + Duration::from_secs(300),
                             state: ActionState::PendingReview,
+                            unknown_acknowledged: false,
                             output: String::new(),
                             session,
                         });
@@ -546,7 +569,10 @@ impl Workspace {
     }
 }
 
+mod client_view;
 mod grants;
+mod history;
+mod history_view;
 mod requests;
 mod review;
 mod view;

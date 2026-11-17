@@ -78,5 +78,25 @@
     ],
     "status": "AUTHOR_GATE_PASS / UI_SOURCE_APPROVED / NATIVE_DESKTOP_NOT_RUN",
     "evidence": "docs/testing/records/2026-11-15-legacy-editor-encodings.md"
+  },
+  "mcp_client_history_20261117": {
+    "base_sha": "f4562ad17efc918976738b241352e7a4f8af434e",
+    "scope": "existing native MCP settings and exact-proposal acknowledgement",
+    "sources": [
+      "crates/keelshell-app/src/workspace/mcp/client_view.rs:1",
+      "crates/keelshell-app/src/workspace/mcp/history.rs:1",
+      "crates/keelshell-app/src/workspace/mcp/history_view.rs:1",
+      "crates/keelshell-app/src/workspace/modal_scope.rs:27",
+      "docs/adr/0160-mcp-client-templates-and-unknown-history.md"
+    ],
+    "preserve": "registry, Palette, shared Kit controls, fixed grant actions, remote review and mutation quarantine boundaries",
+    "introduce": [
+      "explicit Codex and Claude configuration template clipboard actions",
+      "bulk history clearing limited to known terminal states",
+      "single-action unknown-outcome review with fixed confirm/cancel and retained original state"
+    ],
+    "web_render": "not_applicable to native Rust/GPUI; no browser artifact is used as native evidence",
+    "verification_record": "docs/testing/records/2026-11-17-mcp-client-history.md",
+    "native_status": "LOCKED / GUI_ACTIONS_0 / SCREENSHOTS_0"
   }
 }

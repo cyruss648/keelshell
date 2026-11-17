@@ -1,4 +1,8 @@
 //! Real GPUI consent/review actions over pinned loopback SSH handles.
+#[path = "mcp_action_history.rs"]
+mod action_history;
+#[path = "mcp_client_settings.rs"]
+mod client_settings;
 #[path = "mcp_file_changes.rs"]
 mod file_changes;
 #[path = "mcp_first_proposal.rs"]

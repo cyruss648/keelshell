@@ -1,0 +1,1573 @@
+{
+  "schema_version": 1,
+  "members": 260,
+  "logical_bytes": 3457053,
+  "bytes": 654067,
+  "sha256": "2070356dc083d8d098bd8475123633661325fe6782806465a11ac7a9b105d75b",
+  "excluded": [
+    "work/mcp-client-history-review-20261117/bin",
+    "work/mcp-external-workflow-20261117/template-parser-r2/template-probe"
+  ],
+  "files": [
+    {
+      "member": "parent/app-mcp-r1/command.log",
+      "source": "work/mcp-external-workflow-20261117/app-mcp-r1/command.log",
+      "bytes": 1048,
+      "sha256": "3ba5cd527b1ab4404bbdcfb481a12582abfb86ff415c266a1c35801b57b2320f"
+    },
+    {
+      "member": "parent/app-mcp-r1/result.json",
+      "source": "work/mcp-external-workflow-20261117/app-mcp-r1/result.json",
+      "bytes": 457,
+      "sha256": "116daaf349ebe916cb90c165a5b714381eafd66d44cdd9a6fc50e4bc17406a47"
+    },
+    {
+      "member": "parent/app-mcp-r2/command.log",
+      "source": "work/mcp-external-workflow-20261117/app-mcp-r2/command.log",
+      "bytes": 11567,
+      "sha256": "963de29021757b82a5fc3f8653b69b1ff2bd751e44ee246a663e83122007b62c"
+    },
+    {
+      "member": "parent/app-mcp-r2/result.json",
+      "source": "work/mcp-external-workflow-20261117/app-mcp-r2/result.json",
+      "bytes": 457,
+      "sha256": "7d98a071d9f828246272c13fdf94b33b5474c872bfdcd434ebb8ad3966dc0720"
+    },
+    {
+      "member": "parent/app-mcp-r3/command.log",
+      "source": "work/mcp-external-workflow-20261117/app-mcp-r3/command.log",
+      "bytes": 8702,
+      "sha256": "af40c90055bd4493b39705f49a59624645c737cf65ddd1ddc47463f9b5783c55"
+    },
+    {
+      "member": "parent/app-mcp-r3/result.json",
+      "source": "work/mcp-external-workflow-20261117/app-mcp-r3/result.json",
+      "bytes": 457,
+      "sha256": "5d0894f6b02e0067cc91071b46d8fcbecb05aab7fa657f9516eeed948e398cec"
+    },
+    {
+      "member": "parent/app-mcp-r4/command.log",
+      "source": "work/mcp-external-workflow-20261117/app-mcp-r4/command.log",
+      "bytes": 5394,
+      "sha256": "4944770641ade7f60de6199435f0ecc1534c71e1871058e1ece0c0a551d3e461"
+    },
+    {
+      "member": "parent/app-mcp-r4/result.json",
+      "source": "work/mcp-external-workflow-20261117/app-mcp-r4/result.json",
+      "bytes": 455,
+      "sha256": "d9f9db8d5fc4fb8cd3c08a0867629921f3d7dc78e3eaa98e278dfe75571dbe4e"
+    },
+    {
+      "member": "parent/archive_evidence.py",
+      "source": "work/mcp-external-workflow-20261117/archive_evidence.py",
+      "bytes": 3177,
+      "sha256": "53b9d35420469c4589e669970b6d085d68cff0be8c0c581230df12e7bdebbc10"
+    },
+    {
+      "member": "parent/binary-copy-cleanup.json",
+      "source": "work/mcp-external-workflow-20261117/binary-copy-cleanup.json",
+      "bytes": 950,
+      "sha256": "657c0782346ab3f2d6312113c93a992f520d0647aa7f8e43164c7d76635606ad"
+    },
+    {
+      "member": "parent/candidate-inputs-r1.json",
+      "source": "work/mcp-external-workflow-20261117/candidate-inputs-r1.json",
+      "bytes": 143208,
+      "sha256": "1b49e2d28cd6ee25cadf6dc8227e36c1a1075613fc5cc35ea8b406f3e0d92e37"
+    },
+    {
+      "member": "parent/dependencies-r1/command.log",
+      "source": "work/mcp-external-workflow-20261117/dependencies-r1/command.log",
+      "bytes": 84,
+      "sha256": "d3f080204d5d4aae5120c8fc040d921dabfb2b84186b37845e1d5d56d7b3b203"
+    },
+    {
+      "member": "parent/dependencies-r1/result.json",
+      "source": "work/mcp-external-workflow-20261117/dependencies-r1/result.json",
+      "bytes": 517,
+      "sha256": "1c1e67f70bb473bbc2459897fe576d290de9568a669531c3005ca0acbd0eca1a"
+    },
+    {
+      "member": "parent/dependencies-r1.json",
+      "source": "work/mcp-external-workflow-20261117/dependencies-r1.json",
+      "bytes": 60807,
+      "sha256": "66b216347d9f1bb25bf0aa86039444f79f0e20598e64b2b8690b87cb70432978"
+    },
+    {
+      "member": "parent/environment.json",
+      "source": "work/mcp-external-workflow-20261117/environment.json",
+      "bytes": 551,
+      "sha256": "ab8562ed862ea722026b5cfde3583541d9cc2d64ae41f6ab0e4d6fbcdac52616"
+    },
+    {
+      "member": "parent/final-gate-r1/command.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1/command.log",
+      "bytes": 674640,
+      "sha256": "cb5dc33b8e75e998f43d38cbda1ca80be8527e8b52dfed4097a885e250e931d3"
+    },
+    {
+      "member": "parent/final-gate-r1/result.json",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1/result.json",
+      "bytes": 370,
+      "sha256": "f9d4a9c150940dece34dfe23292bac30d6eafaceac5afa355e9cb523e2ee7b4c"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/000.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/000.log",
+      "bytes": 12148,
+      "sha256": "48426e0302fc83802000b8dea870dc8ead22752e4001b199b028762883646ce5"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/001.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/001.log",
+      "bytes": 1356,
+      "sha256": "7108fb713c11198aec22fc4dee03f66751b6ab3ed362cae5e02b366e193995a9"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/002.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/002.log",
+      "bytes": 320,
+      "sha256": "ad2c25f3b7d66649b73410da333754eed4dfe59df210141241b64b5bbfb6b242"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/003.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/003.log",
+      "bytes": 383,
+      "sha256": "efc5bfa7fd42cf3ab73e28a9c3ae7aac76b4254e1e143bfeeb963a69af6aecc7"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/004.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/004.log",
+      "bytes": 319,
+      "sha256": "13269e271232968b67560a6e12f7b5f9a001d45240d01a2aa3ad9cc9584011fd"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/005.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/005.log",
+      "bytes": 104,
+      "sha256": "cc6016343e18019c5ae3da20e751772364124960d70b3f97ab96dda8a16fb6d2"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/006.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/006.log",
+      "bytes": 1138,
+      "sha256": "317c99a7c49a1815b64416464a1f9ba65d39d102dcaf1c23ad3b7a8469f4b933"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/007.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/007.log",
+      "bytes": 1219,
+      "sha256": "99fce2a422755398790254287c77ace65cfe290b2b7e53ca8201e9500a3ce23e"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/008.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/008.log",
+      "bytes": 150203,
+      "sha256": "12fd2179e51df547f674a9bb17c54f27453a27d315bbff9181cb4dbcf2e3b830"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/009.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/009.log",
+      "bytes": 23272,
+      "sha256": "d86f9f0b169e392a8295cd203da145f0beb372bae6388f5c7e651a1bebed9581"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/010.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/010.log",
+      "bytes": 332,
+      "sha256": "d9c8b07fbc33ebcdcafc315931db742bb387db232d7634f7571b964c7d1d69d8"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/011.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/011.log",
+      "bytes": 1063,
+      "sha256": "a00ee9112d41dcf67e008726f0f8d226392660207b3e91dbaffd4c98fd6d64f4"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/012.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/012.log",
+      "bytes": 2577,
+      "sha256": "901e5469f4a2f549589ae17ecae17e6e96c06a57556724b641941d6bedd504d1"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/013.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/013.log",
+      "bytes": 2700,
+      "sha256": "ee36ae6b8d4a4e195c8666801e5d7db88ed11a05c4ce7065b5daff070f5e7770"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/014.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/014.log",
+      "bytes": 152,
+      "sha256": "22d1f477389c343ea3c8c9f4e749ce788656d48aec096e8db395cfebd5217b17"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/015.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/015.log",
+      "bytes": 420,
+      "sha256": "35bc9022c408f6641afa5d0bf99d773fec4d0dcef508888078d3b89a6cf1e8e4"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/016.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/016.log",
+      "bytes": 255,
+      "sha256": "463dd7c0a1e91e1f142d4e721c002f81793a1a3be8e7b698faa0275f2d47cfe6"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/017.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/017.log",
+      "bytes": 332,
+      "sha256": "f1fb3def2f05c1e69f3c31054a355ae27c93e30fbc053cb1841fffec24294f3a"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/018.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/018.log",
+      "bytes": 1687,
+      "sha256": "2609129b4f82c1045b56c75b3110c207074c80aea50f868dd35edfa4049d21c4"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/019.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/019.log",
+      "bytes": 1627,
+      "sha256": "01e9dc5362f1d70e094cea3648a4ff6516809eceefb35c709a4e997695de737a"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/020.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/020.log",
+      "bytes": 697,
+      "sha256": "59603ee9fb1bd1fd4608cf468aa0389761183f23d764c34fef34476ad6afbcec"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/021.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/021.log",
+      "bytes": 152,
+      "sha256": "1ba5b85c00d02ab6d950da5acdaf5536167171a15f6f2ef64638752a963f7cc3"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/022.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/022.log",
+      "bytes": 490,
+      "sha256": "724f9751d1bca8ab2d28fcc57c5c3613895786e3083945091545fb36458f3c94"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/023.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/023.log",
+      "bytes": 169,
+      "sha256": "11f0b45fe13a45c0f2fb08e611f2884f10db66f22e77578669872decac5b3362"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/024.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/024.log",
+      "bytes": 278,
+      "sha256": "202c9d16bb49825a78c4224bdb3395f4306078004f2410e4152a328cc2008a86"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/025.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/025.log",
+      "bytes": 274,
+      "sha256": "9802211e1eee2e5756015ab0ba13855623718b4e0ea7265c5ce4057e10efd911"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/026.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/026.log",
+      "bytes": 517,
+      "sha256": "e753583357ecbb239d096e01b24fc0bb9b2f03a9750dfdc70ccd979e0826765b"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/027.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/027.log",
+      "bytes": 1399,
+      "sha256": "1f216e005e0ee5df1b4ac8c3c8ec928cde8012bfcc2e6e9b3ad6b43bd536ce63"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/028.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/028.log",
+      "bytes": 420,
+      "sha256": "bf18db952a839a21864f01b99a8288afeb31f56b640a2285a8b6abcc8593de59"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/029.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/029.log",
+      "bytes": 451,
+      "sha256": "22806826b6161c512a1fc5e3c91ed5c46c4b291008171bf34e6f38331ab4fe56"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/030.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/030.log",
+      "bytes": 1476,
+      "sha256": "dc03df35c86af078971e2a9d3a793d4f31c5aa4129b73fa73e79ced551caae54"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/031.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/031.log",
+      "bytes": 436,
+      "sha256": "45f0547af19ff7c4ae3d29df71e40a8abb9480b9745f0d6072da4ea520fa4883"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/032.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/032.log",
+      "bytes": 792,
+      "sha256": "0e87702f9591030f0b59b01c654bd4a84ba7ea5a385a9f0136dad94ed50d4e2c"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/033.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/033.log",
+      "bytes": 889,
+      "sha256": "cd9ddf735515c336b814b1bda79b13a03ce6aa9190dfa20f7da053e9be929b74"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/034.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/034.log",
+      "bytes": 852,
+      "sha256": "ca2cefc86a9d1d11dcf098aa9697a4b23375134cba3bd7cbeac5ae4106126071"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/035.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/035.log",
+      "bytes": 1496,
+      "sha256": "abf2380362b813be64e641d7b0f895cdb33ad0e48e9d6df642afa6efef915b86"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/036.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/036.log",
+      "bytes": 1393,
+      "sha256": "5ada23a1c3152e70a5595900aed7323a9af0f58328bfb86740aa04bbe3f51f2f"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/037.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/037.log",
+      "bytes": 110,
+      "sha256": "2313b8d14be09a8a55e74287f321fa35dbf4664dc0b13ba5ec42ec41176d0560"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/038.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/038.log",
+      "bytes": 2065,
+      "sha256": "da28ca6b6a8d3c9d90a184142787a2b4a2ff919da42302ef28aac7e15045eac6"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/039.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/039.log",
+      "bytes": 533,
+      "sha256": "ee2f93179f877aead452c5e203d45ff1a13465b3d53fecd42781f7167f565e5d"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/040.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/040.log",
+      "bytes": 1020,
+      "sha256": "776cf65a661dd9da33508358dcbd1e0f3cdf99628c91c9e1cdc7e29c453fc2b9"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/041.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/041.log",
+      "bytes": 339,
+      "sha256": "0ff2280f293fd30829e4ef2602753ee9f0c8350fee383ede57431aa1702d063a"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/042.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/042.log",
+      "bytes": 1434,
+      "sha256": "e01da2ccff487395c551d39d88598eee016f1810fd38f9130bff5aeccdc2013a"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/043.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/043.log",
+      "bytes": 932,
+      "sha256": "2b5c5be6654d2b1da12ebdb5da3cb831cbbcf6741e2eb68dfa9802055706b9c8"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/044.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/044.log",
+      "bytes": 1134,
+      "sha256": "2f79804bb456cb7463ba9a8d5951fb913de40083cc6aa8903c1cc7106e70ce27"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/045.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/045.log",
+      "bytes": 412,
+      "sha256": "71e9f70db98a747bea28fd8f6d6984cc8f8a50d3a4aceff07355aa5c2278b33d"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/046.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/046.log",
+      "bytes": 242,
+      "sha256": "ef0a4007296919f116f2d7b79867322f297e1afcaee1b0e407b47209eccb0e1b"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/047.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/047.log",
+      "bytes": 748,
+      "sha256": "20e67905d1353527c3a48934c9d3dba74f5acfa5bbe28dc3c3249c3eddac24c9"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/048.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/048.log",
+      "bytes": 727,
+      "sha256": "778c2bdd4d60b0d55af0f2a10b728dfb2a0499cdd71945edbf20f8779b01181b"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/049.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/049.log",
+      "bytes": 571,
+      "sha256": "65ec6a7851471ed44f581d49071294574855d42d69275185f45838ae435eb4b7"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/050.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/050.log",
+      "bytes": 2306,
+      "sha256": "58999d92944dbc2a6f28fcdbfb6e689a66c34f9ba770236f519c12963f1be71b"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/051.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/051.log",
+      "bytes": 524,
+      "sha256": "d7d0972bda3a76ce8ce0253d79a70991196ce32e7d3376d95b818b64aeb0aaea"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/052.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/052.log",
+      "bytes": 98,
+      "sha256": "99800939897d79444ad0e94cb0b566ab24e6bd6ddb8d622ca184dbbf29637db8"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/053.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/053.log",
+      "bytes": 340,
+      "sha256": "85dbad018670905ba5aaca0744b52034cebad96e5254c1843bb84b7738da0658"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/054.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/054.log",
+      "bytes": 90,
+      "sha256": "2fb858ed73208a192ee6e0f19e8162ba568c7dabead76773e25822c3989b8e01"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/055.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/055.log",
+      "bytes": 871,
+      "sha256": "15278c9505f632b03a28a797f342675e1b3a9e2fca9d97345562d7665c57d292"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/056.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/056.log",
+      "bytes": 7523,
+      "sha256": "9aef54af1e1bb3c973c0be4e491c1c49c6a6cb42eb1e7a2fd1f709926221278a"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/057.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/057.log",
+      "bytes": 2006,
+      "sha256": "65b813b98ae553c01f256408b5f26f8018feb44c6a3ef9ea567a457abc08ddeb"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/058.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/058.log",
+      "bytes": 22,
+      "sha256": "414c144fa67f1df75f7b14a69af5641637772e81c4c3fa0a171e3228adbb922e"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/059.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/059.log",
+      "bytes": 1246,
+      "sha256": "7d88cc2ca2947c47429fee80ef9a28f2bd35a1f64b527a34c8e7dbdfa4a2f0ea"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/060.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/060.log",
+      "bytes": 922,
+      "sha256": "96a54d991e4dceed6c8f935cab0647d81c10f403b4907273bb82551575945f6a"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/061.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/061.log",
+      "bytes": 1101,
+      "sha256": "c600f5de0b7ccf650def67c24ecafbfed12c79cedff60189a0d48a1e52d9947b"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/062.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/062.log",
+      "bytes": 229,
+      "sha256": "88d3e5d82db7b3c65d327b91356046a51621044a0799d060d040c1bf7c427b41"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/063.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/063.log",
+      "bytes": 852,
+      "sha256": "7959893dd537756018e53980e18ffbf4feafbcb048305cef8d396d1ee02cce76"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/064.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/064.log",
+      "bytes": 378,
+      "sha256": "ae052a4644f0da2e0e0918fa940555f082fbb7c27f702978186d85da6b7803af"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/065.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/065.log",
+      "bytes": 1561,
+      "sha256": "e0dc680748eee8f791098fea3dd16119725d7a0b9161ae25e10d9b2cd3949283"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory/066.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory/066.log",
+      "bytes": 40723,
+      "sha256": "43cff3e8dab6b52c2880cdc4fc7ffbdcb16e4a1fca96dc74acc68b64602bd0db"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/000.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/000.log",
+      "bytes": 12148,
+      "sha256": "48426e0302fc83802000b8dea870dc8ead22752e4001b199b028762883646ce5"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/001.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/001.log",
+      "bytes": 1356,
+      "sha256": "7108fb713c11198aec22fc4dee03f66751b6ab3ed362cae5e02b366e193995a9"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/002.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/002.log",
+      "bytes": 320,
+      "sha256": "ad2c25f3b7d66649b73410da333754eed4dfe59df210141241b64b5bbfb6b242"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/003.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/003.log",
+      "bytes": 383,
+      "sha256": "efc5bfa7fd42cf3ab73e28a9c3ae7aac76b4254e1e143bfeeb963a69af6aecc7"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/004.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/004.log",
+      "bytes": 319,
+      "sha256": "13269e271232968b67560a6e12f7b5f9a001d45240d01a2aa3ad9cc9584011fd"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/005.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/005.log",
+      "bytes": 104,
+      "sha256": "cc6016343e18019c5ae3da20e751772364124960d70b3f97ab96dda8a16fb6d2"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/006.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/006.log",
+      "bytes": 1138,
+      "sha256": "317c99a7c49a1815b64416464a1f9ba65d39d102dcaf1c23ad3b7a8469f4b933"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/007.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/007.log",
+      "bytes": 1219,
+      "sha256": "99fce2a422755398790254287c77ace65cfe290b2b7e53ca8201e9500a3ce23e"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/008.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/008.log",
+      "bytes": 150203,
+      "sha256": "12fd2179e51df547f674a9bb17c54f27453a27d315bbff9181cb4dbcf2e3b830"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/009.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/009.log",
+      "bytes": 23272,
+      "sha256": "d86f9f0b169e392a8295cd203da145f0beb372bae6388f5c7e651a1bebed9581"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/010.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/010.log",
+      "bytes": 332,
+      "sha256": "d9c8b07fbc33ebcdcafc315931db742bb387db232d7634f7571b964c7d1d69d8"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/011.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/011.log",
+      "bytes": 1063,
+      "sha256": "a00ee9112d41dcf67e008726f0f8d226392660207b3e91dbaffd4c98fd6d64f4"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/012.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/012.log",
+      "bytes": 2577,
+      "sha256": "901e5469f4a2f549589ae17ecae17e6e96c06a57556724b641941d6bedd504d1"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/013.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/013.log",
+      "bytes": 2700,
+      "sha256": "ee36ae6b8d4a4e195c8666801e5d7db88ed11a05c4ce7065b5daff070f5e7770"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/014.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/014.log",
+      "bytes": 152,
+      "sha256": "22d1f477389c343ea3c8c9f4e749ce788656d48aec096e8db395cfebd5217b17"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/015.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/015.log",
+      "bytes": 420,
+      "sha256": "35bc9022c408f6641afa5d0bf99d773fec4d0dcef508888078d3b89a6cf1e8e4"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/016.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/016.log",
+      "bytes": 255,
+      "sha256": "463dd7c0a1e91e1f142d4e721c002f81793a1a3be8e7b698faa0275f2d47cfe6"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/017.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/017.log",
+      "bytes": 332,
+      "sha256": "f1fb3def2f05c1e69f3c31054a355ae27c93e30fbc053cb1841fffec24294f3a"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/018.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/018.log",
+      "bytes": 1687,
+      "sha256": "2609129b4f82c1045b56c75b3110c207074c80aea50f868dd35edfa4049d21c4"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/019.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/019.log",
+      "bytes": 1627,
+      "sha256": "01e9dc5362f1d70e094cea3648a4ff6516809eceefb35c709a4e997695de737a"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/020.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/020.log",
+      "bytes": 697,
+      "sha256": "59603ee9fb1bd1fd4608cf468aa0389761183f23d764c34fef34476ad6afbcec"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/021.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/021.log",
+      "bytes": 152,
+      "sha256": "1ba5b85c00d02ab6d950da5acdaf5536167171a15f6f2ef64638752a963f7cc3"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/022.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/022.log",
+      "bytes": 490,
+      "sha256": "724f9751d1bca8ab2d28fcc57c5c3613895786e3083945091545fb36458f3c94"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/023.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/023.log",
+      "bytes": 169,
+      "sha256": "11f0b45fe13a45c0f2fb08e611f2884f10db66f22e77578669872decac5b3362"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/024.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/024.log",
+      "bytes": 278,
+      "sha256": "202c9d16bb49825a78c4224bdb3395f4306078004f2410e4152a328cc2008a86"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/025.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/025.log",
+      "bytes": 274,
+      "sha256": "9802211e1eee2e5756015ab0ba13855623718b4e0ea7265c5ce4057e10efd911"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/026.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/026.log",
+      "bytes": 517,
+      "sha256": "e753583357ecbb239d096e01b24fc0bb9b2f03a9750dfdc70ccd979e0826765b"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/027.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/027.log",
+      "bytes": 1399,
+      "sha256": "1f216e005e0ee5df1b4ac8c3c8ec928cde8012bfcc2e6e9b3ad6b43bd536ce63"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/028.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/028.log",
+      "bytes": 420,
+      "sha256": "bf18db952a839a21864f01b99a8288afeb31f56b640a2285a8b6abcc8593de59"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/029.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/029.log",
+      "bytes": 451,
+      "sha256": "22806826b6161c512a1fc5e3c91ed5c46c4b291008171bf34e6f38331ab4fe56"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/030.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/030.log",
+      "bytes": 1476,
+      "sha256": "dc03df35c86af078971e2a9d3a793d4f31c5aa4129b73fa73e79ced551caae54"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/031.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/031.log",
+      "bytes": 436,
+      "sha256": "45f0547af19ff7c4ae3d29df71e40a8abb9480b9745f0d6072da4ea520fa4883"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/032.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/032.log",
+      "bytes": 792,
+      "sha256": "0e87702f9591030f0b59b01c654bd4a84ba7ea5a385a9f0136dad94ed50d4e2c"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/033.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/033.log",
+      "bytes": 889,
+      "sha256": "cd9ddf735515c336b814b1bda79b13a03ce6aa9190dfa20f7da053e9be929b74"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/034.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/034.log",
+      "bytes": 852,
+      "sha256": "ca2cefc86a9d1d11dcf098aa9697a4b23375134cba3bd7cbeac5ae4106126071"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/035.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/035.log",
+      "bytes": 1496,
+      "sha256": "abf2380362b813be64e641d7b0f895cdb33ad0e48e9d6df642afa6efef915b86"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/036.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/036.log",
+      "bytes": 1393,
+      "sha256": "5ada23a1c3152e70a5595900aed7323a9af0f58328bfb86740aa04bbe3f51f2f"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/037.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/037.log",
+      "bytes": 110,
+      "sha256": "2313b8d14be09a8a55e74287f321fa35dbf4664dc0b13ba5ec42ec41176d0560"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/038.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/038.log",
+      "bytes": 2065,
+      "sha256": "da28ca6b6a8d3c9d90a184142787a2b4a2ff919da42302ef28aac7e15045eac6"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/039.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/039.log",
+      "bytes": 533,
+      "sha256": "ee2f93179f877aead452c5e203d45ff1a13465b3d53fecd42781f7167f565e5d"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/040.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/040.log",
+      "bytes": 1020,
+      "sha256": "776cf65a661dd9da33508358dcbd1e0f3cdf99628c91c9e1cdc7e29c453fc2b9"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/041.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/041.log",
+      "bytes": 339,
+      "sha256": "0ff2280f293fd30829e4ef2602753ee9f0c8350fee383ede57431aa1702d063a"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/042.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/042.log",
+      "bytes": 1434,
+      "sha256": "e01da2ccff487395c551d39d88598eee016f1810fd38f9130bff5aeccdc2013a"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/043.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/043.log",
+      "bytes": 932,
+      "sha256": "2b5c5be6654d2b1da12ebdb5da3cb831cbbcf6741e2eb68dfa9802055706b9c8"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/044.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/044.log",
+      "bytes": 1134,
+      "sha256": "2f79804bb456cb7463ba9a8d5951fb913de40083cc6aa8903c1cc7106e70ce27"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/045.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/045.log",
+      "bytes": 412,
+      "sha256": "71e9f70db98a747bea28fd8f6d6984cc8f8a50d3a4aceff07355aa5c2278b33d"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/046.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/046.log",
+      "bytes": 242,
+      "sha256": "ef0a4007296919f116f2d7b79867322f297e1afcaee1b0e407b47209eccb0e1b"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/047.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/047.log",
+      "bytes": 748,
+      "sha256": "20e67905d1353527c3a48934c9d3dba74f5acfa5bbe28dc3c3249c3eddac24c9"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/048.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/048.log",
+      "bytes": 727,
+      "sha256": "778c2bdd4d60b0d55af0f2a10b728dfb2a0499cdd71945edbf20f8779b01181b"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/049.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/049.log",
+      "bytes": 571,
+      "sha256": "65ec6a7851471ed44f581d49071294574855d42d69275185f45838ae435eb4b7"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/050.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/050.log",
+      "bytes": 2306,
+      "sha256": "58999d92944dbc2a6f28fcdbfb6e689a66c34f9ba770236f519c12963f1be71b"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/051.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/051.log",
+      "bytes": 524,
+      "sha256": "d7d0972bda3a76ce8ce0253d79a70991196ce32e7d3376d95b818b64aeb0aaea"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/052.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/052.log",
+      "bytes": 98,
+      "sha256": "99800939897d79444ad0e94cb0b566ab24e6bd6ddb8d622ca184dbbf29637db8"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/053.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/053.log",
+      "bytes": 340,
+      "sha256": "85dbad018670905ba5aaca0744b52034cebad96e5254c1843bb84b7738da0658"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/054.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/054.log",
+      "bytes": 90,
+      "sha256": "2fb858ed73208a192ee6e0f19e8162ba568c7dabead76773e25822c3989b8e01"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/055.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/055.log",
+      "bytes": 871,
+      "sha256": "15278c9505f632b03a28a797f342675e1b3a9e2fca9d97345562d7665c57d292"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/056.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/056.log",
+      "bytes": 7523,
+      "sha256": "9aef54af1e1bb3c973c0be4e491c1c49c6a6cb42eb1e7a2fd1f709926221278a"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/057.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/057.log",
+      "bytes": 2006,
+      "sha256": "65b813b98ae553c01f256408b5f26f8018feb44c6a3ef9ea567a457abc08ddeb"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/058.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/058.log",
+      "bytes": 22,
+      "sha256": "414c144fa67f1df75f7b14a69af5641637772e81c4c3fa0a171e3228adbb922e"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/059.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/059.log",
+      "bytes": 1246,
+      "sha256": "7d88cc2ca2947c47429fee80ef9a28f2bd35a1f64b527a34c8e7dbdfa4a2f0ea"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/060.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/060.log",
+      "bytes": 922,
+      "sha256": "96a54d991e4dceed6c8f935cab0647d81c10f403b4907273bb82551575945f6a"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/061.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/061.log",
+      "bytes": 1101,
+      "sha256": "c600f5de0b7ccf650def67c24ecafbfed12c79cedff60189a0d48a1e52d9947b"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/062.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/062.log",
+      "bytes": 229,
+      "sha256": "88d3e5d82db7b3c65d327b91356046a51621044a0799d060d040c1bf7c427b41"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/063.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/063.log",
+      "bytes": 852,
+      "sha256": "7959893dd537756018e53980e18ffbf4feafbcb048305cef8d396d1ee02cce76"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/064.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/064.log",
+      "bytes": 378,
+      "sha256": "ae052a4644f0da2e0e0918fa940555f082fbb7c27f702978186d85da6b7803af"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/065.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/065.log",
+      "bytes": 1561,
+      "sha256": "e0dc680748eee8f791098fea3dd16119725d7a0b9161ae25e10d9b2cd3949283"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/066.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/066.log",
+      "bytes": 40723,
+      "sha256": "43cff3e8dab6b52c2880cdc4fc7ffbdcb16e4a1fca96dc74acc68b64602bd0db"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/067.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/067.log",
+      "bytes": 1173,
+      "sha256": "4590438387ea4c2206ce0976b483ae3778c19449db91e8611161689d21672364"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/068.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/068.log",
+      "bytes": 1709,
+      "sha256": "e9c7006ab076c796ad008397c2174a14b97b89f1acd42b900589618085ec2922"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/069.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/069.log",
+      "bytes": 831,
+      "sha256": "3a8187d3657ffeeecbf26a6a9de725dc1f1e55500261642e6922156bad437e31"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/070.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/070.log",
+      "bytes": 1036,
+      "sha256": "28187648b77d49f4b02174c98d4403f7a5d8b800e125f92a0a0529a13254e6d3"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/071.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/071.log",
+      "bytes": 1060,
+      "sha256": "d029f0afae8ab3c3ed7265df0cdcacba4c79f8a8da029229b6e7dca409a01b70"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/072.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/072.log",
+      "bytes": 225,
+      "sha256": "50f9edbab619f0e2fd55d314881765fa50f917ea4c26edbc7de88839d03a8cfc"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/073.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/073.log",
+      "bytes": 322,
+      "sha256": "7a68ea0475d5daf3f2a2922f0adad97ebc72304f57dd2f7648ca1d5accdf2534"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/074.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/074.log",
+      "bytes": 429,
+      "sha256": "7b0c52877952ef3f9a3c5a59f29a91d2dca07265a5c7e0b6cefc2cf2ce77e8d1"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/075.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/075.log",
+      "bytes": 119,
+      "sha256": "39bcf82e692a699f1b48b78f66dd275b3648a3c4aef820542ae2c075882088ed"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/076.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/076.log",
+      "bytes": 152,
+      "sha256": "36e5470b574beee97fa982be86476a78e4c62f6904aafa479767b024d72f46ce"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/077.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/077.log",
+      "bytes": 1482,
+      "sha256": "048425936c953e9b125467c2212494fd2296c5a46d5bc6e9fa7a29ff54c2ef51"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/078.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/078.log",
+      "bytes": 954,
+      "sha256": "357e324aff406cb971fbf4ddddecc600101c7c3f0871350cba61896f8c1a07aa"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/079.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/079.log",
+      "bytes": 369,
+      "sha256": "2c367cc4fa5fef593c7e11a7901422a0a6d0d5d1d1f8a3a1861436d989f36280"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/080.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/080.log",
+      "bytes": 2829,
+      "sha256": "4e283e8cfd84788f9c76b5ffe3c3ec6dbd84a70aeb1fe0d62787f95f4bede784"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/081.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/081.log",
+      "bytes": 14820,
+      "sha256": "001a8dbd8fd3d426bb258f2a510e2bb500e5ed48ad62b4491987b5622aa88347"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/082.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/082.log",
+      "bytes": 206,
+      "sha256": "cb27a7a59b0e3ddbd6de6e03e2f18aa894a0839e2f2e5542b7a217e4492fb028"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/083.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/083.log",
+      "bytes": 836,
+      "sha256": "c9ecbafccff2c49de98aef3a10147f1df90e0978fd3b5a5c0014427dfd825db6"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/084.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/084.log",
+      "bytes": 828,
+      "sha256": "a14850dabb05b1acef17a755d27ea500eb6a59e662da76639b7c0709d0e43cd1"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/085.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/085.log",
+      "bytes": 885,
+      "sha256": "e8582069b55eba474bccf132643d77029401d69e7f9c86280e0260038e697b1e"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/086.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/086.log",
+      "bytes": 765,
+      "sha256": "7e5358ddf3f43be5ae857c73ac8f1ff2eb98312f8f356b590c24b460577a1abf"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/087.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/087.log",
+      "bytes": 822,
+      "sha256": "f314d0567e37f83165466812600cfc9d00e1b2fbaf457bf2972a5f54892ba568"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/088.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/088.log",
+      "bytes": 1191,
+      "sha256": "e8a15749337ce37c6cc7d8ac62e7f4c5860612c3269bae2659fe23d0c6a6ba3a"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/089.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/089.log",
+      "bytes": 4706,
+      "sha256": "3aebed19073edf10e24c15c692332f381fd703679d57911a006add766f76f090"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/090.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/090.log",
+      "bytes": 827,
+      "sha256": "6016c4cd1ca9a2fa88f37a04f72877a2005912488e1d65fcbfe81f52446f471a"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/091.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/091.log",
+      "bytes": 81,
+      "sha256": "9582e552a609b0c07dc16f46032c0a2fd5f23ce343dcd21bed0f30fb3736346f"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/092.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/092.log",
+      "bytes": 188,
+      "sha256": "a36c4c7128bf8677b66040ff90a474bf7dba36000fe2a14dd0155c28ab570f6c"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/093.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/093.log",
+      "bytes": 976,
+      "sha256": "8ff4b8f657e9dc69f8652abe8a1a096391769a4d02d26087641915932b4184fd"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/094.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/094.log",
+      "bytes": 2137,
+      "sha256": "1f1e79d50230d457fc2ed0f7f6b3ec80c7e12db784f76a383af87d9a7a1a16ee"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/095.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/095.log",
+      "bytes": 1162,
+      "sha256": "c1e76e3a92ddf2d960a53ff5036556af58e786876254d0a9754d5aeece1002f3"
+    },
+    {
+      "member": "parent/final-gate-r1-inventory-r2/summary.json",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1-inventory-r2/summary.json",
+      "bytes": 761019,
+      "sha256": "280533eb28c4d7253f0ef78e12109a89e68647f4faa34f0482e9ff58e1e2acaa"
+    },
+    {
+      "member": "parent/final-gate-r1.log",
+      "source": "work/mcp-external-workflow-20261117/final-gate-r1.log",
+      "bytes": 674640,
+      "sha256": "cb5dc33b8e75e998f43d38cbda1ca80be8527e8b52dfed4097a885e250e931d3"
+    },
+    {
+      "member": "parent/format-r1/command.log",
+      "source": "work/mcp-external-workflow-20261117/format-r1/command.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "parent/format-r1/result.json",
+      "source": "work/mcp-external-workflow-20261117/format-r1/result.json",
+      "bytes": 356,
+      "sha256": "d10070dc6c19b5cc8c06173ed62db4d7cdc693c4fa6451ed89100ba29340e514"
+    },
+    {
+      "member": "parent/format-r2/command.log",
+      "source": "work/mcp-external-workflow-20261117/format-r2/command.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "parent/format-r2/result.json",
+      "source": "work/mcp-external-workflow-20261117/format-r2/result.json",
+      "bytes": 356,
+      "sha256": "b8981423776db2fc8e5f02c29118e8e3c4054a82d0ce431576223e1aba56b64f"
+    },
+    {
+      "member": "parent/format-r3/command.log",
+      "source": "work/mcp-external-workflow-20261117/format-r3/command.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "parent/format-r3/result.json",
+      "source": "work/mcp-external-workflow-20261117/format-r3/result.json",
+      "bytes": 356,
+      "sha256": "c37f65a2ef8184c80a790f3cdf3202219b32afa323f4be66c11797c6393080b9"
+    },
+    {
+      "member": "parent/freeze-after-final-gate-r1/command.log",
+      "source": "work/mcp-external-workflow-20261117/freeze-after-final-gate-r1/command.log",
+      "bytes": 256,
+      "sha256": "e59aa0810097e950a4229e23d989e9ff7704e1f5c7be5d4a0c381d65453d9e46"
+    },
+    {
+      "member": "parent/freeze-after-final-gate-r1/result.json",
+      "source": "work/mcp-external-workflow-20261117/freeze-after-final-gate-r1/result.json",
+      "bytes": 444,
+      "sha256": "f8475dac5f622b10a9d5ffaae1f61f83392ca13740ff877654aa45b3acbd6549"
+    },
+    {
+      "member": "parent/freeze-before-final-gate-r1/command.log",
+      "source": "work/mcp-external-workflow-20261117/freeze-before-final-gate-r1/command.log",
+      "bytes": 256,
+      "sha256": "e59aa0810097e950a4229e23d989e9ff7704e1f5c7be5d4a0c381d65453d9e46"
+    },
+    {
+      "member": "parent/freeze-before-final-gate-r1/result.json",
+      "source": "work/mcp-external-workflow-20261117/freeze-before-final-gate-r1/result.json",
+      "bytes": 445,
+      "sha256": "dc5c4955d5ccfb038dafaa2edd160d463c190722435e85a159c0a26b8a9312ad"
+    },
+    {
+      "member": "parent/gate-counts.json",
+      "source": "work/mcp-external-workflow-20261117/gate-counts.json",
+      "bytes": 1300,
+      "sha256": "94e686b34ec3912c62777a54ade2d65e0d3c1c5e7dc43b8679a692d2ed38a4b5"
+    },
+    {
+      "member": "parent/independent-template-parser-r1/command.log",
+      "source": "work/mcp-external-workflow-20261117/independent-template-parser-r1/command.log",
+      "bytes": 277,
+      "sha256": "67aa47d592284d56257132d800b88ae45403c69af7cb201a14966e5bce4ddef7"
+    },
+    {
+      "member": "parent/independent-template-parser-r1/result.json",
+      "source": "work/mcp-external-workflow-20261117/independent-template-parser-r1/result.json",
+      "bytes": 407,
+      "sha256": "d1f3d04ad330e871a27ed7c8e1b4f0cfc69f266b8dfadc0aebb1616bd49bcf2b"
+    },
+    {
+      "member": "parent/independent-template-parser-r2/command.log",
+      "source": "work/mcp-external-workflow-20261117/independent-template-parser-r2/command.log",
+      "bytes": 711,
+      "sha256": "c9041ba4e0067b219da6495e926f722379fb09e74ea95d675b0ece6b24587177"
+    },
+    {
+      "member": "parent/independent-template-parser-r2/result.json",
+      "source": "work/mcp-external-workflow-20261117/independent-template-parser-r2/result.json",
+      "bytes": 407,
+      "sha256": "41ed55d063cf096eb96d54e539153b2cfc5c70b7507b198fe4eddac81a8f5787"
+    },
+    {
+      "member": "parent/inventory-r1-failure.txt",
+      "source": "work/mcp-external-workflow-20261117/inventory-r1-failure.txt",
+      "bytes": 1803,
+      "sha256": "7e65c7fe6cbb4ebd0cd75716496bca2cc5b118ba2fbab503e6f5467af455cb9f"
+    },
+    {
+      "member": "parent/mcp-client-library-r1/command.log",
+      "source": "work/mcp-external-workflow-20261117/mcp-client-library-r1/command.log",
+      "bytes": 2725,
+      "sha256": "bce24d6b80964fc0046389e7cae7d69812bea28a9b6364edeba258b2089adc3b"
+    },
+    {
+      "member": "parent/mcp-client-library-r1/result.json",
+      "source": "work/mcp-external-workflow-20261117/mcp-client-library-r1/result.json",
+      "bytes": 461,
+      "sha256": "2bdef3c13cf18a68903ac0da25bbc17aa4fa8e2069287ecd85e81afbcf77508b"
+    },
+    {
+      "member": "parent/native-availability.json",
+      "source": "work/mcp-external-workflow-20261117/native-availability.json",
+      "bytes": 258,
+      "sha256": "ffad44e27053faba0456a82951d358fed882c2e51584be7807fa5f3217989f43"
+    },
+    {
+      "member": "parent/previous-ci-followup-r1/command.log",
+      "source": "work/mcp-external-workflow-20261117/previous-ci-followup-r1/command.log",
+      "bytes": 2486,
+      "sha256": "25fc5bd0da0e67ad90f3fdbdf5f898ef1ba9c28a93700ae3716dbab3cd90814e"
+    },
+    {
+      "member": "parent/previous-ci-followup-r1/result.json",
+      "source": "work/mcp-external-workflow-20261117/previous-ci-followup-r1/result.json",
+      "bytes": 415,
+      "sha256": "8e98557f151d3ef15b1246a9c102077c435a1b12fe8478cf9b52208670ba0fcd"
+    },
+    {
+      "member": "parent/reused-tools.json",
+      "source": "work/mcp-external-workflow-20261117/reused-tools.json",
+      "bytes": 518,
+      "sha256": "aca732f3071491690e990ba4993028c7d8b89ae893b06d1aaeffe8e1db2e6cf4"
+    },
+    {
+      "member": "parent/review-binary-copies.json",
+      "source": "work/mcp-external-workflow-20261117/review-binary-copies.json",
+      "bytes": 764,
+      "sha256": "13b73f274ff645b4c288d8b1a569051408b8fbbe21276780e13a59c1ba301e3e"
+    },
+    {
+      "member": "parent/run.py",
+      "source": "work/mcp-external-workflow-20261117/run.py",
+      "bytes": 1720,
+      "sha256": "a04a95d4cb34450a37d19790a597f11c9e1417e8cc9d9fbd8efe7410353962fd"
+    },
+    {
+      "member": "parent/snapshot.py",
+      "source": "work/mcp-external-workflow-20261117/snapshot.py",
+      "bytes": 1443,
+      "sha256": "4f859f02ec70721da942c5a02e0fe16f805fad5a15728158b45b2fbb557c8666"
+    },
+    {
+      "member": "parent/template-library-build-r1/command.log",
+      "source": "work/mcp-external-workflow-20261117/template-library-build-r1/command.log",
+      "bytes": 89169,
+      "sha256": "f445690dc040456619740bc979778820c9ef6d5a573fa3f6be70d2fa4c9fb000"
+    },
+    {
+      "member": "parent/template-library-build-r1/result.json",
+      "source": "work/mcp-external-workflow-20261117/template-library-build-r1/result.json",
+      "bytes": 433,
+      "sha256": "e1136554204b8a4b5f83e1b9f9877ce6d85b74066d69c7c54c5e1e4dff8a75d9"
+    },
+    {
+      "member": "parent/template-parser-r2/compile.log",
+      "source": "work/mcp-external-workflow-20261117/template-parser-r2/compile.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "parent/template-parser-r2/result.json",
+      "source": "work/mcp-external-workflow-20261117/template-parser-r2/result.json",
+      "bytes": 23941,
+      "sha256": "ea913fef9a0adab7c0dc9dabbd193fe9984c7995b11aca06cce78dc7078f2f06"
+    },
+    {
+      "member": "parent/template-parser-r2/stderr.log",
+      "source": "work/mcp-external-workflow-20261117/template-parser-r2/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "parent/template-parser-r2/template-probe.tsv",
+      "source": "work/mcp-external-workflow-20261117/template-parser-r2/template-probe.tsv",
+      "bytes": 36346,
+      "sha256": "c6018b2497cead8b3b79f422fe5063faebffd2810715418b278d8286e804edc2"
+    },
+    {
+      "member": "parent/template-probe-compile.log",
+      "source": "work/mcp-external-workflow-20261117/template-probe-compile.log",
+      "bytes": 406,
+      "sha256": "bec32eee34798d9d161fd24ae8e95c2a10b9f9d7bfa1cd16cd6e23e676004ff0"
+    },
+    {
+      "member": "parent/template_probe.rs",
+      "source": "work/mcp-external-workflow-20261117/template_probe.rs",
+      "bytes": 1505,
+      "sha256": "4a786300d495148ad8be769e11cdc62615db5f0fff62cb81a49142a2177aa81a"
+    },
+    {
+      "member": "parent/verify_gate_inventory-r1.py",
+      "source": "work/mcp-external-workflow-20261117/verify_gate_inventory-r1.py",
+      "bytes": 4011,
+      "sha256": "a6452dab58cfb64ea955b224bb3e33f3dfd74bcfe3630da993216f908508d7cc"
+    },
+    {
+      "member": "parent/verify_gate_inventory.py",
+      "source": "work/mcp-external-workflow-20261117/verify_gate_inventory.py",
+      "bytes": 4848,
+      "sha256": "d2c38393f6a28e33bc788876fcb3a08c6ab152a25500ca6d7a0e97cdd52f6e51"
+    },
+    {
+      "member": "parent/verify_templates-r1.py",
+      "source": "work/mcp-external-workflow-20261117/verify_templates-r1.py",
+      "bytes": 3589,
+      "sha256": "53cc213d59bc4f52f50350c7fa6916d63bb94d82a1901ec48f2391f6c3c5c718"
+    },
+    {
+      "member": "parent/verify_templates.py",
+      "source": "work/mcp-external-workflow-20261117/verify_templates.py",
+      "bytes": 3757,
+      "sha256": "d6bf43d09665b95e026e7f840ddf07e10ef8011266a97de114767eb37a0eef59"
+    },
+    {
+      "member": "review/REPORT.md",
+      "source": "work/mcp-client-history-review-20261117/REPORT.md",
+      "bytes": 21234,
+      "sha256": "6b0b41634b39f5cebe7e689926b3fe5427b629a6b7d4c89f2050ae6e1d94e466"
+    },
+    {
+      "member": "review/after-attestation.json",
+      "source": "work/mcp-client-history-review-20261117/after-attestation.json",
+      "bytes": 1110,
+      "sha256": "7fca7481c09e9213ad7b92de9db29fc9691941eb85cbab4e795bbcbeddbcf103"
+    },
+    {
+      "member": "review/after-status.txt",
+      "source": "work/mcp-client-history-review-20261117/after-status.txt",
+      "bytes": 1236,
+      "sha256": "52bce2db4e9abfe6af812c5a6b2a9863962fe3332df77088d7ab918c8f94a771"
+    },
+    {
+      "member": "review/after-tracked.diff",
+      "source": "work/mcp-client-history-review-20261117/after-tracked.diff",
+      "bytes": 26398,
+      "sha256": "18a2ce2fa928225e3f263751aeeef0122b88df915509c01b24cea59ea568ca4e"
+    },
+    {
+      "member": "review/after-untracked.txt",
+      "source": "work/mcp-client-history-review-20261117/after-untracked.txt",
+      "bytes": 588,
+      "sha256": "247e7b67a000a9c7c2e470cbfb05005c193e6a5779a43ae1a72c012e9530ff12"
+    },
+    {
+      "member": "review/app-history-receipt.json",
+      "source": "work/mcp-client-history-review-20261117/app-history-receipt.json",
+      "bytes": 1490,
+      "sha256": "0d49f3351292a267f79fe4f7b966fa3499f161301af85582dbe8f76bc0e201d7"
+    },
+    {
+      "member": "review/app-history.log",
+      "source": "work/mcp-client-history-review-20261117/app-history.log",
+      "bytes": 212,
+      "sha256": "541c857e5b713d37ac9c450b3f0b4ac3dd491ed4fb810f4bfe655a1125610328"
+    },
+    {
+      "member": "review/app-list-receipt.json",
+      "source": "work/mcp-client-history-review-20261117/app-list-receipt.json",
+      "bytes": 1290,
+      "sha256": "ef11a53abad49f3c075378c98e8b68f6a8f4d78108427f8c1763712c4e5c43d6"
+    },
+    {
+      "member": "review/app-list.log",
+      "source": "work/mcp-client-history-review-20261117/app-list.log",
+      "bytes": 150203,
+      "sha256": "12fd2179e51df547f674a9bb17c54f27453a27d315bbff9181cb4dbcf2e3b830"
+    },
+    {
+      "member": "review/app-mcp-receipt.json",
+      "source": "work/mcp-client-history-review-20261117/app-mcp-receipt.json",
+      "bytes": 1466,
+      "sha256": "2d3c7a57101170707236969f2533ca97bf41b799f384a0d3c48c142c6ef783ab"
+    },
+    {
+      "member": "review/app-mcp.log",
+      "source": "work/mcp-client-history-review-20261117/app-mcp.log",
+      "bytes": 4728,
+      "sha256": "518a5147a5c03d93d0df5ee84a2662a175ad9e44fdd93383b8af5f853ab41d84"
+    },
+    {
+      "member": "review/app-modal-receipt.json",
+      "source": "work/mcp-client-history-review-20261117/app-modal-receipt.json",
+      "bytes": 1485,
+      "sha256": "d4a9aef40463e271d9405b4edecba3d80a79988b7f9839a95a06223813011387"
+    },
+    {
+      "member": "review/app-modal.log",
+      "source": "work/mcp-client-history-review-20261117/app-modal.log",
+      "bytes": 1370,
+      "sha256": "2249856a4e615fef4dea3a31e6eb68489cf4e6a820e621ac351ee9da3a977079"
+    },
+    {
+      "member": "review/audit_inventory.py",
+      "source": "work/mcp-client-history-review-20261117/audit_inventory.py",
+      "bytes": 4055,
+      "sha256": "bbfc41a1dc8dd446fd22cebd167c9b1f14285c49dbd39fb00b5d09a6e5f59cdc"
+    },
+    {
+      "member": "review/before-attestation.json",
+      "source": "work/mcp-client-history-review-20261117/before-attestation.json",
+      "bytes": 1111,
+      "sha256": "e58cd2b4794801f403bc691daf0b829f161a16c0b254d3582bdb920adfb38a8c"
+    },
+    {
+      "member": "review/before-status.txt",
+      "source": "work/mcp-client-history-review-20261117/before-status.txt",
+      "bytes": 1091,
+      "sha256": "796db7ed2b561223261663e366a477b9c0c9bf6b7551ba896c6442cf5779cd6e"
+    },
+    {
+      "member": "review/before-tracked.diff",
+      "source": "work/mcp-client-history-review-20261117/before-tracked.diff",
+      "bytes": 18786,
+      "sha256": "822d7f98a02668a0eaa5a177bd17dff3262ad58955eb4f8d6361483aa2d4a8f2"
+    },
+    {
+      "member": "review/before-untracked.txt",
+      "source": "work/mcp-client-history-review-20261117/before-untracked.txt",
+      "bytes": 588,
+      "sha256": "247e7b67a000a9c7c2e470cbfb05005c193e6a5779a43ae1a72c012e9530ff12"
+    },
+    {
+      "member": "review/binary-provenance.json",
+      "source": "work/mcp-client-history-review-20261117/binary-provenance.json",
+      "bytes": 764,
+      "sha256": "13b73f274ff645b4c288d8b1a569051408b8fbbe21276780e13a59c1ba301e3e"
+    },
+    {
+      "member": "review/client-list-receipt.json",
+      "source": "work/mcp-client-history-review-20261117/client-list-receipt.json",
+      "bytes": 1307,
+      "sha256": "0696bebe3f65716e8ecdbbf2cdfee4b06bd5bcfb336677b6b73d85159c985159"
+    },
+    {
+      "member": "review/client-list.log",
+      "source": "work/mcp-client-history-review-20261117/client-list.log",
+      "bytes": 922,
+      "sha256": "96a54d991e4dceed6c8f935cab0647d81c10f403b4907273bb82551575945f6a"
+    },
+    {
+      "member": "review/client-receipt.json",
+      "source": "work/mcp-client-history-review-20261117/client-receipt.json",
+      "bytes": 1427,
+      "sha256": "95fad2bb64790c308bf3da935e0b4287051c28d2936000f21840a8be01cb9cca"
+    },
+    {
+      "member": "review/client.log",
+      "source": "work/mcp-client-history-review-20261117/client.log",
+      "bytes": 1091,
+      "sha256": "7b2b944f035ee4f19addd20cf36972b1301349dbd18e4d4d38196447fc087f12"
+    },
+    {
+      "member": "review/commands.txt",
+      "source": "work/mcp-client-history-review-20261117/commands.txt",
+      "bytes": 4022,
+      "sha256": "b0ba4148d546531738c39984c95ce07e2930b531950dd5a30756a9ef880707d3"
+    },
+    {
+      "member": "review/fixed-fixture-parse-r2-receipt.json",
+      "source": "work/mcp-client-history-review-20261117/fixed-fixture-parse-r2-receipt.json",
+      "bytes": 301,
+      "sha256": "d55ecbd9d78b63cda3b665e0286d590bf612347394f7cae02554cef6eb3f38f2"
+    },
+    {
+      "member": "review/fixed-fixture-parse-r2.log",
+      "source": "work/mcp-client-history-review-20261117/fixed-fixture-parse-r2.log",
+      "bytes": 452,
+      "sha256": "d0236a4f0e8785b63e2e2a7f089673d7e391635efe188597778a31faeb67a1e8"
+    },
+    {
+      "member": "review/fixed-fixture-parse.json",
+      "source": "work/mcp-client-history-review-20261117/fixed-fixture-parse.json",
+      "bytes": 10096,
+      "sha256": "856d6c0336f3050a461e96626b85aa2a670c2ecdc95853864a0ce7eb0b567354"
+    },
+    {
+      "member": "review/fixed-fixture-parse.log",
+      "source": "work/mcp-client-history-review-20261117/fixed-fixture-parse.log",
+      "bytes": 353,
+      "sha256": "9066979c005a48f63d05d7333a66eea577e3458b2fc7c1b96e796bbb58434bbf"
+    },
+    {
+      "member": "review/inventory-audit.json",
+      "source": "work/mcp-client-history-review-20261117/inventory-audit.json",
+      "bytes": 12657,
+      "sha256": "cf80d15ab998c2d5b5511b30f11b24bcd19e0948a19e44a68fb7325e857ed291"
+    },
+    {
+      "member": "review/parse_fixed_fixtures.py",
+      "source": "work/mcp-client-history-review-20261117/parse_fixed_fixtures.py",
+      "bytes": 4254,
+      "sha256": "c94c6fe42fdde09b8ee8856b206be0a004b8a195c55b608fc4d2c4ff5c334d14"
+    },
+    {
+      "member": "review/parse_fixed_fixtures_r2.py",
+      "source": "work/mcp-client-history-review-20261117/parse_fixed_fixtures_r2.py",
+      "bytes": 4265,
+      "sha256": "9003dda01c68c3d3c11a486f070164e263cf1ad9f9da02f5e61a102c3ac0a254"
+    },
+    {
+      "member": "review/production-output-reparse-r2-receipt.json",
+      "source": "work/mcp-client-history-review-20261117/production-output-reparse-r2-receipt.json",
+      "bytes": 306,
+      "sha256": "c3decf9cb49860eca5fc84e49ea3d700a9b22de3a2b24c78460c4f0e7190bdd9"
+    },
+    {
+      "member": "review/production-output-reparse-r2.log",
+      "source": "work/mcp-client-history-review-20261117/production-output-reparse-r2.log",
+      "bytes": 771,
+      "sha256": "a52f7fa4a3493c0da3f1e290cb97a5cefbfb7bf46d63082c266e87e28ab6b200"
+    },
+    {
+      "member": "review/production-output-reparse.json",
+      "source": "work/mcp-client-history-review-20261117/production-output-reparse.json",
+      "bytes": 5972,
+      "sha256": "b0f62a66c12c38fba6d8b29a9d9a284a7369179527ad4474de8b23588981ee9a"
+    },
+    {
+      "member": "review/reparse_production_output.py",
+      "source": "work/mcp-client-history-review-20261117/reparse_production_output.py",
+      "bytes": 2376,
+      "sha256": "0e257644724693e39c0f132c91691dbeeea768da002cd9356ce3a72044897870"
+    },
+    {
+      "member": "review/reparse_production_output_r2.py",
+      "source": "work/mcp-client-history-review-20261117/reparse_production_output_r2.py",
+      "bytes": 2374,
+      "sha256": "83cf58d00e5d7a1cb6cc8a5db2ac14ea617eb7dbaffabae485817216515e0385"
+    },
+    {
+      "member": "review/review-artifact-manifest.json",
+      "source": "work/mcp-client-history-review-20261117/review-artifact-manifest.json",
+      "bytes": 6410,
+      "sha256": "5eaa9234312fd22753bf26b966867b1c76300ff762cf83636e7d4d2deea52a3b"
+    },
+    {
+      "member": "review/review-result.json",
+      "source": "work/mcp-client-history-review-20261117/review-result.json",
+      "bytes": 1712,
+      "sha256": "396039d653094bd2cec81a2b490f0fa31f3431b94830c46a04cdbcd874d22fe1"
+    },
+    {
+      "member": "review/reviewer-failures.txt",
+      "source": "work/mcp-client-history-review-20261117/reviewer-failures.txt",
+      "bytes": 3360,
+      "sha256": "99ea8e6ba339dd527a90ebdf7599937c307756b921c43efba689cd1b1c32416c"
+    },
+    {
+      "member": "review/run_copied_tests.py",
+      "source": "work/mcp-client-history-review-20261117/run_copied_tests.py",
+      "bytes": 2709,
+      "sha256": "68dd4280fa255312a4c9127d2c77b17f414de96e32c1a02dd65a96aaa32d566e"
+    },
+    {
+      "member": "review/verify_freeze.py",
+      "source": "work/mcp-client-history-review-20261117/verify_freeze.py",
+      "bytes": 3228,
+      "sha256": "061fdd577a3f8e9972d996efcc763a0a3874d1714e216bb41289510a68e06f2d"
+    }
+  ]
+}

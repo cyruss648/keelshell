@@ -102,6 +102,7 @@ impl Workspace {
                         label: target.label.clone(),
                         route,
                         state: ActionState::PendingReview,
+                        unknown_acknowledged: false,
                         output: String::new(),
                         session: target.session.clone(),
                     });

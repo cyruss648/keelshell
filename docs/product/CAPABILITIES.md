@@ -1,5 +1,30 @@
 # Capability ledger
 
+## 2026-11-17: external client templates and retained unknown outcomes
+
+The external MCP panel now offers separate Codex CLI / Claude Code configuration
+templates referencing temporary environment values. Templates contain no live
+capability values; the sensitive current launch settings remain a separate
+explicit clipboard action. Ordinary history cleanup preserves pending, running
+and unknown actions. An exact-action desktop acknowledgement can release that
+proposal's window-close hold after the user independently checks the remote
+state, while retaining OutcomeUnknown, its immutable content and all separate
+mutation/quarantine restrictions.
+
+The revised MCP headless suite passed 37 tests, and the template library suite
+passed 13. An independent Python TOML/JSON parser checked actual compiled
+production output: 41 exact TOML cases, 40 exact JSON cases and one rejected
+Claude literal-expansion path. Initial compilation and first-proposal geometry
+failures remain recorded. A new non-author approved the frozen SOURCE + FUNCTION
+scope with zero P0-P3 findings and independently executed 62 prebuilt tests.
+The final gate passed 3,455 ordinary Rust tests and 15 rustdoc tests; Python main
+ran 526 tests with three skips. All 96 ordinary inventories and binary digests
+match, and the 777 engineering inputs remain unchanged. Native desktop was
+locked during this batch, with zero GUI actions and
+screenshots; installed-client loading and full vendor business workflows remain
+open. See [client setup](EXTERNAL_MCP.md), [unknown history](MCP_ACTION_HISTORY.md)
+and the [exact batch record](../testing/records/2026-11-17-mcp-client-history.md).
+
 ## 2026-11-17: original transport lifetime for local forwarding
 
 Local forwarding now rejects Closing/Closed connections before, during and after
@@ -18,10 +43,13 @@ Python run with three skips. All 95 ordinary suites match their exact compiled
 inventories and binary digests remain unchanged. The initial test-helper Clippy
 failure is retained. Source `cdf1e171f2f9b179f09db230f4739696d02fe80d` is
 pushed with matching local, tracking and remote SHAs; 769 inputs and 478 archived
-members match exact Git blobs. The two new Windows monitor workflows report
-success in the API; new Quality remains in progress on all three platforms,
-without an observed failed job. New artifacts and final Quality remain separate
-from the completed older source CI. See the [lifecycle record](../testing/records/2026-11-17-tunnel-transport-lifetime.md).
+members match exact Git blobs. Quality `44020265369` is now completed/success
+on Windows, Ubuntu and macOS: respectively 3,422 / 3,428 / 3,435 ordinary Rust
+passes, zero failures and 14 rustdoc passes each. Both Windows monitor workflows
+are completed/success; all seven raw ZIPs and 172 members are retained with four
+matching artifact digests. The API isolated-SSH job remains skipped and neither
+Windows artifact establishes native GUI acceptance. See the
+[lifecycle record](../testing/records/2026-11-17-tunnel-transport-lifetime.md).
 Windows real OpenSSH forwarding, native desktop and release acceptance remain open.
 
 ## 2026-11-17: scoped native English toolbar observation

@@ -1,9 +1,34 @@
 [
   {
+    "date": "2026-11-17",
+    "scope": "app",
+    "shape": "existing external MCP settings and a separate unknown-outcome review",
+    "theme": [
+      "frost",
+      "graphite",
+      "lavender"
+    ],
+    "signature": "client-specific secret-free templates and explicit acknowledgement that preserves the unknown outcome",
+    "material": "verified companion path, real current proposal identities and full immutable command or file diff",
+    "preserve": "registry, Palette, shared Kit controls, fixed grant actions, remote review and mutation quarantine boundaries",
+    "introduce": [
+      "explicit Codex and Claude configuration template clipboard actions",
+      "bulk history clearing limited to known terminal states",
+      "single-action unknown-outcome review with fixed confirm/cancel and retained original state"
+    ],
+    "sweep": "Source and headless checks are in progress; exact checks are recorded in docs/testing/records/2026-11-17-mcp-client-history.md. Web render does not apply to native Rust/GPUI.",
+    "native_evidence": "NOT_RUN: this batch CUA inventory reported a locked Mac; GUI actions and screenshots zero",
+    "finish_review": "PENDING independent source/function review; native desktop and supplier client business acceptance remain open"
+  },
+  {
     "date": "2026-11-16",
     "scope": "app",
     "shape": "existing named tunnel actions and fixed draft or review footer",
-    "theme": ["frost", "graphite", "lavender"],
+    "theme": [
+      "frost",
+      "graphite",
+      "lavender"
+    ],
     "signature": "explicit local configuration recovery beside preserved drafts and original tunnel owners",
     "material": "actual isolated StateStore conflicts, failures and real loopback SSH listeners",
     "preserve": "theme registry, Palette, Kit controls, original draft snapshot, live SSH and runtime owners",

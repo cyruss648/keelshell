@@ -7,6 +7,8 @@ mod independent_final_retirement;
 mod lifecycle_retirement;
 #[path = "mcp_transfer_isolation.rs"]
 mod transfer_isolation;
+#[path = "mcp_file_unknown_history.rs"]
+mod unknown_history;
 
 async fn grant_files(h: &Harness, read: bool, cx: &mut TestAppContext) -> SessionIdentity {
     let mut tools = vec![

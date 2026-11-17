@@ -20,6 +20,17 @@
 
 ## 当前批次与接续顺序
 
+MCP接入与提案记录增量的实现与限定工程验证完成：纯Codex／Claude模板和原生显式复制、
+保留Unknown的批量清理、独立准确提案核对已实现；核对不执行／重试或改写状态。
+专项MCP37／renderer13通过；实际renderer经独立Python解析41TOML／40JSON和1拒绝通过。
+777输入冻结前后相等；新非作者Cicero源码/功能限定批准、P0–P3全0，
+独立预编译62项通过并关闭。最终完整门禁通过Rust3455/0/68 ignored、
+15rustdoc及Python主526 run/3 skipped，96普通库存逐名和二进制摘要相等。
+原编译／首提案布局／库存工装解析失败保留；
+本批原生锁屏，完整供应商客户端／三平台原生仍开放。
+从[本批记录](testing/records/2026-11-17-mcp-client-history.md)接续精确交付，
+不重复未变工程的完整门禁。
+
 本地转发的原SSH生命周期增量已整合，见[ADR0159](adr/0159-local-forward-transport-lifetime.md)及
 [本批记录](testing/records/2026-11-17-tunnel-transport-lifetime.md)。
 Closing／Closed准入、bind竞态、原连接断线后的listener／streams回收及新旧owner隔离
@@ -31,10 +42,12 @@ Python主526 run／3 skipped，95普通套件逐名库存／二进制摘要及�
 首轮Clippy失败保留。工程`cdf1e171`已普通推送、三方SHA一致，
 769输入／478归档成员精确Git绑定通过；5位自有agent关闭，
 6目录／478文件按原件核对回收，target与正常旧包保持。
-Windows API44020265273／SSH44020265248现为API状态success，
-Quality44020265369三平台仍in_progress、未观察失败job，
-见[交付](testing/records/2026-11-17-tunnel-transport-lifetime-evidence/delivery/README.md)；
-不由旧de9768c的三平台成功代签。
+Windows API44020265273／SSH44020265248及Quality44020265369均已completed/success，
+Windows／Ubuntu／macOS普通Rust3422／3428／3435通过、0失败，各14rustdoc；
+Python主526 run、skip53／3／3，7原始ZIP／172成员和4个digest已取得核对，
+见[精确CI](testing/records/2026-11-17-tunnel-transport-lifetime-evidence/ci-completion/README.md)。
+API isolated-SSH skipped、native_gui=UNRUN与历史HOLD／清理exit125保留；
+不代签本批新MCP源码、原生或发行。
 uuid锁更新1.29.3后，完整官方直接依赖新快照37包／113声明全部通过。
 原生再次锁屏、GUI操作／截图0；三平台原生及完整隧道阶段继续开放。
 

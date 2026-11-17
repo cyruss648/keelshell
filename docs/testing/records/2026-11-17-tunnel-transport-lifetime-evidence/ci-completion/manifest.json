@@ -1,0 +1,1894 @@
+{
+  "schema_version": 1,
+  "members": 314,
+  "logical_bytes": 7314736,
+  "bytes": 2046994,
+  "sha256": "88c25669ca00d7d0a6f6609ecad08e57feffcc06ac0c523248428615abccc4e2",
+  "excluded": [],
+  "files": [
+    {
+      "member": "README.md",
+      "source": "work/tunnel-ci-completion-20261117/README.md",
+      "bytes": 5996,
+      "sha256": "a785e28c359c5bf67bd8b911f430527bc840b7ae6f13b5b12817d68c0ac5cd36"
+    },
+    {
+      "member": "SHA256SUMS",
+      "source": "work/tunnel-ci-completion-20261117/SHA256SUMS",
+      "bytes": 33794,
+      "sha256": "63f2da2aaa186597ba6e154fe6cf803900e9b38e142b7b894da9ec8d8466619c"
+    },
+    {
+      "member": "analyze.py",
+      "source": "work/tunnel-ci-completion-20261117/analyze.py",
+      "bytes": 26046,
+      "sha256": "72c42d668e87755805a65106b21e05143c0ee682280a664744210cccc11361f9"
+    },
+    {
+      "member": "archive-bindings.json",
+      "source": "work/tunnel-ci-completion-20261117/archive-bindings.json",
+      "bytes": 4353,
+      "sha256": "214820e418a8816dfcceb4d51237541517762e1abc80ea1f8650138ff949feb0"
+    },
+    {
+      "member": "archive-manifest.json",
+      "source": "work/tunnel-ci-completion-20261117/archive-manifest.json",
+      "bytes": 36735,
+      "sha256": "00a64832f2491a5e602c7fc4ee5d5385e17b01b139ec30ebba468a2058bdfcb0"
+    },
+    {
+      "member": "artifacts/14300447980.json",
+      "source": "work/tunnel-ci-completion-20261117/artifacts/14300447980.json",
+      "bytes": 735,
+      "sha256": "cc393e75e11550e1d7ce656ec739a340ed0a6e325efd57f7a19742dabf9758ba"
+    },
+    {
+      "member": "artifacts/14300447980.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/artifacts/14300447980.json.receipt.json",
+      "bytes": 586,
+      "sha256": "50fb0c39d5c652eef919340abea6cd13fc677792b31cea3267da41346683f88f"
+    },
+    {
+      "member": "artifacts/14300944839.json",
+      "source": "work/tunnel-ci-completion-20261117/artifacts/14300944839.json",
+      "bytes": 724,
+      "sha256": "3437a72985c30594357e67662693f707dbf961d50f7bd07b4aa3d5eb1281f704"
+    },
+    {
+      "member": "artifacts/14300944839.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/artifacts/14300944839.json.receipt.json",
+      "bytes": 586,
+      "sha256": "78c9334d5a3252bda59c692b12713aae2ab4d4118f257a072ec16037ecf2e21a"
+    },
+    {
+      "member": "artifacts/14301275329.json",
+      "source": "work/tunnel-ci-completion-20261117/artifacts/14301275329.json",
+      "bytes": 734,
+      "sha256": "12c7ff440bb3a26c4c24a70d7a61d5f67cbeeb9975c1674bffbacf5a61eea1d0"
+    },
+    {
+      "member": "artifacts/14301275329.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/artifacts/14301275329.json.receipt.json",
+      "bytes": 586,
+      "sha256": "a47c8eb27f4c8dd15f8d178e9c163fe6b653c6135152001960ce0ae63ac3b372"
+    },
+    {
+      "member": "artifacts/14302006704.json",
+      "source": "work/tunnel-ci-completion-20261117/artifacts/14302006704.json",
+      "bytes": 722,
+      "sha256": "cc79eff2b74d7d6165aac09ec43aa8498a39ebd39f677b4e67699d6fe9e74554"
+    },
+    {
+      "member": "artifacts/14302006704.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/artifacts/14302006704.json.receipt.json",
+      "bytes": 585,
+      "sha256": "0cc81d6db3dac944f1253fa8edc3316d8913fcad135e87ab081e189d535345e4"
+    },
+    {
+      "member": "bounded-snapshot-052139/README.md",
+      "source": "work/tunnel-ci-completion-20261117/bounded-snapshot-052139/README.md",
+      "bytes": 6115,
+      "sha256": "25e846042b3644a40441fa8deef18b490e8e0e44d649243cc0892f60c8c9a4de"
+    },
+    {
+      "member": "bounded-snapshot-052139/SHA256SUMS",
+      "source": "work/tunnel-ci-completion-20261117/bounded-snapshot-052139/SHA256SUMS",
+      "bytes": 28682,
+      "sha256": "7999bd035c31427e224d8742e254aadff9cc8975921899ecddd247f36fb78555"
+    },
+    {
+      "member": "bounded-snapshot-052139/archive-bindings.json",
+      "source": "work/tunnel-ci-completion-20261117/bounded-snapshot-052139/archive-bindings.json",
+      "bytes": 4822,
+      "sha256": "7af60bff4a9d5a528f5ca4a905d7a5c32a8ce26bb31c4d9bb493646f076b4f63"
+    },
+    {
+      "member": "bounded-snapshot-052139/archive-manifest.json",
+      "source": "work/tunnel-ci-completion-20261117/bounded-snapshot-052139/archive-manifest.json",
+      "bytes": 29076,
+      "sha256": "d4ab5b15b3ec4369b3956bdd2149bc403d6cac891214fc09526c0bba043e2960"
+    },
+    {
+      "member": "bounded-snapshot-052139/copy-manifest.json",
+      "source": "work/tunnel-ci-completion-20261117/bounded-snapshot-052139/copy-manifest.json",
+      "bytes": 982,
+      "sha256": "02e3150ab32ed121904ca349aa9dacc225c1377197707af6b47098431104857f"
+    },
+    {
+      "member": "bounded-snapshot-052139/latest.json",
+      "source": "work/tunnel-ci-completion-20261117/bounded-snapshot-052139/latest.json",
+      "bytes": 146,
+      "sha256": "da25f046b80e8c1edab92dc80cec52a86ba30a5c3cfd1e4e63c23ba58d3ea11a"
+    },
+    {
+      "member": "bounded-snapshot-052139/summary.json",
+      "source": "work/tunnel-ci-completion-20261117/bounded-snapshot-052139/summary.json",
+      "bytes": 46769,
+      "sha256": "669801007398e8de56620052eccd1b98d9ec3b7b1eb35ea6310c8a8fef950779"
+    },
+    {
+      "member": "bounded-snapshot-052139/verification.json",
+      "source": "work/tunnel-ci-completion-20261117/bounded-snapshot-052139/verification.json",
+      "bytes": 10184,
+      "sha256": "bd82cef71d3a56061b8bf752a0ab6abd96eda2654bf93bd2caf50ef662e4d108"
+    },
+    {
+      "member": "collect.py",
+      "source": "work/tunnel-ci-completion-20261117/collect.py",
+      "bytes": 13201,
+      "sha256": "331b147b02c04e85bb52ad3085888eb657d6580c33f4b3c3ebee369c56f935ff"
+    },
+    {
+      "member": "context.json",
+      "source": "work/tunnel-ci-completion-20261117/context.json",
+      "bytes": 577,
+      "sha256": "318ccedabdbffa9093ea52a75d50792c16bfa095628aa38e9afe36a47625b02d"
+    },
+    {
+      "member": "downloads/artifact-14300447980.zip",
+      "source": "work/tunnel-ci-completion-20261117/downloads/artifact-14300447980.zip",
+      "bytes": 53908,
+      "sha256": "1663513c81ac54069e04a008f7e51677cb897a2656792a9a927c021eab711398"
+    },
+    {
+      "member": "downloads/artifact-14300447980.zip.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/downloads/artifact-14300447980.zip.receipt.json",
+      "bytes": 7239,
+      "sha256": "67abf0ec59a245a1508dad48d72d38e6cd270c7c3f519a69c1dd4aba1c7d361a"
+    },
+    {
+      "member": "downloads/artifact-14300944839.zip",
+      "source": "work/tunnel-ci-completion-20261117/downloads/artifact-14300944839.zip",
+      "bytes": 5604,
+      "sha256": "e821363873da9bbaf0b5903007dd4fc581bc6fa146f8025df559b578c804bfbb"
+    },
+    {
+      "member": "downloads/artifact-14300944839.zip.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/downloads/artifact-14300944839.zip.receipt.json",
+      "bytes": 3020,
+      "sha256": "3cf46f513bfe4a70dc9d2a7a801782471b971ba9cabc6b5850f2ae0cb21bfdb8"
+    },
+    {
+      "member": "downloads/artifact-14301275329.zip",
+      "source": "work/tunnel-ci-completion-20261117/downloads/artifact-14301275329.zip",
+      "bytes": 46378,
+      "sha256": "de56cee2b72e9801ee6b7117b147862402ce0b0f6777b2f24e60f1bf51a96b22"
+    },
+    {
+      "member": "downloads/artifact-14301275329.zip.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/downloads/artifact-14301275329.zip.receipt.json",
+      "bytes": 5461,
+      "sha256": "5dd49f78571061fae7d5d87bf111d7be07ff8535adb35ef60a0a7911e0201b77"
+    },
+    {
+      "member": "downloads/artifact-14302006704.zip",
+      "source": "work/tunnel-ci-completion-20261117/downloads/artifact-14302006704.zip",
+      "bytes": 5522,
+      "sha256": "cf8d8f514416d35aadc99cce5118939fefb3b013725bf00dda5995a70f93a6ef"
+    },
+    {
+      "member": "downloads/artifact-14302006704.zip.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/downloads/artifact-14302006704.zip.receipt.json",
+      "bytes": 3047,
+      "sha256": "c234af0add74bfa0718a5af0009b91e7802e95950682372202f3df7986c014e4"
+    },
+    {
+      "member": "downloads/job-133827818182-logs.txt",
+      "source": "work/tunnel-ci-completion-20261117/downloads/job-133827818182-logs.txt",
+      "bytes": 911660,
+      "sha256": "c0038223dc15df50b72e0425ea6196e4a57055316eb6d0e8caa4d03c32c5ee80"
+    },
+    {
+      "member": "downloads/job-133827818182-logs.txt.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/downloads/job-133827818182-logs.txt.receipt.json",
+      "bytes": 632,
+      "sha256": "911c0148285a2cd6744c2938aa7f38a0cab668819dc8e586e4a476a5edfacc68"
+    },
+    {
+      "member": "downloads/job-133827818303-logs.txt",
+      "source": "work/tunnel-ci-completion-20261117/downloads/job-133827818303-logs.txt",
+      "bytes": 887630,
+      "sha256": "726fc36fb92192e9e0c8549042dac7ba9d5e74ada2a1af2220670dd0da333a64"
+    },
+    {
+      "member": "downloads/job-133827818303-logs.txt.attempt-001.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/downloads/job-133827818303-logs.txt.attempt-001.receipt.json",
+      "bytes": 616,
+      "sha256": "a729f19c9e217160fda306f0949bd33cfb0276089d5d274a64ea38956827b306"
+    },
+    {
+      "member": "downloads/job-133827818303-logs.txt.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/downloads/job-133827818303-logs.txt.receipt.json",
+      "bytes": 631,
+      "sha256": "8a191918f1a12f47bc296606ae2fe9169d5a97d047d7611aedcb681583bf7dd9"
+    },
+    {
+      "member": "downloads/run-44020265248-attempt-1-logs.zip",
+      "source": "work/tunnel-ci-completion-20261117/downloads/run-44020265248-attempt-1-logs.zip",
+      "bytes": 33117,
+      "sha256": "9450f9120045d9a6ed8b0d531cd230c062ce09e9d3b497bd62977097b3996f97"
+    },
+    {
+      "member": "downloads/run-44020265248-attempt-1-logs.zip.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/downloads/run-44020265248-attempt-1-logs.zip.receipt.json",
+      "bytes": 3400,
+      "sha256": "c80c971be171e5eb3ea5001576674d2fc45554fd56b85dfbec5fc328f5979d25"
+    },
+    {
+      "member": "downloads/run-44020265273-attempt-1-logs.zip",
+      "source": "work/tunnel-ci-completion-20261117/downloads/run-44020265273-attempt-1-logs.zip",
+      "bytes": 33355,
+      "sha256": "f2a7c4549665cbee1436bfca348b208399b07be8c703ed51e3e7064843ce107b"
+    },
+    {
+      "member": "downloads/run-44020265273-attempt-1-logs.zip.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/downloads/run-44020265273-attempt-1-logs.zip.receipt.json",
+      "bytes": 3293,
+      "sha256": "807483b80f43ceaeb62d0351364a319f5fbefe70f2b15c735c2c0d480d3130d8"
+    },
+    {
+      "member": "downloads/run-44020265369-attempt-1-logs.zip",
+      "source": "work/tunnel-ci-completion-20261117/downloads/run-44020265369-attempt-1-logs.zip",
+      "bytes": 1036337,
+      "sha256": "51f46c97f5ad262fa8cf7688f23c16ecc67965a8bac393247764659f9e2b5850"
+    },
+    {
+      "member": "downloads/run-44020265369-attempt-1-logs.zip.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/downloads/run-44020265369-attempt-1-logs.zip.receipt.json",
+      "bytes": 7983,
+      "sha256": "8055c50e7e45fa3e3ea6cef7137220fb8c5ad64201be6e7dd8645a233ba88323"
+    },
+    {
+      "member": "final-analysis.stdout",
+      "source": "work/tunnel-ci-completion-20261117/final-analysis.stdout",
+      "bytes": 4296,
+      "sha256": "27966dd94b1a1d8702e62e0025741035cda9b7aeb230e1600ea84bd00dc3ab04"
+    },
+    {
+      "member": "final-collection.stdout",
+      "source": "work/tunnel-ci-completion-20261117/final-collection.stdout",
+      "bytes": 2486,
+      "sha256": "2f4c8a605543ff747da5f3228e2a562575d3e180684209da5f53ab6a715f3c2d"
+    },
+    {
+      "member": "finalize.py",
+      "source": "work/tunnel-ci-completion-20261117/finalize.py",
+      "bytes": 16222,
+      "sha256": "3bd28c81878e67bf8c71e2bfcfa291c9669f8be3d818608a792e46a221771c4d"
+    },
+    {
+      "member": "initial-observation.json",
+      "source": "work/tunnel-ci-completion-20261117/initial-observation.json",
+      "bytes": 4248,
+      "sha256": "1d06ade3df0006a2219ae5ac25d9df91fd58a2b5cfe4dd9547a753277f03af30"
+    },
+    {
+      "member": "inventories/artifact-14300447980-native-ssh.json",
+      "source": "work/tunnel-ci-completion-20261117/inventories/artifact-14300447980-native-ssh.json",
+      "bytes": 942,
+      "sha256": "d55672d5dccda7f971ff14167942573b0725cc953f54bca33993e99fe1259428"
+    },
+    {
+      "member": "inventories/artifact-14300944839-20261117T051455Z-1c0dd13a5e.json",
+      "source": "work/tunnel-ci-completion-20261117/inventories/artifact-14300944839-20261117T051455Z-1c0dd13a5e.json",
+      "bytes": 4274,
+      "sha256": "f14f75728f4260373f7835d289f6bd3a646d642e8e4d68f4e4a938efa3e8f2a4"
+    },
+    {
+      "member": "inventories/artifact-14300944839-20261117T051515Z-269326626e.json",
+      "source": "work/tunnel-ci-completion-20261117/inventories/artifact-14300944839-20261117T051515Z-269326626e.json",
+      "bytes": 1914,
+      "sha256": "f6065b6a3190e79d3a3b0cd2ea484ed0aeba05593cb59fa35560a186a5da1afc"
+    },
+    {
+      "member": "inventories/artifact-14302006704-20261117T051847Z-d6a33db535.json",
+      "source": "work/tunnel-ci-completion-20261117/inventories/artifact-14302006704-20261117T051847Z-d6a33db535.json",
+      "bytes": 4274,
+      "sha256": "6953642ce308dd797509faf85d357a1e87ecd655073c7f3dcb9dab6c1b4c50b5"
+    },
+    {
+      "member": "inventories/artifact-14302006704-20261117T051903Z-0f6331cd37.json",
+      "source": "work/tunnel-ci-completion-20261117/inventories/artifact-14302006704-20261117T051903Z-0f6331cd37.json",
+      "bytes": 1914,
+      "sha256": "e394324c4c5a3a9b4f9bbd3378b4a7f937dbde7f7fbb3fbcddbef3c560d0d6af"
+    },
+    {
+      "member": "inventories/job-133827817472.json",
+      "source": "work/tunnel-ci-completion-20261117/inventories/job-133827817472.json",
+      "bytes": 39211,
+      "sha256": "a4e8f7632ec37d858d20595eff215b1471719cc6f0cdc07c82f0028e7e223f93"
+    },
+    {
+      "member": "inventories/job-133827817731.json",
+      "source": "work/tunnel-ci-completion-20261117/inventories/job-133827817731.json",
+      "bytes": 42713,
+      "sha256": "0e17b0945869c03b4f1671c949f50dcb5348dcaed2d3c64202e79fd43794225b"
+    },
+    {
+      "member": "inventories/job-133827817935.json",
+      "source": "work/tunnel-ci-completion-20261117/inventories/job-133827817935.json",
+      "bytes": 1024596,
+      "sha256": "c4742657a38a0efbf5299f8237542c493ef616367a68fa8ecba501fa1621d00f"
+    },
+    {
+      "member": "inventories/job-133827818182.json",
+      "source": "work/tunnel-ci-completion-20261117/inventories/job-133827818182.json",
+      "bytes": 903138,
+      "sha256": "49360ebe8c0ef7387386c1be81a8af34c777d64a0ea3fec1c67a39193b2759e4"
+    },
+    {
+      "member": "inventories/job-133827818303.json",
+      "source": "work/tunnel-ci-completion-20261117/inventories/job-133827818303.json",
+      "bytes": 903954,
+      "sha256": "994d5c40cd852370ff23a80e14754305f06d5a776560cb74c939cffc79ed5d39"
+    },
+    {
+      "member": "inventories/job-133827819414.json",
+      "source": "work/tunnel-ci-completion-20261117/inventories/job-133827819414.json",
+      "bytes": 277,
+      "sha256": "56c4add713ebdd1879ccff255dfc183e53012fb2ce9a3b2db440167f151b79e7"
+    },
+    {
+      "member": "latest.json",
+      "source": "work/tunnel-ci-completion-20261117/latest.json",
+      "bytes": 146,
+      "sha256": "7d6f145555e985ef77d10dafed3a520c1be12cf6fc049528c7f192e219b74365"
+    },
+    {
+      "member": "snapshots/001/44020265248-artifacts.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/001/44020265248-artifacts.json",
+      "bytes": 767,
+      "sha256": "13c703ea0cf6e03a1e2f16df764c80d5ed7359154dbd8572116c96315eddc501"
+    },
+    {
+      "member": "snapshots/001/44020265248-artifacts.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/001/44020265248-artifacts.receipt.json",
+      "bytes": 419,
+      "sha256": "de5e5a4f6970881a895b280f0099b994a9863de63ad53cc6fe5b8bd938869ad9"
+    },
+    {
+      "member": "snapshots/001/44020265248-jobs.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/001/44020265248-jobs.json",
+      "bytes": 2877,
+      "sha256": "907579fe4a2edb32decc1046d0cbc6ac8c5a42a689da56ebac709b222825db67"
+    },
+    {
+      "member": "snapshots/001/44020265248-jobs.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/001/44020265248-jobs.receipt.json",
+      "bytes": 410,
+      "sha256": "1dff65162894f7f6d70729d8a42335fd18da51aab4a90b7b084ff72181d7580f"
+    },
+    {
+      "member": "snapshots/001/44020265248-run.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/001/44020265248-run.json",
+      "bytes": 12285,
+      "sha256": "2b0c7464c2994c71e72322b690f6c4b2001daa300f73c6628ec5a4a7cfe4b1b7"
+    },
+    {
+      "member": "snapshots/001/44020265248-run.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/001/44020265248-run.receipt.json",
+      "bytes": 385,
+      "sha256": "5b20f9a62cba510adecae03d7f487293bf59f78b47e263ccb3270658e6d18365"
+    },
+    {
+      "member": "snapshots/001/44020265273-artifacts.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/001/44020265273-artifacts.json",
+      "bytes": 766,
+      "sha256": "1e056705aa0b29adc805bea6afeb49cf9822413bf79d8088aa53418788c0afde"
+    },
+    {
+      "member": "snapshots/001/44020265273-artifacts.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/001/44020265273-artifacts.receipt.json",
+      "bytes": 419,
+      "sha256": "29c5eaf58b461442bee496fa4dac1525beec103c9d89472d471f800bd53efe8c"
+    },
+    {
+      "member": "snapshots/001/44020265273-jobs.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/001/44020265273-jobs.json",
+      "bytes": 3775,
+      "sha256": "fad571a77926d876a579be2c85a9dc682ebc4deae7766336d6a687abcb3a8751"
+    },
+    {
+      "member": "snapshots/001/44020265273-jobs.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/001/44020265273-jobs.receipt.json",
+      "bytes": 410,
+      "sha256": "0f235ac7f35f03f34723f0ba92d56efc439d66c4f0934f96b7b992ca8e96ce97"
+    },
+    {
+      "member": "snapshots/001/44020265273-run.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/001/44020265273-run.json",
+      "bytes": 12273,
+      "sha256": "9d400390439ac020ecdf4a8abcbabacb90b6ebd05bfc9f15befcbcb5a6cd0223"
+    },
+    {
+      "member": "snapshots/001/44020265273-run.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/001/44020265273-run.receipt.json",
+      "bytes": 385,
+      "sha256": "3d3773bb6b5b726f62e56314e7372a2672c37b0ea9ee4b43d327c8bdaafce791"
+    },
+    {
+      "member": "snapshots/001/44020265369-artifacts.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/001/44020265369-artifacts.json",
+      "bytes": 32,
+      "sha256": "244563f989470892c537c9a4622920af0d228ee4528f7d00c64a06d6cd95856c"
+    },
+    {
+      "member": "snapshots/001/44020265369-artifacts.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/001/44020265369-artifacts.receipt.json",
+      "bytes": 418,
+      "sha256": "3c3c78aafac6b3d62f2e6d8c990eca542b39b0a2102812b5f958f655a4186e68"
+    },
+    {
+      "member": "snapshots/001/44020265369-jobs.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/001/44020265369-jobs.json",
+      "bytes": 9411,
+      "sha256": "814fffcfd6f5c03d8cb22d0632d62143b049b1adc0ba07a740e22a2545a87f84"
+    },
+    {
+      "member": "snapshots/001/44020265369-jobs.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/001/44020265369-jobs.receipt.json",
+      "bytes": 410,
+      "sha256": "3fda227549954bb606b51d21a11cfef9bc9661a40f945075e386b9122bc075d3"
+    },
+    {
+      "member": "snapshots/001/44020265369-run.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/001/44020265369-run.json",
+      "bytes": 12239,
+      "sha256": "f43cd8dc6ef21b7f4a90340137be54ca644afaf9ccd9fd170d8f1422e470bc8b"
+    },
+    {
+      "member": "snapshots/001/44020265369-run.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/001/44020265369-run.receipt.json",
+      "bytes": 385,
+      "sha256": "99ddcfd2b495473995718201ce0faccbc252a10382333db6d1d371fc3f2aeedd"
+    },
+    {
+      "member": "snapshots/002/44020265248-artifacts.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/002/44020265248-artifacts.json",
+      "bytes": 767,
+      "sha256": "13c703ea0cf6e03a1e2f16df764c80d5ed7359154dbd8572116c96315eddc501"
+    },
+    {
+      "member": "snapshots/002/44020265248-artifacts.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/002/44020265248-artifacts.json.receipt.json",
+      "bytes": 650,
+      "sha256": "7f74e6b254c4e27e691d1cd268fa7b5e5e43a3e6fa9ebb1a279bf23c647b5b41"
+    },
+    {
+      "member": "snapshots/002/44020265248-jobs.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/002/44020265248-jobs.json",
+      "bytes": 2877,
+      "sha256": "907579fe4a2edb32decc1046d0cbc6ac8c5a42a689da56ebac709b222825db67"
+    },
+    {
+      "member": "snapshots/002/44020265248-jobs.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/002/44020265248-jobs.json.receipt.json",
+      "bytes": 636,
+      "sha256": "d3ac0a9508730a6fe8d5a04e70e08d3e8bafdf2747b55ecc319cd3dbcb1ad8bb"
+    },
+    {
+      "member": "snapshots/002/44020265248-run.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/002/44020265248-run.json",
+      "bytes": 12285,
+      "sha256": "2b0c7464c2994c71e72322b690f6c4b2001daa300f73c6628ec5a4a7cfe4b1b7"
+    },
+    {
+      "member": "snapshots/002/44020265248-run.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/002/44020265248-run.json.receipt.json",
+      "bytes": 586,
+      "sha256": "9cfab27b045267a7ecdf05e024d9593ef477aad8f44907c437f968680cb27651"
+    },
+    {
+      "member": "snapshots/002/44020265273-artifacts.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/002/44020265273-artifacts.json",
+      "bytes": 766,
+      "sha256": "1e056705aa0b29adc805bea6afeb49cf9822413bf79d8088aa53418788c0afde"
+    },
+    {
+      "member": "snapshots/002/44020265273-artifacts.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/002/44020265273-artifacts.json.receipt.json",
+      "bytes": 650,
+      "sha256": "ba6ae42d0ad64491955a7f13151c9629ef3542966e31c1c75f8c59d80b1995b9"
+    },
+    {
+      "member": "snapshots/002/44020265273-jobs.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/002/44020265273-jobs.json",
+      "bytes": 3775,
+      "sha256": "fad571a77926d876a579be2c85a9dc682ebc4deae7766336d6a687abcb3a8751"
+    },
+    {
+      "member": "snapshots/002/44020265273-jobs.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/002/44020265273-jobs.json.receipt.json",
+      "bytes": 636,
+      "sha256": "91256af3e24e564012ce4a07c53ae4160a9d8b4f2aeb6188853d448a07672328"
+    },
+    {
+      "member": "snapshots/002/44020265273-run.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/002/44020265273-run.json",
+      "bytes": 12273,
+      "sha256": "9d400390439ac020ecdf4a8abcbabacb90b6ebd05bfc9f15befcbcb5a6cd0223"
+    },
+    {
+      "member": "snapshots/002/44020265273-run.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/002/44020265273-run.json.receipt.json",
+      "bytes": 586,
+      "sha256": "eb7698bf2db4a7422898e2f16592deec82bb0fce4a805b0713728a5427eb0178"
+    },
+    {
+      "member": "snapshots/002/44020265369-artifacts.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/002/44020265369-artifacts.json",
+      "bytes": 32,
+      "sha256": "244563f989470892c537c9a4622920af0d228ee4528f7d00c64a06d6cd95856c"
+    },
+    {
+      "member": "snapshots/002/44020265369-artifacts.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/002/44020265369-artifacts.json.receipt.json",
+      "bytes": 649,
+      "sha256": "69307860e7e93f105a1ade27c4ddb2416b5991e8abbaecb47a878f2daeb048e2"
+    },
+    {
+      "member": "snapshots/002/44020265369-jobs.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/002/44020265369-jobs.json",
+      "bytes": 9411,
+      "sha256": "814fffcfd6f5c03d8cb22d0632d62143b049b1adc0ba07a740e22a2545a87f84"
+    },
+    {
+      "member": "snapshots/002/44020265369-jobs.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/002/44020265369-jobs.json.receipt.json",
+      "bytes": 636,
+      "sha256": "32a9150e17a7d3bdeca331755b719aef0b34a1a8a96c079d04ffac472dfbe486"
+    },
+    {
+      "member": "snapshots/002/44020265369-run.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/002/44020265369-run.json",
+      "bytes": 12239,
+      "sha256": "f43cd8dc6ef21b7f4a90340137be54ca644afaf9ccd9fd170d8f1422e470bc8b"
+    },
+    {
+      "member": "snapshots/002/44020265369-run.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/002/44020265369-run.json.receipt.json",
+      "bytes": 586,
+      "sha256": "a7b0200718cd6b303ca673557b3d47ebb1ecdd58e06e4dd50539a0d72639c339"
+    },
+    {
+      "member": "snapshots/003/44020265248-artifacts.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/003/44020265248-artifacts.json",
+      "bytes": 767,
+      "sha256": "13c703ea0cf6e03a1e2f16df764c80d5ed7359154dbd8572116c96315eddc501"
+    },
+    {
+      "member": "snapshots/003/44020265248-artifacts.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/003/44020265248-artifacts.json.receipt.json",
+      "bytes": 650,
+      "sha256": "b6328746e015b8d5f3e27e408f7a41e56f47a9923d2c184ca2c821ff52280561"
+    },
+    {
+      "member": "snapshots/003/44020265248-jobs.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/003/44020265248-jobs.json",
+      "bytes": 2877,
+      "sha256": "907579fe4a2edb32decc1046d0cbc6ac8c5a42a689da56ebac709b222825db67"
+    },
+    {
+      "member": "snapshots/003/44020265248-jobs.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/003/44020265248-jobs.json.receipt.json",
+      "bytes": 636,
+      "sha256": "a3a65c8c2cbc7d8f4ca94233a7741ab341fc5e4969b196bf895cf3598aecf271"
+    },
+    {
+      "member": "snapshots/003/44020265248-run.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/003/44020265248-run.json",
+      "bytes": 12285,
+      "sha256": "2b0c7464c2994c71e72322b690f6c4b2001daa300f73c6628ec5a4a7cfe4b1b7"
+    },
+    {
+      "member": "snapshots/003/44020265248-run.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/003/44020265248-run.json.receipt.json",
+      "bytes": 586,
+      "sha256": "90623645abdc91d12e7d7d46a94698dd2ff495843fd7c022f0e5f045c178a176"
+    },
+    {
+      "member": "snapshots/003/44020265273-artifacts.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/003/44020265273-artifacts.json",
+      "bytes": 766,
+      "sha256": "1e056705aa0b29adc805bea6afeb49cf9822413bf79d8088aa53418788c0afde"
+    },
+    {
+      "member": "snapshots/003/44020265273-artifacts.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/003/44020265273-artifacts.json.receipt.json",
+      "bytes": 649,
+      "sha256": "4b4973d14df945460db3a25f539740a6f1e7c8365da1bd109e4f8c8e66d2272b"
+    },
+    {
+      "member": "snapshots/003/44020265273-jobs.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/003/44020265273-jobs.json",
+      "bytes": 3775,
+      "sha256": "fad571a77926d876a579be2c85a9dc682ebc4deae7766336d6a687abcb3a8751"
+    },
+    {
+      "member": "snapshots/003/44020265273-jobs.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/003/44020265273-jobs.json.receipt.json",
+      "bytes": 636,
+      "sha256": "64a922f4998f26310bc02624e8b17cafa1289122ae0f22711c88b2d52f66061e"
+    },
+    {
+      "member": "snapshots/003/44020265273-run.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/003/44020265273-run.json",
+      "bytes": 12273,
+      "sha256": "9d400390439ac020ecdf4a8abcbabacb90b6ebd05bfc9f15befcbcb5a6cd0223"
+    },
+    {
+      "member": "snapshots/003/44020265273-run.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/003/44020265273-run.json.receipt.json",
+      "bytes": 586,
+      "sha256": "dde5d71f961cd168c3b253a3e1afda5f5410fdf79fdac0dc16f08ee46d03e087"
+    },
+    {
+      "member": "snapshots/003/44020265369-artifacts.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/003/44020265369-artifacts.json",
+      "bytes": 32,
+      "sha256": "244563f989470892c537c9a4622920af0d228ee4528f7d00c64a06d6cd95856c"
+    },
+    {
+      "member": "snapshots/003/44020265369-artifacts.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/003/44020265369-artifacts.json.receipt.json",
+      "bytes": 649,
+      "sha256": "2138132831f966530cd02b63282da57535756c86d172f9904e54622a1dc23d1a"
+    },
+    {
+      "member": "snapshots/003/44020265369-jobs.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/003/44020265369-jobs.json",
+      "bytes": 9411,
+      "sha256": "814fffcfd6f5c03d8cb22d0632d62143b049b1adc0ba07a740e22a2545a87f84"
+    },
+    {
+      "member": "snapshots/003/44020265369-jobs.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/003/44020265369-jobs.json.receipt.json",
+      "bytes": 636,
+      "sha256": "0c57089293e37e1af68740501c9f28304bef150675648e33f9850e376b0dac7c"
+    },
+    {
+      "member": "snapshots/003/44020265369-run.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/003/44020265369-run.json",
+      "bytes": 12239,
+      "sha256": "f43cd8dc6ef21b7f4a90340137be54ca644afaf9ccd9fd170d8f1422e470bc8b"
+    },
+    {
+      "member": "snapshots/003/44020265369-run.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/003/44020265369-run.json.receipt.json",
+      "bytes": 586,
+      "sha256": "4f064e97b6e3fc6b832239a3569ea69740a70782b1aa391b376da587c564052a"
+    },
+    {
+      "member": "snapshots/004/44020265248-artifacts.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/004/44020265248-artifacts.json",
+      "bytes": 767,
+      "sha256": "13c703ea0cf6e03a1e2f16df764c80d5ed7359154dbd8572116c96315eddc501"
+    },
+    {
+      "member": "snapshots/004/44020265248-artifacts.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/004/44020265248-artifacts.json.receipt.json",
+      "bytes": 650,
+      "sha256": "0ddf2b6e8f24af6e2fda3dc74f1815051feda9650b213ccec92677ed28e9723f"
+    },
+    {
+      "member": "snapshots/004/44020265248-jobs.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/004/44020265248-jobs.json",
+      "bytes": 2877,
+      "sha256": "907579fe4a2edb32decc1046d0cbc6ac8c5a42a689da56ebac709b222825db67"
+    },
+    {
+      "member": "snapshots/004/44020265248-jobs.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/004/44020265248-jobs.json.receipt.json",
+      "bytes": 636,
+      "sha256": "b14fd72e8a7c3c3485324d4c355b5a401ce9fef40512aa5574d7d3019f75c27a"
+    },
+    {
+      "member": "snapshots/004/44020265248-run.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/004/44020265248-run.json",
+      "bytes": 12285,
+      "sha256": "2b0c7464c2994c71e72322b690f6c4b2001daa300f73c6628ec5a4a7cfe4b1b7"
+    },
+    {
+      "member": "snapshots/004/44020265248-run.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/004/44020265248-run.json.receipt.json",
+      "bytes": 586,
+      "sha256": "0ac07d8ca4f542772d150b47fca9800ce1cd014d6992ce1f5ed7d647c87c143b"
+    },
+    {
+      "member": "snapshots/004/44020265273-artifacts.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/004/44020265273-artifacts.json",
+      "bytes": 766,
+      "sha256": "1e056705aa0b29adc805bea6afeb49cf9822413bf79d8088aa53418788c0afde"
+    },
+    {
+      "member": "snapshots/004/44020265273-artifacts.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/004/44020265273-artifacts.json.receipt.json",
+      "bytes": 649,
+      "sha256": "fcfda9db8ea90084796b3b141cbe38b9cfdf21829209ddbb6361126c33bc79d7"
+    },
+    {
+      "member": "snapshots/004/44020265273-jobs.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/004/44020265273-jobs.json",
+      "bytes": 3775,
+      "sha256": "fad571a77926d876a579be2c85a9dc682ebc4deae7766336d6a687abcb3a8751"
+    },
+    {
+      "member": "snapshots/004/44020265273-jobs.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/004/44020265273-jobs.json.receipt.json",
+      "bytes": 636,
+      "sha256": "163bb3c370e11976b8ea65f234dbb1ed11fe229a16bb3b3697eebce74460434d"
+    },
+    {
+      "member": "snapshots/004/44020265273-run.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/004/44020265273-run.json",
+      "bytes": 12273,
+      "sha256": "9d400390439ac020ecdf4a8abcbabacb90b6ebd05bfc9f15befcbcb5a6cd0223"
+    },
+    {
+      "member": "snapshots/004/44020265273-run.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/004/44020265273-run.json.receipt.json",
+      "bytes": 586,
+      "sha256": "82ede6bd6a7261ec974ff93aa806edb889a458510fe5941535392d6b219e52eb"
+    },
+    {
+      "member": "snapshots/004/44020265369-artifacts.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/004/44020265369-artifacts.json",
+      "bytes": 32,
+      "sha256": "244563f989470892c537c9a4622920af0d228ee4528f7d00c64a06d6cd95856c"
+    },
+    {
+      "member": "snapshots/004/44020265369-artifacts.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/004/44020265369-artifacts.json.receipt.json",
+      "bytes": 649,
+      "sha256": "26205eb163419181cebb40583e8686b6eab1560109346999a46e714b45c5cb33"
+    },
+    {
+      "member": "snapshots/004/44020265369-jobs.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/004/44020265369-jobs.json",
+      "bytes": 9411,
+      "sha256": "814fffcfd6f5c03d8cb22d0632d62143b049b1adc0ba07a740e22a2545a87f84"
+    },
+    {
+      "member": "snapshots/004/44020265369-jobs.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/004/44020265369-jobs.json.receipt.json",
+      "bytes": 636,
+      "sha256": "b83301ef08088c8910c962bf47dd3be92a422c1d669717efe16ffc64433741d1"
+    },
+    {
+      "member": "snapshots/004/44020265369-run.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/004/44020265369-run.json",
+      "bytes": 12239,
+      "sha256": "f43cd8dc6ef21b7f4a90340137be54ca644afaf9ccd9fd170d8f1422e470bc8b"
+    },
+    {
+      "member": "snapshots/004/44020265369-run.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/004/44020265369-run.json.receipt.json",
+      "bytes": 586,
+      "sha256": "9c063fae70ec9b9dc7c91770bef4aca9c5bf255f3750eaa4500f9e1274f1270c"
+    },
+    {
+      "member": "snapshots/005/44020265248-artifacts.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/005/44020265248-artifacts.json",
+      "bytes": 767,
+      "sha256": "13c703ea0cf6e03a1e2f16df764c80d5ed7359154dbd8572116c96315eddc501"
+    },
+    {
+      "member": "snapshots/005/44020265248-artifacts.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/005/44020265248-artifacts.json.receipt.json",
+      "bytes": 650,
+      "sha256": "e6fb58f1a961a1c738dc7b414b4789f6f5324cbd218f8182df24d34a6020d9bf"
+    },
+    {
+      "member": "snapshots/005/44020265248-jobs.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/005/44020265248-jobs.json",
+      "bytes": 2877,
+      "sha256": "907579fe4a2edb32decc1046d0cbc6ac8c5a42a689da56ebac709b222825db67"
+    },
+    {
+      "member": "snapshots/005/44020265248-jobs.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/005/44020265248-jobs.json.receipt.json",
+      "bytes": 634,
+      "sha256": "f35ea88b39a037a7ed06cdde7c4da627d6d9437fc5f210e517e36d0b3b440731"
+    },
+    {
+      "member": "snapshots/005/44020265248-run.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/005/44020265248-run.json",
+      "bytes": 12285,
+      "sha256": "2b0c7464c2994c71e72322b690f6c4b2001daa300f73c6628ec5a4a7cfe4b1b7"
+    },
+    {
+      "member": "snapshots/005/44020265248-run.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/005/44020265248-run.json.receipt.json",
+      "bytes": 586,
+      "sha256": "def3d86cb59c0ece5be0d4f59b8c0ffa7b26057f9829929d06b06eac8efd92e3"
+    },
+    {
+      "member": "snapshots/005/44020265273-artifacts.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/005/44020265273-artifacts.json",
+      "bytes": 766,
+      "sha256": "1e056705aa0b29adc805bea6afeb49cf9822413bf79d8088aa53418788c0afde"
+    },
+    {
+      "member": "snapshots/005/44020265273-artifacts.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/005/44020265273-artifacts.json.receipt.json",
+      "bytes": 650,
+      "sha256": "e642357a97d72fd034dda090a82ac86887234e1892ef2b92ed135ec1d3fcf9ee"
+    },
+    {
+      "member": "snapshots/005/44020265273-jobs.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/005/44020265273-jobs.json",
+      "bytes": 3775,
+      "sha256": "fad571a77926d876a579be2c85a9dc682ebc4deae7766336d6a687abcb3a8751"
+    },
+    {
+      "member": "snapshots/005/44020265273-jobs.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/005/44020265273-jobs.json.receipt.json",
+      "bytes": 636,
+      "sha256": "c4c064eab7426031e2e63e3de98b99faccf1f30eab9d2d4d67bbda5b3e119437"
+    },
+    {
+      "member": "snapshots/005/44020265273-run.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/005/44020265273-run.json",
+      "bytes": 12273,
+      "sha256": "9d400390439ac020ecdf4a8abcbabacb90b6ebd05bfc9f15befcbcb5a6cd0223"
+    },
+    {
+      "member": "snapshots/005/44020265273-run.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/005/44020265273-run.json.receipt.json",
+      "bytes": 586,
+      "sha256": "55816b878663a8bdacb8931fcc2258d186730b31e018a245a33e226e6f2b1ba2"
+    },
+    {
+      "member": "snapshots/005/44020265369-artifacts.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/005/44020265369-artifacts.json",
+      "bytes": 32,
+      "sha256": "244563f989470892c537c9a4622920af0d228ee4528f7d00c64a06d6cd95856c"
+    },
+    {
+      "member": "snapshots/005/44020265369-artifacts.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/005/44020265369-artifacts.json.receipt.json",
+      "bytes": 649,
+      "sha256": "60ae191a158bfe56b30c4e251743aad209c14504a415cf6accf7df29e1ddf2c8"
+    },
+    {
+      "member": "snapshots/005/44020265369-jobs.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/005/44020265369-jobs.json",
+      "bytes": 9411,
+      "sha256": "814fffcfd6f5c03d8cb22d0632d62143b049b1adc0ba07a740e22a2545a87f84"
+    },
+    {
+      "member": "snapshots/005/44020265369-jobs.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/005/44020265369-jobs.json.receipt.json",
+      "bytes": 636,
+      "sha256": "f4e424da31e017d647f16130645271b9c2d1b3dd6df98e5860fa7cc2a1b9ef15"
+    },
+    {
+      "member": "snapshots/005/44020265369-run.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/005/44020265369-run.json",
+      "bytes": 12239,
+      "sha256": "f43cd8dc6ef21b7f4a90340137be54ca644afaf9ccd9fd170d8f1422e470bc8b"
+    },
+    {
+      "member": "snapshots/005/44020265369-run.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/005/44020265369-run.json.receipt.json",
+      "bytes": 585,
+      "sha256": "b3f5b47fec4b6d02f5913846abc61f55ac6303e7c350db42778c1dc143f7da1f"
+    },
+    {
+      "member": "snapshots/006/44020265248-artifacts.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/006/44020265248-artifacts.json",
+      "bytes": 767,
+      "sha256": "13c703ea0cf6e03a1e2f16df764c80d5ed7359154dbd8572116c96315eddc501"
+    },
+    {
+      "member": "snapshots/006/44020265248-artifacts.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/006/44020265248-artifacts.json.receipt.json",
+      "bytes": 650,
+      "sha256": "b998eb3e904c8f7bec28c331c427d6f356eddcf46136093a4bc40b8fea3c7e1f"
+    },
+    {
+      "member": "snapshots/006/44020265248-jobs.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/006/44020265248-jobs.json",
+      "bytes": 2877,
+      "sha256": "907579fe4a2edb32decc1046d0cbc6ac8c5a42a689da56ebac709b222825db67"
+    },
+    {
+      "member": "snapshots/006/44020265248-jobs.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/006/44020265248-jobs.json.receipt.json",
+      "bytes": 636,
+      "sha256": "541c257bc1fd1b3111c505c059ea36da2d4c70e757116269293037f4e7ccf965"
+    },
+    {
+      "member": "snapshots/006/44020265248-run.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/006/44020265248-run.json",
+      "bytes": 12285,
+      "sha256": "2b0c7464c2994c71e72322b690f6c4b2001daa300f73c6628ec5a4a7cfe4b1b7"
+    },
+    {
+      "member": "snapshots/006/44020265248-run.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/006/44020265248-run.json.receipt.json",
+      "bytes": 586,
+      "sha256": "a62e5d9c2d224cc2c007fc7f953a5dfd6e11300a1d788bd531bbfc35e639f75c"
+    },
+    {
+      "member": "snapshots/006/44020265273-artifacts.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/006/44020265273-artifacts.json",
+      "bytes": 766,
+      "sha256": "1e056705aa0b29adc805bea6afeb49cf9822413bf79d8088aa53418788c0afde"
+    },
+    {
+      "member": "snapshots/006/44020265273-artifacts.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/006/44020265273-artifacts.json.receipt.json",
+      "bytes": 650,
+      "sha256": "2b4363a9ac7f2c15afaced59f41eedce8dc51c3910732b95f4ff3bf5576ce53f"
+    },
+    {
+      "member": "snapshots/006/44020265273-jobs.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/006/44020265273-jobs.json",
+      "bytes": 3775,
+      "sha256": "fad571a77926d876a579be2c85a9dc682ebc4deae7766336d6a687abcb3a8751"
+    },
+    {
+      "member": "snapshots/006/44020265273-jobs.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/006/44020265273-jobs.json.receipt.json",
+      "bytes": 636,
+      "sha256": "f825b109209c4d431b97dbf88a38611c5044a278b6492ee20ac9b339304c546d"
+    },
+    {
+      "member": "snapshots/006/44020265273-run.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/006/44020265273-run.json",
+      "bytes": 12273,
+      "sha256": "9d400390439ac020ecdf4a8abcbabacb90b6ebd05bfc9f15befcbcb5a6cd0223"
+    },
+    {
+      "member": "snapshots/006/44020265273-run.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/006/44020265273-run.json.receipt.json",
+      "bytes": 586,
+      "sha256": "c774cffecfc914c4e9028bdb7fbc2b2182d82af1b358e762f826a0174673e0cb"
+    },
+    {
+      "member": "snapshots/006/44020265369-artifacts.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/006/44020265369-artifacts.json",
+      "bytes": 32,
+      "sha256": "244563f989470892c537c9a4622920af0d228ee4528f7d00c64a06d6cd95856c"
+    },
+    {
+      "member": "snapshots/006/44020265369-artifacts.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/006/44020265369-artifacts.json.receipt.json",
+      "bytes": 649,
+      "sha256": "3db452b7c4a858f542e79507ddf2660517531c5f0e6995deb7467ffa1043fdd2"
+    },
+    {
+      "member": "snapshots/006/44020265369-jobs.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/006/44020265369-jobs.json",
+      "bytes": 9411,
+      "sha256": "814fffcfd6f5c03d8cb22d0632d62143b049b1adc0ba07a740e22a2545a87f84"
+    },
+    {
+      "member": "snapshots/006/44020265369-jobs.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/006/44020265369-jobs.json.receipt.json",
+      "bytes": 636,
+      "sha256": "3ac67d0a32e372149ae9274093156b8d41675983911cac5ed82f79bcacc62409"
+    },
+    {
+      "member": "snapshots/006/44020265369-run.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/006/44020265369-run.json",
+      "bytes": 12239,
+      "sha256": "f43cd8dc6ef21b7f4a90340137be54ca644afaf9ccd9fd170d8f1422e470bc8b"
+    },
+    {
+      "member": "snapshots/006/44020265369-run.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/006/44020265369-run.json.receipt.json",
+      "bytes": 586,
+      "sha256": "fcac92ea3606c9b58fce5b6b644d03d7e61f75e2df494397cbf4523964b26dde"
+    },
+    {
+      "member": "snapshots/007/44020265248-artifacts.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/007/44020265248-artifacts.json",
+      "bytes": 767,
+      "sha256": "13c703ea0cf6e03a1e2f16df764c80d5ed7359154dbd8572116c96315eddc501"
+    },
+    {
+      "member": "snapshots/007/44020265248-artifacts.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/007/44020265248-artifacts.json.receipt.json",
+      "bytes": 649,
+      "sha256": "04ae9b2e987e607fe119151d63d4f97c9d10c19da51686e710f808c5585db836"
+    },
+    {
+      "member": "snapshots/007/44020265248-jobs.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/007/44020265248-jobs.json",
+      "bytes": 2877,
+      "sha256": "907579fe4a2edb32decc1046d0cbc6ac8c5a42a689da56ebac709b222825db67"
+    },
+    {
+      "member": "snapshots/007/44020265248-jobs.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/007/44020265248-jobs.json.receipt.json",
+      "bytes": 636,
+      "sha256": "e2376712dde1d45b0697dd8b79e93ab6fb5b0d3b2cbbef20e396c2be6456587d"
+    },
+    {
+      "member": "snapshots/007/44020265248-run.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/007/44020265248-run.json",
+      "bytes": 12285,
+      "sha256": "2b0c7464c2994c71e72322b690f6c4b2001daa300f73c6628ec5a4a7cfe4b1b7"
+    },
+    {
+      "member": "snapshots/007/44020265248-run.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/007/44020265248-run.json.receipt.json",
+      "bytes": 586,
+      "sha256": "5b54aa044d05c9924a784102917c1c8dbcda4c2ae20f337e63540c5b257f7a20"
+    },
+    {
+      "member": "snapshots/007/44020265273-artifacts.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/007/44020265273-artifacts.json",
+      "bytes": 766,
+      "sha256": "1e056705aa0b29adc805bea6afeb49cf9822413bf79d8088aa53418788c0afde"
+    },
+    {
+      "member": "snapshots/007/44020265273-artifacts.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/007/44020265273-artifacts.json.receipt.json",
+      "bytes": 650,
+      "sha256": "b9512cbcdc3bfe5b7e4dd0c0e5b727916708d3299eb4da434458ade4adaf30c7"
+    },
+    {
+      "member": "snapshots/007/44020265273-jobs.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/007/44020265273-jobs.json",
+      "bytes": 3775,
+      "sha256": "fad571a77926d876a579be2c85a9dc682ebc4deae7766336d6a687abcb3a8751"
+    },
+    {
+      "member": "snapshots/007/44020265273-jobs.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/007/44020265273-jobs.json.receipt.json",
+      "bytes": 636,
+      "sha256": "ddd4a6f52a3f179c69cf8136020331995b56dea0462dbd09328fb61dda040476"
+    },
+    {
+      "member": "snapshots/007/44020265273-run.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/007/44020265273-run.json",
+      "bytes": 12273,
+      "sha256": "9d400390439ac020ecdf4a8abcbabacb90b6ebd05bfc9f15befcbcb5a6cd0223"
+    },
+    {
+      "member": "snapshots/007/44020265273-run.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/007/44020265273-run.json.receipt.json",
+      "bytes": 586,
+      "sha256": "f859604397b4d28650e990265a9f124d39ff740a5b51eea2fc7d509b652ba815"
+    },
+    {
+      "member": "snapshots/007/44020265369-artifacts.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/007/44020265369-artifacts.json",
+      "bytes": 756,
+      "sha256": "721052b224389d05c2a33bf949ddcd4ae5a9bd2d74b36c7eb2121105c9991f2d"
+    },
+    {
+      "member": "snapshots/007/44020265369-artifacts.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/007/44020265369-artifacts.json.receipt.json",
+      "bytes": 650,
+      "sha256": "946b6531ab2b20265fcd956dd32bdd9f69ed59f76351bc9df45659a0c4e4f7b4"
+    },
+    {
+      "member": "snapshots/007/44020265369-jobs.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/007/44020265369-jobs.json",
+      "bytes": 9626,
+      "sha256": "a0a04a6ab5ef6b8e4472cf5e2dba3367acc395fd37e814b2e8e268f81caf6210"
+    },
+    {
+      "member": "snapshots/007/44020265369-jobs.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/007/44020265369-jobs.json.receipt.json",
+      "bytes": 635,
+      "sha256": "4dc46a33300812d0a314bba60aea3706786853e7342a908a1ed1d437c523320a"
+    },
+    {
+      "member": "snapshots/007/44020265369-run.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/007/44020265369-run.json",
+      "bytes": 12239,
+      "sha256": "f43cd8dc6ef21b7f4a90340137be54ca644afaf9ccd9fd170d8f1422e470bc8b"
+    },
+    {
+      "member": "snapshots/007/44020265369-run.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/007/44020265369-run.json.receipt.json",
+      "bytes": 586,
+      "sha256": "93f1d97224c35da9e92d77095e9808749dc110866b445efd662a63fc14c3d634"
+    },
+    {
+      "member": "snapshots/008/44020265248-artifacts.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/008/44020265248-artifacts.json",
+      "bytes": 767,
+      "sha256": "13c703ea0cf6e03a1e2f16df764c80d5ed7359154dbd8572116c96315eddc501"
+    },
+    {
+      "member": "snapshots/008/44020265248-artifacts.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/008/44020265248-artifacts.json.receipt.json",
+      "bytes": 650,
+      "sha256": "1d91572ec0e040bf703a4082508edb624e2c4ca2d0f3d70aaf033fad503ba0dd"
+    },
+    {
+      "member": "snapshots/008/44020265248-jobs.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/008/44020265248-jobs.json",
+      "bytes": 2877,
+      "sha256": "907579fe4a2edb32decc1046d0cbc6ac8c5a42a689da56ebac709b222825db67"
+    },
+    {
+      "member": "snapshots/008/44020265248-jobs.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/008/44020265248-jobs.json.receipt.json",
+      "bytes": 636,
+      "sha256": "3d86fa283b380e59fa566f50cf426837b8355e785a0170ef41cccfb19afa9f71"
+    },
+    {
+      "member": "snapshots/008/44020265248-run.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/008/44020265248-run.json",
+      "bytes": 12285,
+      "sha256": "2b0c7464c2994c71e72322b690f6c4b2001daa300f73c6628ec5a4a7cfe4b1b7"
+    },
+    {
+      "member": "snapshots/008/44020265248-run.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/008/44020265248-run.json.receipt.json",
+      "bytes": 586,
+      "sha256": "dbf5a8c44be2b05f9eba450ad869c7fa1e178894c229107baa192b66bad94824"
+    },
+    {
+      "member": "snapshots/008/44020265273-artifacts.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/008/44020265273-artifacts.json",
+      "bytes": 766,
+      "sha256": "1e056705aa0b29adc805bea6afeb49cf9822413bf79d8088aa53418788c0afde"
+    },
+    {
+      "member": "snapshots/008/44020265273-artifacts.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/008/44020265273-artifacts.json.receipt.json",
+      "bytes": 650,
+      "sha256": "bddc83a1771931fe33f74732b5ed92c8afd387a7ddc02238c5957e3e697a88b6"
+    },
+    {
+      "member": "snapshots/008/44020265273-jobs.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/008/44020265273-jobs.json",
+      "bytes": 3775,
+      "sha256": "fad571a77926d876a579be2c85a9dc682ebc4deae7766336d6a687abcb3a8751"
+    },
+    {
+      "member": "snapshots/008/44020265273-jobs.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/008/44020265273-jobs.json.receipt.json",
+      "bytes": 636,
+      "sha256": "2137122c633d5de33fe31bbae374ce495b5cd06e78e5b17dcde6755016730a35"
+    },
+    {
+      "member": "snapshots/008/44020265273-run.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/008/44020265273-run.json",
+      "bytes": 12273,
+      "sha256": "9d400390439ac020ecdf4a8abcbabacb90b6ebd05bfc9f15befcbcb5a6cd0223"
+    },
+    {
+      "member": "snapshots/008/44020265273-run.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/008/44020265273-run.json.receipt.json",
+      "bytes": 586,
+      "sha256": "0cc631e0dc5a3f93fdc69def1d75b0f0a15cc88320ec34f9e36ec51c10a798b9"
+    },
+    {
+      "member": "snapshots/008/44020265369-artifacts.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/008/44020265369-artifacts.json",
+      "bytes": 756,
+      "sha256": "721052b224389d05c2a33bf949ddcd4ae5a9bd2d74b36c7eb2121105c9991f2d"
+    },
+    {
+      "member": "snapshots/008/44020265369-artifacts.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/008/44020265369-artifacts.json.receipt.json",
+      "bytes": 650,
+      "sha256": "3ce10be29d77d476a0bb9fe76a4e28ba2aca0f2acfe61da106d6b3923b9c7dd4"
+    },
+    {
+      "member": "snapshots/008/44020265369-jobs.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/008/44020265369-jobs.json",
+      "bytes": 9865,
+      "sha256": "abc465e4463ae985ac0759606a001da32241830826918f1944ee7164946755d4"
+    },
+    {
+      "member": "snapshots/008/44020265369-jobs.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/008/44020265369-jobs.json.receipt.json",
+      "bytes": 636,
+      "sha256": "9d0a587c862a9f92a275b7603bee1cbf92ef3b406cacda95a3646d7276cc64cb"
+    },
+    {
+      "member": "snapshots/008/44020265369-run.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/008/44020265369-run.json",
+      "bytes": 12239,
+      "sha256": "f43cd8dc6ef21b7f4a90340137be54ca644afaf9ccd9fd170d8f1422e470bc8b"
+    },
+    {
+      "member": "snapshots/008/44020265369-run.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/008/44020265369-run.json.receipt.json",
+      "bytes": 585,
+      "sha256": "eb89d8adba4a7e5520a3d536eb58fe656418c4be9b3c167c959f4f07ffe27565"
+    },
+    {
+      "member": "snapshots/009/44020265248-artifacts.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/009/44020265248-artifacts.json",
+      "bytes": 767,
+      "sha256": "13c703ea0cf6e03a1e2f16df764c80d5ed7359154dbd8572116c96315eddc501"
+    },
+    {
+      "member": "snapshots/009/44020265248-artifacts.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/009/44020265248-artifacts.json.receipt.json",
+      "bytes": 650,
+      "sha256": "d6f5d765d0a9821798f6c27c5ea0e108d2e0ec132ac614430910667f9f89fa33"
+    },
+    {
+      "member": "snapshots/009/44020265248-jobs.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/009/44020265248-jobs.json",
+      "bytes": 2877,
+      "sha256": "907579fe4a2edb32decc1046d0cbc6ac8c5a42a689da56ebac709b222825db67"
+    },
+    {
+      "member": "snapshots/009/44020265248-jobs.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/009/44020265248-jobs.json.receipt.json",
+      "bytes": 636,
+      "sha256": "6162dd734d8f611405185c0400122ce316239a74522dee758bd587fe788176aa"
+    },
+    {
+      "member": "snapshots/009/44020265248-run.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/009/44020265248-run.json",
+      "bytes": 12285,
+      "sha256": "2b0c7464c2994c71e72322b690f6c4b2001daa300f73c6628ec5a4a7cfe4b1b7"
+    },
+    {
+      "member": "snapshots/009/44020265248-run.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/009/44020265248-run.json.receipt.json",
+      "bytes": 586,
+      "sha256": "37db12424d8e89caba29b7e0f7340fdbfde0be030186e99aa335ef2f8090dfb0"
+    },
+    {
+      "member": "snapshots/009/44020265273-artifacts.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/009/44020265273-artifacts.json",
+      "bytes": 766,
+      "sha256": "1e056705aa0b29adc805bea6afeb49cf9822413bf79d8088aa53418788c0afde"
+    },
+    {
+      "member": "snapshots/009/44020265273-artifacts.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/009/44020265273-artifacts.json.receipt.json",
+      "bytes": 650,
+      "sha256": "90e33a884dca89dc0aa872b4bb1fd5a9ec97c2f8f92e1df3fb39b08eeeb26753"
+    },
+    {
+      "member": "snapshots/009/44020265273-jobs.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/009/44020265273-jobs.json",
+      "bytes": 3775,
+      "sha256": "fad571a77926d876a579be2c85a9dc682ebc4deae7766336d6a687abcb3a8751"
+    },
+    {
+      "member": "snapshots/009/44020265273-jobs.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/009/44020265273-jobs.json.receipt.json",
+      "bytes": 636,
+      "sha256": "e6482e6d8a8de483caef30411b8f37acf8b03cb6d6e9e1be789d3688f2ca24c4"
+    },
+    {
+      "member": "snapshots/009/44020265273-run.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/009/44020265273-run.json",
+      "bytes": 12273,
+      "sha256": "9d400390439ac020ecdf4a8abcbabacb90b6ebd05bfc9f15befcbcb5a6cd0223"
+    },
+    {
+      "member": "snapshots/009/44020265273-run.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/009/44020265273-run.json.receipt.json",
+      "bytes": 586,
+      "sha256": "321bd03e5739504f764103244a0f42e266323837da60079a2af8a891d008a7e0"
+    },
+    {
+      "member": "snapshots/009/44020265369-artifacts.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/009/44020265369-artifacts.json",
+      "bytes": 756,
+      "sha256": "721052b224389d05c2a33bf949ddcd4ae5a9bd2d74b36c7eb2121105c9991f2d"
+    },
+    {
+      "member": "snapshots/009/44020265369-artifacts.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/009/44020265369-artifacts.json.receipt.json",
+      "bytes": 650,
+      "sha256": "90b82612ad15ac0cc5f1d426c5a97b9dc5f040024f92b4f4bc7ab0e3a74ca6c6"
+    },
+    {
+      "member": "snapshots/009/44020265369-jobs.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/009/44020265369-jobs.json",
+      "bytes": 9865,
+      "sha256": "abc465e4463ae985ac0759606a001da32241830826918f1944ee7164946755d4"
+    },
+    {
+      "member": "snapshots/009/44020265369-jobs.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/009/44020265369-jobs.json.receipt.json",
+      "bytes": 636,
+      "sha256": "9a02d60d7034072b55d9b8514b6fc828b5d8e4b31ddd1c0a838ed2ae1c7eae6e"
+    },
+    {
+      "member": "snapshots/009/44020265369-run.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/009/44020265369-run.json",
+      "bytes": 12239,
+      "sha256": "f43cd8dc6ef21b7f4a90340137be54ca644afaf9ccd9fd170d8f1422e470bc8b"
+    },
+    {
+      "member": "snapshots/009/44020265369-run.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/009/44020265369-run.json.receipt.json",
+      "bytes": 585,
+      "sha256": "46ed42602c0f17655e86e63e09c4acc7599df0a1ae981ba61556d16d37c35265"
+    },
+    {
+      "member": "snapshots/010/44020265248-artifacts.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/010/44020265248-artifacts.json",
+      "bytes": 767,
+      "sha256": "13c703ea0cf6e03a1e2f16df764c80d5ed7359154dbd8572116c96315eddc501"
+    },
+    {
+      "member": "snapshots/010/44020265248-artifacts.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/010/44020265248-artifacts.json.receipt.json",
+      "bytes": 650,
+      "sha256": "d3ce93a5ddcbac5068605ae2c6545abbf09302fd1cf62f9ce0d67082bd815883"
+    },
+    {
+      "member": "snapshots/010/44020265248-jobs.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/010/44020265248-jobs.json",
+      "bytes": 2877,
+      "sha256": "907579fe4a2edb32decc1046d0cbc6ac8c5a42a689da56ebac709b222825db67"
+    },
+    {
+      "member": "snapshots/010/44020265248-jobs.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/010/44020265248-jobs.json.receipt.json",
+      "bytes": 636,
+      "sha256": "40dee2c40aefaa01cc0f036446b5964b24c7b651dda110e4cf67106be14e0e02"
+    },
+    {
+      "member": "snapshots/010/44020265248-run.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/010/44020265248-run.json",
+      "bytes": 12285,
+      "sha256": "2b0c7464c2994c71e72322b690f6c4b2001daa300f73c6628ec5a4a7cfe4b1b7"
+    },
+    {
+      "member": "snapshots/010/44020265248-run.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/010/44020265248-run.json.receipt.json",
+      "bytes": 586,
+      "sha256": "4bdf521de834020ae49f4ceef342acc5a613f8425a1575920da0fecf7a4bd43a"
+    },
+    {
+      "member": "snapshots/010/44020265273-artifacts.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/010/44020265273-artifacts.json",
+      "bytes": 766,
+      "sha256": "1e056705aa0b29adc805bea6afeb49cf9822413bf79d8088aa53418788c0afde"
+    },
+    {
+      "member": "snapshots/010/44020265273-artifacts.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/010/44020265273-artifacts.json.receipt.json",
+      "bytes": 650,
+      "sha256": "a4a172935dd65e49d638dae57332dee3370947c1298f7d65b3748edd7af8e0d7"
+    },
+    {
+      "member": "snapshots/010/44020265273-jobs.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/010/44020265273-jobs.json",
+      "bytes": 3775,
+      "sha256": "fad571a77926d876a579be2c85a9dc682ebc4deae7766336d6a687abcb3a8751"
+    },
+    {
+      "member": "snapshots/010/44020265273-jobs.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/010/44020265273-jobs.json.receipt.json",
+      "bytes": 636,
+      "sha256": "9bf36a54a434978a6742dd9a870bd20122c7cf9de248de08b6aff6fb89ba3863"
+    },
+    {
+      "member": "snapshots/010/44020265273-run.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/010/44020265273-run.json",
+      "bytes": 12273,
+      "sha256": "9d400390439ac020ecdf4a8abcbabacb90b6ebd05bfc9f15befcbcb5a6cd0223"
+    },
+    {
+      "member": "snapshots/010/44020265273-run.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/010/44020265273-run.json.receipt.json",
+      "bytes": 586,
+      "sha256": "715ab24eec1add10626ebb27e23c942d67f9a2601ca3923614591951095740f3"
+    },
+    {
+      "member": "snapshots/010/44020265369-artifacts.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/010/44020265369-artifacts.json",
+      "bytes": 1479,
+      "sha256": "284e1d62f9f91697dfdb1fafd7ce8bd5f8518688d28d67b817e802d704fbeb7c"
+    },
+    {
+      "member": "snapshots/010/44020265369-artifacts.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/010/44020265369-artifacts.json.receipt.json",
+      "bytes": 651,
+      "sha256": "7f7e541c7ec1a6274e30ec6877578dc64d10d194171e576e7544bd64576513a9"
+    },
+    {
+      "member": "snapshots/010/44020265369-jobs.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/010/44020265369-jobs.json",
+      "bytes": 10319,
+      "sha256": "305b9b9c8554f83a6d392eb4bdc8de842d1cab29bbd56691483b9ee4e0e8197f"
+    },
+    {
+      "member": "snapshots/010/44020265369-jobs.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/010/44020265369-jobs.json.receipt.json",
+      "bytes": 637,
+      "sha256": "89b25d2a2c8ecfd41583bfbee15b2f938711492d4c3f26263b009e064177314a"
+    },
+    {
+      "member": "snapshots/010/44020265369-run.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/010/44020265369-run.json",
+      "bytes": 12239,
+      "sha256": "f43cd8dc6ef21b7f4a90340137be54ca644afaf9ccd9fd170d8f1422e470bc8b"
+    },
+    {
+      "member": "snapshots/010/44020265369-run.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/010/44020265369-run.json.receipt.json",
+      "bytes": 586,
+      "sha256": "feb68e3a04158f669366d81274d5bc2500ca78e1d045fdb9c04eaed1fcb5f56b"
+    },
+    {
+      "member": "snapshots/011/44020265248-artifacts.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/011/44020265248-artifacts.json",
+      "bytes": 767,
+      "sha256": "13c703ea0cf6e03a1e2f16df764c80d5ed7359154dbd8572116c96315eddc501"
+    },
+    {
+      "member": "snapshots/011/44020265248-artifacts.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/011/44020265248-artifacts.json.receipt.json",
+      "bytes": 649,
+      "sha256": "e677bb677bd727c9587e1188e831f88c828206df5a2781d68d3d2d84d62a7e58"
+    },
+    {
+      "member": "snapshots/011/44020265248-jobs.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/011/44020265248-jobs.json",
+      "bytes": 2877,
+      "sha256": "907579fe4a2edb32decc1046d0cbc6ac8c5a42a689da56ebac709b222825db67"
+    },
+    {
+      "member": "snapshots/011/44020265248-jobs.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/011/44020265248-jobs.json.receipt.json",
+      "bytes": 636,
+      "sha256": "144203ea35d46ce7d1268fc7ffc588aef7f8ea306ed5db8cec85e0b206bf64d4"
+    },
+    {
+      "member": "snapshots/011/44020265248-run.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/011/44020265248-run.json",
+      "bytes": 12285,
+      "sha256": "2b0c7464c2994c71e72322b690f6c4b2001daa300f73c6628ec5a4a7cfe4b1b7"
+    },
+    {
+      "member": "snapshots/011/44020265248-run.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/011/44020265248-run.json.receipt.json",
+      "bytes": 586,
+      "sha256": "e284676e5f97a6fa8f5ea3c49b5ac6954b686fffdab134ce3279518f7cb551ef"
+    },
+    {
+      "member": "snapshots/011/44020265273-artifacts.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/011/44020265273-artifacts.json",
+      "bytes": 766,
+      "sha256": "1e056705aa0b29adc805bea6afeb49cf9822413bf79d8088aa53418788c0afde"
+    },
+    {
+      "member": "snapshots/011/44020265273-artifacts.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/011/44020265273-artifacts.json.receipt.json",
+      "bytes": 650,
+      "sha256": "a4e6e85ca942fb2ea6909820b4aedb032e5ee84f03c3527ef0ec19ace0d88f91"
+    },
+    {
+      "member": "snapshots/011/44020265273-jobs.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/011/44020265273-jobs.json",
+      "bytes": 3775,
+      "sha256": "fad571a77926d876a579be2c85a9dc682ebc4deae7766336d6a687abcb3a8751"
+    },
+    {
+      "member": "snapshots/011/44020265273-jobs.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/011/44020265273-jobs.json.receipt.json",
+      "bytes": 636,
+      "sha256": "b2a02172f5ff93eaf232a100e7df1537f263988b969b780da3edb5382ced71ae"
+    },
+    {
+      "member": "snapshots/011/44020265273-run.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/011/44020265273-run.json",
+      "bytes": 12273,
+      "sha256": "9d400390439ac020ecdf4a8abcbabacb90b6ebd05bfc9f15befcbcb5a6cd0223"
+    },
+    {
+      "member": "snapshots/011/44020265273-run.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/011/44020265273-run.json.receipt.json",
+      "bytes": 586,
+      "sha256": "937d007975860720b84282beae5f54338f3b53399cfde4a5d224202f367ef197"
+    },
+    {
+      "member": "snapshots/011/44020265369-artifacts.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/011/44020265369-artifacts.json",
+      "bytes": 1479,
+      "sha256": "284e1d62f9f91697dfdb1fafd7ce8bd5f8518688d28d67b817e802d704fbeb7c"
+    },
+    {
+      "member": "snapshots/011/44020265369-artifacts.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/011/44020265369-artifacts.json.receipt.json",
+      "bytes": 651,
+      "sha256": "01f1200c1136821cb2ee58222eacb116070638076b2c002eb248b3a4fa1f16fa"
+    },
+    {
+      "member": "snapshots/011/44020265369-jobs.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/011/44020265369-jobs.json",
+      "bytes": 10319,
+      "sha256": "305b9b9c8554f83a6d392eb4bdc8de842d1cab29bbd56691483b9ee4e0e8197f"
+    },
+    {
+      "member": "snapshots/011/44020265369-jobs.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/011/44020265369-jobs.json.receipt.json",
+      "bytes": 637,
+      "sha256": "3532f063d522381decff7433dba607079c8a31f4245f187b8222429a45015a92"
+    },
+    {
+      "member": "snapshots/011/44020265369-run.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/011/44020265369-run.json",
+      "bytes": 12239,
+      "sha256": "f43cd8dc6ef21b7f4a90340137be54ca644afaf9ccd9fd170d8f1422e470bc8b"
+    },
+    {
+      "member": "snapshots/011/44020265369-run.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/011/44020265369-run.json.receipt.json",
+      "bytes": 586,
+      "sha256": "47e2973e7b8456b92e4f3fef46eefe8dd68950430d4d84f526d69b95b2a02470"
+    },
+    {
+      "member": "snapshots/012/44020265248-artifacts.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/012/44020265248-artifacts.json",
+      "bytes": 767,
+      "sha256": "13c703ea0cf6e03a1e2f16df764c80d5ed7359154dbd8572116c96315eddc501"
+    },
+    {
+      "member": "snapshots/012/44020265248-artifacts.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/012/44020265248-artifacts.json.receipt.json",
+      "bytes": 650,
+      "sha256": "5787eef52e56536863ec24cc63de81598253438cfd17e612b6829e03103de5bd"
+    },
+    {
+      "member": "snapshots/012/44020265248-jobs.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/012/44020265248-jobs.json",
+      "bytes": 2877,
+      "sha256": "907579fe4a2edb32decc1046d0cbc6ac8c5a42a689da56ebac709b222825db67"
+    },
+    {
+      "member": "snapshots/012/44020265248-jobs.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/012/44020265248-jobs.json.receipt.json",
+      "bytes": 636,
+      "sha256": "18b20624484d6b360924ca3a817f2f6306242c4becabdd1487c599a4a18d48b8"
+    },
+    {
+      "member": "snapshots/012/44020265248-run.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/012/44020265248-run.json",
+      "bytes": 12285,
+      "sha256": "2b0c7464c2994c71e72322b690f6c4b2001daa300f73c6628ec5a4a7cfe4b1b7"
+    },
+    {
+      "member": "snapshots/012/44020265248-run.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/012/44020265248-run.json.receipt.json",
+      "bytes": 586,
+      "sha256": "be26fdeeb7af724dd709562d15297c9a8ef67041ccabecd65b1db2dd358fa3a3"
+    },
+    {
+      "member": "snapshots/012/44020265273-artifacts.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/012/44020265273-artifacts.json",
+      "bytes": 766,
+      "sha256": "1e056705aa0b29adc805bea6afeb49cf9822413bf79d8088aa53418788c0afde"
+    },
+    {
+      "member": "snapshots/012/44020265273-artifacts.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/012/44020265273-artifacts.json.receipt.json",
+      "bytes": 650,
+      "sha256": "44e559f994270fb0549ef71ea4e4d9e00aaeb6af9d2e557c1bc57977a82ee0e2"
+    },
+    {
+      "member": "snapshots/012/44020265273-jobs.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/012/44020265273-jobs.json",
+      "bytes": 3775,
+      "sha256": "fad571a77926d876a579be2c85a9dc682ebc4deae7766336d6a687abcb3a8751"
+    },
+    {
+      "member": "snapshots/012/44020265273-jobs.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/012/44020265273-jobs.json.receipt.json",
+      "bytes": 635,
+      "sha256": "1f26dd91e9a457c28994fd62ab20e794aca03a8cdbec5fd4e581fd69325be87a"
+    },
+    {
+      "member": "snapshots/012/44020265273-run.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/012/44020265273-run.json",
+      "bytes": 12273,
+      "sha256": "9d400390439ac020ecdf4a8abcbabacb90b6ebd05bfc9f15befcbcb5a6cd0223"
+    },
+    {
+      "member": "snapshots/012/44020265273-run.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/012/44020265273-run.json.receipt.json",
+      "bytes": 586,
+      "sha256": "604d3e8bcf4d5c239d64a4aef5ee8b15cfd5d96f235b48f2ca6226add5659026"
+    },
+    {
+      "member": "snapshots/012/44020265369-artifacts.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/012/44020265369-artifacts.json",
+      "bytes": 1479,
+      "sha256": "284e1d62f9f91697dfdb1fafd7ce8bd5f8518688d28d67b817e802d704fbeb7c"
+    },
+    {
+      "member": "snapshots/012/44020265369-artifacts.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/012/44020265369-artifacts.json.receipt.json",
+      "bytes": 651,
+      "sha256": "cdef5b00c7bf091f53b35246ab8483080941b2c1aafff0642e6645573061aa20"
+    },
+    {
+      "member": "snapshots/012/44020265369-jobs.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/012/44020265369-jobs.json",
+      "bytes": 10319,
+      "sha256": "305b9b9c8554f83a6d392eb4bdc8de842d1cab29bbd56691483b9ee4e0e8197f"
+    },
+    {
+      "member": "snapshots/012/44020265369-jobs.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/012/44020265369-jobs.json.receipt.json",
+      "bytes": 637,
+      "sha256": "8550f02676f0f750a0ba444ee49c37fa5f3d755b1a1c898aeeb65477f908eb1f"
+    },
+    {
+      "member": "snapshots/012/44020265369-run.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/012/44020265369-run.json",
+      "bytes": 12239,
+      "sha256": "f43cd8dc6ef21b7f4a90340137be54ca644afaf9ccd9fd170d8f1422e470bc8b"
+    },
+    {
+      "member": "snapshots/012/44020265369-run.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/012/44020265369-run.json.receipt.json",
+      "bytes": 586,
+      "sha256": "a96789013f1eafa54589c868222f5c5edc9ede92c65795d5fb10852d0abc8957"
+    },
+    {
+      "member": "snapshots/013/44020265248-artifacts.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/013/44020265248-artifacts.json",
+      "bytes": 767,
+      "sha256": "13c703ea0cf6e03a1e2f16df764c80d5ed7359154dbd8572116c96315eddc501"
+    },
+    {
+      "member": "snapshots/013/44020265248-artifacts.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/013/44020265248-artifacts.json.receipt.json",
+      "bytes": 650,
+      "sha256": "d200a724dd83216196573e40d40623410da2f74518968b35ea045b9791125f5d"
+    },
+    {
+      "member": "snapshots/013/44020265248-jobs.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/013/44020265248-jobs.json",
+      "bytes": 2877,
+      "sha256": "907579fe4a2edb32decc1046d0cbc6ac8c5a42a689da56ebac709b222825db67"
+    },
+    {
+      "member": "snapshots/013/44020265248-jobs.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/013/44020265248-jobs.json.receipt.json",
+      "bytes": 635,
+      "sha256": "64303f0c2a4c142db45e1a6661f882d51527b80e1fd9841df091fc99296c9f0b"
+    },
+    {
+      "member": "snapshots/013/44020265248-run.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/013/44020265248-run.json",
+      "bytes": 12285,
+      "sha256": "2b0c7464c2994c71e72322b690f6c4b2001daa300f73c6628ec5a4a7cfe4b1b7"
+    },
+    {
+      "member": "snapshots/013/44020265248-run.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/013/44020265248-run.json.receipt.json",
+      "bytes": 586,
+      "sha256": "6c90c834cb70c73688a1c5337477d084b1fb7c95cbd9fea5334475e7921efc84"
+    },
+    {
+      "member": "snapshots/013/44020265273-artifacts.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/013/44020265273-artifacts.json",
+      "bytes": 766,
+      "sha256": "1e056705aa0b29adc805bea6afeb49cf9822413bf79d8088aa53418788c0afde"
+    },
+    {
+      "member": "snapshots/013/44020265273-artifacts.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/013/44020265273-artifacts.json.receipt.json",
+      "bytes": 650,
+      "sha256": "73951182801b272c32fa450d18b950fcb3b59181e8dab3337c209e8b33231f56"
+    },
+    {
+      "member": "snapshots/013/44020265273-jobs.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/013/44020265273-jobs.json",
+      "bytes": 3775,
+      "sha256": "fad571a77926d876a579be2c85a9dc682ebc4deae7766336d6a687abcb3a8751"
+    },
+    {
+      "member": "snapshots/013/44020265273-jobs.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/013/44020265273-jobs.json.receipt.json",
+      "bytes": 636,
+      "sha256": "706ffea1ad122486ba837defc425c080379b97566a9af15c3fb5dbd0d9033b1d"
+    },
+    {
+      "member": "snapshots/013/44020265273-run.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/013/44020265273-run.json",
+      "bytes": 12273,
+      "sha256": "9d400390439ac020ecdf4a8abcbabacb90b6ebd05bfc9f15befcbcb5a6cd0223"
+    },
+    {
+      "member": "snapshots/013/44020265273-run.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/013/44020265273-run.json.receipt.json",
+      "bytes": 586,
+      "sha256": "4b4be81cc1602fac94aeb40cd5c05e2c7a2787e98fd2977e33412be8ae5e7d7b"
+    },
+    {
+      "member": "snapshots/013/44020265369-artifacts.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/013/44020265369-artifacts.json",
+      "bytes": 1479,
+      "sha256": "284e1d62f9f91697dfdb1fafd7ce8bd5f8518688d28d67b817e802d704fbeb7c"
+    },
+    {
+      "member": "snapshots/013/44020265369-artifacts.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/013/44020265369-artifacts.json.receipt.json",
+      "bytes": 651,
+      "sha256": "2c5945740ec7f78b18d0b3be6ad3c49ec3469e6a1446aa54b53583a987a8c15b"
+    },
+    {
+      "member": "snapshots/013/44020265369-jobs.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/013/44020265369-jobs.json",
+      "bytes": 10319,
+      "sha256": "305b9b9c8554f83a6d392eb4bdc8de842d1cab29bbd56691483b9ee4e0e8197f"
+    },
+    {
+      "member": "snapshots/013/44020265369-jobs.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/013/44020265369-jobs.json.receipt.json",
+      "bytes": 636,
+      "sha256": "517d09a1fefcc33f1ac0ec9eb5ed9b7bf660a6b1a4e199956c4ba84a7b73ff93"
+    },
+    {
+      "member": "snapshots/013/44020265369-run.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/013/44020265369-run.json",
+      "bytes": 12239,
+      "sha256": "f43cd8dc6ef21b7f4a90340137be54ca644afaf9ccd9fd170d8f1422e470bc8b"
+    },
+    {
+      "member": "snapshots/013/44020265369-run.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/013/44020265369-run.json.receipt.json",
+      "bytes": 586,
+      "sha256": "4531ef4f3cf48a96c12d1622a3c32e072df2f933bbdbdc8d9ffce3f2999620b3"
+    },
+    {
+      "member": "snapshots/014/44020265248-artifacts.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/014/44020265248-artifacts.json",
+      "bytes": 767,
+      "sha256": "13c703ea0cf6e03a1e2f16df764c80d5ed7359154dbd8572116c96315eddc501"
+    },
+    {
+      "member": "snapshots/014/44020265248-artifacts.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/014/44020265248-artifacts.json.receipt.json",
+      "bytes": 650,
+      "sha256": "49aa1fa551c9d73f0f883e12a5cfd0508204078e2c7e5346f57f16ba2423bb87"
+    },
+    {
+      "member": "snapshots/014/44020265248-jobs.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/014/44020265248-jobs.json",
+      "bytes": 2877,
+      "sha256": "907579fe4a2edb32decc1046d0cbc6ac8c5a42a689da56ebac709b222825db67"
+    },
+    {
+      "member": "snapshots/014/44020265248-jobs.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/014/44020265248-jobs.json.receipt.json",
+      "bytes": 636,
+      "sha256": "7602eb2dc5d2051833b76c3c10c06297b3f3cf975d34dbdebc6999b707008978"
+    },
+    {
+      "member": "snapshots/014/44020265248-run.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/014/44020265248-run.json",
+      "bytes": 12285,
+      "sha256": "2b0c7464c2994c71e72322b690f6c4b2001daa300f73c6628ec5a4a7cfe4b1b7"
+    },
+    {
+      "member": "snapshots/014/44020265248-run.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/014/44020265248-run.json.receipt.json",
+      "bytes": 585,
+      "sha256": "a4948179048fbd3294058fa8f2787625834da21d34afb5b69f4089b3a89b9617"
+    },
+    {
+      "member": "snapshots/014/44020265273-artifacts.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/014/44020265273-artifacts.json",
+      "bytes": 766,
+      "sha256": "1e056705aa0b29adc805bea6afeb49cf9822413bf79d8088aa53418788c0afde"
+    },
+    {
+      "member": "snapshots/014/44020265273-artifacts.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/014/44020265273-artifacts.json.receipt.json",
+      "bytes": 649,
+      "sha256": "fd1ae400bf51e35c01aaff9dc2a2e5e13d3fda35e744f59cc586b94a0fb39cf3"
+    },
+    {
+      "member": "snapshots/014/44020265273-jobs.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/014/44020265273-jobs.json",
+      "bytes": 3775,
+      "sha256": "fad571a77926d876a579be2c85a9dc682ebc4deae7766336d6a687abcb3a8751"
+    },
+    {
+      "member": "snapshots/014/44020265273-jobs.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/014/44020265273-jobs.json.receipt.json",
+      "bytes": 636,
+      "sha256": "bc673faf66676f2c740766e59c9da4fe847ea25fb4c03205a086fe4612eaf15d"
+    },
+    {
+      "member": "snapshots/014/44020265273-run.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/014/44020265273-run.json",
+      "bytes": 12273,
+      "sha256": "9d400390439ac020ecdf4a8abcbabacb90b6ebd05bfc9f15befcbcb5a6cd0223"
+    },
+    {
+      "member": "snapshots/014/44020265273-run.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/014/44020265273-run.json.receipt.json",
+      "bytes": 586,
+      "sha256": "1cdb4718009344b4ab854162c5e9cd65566e4bb20338ddaa8323b466c3199b4d"
+    },
+    {
+      "member": "snapshots/014/44020265369-artifacts.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/014/44020265369-artifacts.json",
+      "bytes": 1479,
+      "sha256": "284e1d62f9f91697dfdb1fafd7ce8bd5f8518688d28d67b817e802d704fbeb7c"
+    },
+    {
+      "member": "snapshots/014/44020265369-artifacts.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/014/44020265369-artifacts.json.receipt.json",
+      "bytes": 651,
+      "sha256": "6933165f80061fa511232cd96e43055ccda87f1c99fe5dbc1de92ab4c6bb8ce7"
+    },
+    {
+      "member": "snapshots/014/44020265369-jobs.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/014/44020265369-jobs.json",
+      "bytes": 10773,
+      "sha256": "50599335c6be65d1ddcd63a89025a73ce90192ec0d0b80ce80ee79f76d5e7127"
+    },
+    {
+      "member": "snapshots/014/44020265369-jobs.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/014/44020265369-jobs.json.receipt.json",
+      "bytes": 637,
+      "sha256": "e817bd8987eff32200b6832e1c8820a7b2fdf1568d7b363060a65764c54e1b2e"
+    },
+    {
+      "member": "snapshots/014/44020265369-run.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/014/44020265369-run.json",
+      "bytes": 12242,
+      "sha256": "0f34b7973a462444124f29107614238518a0700581b2afbafdbb5ff929af468e"
+    },
+    {
+      "member": "snapshots/014/44020265369-run.json.receipt.json",
+      "source": "work/tunnel-ci-completion-20261117/snapshots/014/44020265369-run.json.receipt.json",
+      "bytes": 586,
+      "sha256": "99626edaa371ba3f0fdacf94f8acb5e2f7a3d1e7ea0bb6634626fc727a13fcfc"
+    },
+    {
+      "member": "source-input-binding.json",
+      "source": "work/tunnel-ci-completion-20261117/source-input-binding.json",
+      "bytes": 215,
+      "sha256": "7264a5b5f07f240387a6c31e1806afc4d65e532c533a6cdfffec5d68467328ac"
+    },
+    {
+      "member": "source-inputs.json",
+      "source": "work/tunnel-ci-completion-20261117/source-inputs.json",
+      "bytes": 141694,
+      "sha256": "0dda219e081d4c136f25560afdbd129f509ca73821c5978e1e396adfa3ddc7b8"
+    },
+    {
+      "member": "summary.json",
+      "source": "work/tunnel-ci-completion-20261117/summary.json",
+      "bytes": 52343,
+      "sha256": "fd1d04d419fffc651d75ba8d583ef250f43dd7e9e524857267ddc323624013a0"
+    },
+    {
+      "member": "verification.json",
+      "source": "work/tunnel-ci-completion-20261117/verification.json",
+      "bytes": 10194,
+      "sha256": "f3964fdaa67f264ec441066c2be9d847e0992637ed8bc511576a97e05ab3e71a"
+    }
+  ]
+}

@@ -11,6 +11,11 @@ KeelShell 对外 MCP 服务提供 `keelshell_propose_file_change`。它只把精
 
 旧文件与替换正文分别最多 64 KiB；替换可为空，但文件必须已经存在。不支持新建、删除、移动、符号链接、特殊对象、非 UTF-8 或不完整内容。JSON-RPC 请求整个编码帧仍限制为 128 KiB，大量转义字符可能先触及该限制。提案、原文、diff、输出和授权只在本次应用内存中，应用退出不恢复。
 
+文件写入结果未知时，普通历史清理不会移除记录或解除关闭限制。
+在独立检查后，可从该提案打开完整目标/diff核对层，明确记录人工核对；
+提案仍保持未知，不重试、不回滚、不清除文件 quarantine。
+见[提案记录与核对](MCP_ACTION_HISTORY.md)。
+
 写入要求远端真实支持 OpenSSH POSIX rename version 1。临时文件完整写完并关闭后才替换原目标，缺扩展时没有非原子回退。staging 前和 rename 前复核完整旧内容、大小、mode、mtime 与 canonical 路径；最终读回精确 replacement。只保留既有 writer 的 rwx 权限策略，ownership/ACL/special mode bits 可能改变。SFTP v3 的检查是观察，不是阻止恶意远端并发替换的原子锁，结果未知也不代表取消已经回滚远端。
 
 历史供应商客户端七项 schema 的实验继续保留原范围；新增第八项工具已在新标准 macOS 开发包和自有外部客户端中通过实际文件审阅闭环，供应商调用和其他平台原生须另行建立。实现与门禁见 [ADR0051](../adr/0051-reviewed-mcp-file-replacement.md) 和 [开发记录](../testing/records/2026-10-05-mcp-file-proposals.md)。

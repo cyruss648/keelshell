@@ -241,6 +241,16 @@ impl Workspace {
                                 .child(action.output.clone()),
                         )
                     })
+                    .when(
+                        matches!(action.state, ActionState::OutcomeUnknown),
+                        |card| {
+                            card.child(self.mcp_unknown_action_controls(
+                                id,
+                                action.unknown_acknowledged,
+                                cx,
+                            ))
+                        },
+                    )
                     .when(pending, |card| {
                         card.child(
                             div()
@@ -320,8 +330,10 @@ impl Workspace {
                     .child(div().flex().items_center().justify_between()
                         .child(div().font_weight(FontWeight::SEMIBOLD).child(format!("{} ({pending})", t(cx, "操作提案", "Action proposals"))))
                         .child(Button::new("mcp-clear-actions").ghost().compact().label(t(cx, "清除已处理记录", "Clear finished records"))
-                            .on_click(cx.listener(|view, _, _, cx| { view.mcp.actions.retain(|action| matches!(action.state, ActionState::PendingReview | ActionState::Running)); cx.notify(); }))))
-                    .child(actions))
+                            .disabled(!self.mcp.has_clearable_actions())
+                            .on_click(cx.listener(|view, _, _, cx| { view.mcp.clear_finished_actions(); cx.notify(); }))))
+                    .child(actions)
+                    .child(self.mcp_client_settings(cx)))
                 .child(div().p_3().flex_shrink_0().border_t_1().border_color(rgb(visual.border)).flex().flex_wrap().justify_end().gap_2()
                     .child(Button::new("mcp-disable").ghost().label(t(cx, "关闭并撤销全部授权", "Disable and revoke all"))
                         .on_click(cx.listener(|view, _, _, cx| { view.mcp.stop(); view.mcp.status = Message::new("MCP 已关闭，全部临时授权已撤销。", "MCP is off; all temporary grants are revoked."); cx.notify(); })))

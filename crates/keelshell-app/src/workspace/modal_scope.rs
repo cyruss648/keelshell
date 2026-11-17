@@ -37,6 +37,7 @@ pub(super) enum ModalKind {
     AiSettings,
     Mcp,
     McpFileReview,
+    McpUnknownReview,
     Workflow,
     Batch,
     Archive,
@@ -71,6 +72,7 @@ impl ModalKind {
             Self::AiSettings => t(cx, "AI 配置", "AI configurations"),
             Self::Mcp => t(cx, "对外 MCP 授权与审阅", "External MCP grants and review"),
             Self::McpFileReview => t(cx, "远程文件修改审阅", "Remote file change review"),
+            Self::McpUnknownReview => t(cx, "核对未知远端结果", "Review unknown remote outcome"),
             Self::Workflow => t(cx, "依赖工作流", "Dependency workflow"),
             Self::Batch => t(cx, "批量任务", "Batch tasks"),
             Self::Archive => t(cx, "上次会话草稿", "Previous session drafts"),
@@ -219,6 +221,11 @@ impl Workspace {
         self.keyboard_interactive
             .as_ref()
             .map(|prompt| prompt.identity)
+            .or_else(|| {
+                (self.mcp.show)
+                    .then_some(self.mcp.unknown_reviewing)
+                    .flatten()
+            })
             .or_else(|| (self.mcp.show).then_some(self.mcp.reviewing).flatten())
     }
     pub(super) fn protect_surface_input(
@@ -277,6 +284,10 @@ impl Workspace {
                 ModalKind::ConfigurationRecovery,
             ),
             (self.ai_settings.is_some(), ModalKind::AiSettings),
+            (
+                self.mcp.show && self.mcp.unknown_reviewing.is_some(),
+                ModalKind::McpUnknownReview,
+            ),
             (
                 self.mcp.show && self.mcp.reviewing.is_some(),
                 ModalKind::McpFileReview,
@@ -502,6 +513,7 @@ impl Workspace {
                 self.ai_settings_subscription = None;
             }
             ModalKind::McpFileReview => self.mcp.reviewing = None,
+            ModalKind::McpUnknownReview => self.mcp.unknown_reviewing = None,
             ModalKind::Mcp => self.mcp.show = false,
             ModalKind::Workflow => self.show_workflow = false,
             ModalKind::Batch => self.show_batch = false,
@@ -554,6 +566,7 @@ impl Workspace {
             }
             ModalKind::Mcp => self.mcp_modal(cx),
             ModalKind::McpFileReview => self.mcp_file_review_modal(cx),
+            ModalKind::McpUnknownReview => self.mcp_unknown_review_modal(cx),
             ModalKind::Workflow => self.workflow_modal(cx),
             ModalKind::Batch => self.batch_modal(cx),
             ModalKind::Archive => self.archive_confirmation(cx),

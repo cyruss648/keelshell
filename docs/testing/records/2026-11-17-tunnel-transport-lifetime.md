@@ -114,3 +114,16 @@ Pauli、Curie、Averroes、Volta、Feynman五位本批agent均已关闭。
 后次API读取显示两个Windows工作流completed/success，Quality三平台仍in_progress，
 未观察到失败job。这一后次快照未下载或复核新的CI artifact。
 旧work路径已回收，只从Git内原件和当前交接接续。
+
+## 精确 CI 终态补充
+
+UTC `2026-11-17T05:43:37.040413+00:00` 实际观察上述三个 workflow
+均 completed/success：Quality 的 Windows/Ubuntu/macOS 普通 Rust
+3422/3428/3435 passed、0 failed、66/69/68 ignored，各 14 rustdoc；
+Python 主 526 run、53/3/3 skipped。macOS/Ubuntu 各 18 interoperability
+及 6 forwarding passed；Windows API lab111/3 skip、routing1 pass，
+Windows SSH lab96/1 skip、实际 SSH1 pass，分别计数。
+7 原 ZIP/172 成员、4 个 artifact digest 和 77 个父级离线检查相符，
+见[精确 CI 原件](2026-11-17-tunnel-transport-lifetime-evidence/ci-completion/README.md)。
+API isolated-SSH skipped、native_gui=UNRUN、历史 seal HOLD 和 cleanup
+exit125 均保持；新非作者原件复核另记，不扩大为 Windows 转发或原生验收。
