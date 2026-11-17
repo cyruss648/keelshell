@@ -37,7 +37,14 @@ Herschel实际查看15新图、限定ship，补审关闭三测试输入归属P2�
 正常包绑定r1，最终r2仅三个测试文件不同、774项相等；生产输入相同，
 不宣称整个工作树与r1相等，不把旧测试二进制代签新增断言。
 555件原件已持久化至[本批封存](testing/records/2026-11-17-mcp-review-scroll-evidence/README.md)，
-后续以此为维护入口；准确提交后再作777工程Git绑定与自有展开副本回收。
+工程`39d9041f350e30788b39121959d2ae7f7efea043`已普通提交／推送，
+local／tracking／remote一致、工作区干净；555成员／777工程Git绑定通过。
+按完整来源和摘要回收460文件／406,831,883逻辑字节，10源目录移除；
+当前正常包六件、target目录身份和三维护正常包摘要保持，
+从[19件交付原件](testing/records/2026-11-17-mcp-review-scroll-evidence/delivery/README.md)接续，
+不再使用已回收的原图／review展开路径。
+新Quality44053769445／Windows API44053769378／SSH44053769444在UTC09:15:29
+均in_progress，后续按准确工程接续，不预填成功。
 
 监控读取的及时取消已实现，见[ADR0161](adr/0161-monitor-read-cancellation.md)及
 [本批记录](testing/records/2026-11-17-monitor-read-cancellation.md)。
@@ -309,8 +316,8 @@ Python 主 discovery 各 293 run，skipped 为 34／2／2；包装与 helper 独
 绑定上述r1冻结777输入，app SHA
 `cb963bbce61dd5af79770064a98c61ba524bc8fcaeed8e32a82e6392041c456b`，
 真实SSH／SFTP文件审核与读回、命令拒绝后已正常退出，未安装。
-`normal-build-final-test-differences.json`记录最终r2的三测试差异；
-维护用包和原件保持，不将未提交manifest改写为已提交工程。
+主封存内`scrollbar-native/normal-build-final-test-differences.json`记录最终r2三测试差异；
+展开副本只保留包，原图和回执从Git archive读取，不将原未提交manifest改写成新commit。
 前批包 `work/mcp-client-native-20261117/package-r1/KeelShell.app`，
 精确f910e001，11组空授权原图限定保留，未安装。
 前批包 `work/windows-monitor-delivery-20261117/package-r2/KeelShell.app` 仅保留为旧验证原件，

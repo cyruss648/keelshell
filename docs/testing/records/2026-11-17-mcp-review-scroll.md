@@ -224,3 +224,20 @@ reviewer 已关闭，没有 Cargo、target 操作、网络、GUI 或独立完整
 具体前缀、版本归属、复核工具和边界见
 [555件原件](2026-11-17-mcp-review-scroll-evidence/README.md)；
 准确本地提交之后再验证 777 Git blobs 和封存文件，才回收已封存的自有展开副本。
+
+## 普通提交、推送与清理
+
+工程 `39d9041f350e30788b39121959d2ae7f7efea043` 已普通提交／推送，
+UTC09:14:51 local／tracking／remote 三方相等且工作区干净。
+555 成员、777 工程 Git blobs 和顶层封存文件准确绑定通过，
+`0/reaped/8.244846s`。再次核对后回收 460 文件／406,831,883 逻辑字节，
+10 源目录移除，仅保留当前正常包六件；
+target 目录身份与三维护正常包摘要相等，`0/reaped/9.890067s`。
+应用／客户端和自有 Podman 资源在原生阶段均已回收，本批作者／reviewer 均已关闭。
+
+后续 19 件交付原件封存及限定离线复核通过，入口为
+[交付回执](2026-11-17-mcp-review-scroll-evidence/delivery/README.md)。
+原图与 reviewer 展开副本已回收，不再从旧 work 路径接续。
+UTC09:15:29 准确工程的 Quality44053769445、Windows API44053769378、
+SSH44053769444 均 in_progress，保留该快照，不预填终态成功。
+本段不关闭原生滚轮 P2、完整产品／跨平台桌面／发行。
