@@ -1,0 +1,46 @@
+{
+  "source": "6ae91d2e90668e7d9c04a2a7eea7c5de1bf6d3d4",
+  "scope": "CI_EVIDENCE_ONLY",
+  "independent_reviewer": "Parfit",
+  "decision": "APPROVE_CI_EVIDENCE_ONLY",
+  "independent_checks": {
+    "passed": 3318,
+    "failed": 0
+  },
+  "authors_closed": "Both source authors closed per task handoff; no additional lifecycle action performed here.",
+  "sources": {
+    "collector": {
+      "members": 195,
+      "logical_bytes": 1041746
+    },
+    "review": {
+      "members": 254,
+      "logical_bytes": 12010610
+    }
+  },
+  "members": 449,
+  "logical_bytes": 13052356,
+  "archive_bytes": 2900131,
+  "archive_sha256": "0a2d2b7908ca447718542503582d35589c9f2aaeb89dd8926f9652a32ce52e2a",
+  "original_zip_count": 7,
+  "original_zip_members": 172,
+  "official_artifact_digests": 4,
+  "source_sha256sum_entries": {
+    "collector": 194,
+    "review": 253
+  },
+  "old_engineering_input_count": 777,
+  "old_engineering_aggregate_sha256": "6d495b849c63e00dfc7ba8b867f3fa8b5ba3481de9e4b66669dee77f40fa22d5",
+  "limits": [
+    "SSH seal HOLD / terminal_proven=false",
+    "nonmaster natural exit0x14, 255x5, 1x1",
+    "master cleanup exit125, natural_terminal_before_cleanup=false",
+    "SSH owned-sshd observed_exit=null",
+    "API isolated SSH skipped / direct API ssh=UNRUN",
+    "both Windows artifacts native_gui=UNRUN",
+    "No current MCP scroll change, full native matrix, product completion or release acceptance",
+    "No Cargo/product/CI rerun, target artifact reads or writes, Git mutation, push or source cleanup",
+    "--commit binding is reserved for the parent after its accurate local commit."
+  ],
+  "execution_note": "Initial nested AGENTS discovery enumerated work directory entries, including target directories; no target artifact was read, executed or modified. Later checks used explicit paths."
+}

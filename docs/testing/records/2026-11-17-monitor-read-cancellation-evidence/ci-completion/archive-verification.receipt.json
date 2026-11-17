@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "/opt/homebrew/opt/python@3.15/bin/python3.15",
+    "-B",
+    "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell/docs/testing/records/2026-11-17-monitor-read-cancellation-evidence/ci-completion/verify.py",
+    "--bind-source"
+  ],
+  "started_utc": "2026-11-17T08:32:53.662325+00:00",
+  "elapsed_seconds": 0.254373,
+  "returncode": 0,
+  "natural_exit": true,
+  "reaped": true,
+  "timed_out": false,
+  "verifier_sha256": "8fa87cfcb31cd79c75f449e91eb8ccc6fe92ef07726d93ee9b0177ce4b93253b",
+  "stdout_bytes": 5251,
+  "stdout_sha256": "0ff0a38ab7e70c4b7d546086cc9baced8b4d53df2a8131acd6c50347dd6fca3d",
+  "stderr_bytes": 0,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

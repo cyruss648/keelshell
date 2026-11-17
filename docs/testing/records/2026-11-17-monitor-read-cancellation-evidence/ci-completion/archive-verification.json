@@ -1,0 +1,218 @@
+{
+  "source": "6ae91d2e90668e7d9c04a2a7eea7c5de1bf6d3d4",
+  "sources": {
+    "collector": {
+      "members": 195,
+      "bytes": 1041746
+    },
+    "review": {
+      "members": 254,
+      "bytes": 12010610
+    }
+  },
+  "source_checksum_entries": {
+    "collector": 194,
+    "review": 253
+  },
+  "runs": {
+    "44040248864": {
+      "status": "completed",
+      "conclusion": "success",
+      "jobs": [
+        133892795291,
+        133892795649,
+        133892795682
+      ]
+    },
+    "44040248806": {
+      "status": "completed",
+      "conclusion": "success",
+      "jobs": [
+        133892794901,
+        133892796479
+      ]
+    },
+    "44040248746": {
+      "status": "completed",
+      "conclusion": "success",
+      "jobs": [
+        133892794705
+      ]
+    }
+  },
+  "quality": {
+    "windows-2025": {
+      "rust": {
+        "ordinary": {
+          "groups": 96,
+          "passed": 3453,
+          "failed": 0,
+          "ignored": 66,
+          "measured": 0,
+          "filtered": 0
+        },
+        "rustdoc": {
+          "groups": 6,
+          "passed": 15,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        }
+      },
+      "python_main": {
+        "run": 526,
+        "skipped": 53
+      }
+    },
+    "macos-26": {
+      "rust": {
+        "ordinary": {
+          "groups": 96,
+          "passed": 3466,
+          "failed": 0,
+          "ignored": 68,
+          "measured": 0,
+          "filtered": 0
+        },
+        "rustdoc": {
+          "groups": 6,
+          "passed": 15,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        }
+      },
+      "python_main": {
+        "run": 526,
+        "skipped": 3
+      }
+    },
+    "ubuntu-24.04": {
+      "rust": {
+        "ordinary": {
+          "groups": 96,
+          "passed": 3459,
+          "failed": 0,
+          "ignored": 69,
+          "measured": 0,
+          "filtered": 0
+        },
+        "rustdoc": {
+          "groups": 6,
+          "passed": 15,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        }
+      },
+      "python_main": {
+        "run": 526,
+        "skipped": 3
+      }
+    }
+  },
+  "original_zips": [
+    {
+      "path": "collector/downloads/artifact-14308219775.zip",
+      "members": 46,
+      "bytes": 54235,
+      "sha256": "352d64f9b905acd4cd8ad5f963e77985da4c22aec19d450327962476b0fa639a"
+    },
+    {
+      "path": "collector/downloads/artifact-14308319951.zip",
+      "members": 34,
+      "bytes": 46863,
+      "sha256": "88b9ed0cf60e25963af31155c227b2b39524ca5dc42767ba2cda7f3b5a690009"
+    },
+    {
+      "path": "collector/downloads/run-44040248746-attempt-1-logs.zip",
+      "members": 12,
+      "bytes": 31818,
+      "sha256": "9459fda9f8418ff4250b333405007b7b62dac6271716f4169dfa51e516acd867"
+    },
+    {
+      "path": "collector/downloads/run-44040248806-attempt-1-logs.zip",
+      "members": 12,
+      "bytes": 31638,
+      "sha256": "9f4dd092230f08f7d62a39afd7f8d3fdc2cb3babf5c2a57c3d2d0a3cc9b35bac"
+    },
+    {
+      "path": "review/originals/quality-001/artifact-14309783967.zip",
+      "members": 14,
+      "bytes": 5512,
+      "sha256": "d44532b440cc0ca0f25a56421463c61865247507c7eb0cd05ec081f41ade9df0"
+    },
+    {
+      "path": "review/originals/quality-001/artifact-14309968324.zip",
+      "members": 14,
+      "bytes": 5593,
+      "sha256": "32554df4c5b873765d210dbde7417b255ad8adcc762a1bee737058312681c0b0"
+    },
+    {
+      "path": "review/originals/quality-001/run-logs.zip",
+      "members": 40,
+      "bytes": 1031994,
+      "sha256": "3754fc35a5ffa0c29ac9d9b67a81a4d835ea9a040b9b7a9906f582754f301a10"
+    }
+  ],
+  "official_artifact_digests": [
+    {
+      "id": 14308219775,
+      "run": 44040248746,
+      "bytes": 54235,
+      "sha256": "352d64f9b905acd4cd8ad5f963e77985da4c22aec19d450327962476b0fa639a"
+    },
+    {
+      "id": 14308319951,
+      "run": 44040248806,
+      "bytes": 46863,
+      "sha256": "88b9ed0cf60e25963af31155c227b2b39524ca5dc42767ba2cda7f3b5a690009"
+    },
+    {
+      "id": 14309783967,
+      "run": 44040248864,
+      "bytes": 5512,
+      "sha256": "d44532b440cc0ca0f25a56421463c61865247507c7eb0cd05ec081f41ade9df0"
+    },
+    {
+      "id": 14309968324,
+      "run": 44040248864,
+      "bytes": 5593,
+      "sha256": "32554df4c5b873765d210dbde7417b255ad8adcc762a1bee737058312681c0b0"
+    }
+  ],
+  "interop": [
+    {
+      "platform": "Linux",
+      "passed": 18
+    },
+    {
+      "platform": "Linux",
+      "passed": 6
+    },
+    {
+      "platform": "Darwin",
+      "passed": 18
+    },
+    {
+      "platform": "Darwin",
+      "passed": 6
+    }
+  ],
+  "independent_decision": "APPROVE_CI_EVIDENCE_ONLY",
+  "independent_saved_checks": 3318,
+  "boundary": "CI evidence only. SSH HOLD, 255x5/1x1, master cleanup125 non-natural, API isolated SSH skipped, native UNRUN; current MCP/native unapproved.",
+  "product_tests_replayed": 0,
+  "old_engineering_binding": {
+    "source": "6ae91d2e90668e7d9c04a2a7eea7c5de1bf6d3d4",
+    "engineering_inputs": 777,
+    "aggregate_sha256": "6d495b849c63e00dfc7ba8b867f3fa8b5ba3481de9e4b66669dee77f40fa22d5",
+    "all_exact_git_blobs_equal": true
+  },
+  "passed": 8408,
+  "failed": 0,
+  "mismatches": []
+}

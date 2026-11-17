@@ -134,3 +134,44 @@ Quality44040248864、Windows API44040248806、Windows OpenSSH44040248746
 推送、绑定、自然退出与清理回执见
 [交付封存](2026-11-17-monitor-read-cancellation-evidence/delivery/README.md)；
 已回收work目录不再作为维护入口。不把局部检查扩成原生验收。
+
+## 精确 CI 终态与封存 — 2026-11-17
+
+仅补签工程 `6ae91d2e90668e7d9c04a2a7eea7c5de1bf6d3d4` 的既有 CI 原件：
+Quality `44040248864`、Windows API `44040248806`、Windows OpenSSH
+`44040248746` 均 attempt1、completed/success。独立复核于 UTC08:08:28
+首次 GET 取得新 Quality 终态，原 UTC07:38:44／07:56:50 pending 仍保持原记录。
+三平台 job 的原 run／单 job／列表 metadata、checkout 最终 SHA、ZIP、
+逐名库存和四个官方 artifact digest 已由本次封存父级另行核对。
+
+| Quality 平台 | 普通 Rust passed／failed／ignored | rustdoc | Python 主 run／skip |
+| --- | --- | --- | --- |
+| Windows | 3453／0／66 | 15／0／0 | 526／53 |
+| macOS | 3466／0／68 | 15／0／0 | 526／3 |
+| Ubuntu | 3459／0／69 | 15／0／0 | 526／3 |
+
+每平台 96 普通套件和 6 rustdoc 组逐名／声明／结果相等；Python 主 quiet
+discovery 仅核对总数。preflight／packaging／内嵌 Python／controller 单列。
+macOS／Linux 实际 OpenSSH 各 18、forwarding 各 6 通过。
+Windows API lab111 run／3 skip、capture replay1通过；
+SSH lab96 run／1 skip、真实 SSH Rust1通过。
+独立 Parfit 限定 `APPROVE_CI_EVIDENCE_ONLY`，3318 离线检查通过、0 失败，
+P0–P3 全0，两作者已关闭；没有独立产品重跑。
+
+两个来源完整安全文件集 195＋254＝449 成员、13,052,356 逻辑字节全部封存，
+包括原两份 SHA256SUMS、失败 helper／回执及 pending 快照，排除0。
+7 个原始 ZIP／172 成员与4个官方 artifact digest 相等。
+封存包 2,900,131 字节，SHA-256
+`0a2d2b7908ca447718542503582d35589c9f2aaeb89dd8926f9652a32ce52e2a`。
+父级来源复核8004项及归档读回复核8408项通过、0差异，后者自然
+`0/reaped/0.254373s`；旧工程777输入与精确Git对象绑定相等。
+可离线工具、逐件manifest、原件和具体边界见
+[精确终态封存](2026-11-17-monitor-read-cancellation-evidence/ci-completion/README.md)。
+
+SSH 原 seal HOLD／terminal_proven=false 保持；非master自然 exit0×14、
+255×5、1×1，master cleanup125 非自然终态、owner observed_exit=null 保持。
+API isolated SSH skipped、direct API ssh=UNRUN、两份 native_gui=UNRUN 保持。
+此为旧监控取消工程的 CI 证据，不代签当前 MCP 滚动改动、当前原生矩阵、
+完整产品或发行。本子任务未运行 Cargo／产品／CI、未读取或修改 target 产物、
+未 Git 写入／推送或清理来源；父级在准确本地提交后运行
+`ci-completion/verify.py --commit FULL_40_HEX_LOCAL_COMMIT` 再处理来源回收。

@@ -1,0 +1,2705 @@
+{
+  "schema_version": 1,
+  "members": 449,
+  "logical_bytes": 13052356,
+  "bytes": 2900131,
+  "sha256": "0a2d2b7908ca447718542503582d35589c9f2aaeb89dd8926f9652a32ce52e2a",
+  "engineering_source": "6ae91d2e90668e7d9c04a2a7eea7c5de1bf6d3d4",
+  "excluded": [],
+  "files": [
+    {
+      "member": "collector/REPORT.md",
+      "source": "work/monitor-cancellation-ci-completion-20261117/REPORT.md",
+      "bytes": 8018,
+      "sha256": "bdcaec04d0b49355c854da168a294c5698370789121dc3fd5d30f286ab4a6258"
+    },
+    {
+      "member": "collector/SHA256SUMS",
+      "source": "work/monitor-cancellation-ci-completion-20261117/SHA256SUMS",
+      "bytes": 20017,
+      "sha256": "b98e540519bbdc4603dedc0f9672af47fdf8f7c33016b6b3df2fcf4b76740f07"
+    },
+    {
+      "member": "collector/analysis-history/001/archive-bindings.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/analysis-history/001/archive-bindings.json",
+      "bytes": 2406,
+      "sha256": "22469b12394fa4a52204f36220a44c644367b548787bd1bbf98925896b1f3df1"
+    },
+    {
+      "member": "collector/analysis-history/001/archive-manifest.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/analysis-history/001/archive-manifest.json",
+      "bytes": 21360,
+      "sha256": "d3136e0483a265d2efb2a303ff67bc6c1499e3356662d956f25da88ca1a08d8c"
+    },
+    {
+      "member": "collector/analysis-history/001/latest.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/analysis-history/001/latest.json",
+      "bytes": 145,
+      "sha256": "60cae10e2c1a6e26a9802690cc588d2462471995a0c1cd6e42091018077d7af9"
+    },
+    {
+      "member": "collector/analysis-history/001/summary.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/analysis-history/001/summary.json",
+      "bytes": 30969,
+      "sha256": "6893c0804d105f61ec452597af44cf53e9c46c152f1afa2dd447aae7a27126f5"
+    },
+    {
+      "member": "collector/analyze.py",
+      "source": "work/monitor-cancellation-ci-completion-20261117/analyze.py",
+      "bytes": 26134,
+      "sha256": "cb3592b1d328122f741252fa568b9be82684cee64d863078e5de6693af6955c9"
+    },
+    {
+      "member": "collector/archive-bindings.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/archive-bindings.json",
+      "bytes": 2406,
+      "sha256": "a3f7a68ba1ba43a348da9b5eb257acdbb66489bfe21324287ee710a0ae8d287f"
+    },
+    {
+      "member": "collector/archive-manifest.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/archive-manifest.json",
+      "bytes": 21360,
+      "sha256": "b21ab38304c03858bbbe9328eb39d17536d1f31101ff94aa92490bbef868ba89"
+    },
+    {
+      "member": "collector/artifacts/14308219775.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/artifacts/14308219775.json",
+      "bytes": 735,
+      "sha256": "5698c83a058a6882f5c99c04996a652b659d17c2c7250796b8014be82fbe546c"
+    },
+    {
+      "member": "collector/artifacts/14308219775.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/artifacts/14308219775.json.receipt.json",
+      "bytes": 749,
+      "sha256": "449a45c024f38f6bc9c4bc0eb353072f5fd5467851fa36182c3155e7737cf16b"
+    },
+    {
+      "member": "collector/artifacts/14308319951.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/artifacts/14308319951.json",
+      "bytes": 734,
+      "sha256": "e430aa632a82cf11ddc934732d61009d0e14277882fb8484253ece8dc656967e"
+    },
+    {
+      "member": "collector/artifacts/14308319951.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/artifacts/14308319951.json.receipt.json",
+      "bytes": 749,
+      "sha256": "a3ea8398f19f4cb6f33afadd546aa980e5d84f9b57fb426189af45d2eb91d0d6"
+    },
+    {
+      "member": "collector/collect.py",
+      "source": "work/monitor-cancellation-ci-completion-20261117/collect.py",
+      "bytes": 13772,
+      "sha256": "e74926c3711d69752e997960341e4a340208f788ddd9ffab69d24afda86b7132"
+    },
+    {
+      "member": "collector/command-ledger.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/command-ledger.json",
+      "bytes": 88885,
+      "sha256": "e4284bc358960c0273ef143cc4439eefa72e38faccfd2f35d29a5473e8ce70df"
+    },
+    {
+      "member": "collector/commands/analyze-r1/receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/commands/analyze-r1/receipt.json",
+      "bytes": 694,
+      "sha256": "7bcdd4e9ca7736452cc3f7e308855349f9346bd5a4866106527b6902a2900404"
+    },
+    {
+      "member": "collector/commands/analyze-r1/stderr.log",
+      "source": "work/monitor-cancellation-ci-completion-20261117/commands/analyze-r1/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/commands/analyze-r1/stdout.log",
+      "source": "work/monitor-cancellation-ci-completion-20261117/commands/analyze-r1/stdout.log",
+      "bytes": 3072,
+      "sha256": "7514c05d3d87fdf3e482cd867a54adb22544e4da76746e1cb48cf23372b43724"
+    },
+    {
+      "member": "collector/commands/analyze-r2/receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/commands/analyze-r2/receipt.json",
+      "bytes": 694,
+      "sha256": "8f9e3e67acde9a8a60aec12b13434702d0f4a6cf843bfd76b03205a01ebbc3bb"
+    },
+    {
+      "member": "collector/commands/analyze-r2/stderr.log",
+      "source": "work/monitor-cancellation-ci-completion-20261117/commands/analyze-r2/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/commands/analyze-r2/stdout.log",
+      "source": "work/monitor-cancellation-ci-completion-20261117/commands/analyze-r2/stdout.log",
+      "bytes": 3073,
+      "sha256": "22e34ef55dc490cf325cc715d79c640febd73cfe6f8a2d58b77889c7be4880ba"
+    },
+    {
+      "member": "collector/commands/collect-r1/receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/commands/collect-r1/receipt.json",
+      "bytes": 694,
+      "sha256": "a4df5b4f5cbaf8c081561ce08b2d1f2b514bc86ab6b3496b469210e2bdfbf74d"
+    },
+    {
+      "member": "collector/commands/collect-r1/stderr.log",
+      "source": "work/monitor-cancellation-ci-completion-20261117/commands/collect-r1/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/commands/collect-r1/stdout.log",
+      "source": "work/monitor-cancellation-ci-completion-20261117/commands/collect-r1/stdout.log",
+      "bytes": 2054,
+      "sha256": "9e7fb6ad75f39312f7fb2a2c5956ebac819f6e0bcf0dd7e98b64bfe9b69b6cd7"
+    },
+    {
+      "member": "collector/commands/collect-r2/receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/commands/collect-r2/receipt.json",
+      "bytes": 712,
+      "sha256": "cc1e1293973d400157031bcf46b6b959f818deb4dc0e22cd17dd50013819a064"
+    },
+    {
+      "member": "collector/commands/collect-r2/stderr.log",
+      "source": "work/monitor-cancellation-ci-completion-20261117/commands/collect-r2/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/commands/collect-r2/stdout.log",
+      "source": "work/monitor-cancellation-ci-completion-20261117/commands/collect-r2/stdout.log",
+      "bytes": 2054,
+      "sha256": "572a8eab7fd6103b2bf507cb3eaf8e0153f02e5d3430215450fc9cd988460c56"
+    },
+    {
+      "member": "collector/commands/collect-r3/receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/commands/collect-r3/receipt.json",
+      "bytes": 712,
+      "sha256": "e0115cf086d8efb3145c4e9c285f381cdb2499150a2cbc62d3a1df6d81f2a838"
+    },
+    {
+      "member": "collector/commands/collect-r3/stderr.log",
+      "source": "work/monitor-cancellation-ci-completion-20261117/commands/collect-r3/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/commands/collect-r3/stdout.log",
+      "source": "work/monitor-cancellation-ci-completion-20261117/commands/collect-r3/stdout.log",
+      "bytes": 2054,
+      "sha256": "6e513c1377e5f7bb102ed6634bc8453a20bc1f520ff709c1b0c61bf75d06bbeb"
+    },
+    {
+      "member": "collector/commands/collect-r4/receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/commands/collect-r4/receipt.json",
+      "bytes": 712,
+      "sha256": "1f135f260c844653595654c52cf4728d85d5ba6d49f4fc610678271013c4f652"
+    },
+    {
+      "member": "collector/commands/collect-r4/stderr.log",
+      "source": "work/monitor-cancellation-ci-completion-20261117/commands/collect-r4/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/commands/collect-r4/stdout.log",
+      "source": "work/monitor-cancellation-ci-completion-20261117/commands/collect-r4/stdout.log",
+      "bytes": 2054,
+      "sha256": "9e7fb6ad75f39312f7fb2a2c5956ebac819f6e0bcf0dd7e98b64bfe9b69b6cd7"
+    },
+    {
+      "member": "collector/commands/report-r1/receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/commands/report-r1/receipt.json",
+      "bytes": 692,
+      "sha256": "b9716fe610242f3050daf5870744b78baa01312bde7fa183e051ba59ee05cd30"
+    },
+    {
+      "member": "collector/commands/report-r1/stderr.log",
+      "source": "work/monitor-cancellation-ci-completion-20261117/commands/report-r1/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/commands/report-r1/stdout.log",
+      "source": "work/monitor-cancellation-ci-completion-20261117/commands/report-r1/stdout.log",
+      "bytes": 121,
+      "sha256": "275adcddd222abada9a85657bc1120e02645a993e3debf206318683eb0ece3b1"
+    },
+    {
+      "member": "collector/commands/snapshot-r1/receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/commands/snapshot-r1/receipt.json",
+      "bytes": 734,
+      "sha256": "d152a5c525a22c21cb71f7102b846d2c8f0e3b481af8077b0a88a452af2972fd"
+    },
+    {
+      "member": "collector/commands/snapshot-r1/stderr.log",
+      "source": "work/monitor-cancellation-ci-completion-20261117/commands/snapshot-r1/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "collector/commands/snapshot-r1/stdout.log",
+      "source": "work/monitor-cancellation-ci-completion-20261117/commands/snapshot-r1/stdout.log",
+      "bytes": 131,
+      "sha256": "cb73e78d16550778aab87123d4b8e1060adffd129577d4b800716f0bccb28686"
+    },
+    {
+      "member": "collector/context.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/context.json",
+      "bytes": 736,
+      "sha256": "0471267a14d47bdfbd5b4da1edbf0206f9e857cfc2a9cd91f47a2872af5ca3c7"
+    },
+    {
+      "member": "collector/digest-verification.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/digest-verification.json",
+      "bytes": 1257,
+      "sha256": "938314c7c5d2d96e79eb9f99265230569b549586a9c826fde693c49da866bdf2"
+    },
+    {
+      "member": "collector/downloads/artifact-14308219775.zip",
+      "source": "work/monitor-cancellation-ci-completion-20261117/downloads/artifact-14308219775.zip",
+      "bytes": 54235,
+      "sha256": "352d64f9b905acd4cd8ad5f963e77985da4c22aec19d450327962476b0fa639a"
+    },
+    {
+      "member": "collector/downloads/artifact-14308219775.zip.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/downloads/artifact-14308219775.zip.receipt.json",
+      "bytes": 7436,
+      "sha256": "40d3124d483dc0d202951b9234cf6c71b6b049b4dd302a0204a204ec2de90937"
+    },
+    {
+      "member": "collector/downloads/artifact-14308319951.zip",
+      "source": "work/monitor-cancellation-ci-completion-20261117/downloads/artifact-14308319951.zip",
+      "bytes": 46863,
+      "sha256": "88b9ed0cf60e25963af31155c227b2b39524ca5dc42767ba2cda7f3b5a690009"
+    },
+    {
+      "member": "collector/downloads/artifact-14308319951.zip.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/downloads/artifact-14308319951.zip.receipt.json",
+      "bytes": 5654,
+      "sha256": "59c2efa6d6825673048df91d6b98e6f312bea9b88bc9df95fa2a7b59a1c8b9ce"
+    },
+    {
+      "member": "collector/downloads/run-44040248746-attempt-1-logs.zip",
+      "source": "work/monitor-cancellation-ci-completion-20261117/downloads/run-44040248746-attempt-1-logs.zip",
+      "bytes": 31818,
+      "sha256": "9459fda9f8418ff4250b333405007b7b62dac6271716f4169dfa51e516acd867"
+    },
+    {
+      "member": "collector/downloads/run-44040248746-attempt-1-logs.zip.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/downloads/run-44040248746-attempt-1-logs.zip.receipt.json",
+      "bytes": 3593,
+      "sha256": "1932aac48a0f49061fdd5277fd1d88fc1d6548e5c6f765f700e3db3494301876"
+    },
+    {
+      "member": "collector/downloads/run-44040248806-attempt-1-logs.zip",
+      "source": "work/monitor-cancellation-ci-completion-20261117/downloads/run-44040248806-attempt-1-logs.zip",
+      "bytes": 31638,
+      "sha256": "9f4dd092230f08f7d62a39afd7f8d3fdc2cb3babf5c2a57c3d2d0a3cc9b35bac"
+    },
+    {
+      "member": "collector/downloads/run-44040248806-attempt-1-logs.zip.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/downloads/run-44040248806-attempt-1-logs.zip.receipt.json",
+      "bytes": 3486,
+      "sha256": "d1101fe69806fb5c54fdace5a07bb5bff6c3986c8a64864035e0fe8e9135490e"
+    },
+    {
+      "member": "collector/exit-summary.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/exit-summary.json",
+      "bytes": 390,
+      "sha256": "29bb26718b0487a8cf554c4061f877869a39261e1882a77817473fb913c3a187"
+    },
+    {
+      "member": "collector/helper-provenance.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/helper-provenance.json",
+      "bytes": 2449,
+      "sha256": "8bdcc32f18e4aa71064907fe80da774c2f1adae088caa00cc28cbfce97608d8d"
+    },
+    {
+      "member": "collector/inputs/AGENTS.md",
+      "source": "work/monitor-cancellation-ci-completion-20261117/inputs/AGENTS.md",
+      "bytes": 2770,
+      "sha256": "edd4266f9c01e41ed4384a3bf9c1861b39114abe916819ad1d603c9e9d8601bb"
+    },
+    {
+      "member": "collector/inputs/HANDOFF.md",
+      "source": "work/monitor-cancellation-ci-completion-20261117/inputs/HANDOFF.md",
+      "bytes": 24169,
+      "sha256": "398aad1f53f1e8da0133822baa139d59507bf302ff49be0e79ee6455ff0b040f"
+    },
+    {
+      "member": "collector/inputs/RTK.md",
+      "source": "work/monitor-cancellation-ci-completion-20261117/inputs/RTK.md",
+      "bytes": 546,
+      "sha256": "13f973cf9d47899124efae2cdb1684021ea2ed4b523c9a8c7f032197175e1aa1"
+    },
+    {
+      "member": "collector/inputs/previous-analyze.py.txt",
+      "source": "work/monitor-cancellation-ci-completion-20261117/inputs/previous-analyze.py.txt",
+      "bytes": 26056,
+      "sha256": "b48fcd5ec37513595a8dffb4ab3017b0415274105ef6a76412b39f916e59d0b0"
+    },
+    {
+      "member": "collector/inputs/previous-collect.py.txt",
+      "source": "work/monitor-cancellation-ci-completion-20261117/inputs/previous-collect.py.txt",
+      "bytes": 13777,
+      "sha256": "cd22a8bad470741b24c030bb897625b08da937141642d0f7d5ff45c8533fcb9c"
+    },
+    {
+      "member": "collector/inputs/previous-report.py.txt",
+      "source": "work/monitor-cancellation-ci-completion-20261117/inputs/previous-report.py.txt",
+      "bytes": 15774,
+      "sha256": "20756351f4a834505040f0d062b6b69e6061383c782b73ffc4ddc43fc5beaf2e"
+    },
+    {
+      "member": "collector/inputs/previous-seal.py.txt",
+      "source": "work/monitor-cancellation-ci-completion-20261117/inputs/previous-seal.py.txt",
+      "bytes": 4804,
+      "sha256": "f07be2a2b33811c12026c93997925807b3811ae07d16278085e8115e1b28fb9f"
+    },
+    {
+      "member": "collector/inventories/artifact-14308219775-native-ssh.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/inventories/artifact-14308219775-native-ssh.json",
+      "bytes": 942,
+      "sha256": "052680f97ad137e86ad98fb9fe87e68791faa95c19e42e679e1ec173a5f52505"
+    },
+    {
+      "member": "collector/inventories/job-133892794705.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/inventories/job-133892794705.json",
+      "bytes": 39209,
+      "sha256": "5eff6d98652a7ea6f064a4ebd9a8733ef37982ba24d5284a8b98ace76c384de7"
+    },
+    {
+      "member": "collector/inventories/job-133892794901.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/inventories/job-133892794901.json",
+      "bytes": 42712,
+      "sha256": "43a2a7ed2fc536e82235bdd7b38132a485539973f597daa9cc3abb8aad201350"
+    },
+    {
+      "member": "collector/inventories/job-133892795291.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/inventories/job-133892795291.json",
+      "bytes": 233,
+      "sha256": "7322eee7b70477068e2056ccd8aae53d6c99de65ca46668da448668adff25259"
+    },
+    {
+      "member": "collector/inventories/job-133892795649.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/inventories/job-133892795649.json",
+      "bytes": 237,
+      "sha256": "bf1a4134ec82bc451b62727f4a2f57bb93bb15417ac9bb6212f179c4c4aacefa"
+    },
+    {
+      "member": "collector/inventories/job-133892795682.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/inventories/job-133892795682.json",
+      "bytes": 237,
+      "sha256": "04477ea406fbae79ff21cc617e2e2102cd0882b2fdd1dca91f8acdf4d3024a24"
+    },
+    {
+      "member": "collector/inventories/job-133892796479.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/inventories/job-133892796479.json",
+      "bytes": 277,
+      "sha256": "636967c62c155f2106551cca6b7490f38c6fd006623e06eccaa8d1a5c0700ee1"
+    },
+    {
+      "member": "collector/jobs/133892794705.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/jobs/133892794705.json",
+      "bytes": 2850,
+      "sha256": "d0c1acee0420a24fca1e91964009e5d5b8f7e1700544be087e263d487241e6fe"
+    },
+    {
+      "member": "collector/jobs/133892794705.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/jobs/133892794705.json.receipt.json",
+      "bytes": 738,
+      "sha256": "292432efd9f153f23d32deca81e132999e2182d98e5599e70b59136ccc17d965"
+    },
+    {
+      "member": "collector/jobs/133892794901.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/jobs/133892794901.json",
+      "bytes": 2802,
+      "sha256": "5e7c07749cf0a217019d359d52f274add7b6f1bf0aefebada15141c5df41019a"
+    },
+    {
+      "member": "collector/jobs/133892794901.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/jobs/133892794901.json.receipt.json",
+      "bytes": 738,
+      "sha256": "bf2028085207585390556fe1e3dacbe3977e57fd97569744049b68bc9138e11f"
+    },
+    {
+      "member": "collector/jobs/133892795291.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/jobs/133892795291.json",
+      "bytes": 3122,
+      "sha256": "6a2eb497e9faed908efa984608196636319b17ab80706af6463ede3cda0ed612"
+    },
+    {
+      "member": "collector/jobs/133892795291.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/jobs/133892795291.json.receipt.json",
+      "bytes": 738,
+      "sha256": "c21e2bfd379c716d3707ca6dbfa5e4494dbb659b6d939fed2ea1e976f0082996"
+    },
+    {
+      "member": "collector/jobs/133892795649.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/jobs/133892795649.json",
+      "bytes": 3130,
+      "sha256": "ac3976a273638e8be01debe03a2917d27869c15970ea221319ae0bb70edcc4ac"
+    },
+    {
+      "member": "collector/jobs/133892795649.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/jobs/133892795649.json.receipt.json",
+      "bytes": 738,
+      "sha256": "abb1ec5fe011cca1745de86538c93c03e17ddb774d70738418a733fc6ea9a357"
+    },
+    {
+      "member": "collector/jobs/133892795682.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/jobs/133892795682.json",
+      "bytes": 3130,
+      "sha256": "9416cfbdaf7774ca21ede1fb2e3165748de10556bac2ab9e400171c6c64af267"
+    },
+    {
+      "member": "collector/jobs/133892795682.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/jobs/133892795682.json.receipt.json",
+      "bytes": 736,
+      "sha256": "3eaf05f0c3b2ffb349828313b30da5fe123c9dde2c77d852a1465dc193e60617"
+    },
+    {
+      "member": "collector/jobs/133892796479.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/jobs/133892796479.json",
+      "bytes": 945,
+      "sha256": "cc92c2e20ca38c51999a5e0c6a82e4b732eb519c3169294a5b10f46a36d26789"
+    },
+    {
+      "member": "collector/jobs/133892796479.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/jobs/133892796479.json.receipt.json",
+      "bytes": 737,
+      "sha256": "58f7a8fec8122b5533b170a9b6b5811e43d06410c996404e67846a46b4a5f9d2"
+    },
+    {
+      "member": "collector/latest.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/latest.json",
+      "bytes": 146,
+      "sha256": "65812d573ee4ad9e8f08a7fcf6e90d02e02e5e2db937df401ad41bca7f13c381"
+    },
+    {
+      "member": "collector/length-summary.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/length-summary.json",
+      "bytes": 172,
+      "sha256": "4bfc69a8f918a210c9d252df82944f055202ca47a7b82451c2878b8a5bac4c7a"
+    },
+    {
+      "member": "collector/pending.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/pending.json",
+      "bytes": 6240,
+      "sha256": "de192bdf824cd07189b68e3baacb4e2b4567507df88dc5efe6ba3825cce48305"
+    },
+    {
+      "member": "collector/report.py",
+      "source": "work/monitor-cancellation-ci-completion-20261117/report.py",
+      "bytes": 16761,
+      "sha256": "66f1d7e037958f644c774abd2c60b96c29458061895a80a9142bbb5a51923ad7"
+    },
+    {
+      "member": "collector/run_stage.py",
+      "source": "work/monitor-cancellation-ci-completion-20261117/run_stage.py",
+      "bytes": 1309,
+      "sha256": "f8f7d35d9989abd9d1931b7ff5061f893b0d8266cbff5735f2eb0d13ba7be6d9"
+    },
+    {
+      "member": "collector/seal-verification.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/seal-verification.json",
+      "bytes": 323,
+      "sha256": "dcb3fb0038a0f1d777e27bb381343abacb2e216ac634e98bb7bf30adc0fcb14e"
+    },
+    {
+      "member": "collector/seal.py",
+      "source": "work/monitor-cancellation-ci-completion-20261117/seal.py",
+      "bytes": 4377,
+      "sha256": "53ef2031ce575bfbf29977773b441363cd0498febd087ac2021e120d6171f092"
+    },
+    {
+      "member": "collector/snapshots/001/44040248746-artifacts.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/001/44040248746-artifacts.json",
+      "bytes": 767,
+      "sha256": "d1a0959cd81bdb0fb9f0ca9b5e6f14124f262f7dc1d3ec3d099fffda7dd42f60"
+    },
+    {
+      "member": "collector/snapshots/001/44040248746-artifacts.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/001/44040248746-artifacts.json.receipt.json",
+      "bytes": 813,
+      "sha256": "907f1855388a0e503fc686479a9b5b555ca1d8b58a21530f1e83c7b986da5380"
+    },
+    {
+      "member": "collector/snapshots/001/44040248746-jobs.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/001/44040248746-jobs.json",
+      "bytes": 2877,
+      "sha256": "d0cde6cf79e86c894e2686dbf70ec4048a8dae97ad27b16bbe988bc391ff3121"
+    },
+    {
+      "member": "collector/snapshots/001/44040248746-jobs.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/001/44040248746-jobs.json.receipt.json",
+      "bytes": 799,
+      "sha256": "e54ded810b92d45ac5fd0b9cb63acfa3bed841d49a5a35967ca140315364d2ed"
+    },
+    {
+      "member": "collector/snapshots/001/44040248746-run.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/001/44040248746-run.json",
+      "bytes": 12668,
+      "sha256": "f5f9ab8cf94d701488fe1b0970b8abaa3eb562af50615317e32b1ed51b088d35"
+    },
+    {
+      "member": "collector/snapshots/001/44040248746-run.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/001/44040248746-run.json.receipt.json",
+      "bytes": 749,
+      "sha256": "890289313ad7b5ce4d78c74425333b02d1f5fb83bf4bd3ec6b91e6c60bc35b41"
+    },
+    {
+      "member": "collector/snapshots/001/44040248806-artifacts.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/001/44040248806-artifacts.json",
+      "bytes": 766,
+      "sha256": "e823a2c371671260bd2e897cc535599f0771fc17f0d985b5bad440a7970065c0"
+    },
+    {
+      "member": "collector/snapshots/001/44040248806-artifacts.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/001/44040248806-artifacts.json.receipt.json",
+      "bytes": 813,
+      "sha256": "bcc93ffd9ed3e97be109d80a616f6018e4db385877a68e05f4d01d924c065456"
+    },
+    {
+      "member": "collector/snapshots/001/44040248806-jobs.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/001/44040248806-jobs.json",
+      "bytes": 3775,
+      "sha256": "d754fc050528e9532a0da046ab61209ffad9e24042c62ebbdb29be8c7bb688fc"
+    },
+    {
+      "member": "collector/snapshots/001/44040248806-jobs.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/001/44040248806-jobs.json.receipt.json",
+      "bytes": 799,
+      "sha256": "6228f844148c8b52d0f1c3f944885e374cc6603b759cfea3edd79b87d87a0c3d"
+    },
+    {
+      "member": "collector/snapshots/001/44040248806-run.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/001/44040248806-run.json",
+      "bytes": 12656,
+      "sha256": "0698d77c34e3f9dc4ae9e643df9ffb766a70540b701844d4d66129b874c75425"
+    },
+    {
+      "member": "collector/snapshots/001/44040248806-run.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/001/44040248806-run.json.receipt.json",
+      "bytes": 749,
+      "sha256": "78357fa092f024da7daaeca729a40fdd5294bc3e4f454166a646d41bc4d94f6e"
+    },
+    {
+      "member": "collector/snapshots/001/44040248864-artifacts.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/001/44040248864-artifacts.json",
+      "bytes": 32,
+      "sha256": "244563f989470892c537c9a4622920af0d228ee4528f7d00c64a06d6cd95856c"
+    },
+    {
+      "member": "collector/snapshots/001/44040248864-artifacts.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/001/44040248864-artifacts.json.receipt.json",
+      "bytes": 812,
+      "sha256": "6f1eddd0aa8c5ad5112929563883bfea7ee6a0f1cef643898960aa28f7ee9c3c"
+    },
+    {
+      "member": "collector/snapshots/001/44040248864-jobs.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/001/44040248864-jobs.json",
+      "bytes": 9411,
+      "sha256": "fcb531245087df09c38fefaef24940f7198991cd1b292b49ecc2c6bb7f6d5ffb"
+    },
+    {
+      "member": "collector/snapshots/001/44040248864-jobs.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/001/44040248864-jobs.json.receipt.json",
+      "bytes": 799,
+      "sha256": "d2c68f1f7747f8d5f2d7de89cd53599ae7dbacc1e73097b96b58cfd21f35e7a6"
+    },
+    {
+      "member": "collector/snapshots/001/44040248864-run.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/001/44040248864-run.json",
+      "bytes": 12622,
+      "sha256": "1beaec41bc41bca423f4faec55b51c3f6dfb9689d92886fd30288fe5885a82be"
+    },
+    {
+      "member": "collector/snapshots/001/44040248864-run.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/001/44040248864-run.json.receipt.json",
+      "bytes": 749,
+      "sha256": "3dd697d02e397e510a6443a62173cf9ea7c0c9becd0681038d29102adcceb0ed"
+    },
+    {
+      "member": "collector/snapshots/002/44040248746-artifacts.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/002/44040248746-artifacts.json",
+      "bytes": 767,
+      "sha256": "d1a0959cd81bdb0fb9f0ca9b5e6f14124f262f7dc1d3ec3d099fffda7dd42f60"
+    },
+    {
+      "member": "collector/snapshots/002/44040248746-artifacts.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/002/44040248746-artifacts.json.receipt.json",
+      "bytes": 813,
+      "sha256": "5de41c36ec3282f454f4cf5d37424fdc9ba188ccad889c1604d4846a186fde0d"
+    },
+    {
+      "member": "collector/snapshots/002/44040248746-jobs.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/002/44040248746-jobs.json",
+      "bytes": 2877,
+      "sha256": "d0cde6cf79e86c894e2686dbf70ec4048a8dae97ad27b16bbe988bc391ff3121"
+    },
+    {
+      "member": "collector/snapshots/002/44040248746-jobs.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/002/44040248746-jobs.json.receipt.json",
+      "bytes": 799,
+      "sha256": "f45a16f4674afd2db8410b8ca807b1c534bed130cc2022e989a9e3a248c3b3df"
+    },
+    {
+      "member": "collector/snapshots/002/44040248746-run.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/002/44040248746-run.json",
+      "bytes": 12668,
+      "sha256": "f5f9ab8cf94d701488fe1b0970b8abaa3eb562af50615317e32b1ed51b088d35"
+    },
+    {
+      "member": "collector/snapshots/002/44040248746-run.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/002/44040248746-run.json.receipt.json",
+      "bytes": 749,
+      "sha256": "3bbc01a451dfbef97b65ccbcdb1a5d2a351ecf0c4ae7d24d3fcab4a923fda1b0"
+    },
+    {
+      "member": "collector/snapshots/002/44040248806-artifacts.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/002/44040248806-artifacts.json",
+      "bytes": 766,
+      "sha256": "e823a2c371671260bd2e897cc535599f0771fc17f0d985b5bad440a7970065c0"
+    },
+    {
+      "member": "collector/snapshots/002/44040248806-artifacts.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/002/44040248806-artifacts.json.receipt.json",
+      "bytes": 813,
+      "sha256": "fde18c858140a08771943cac0276fa62df754bc256703bb6425cec341540918e"
+    },
+    {
+      "member": "collector/snapshots/002/44040248806-jobs.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/002/44040248806-jobs.json",
+      "bytes": 3775,
+      "sha256": "d754fc050528e9532a0da046ab61209ffad9e24042c62ebbdb29be8c7bb688fc"
+    },
+    {
+      "member": "collector/snapshots/002/44040248806-jobs.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/002/44040248806-jobs.json.receipt.json",
+      "bytes": 799,
+      "sha256": "7c6dae637f1292f4a3fcb9a3c527b2929651e678abfad7dfafa2df27562f5a9a"
+    },
+    {
+      "member": "collector/snapshots/002/44040248806-run.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/002/44040248806-run.json",
+      "bytes": 12656,
+      "sha256": "0698d77c34e3f9dc4ae9e643df9ffb766a70540b701844d4d66129b874c75425"
+    },
+    {
+      "member": "collector/snapshots/002/44040248806-run.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/002/44040248806-run.json.receipt.json",
+      "bytes": 749,
+      "sha256": "a0f4adeacbdb8aa1cd9228613bca873df3720d1ea280834622605e90bdcca612"
+    },
+    {
+      "member": "collector/snapshots/002/44040248864-artifacts.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/002/44040248864-artifacts.json",
+      "bytes": 32,
+      "sha256": "244563f989470892c537c9a4622920af0d228ee4528f7d00c64a06d6cd95856c"
+    },
+    {
+      "member": "collector/snapshots/002/44040248864-artifacts.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/002/44040248864-artifacts.json.receipt.json",
+      "bytes": 812,
+      "sha256": "114f99fac3e3637d7944757c9d454843d7ca029917915c81127442459655b3ff"
+    },
+    {
+      "member": "collector/snapshots/002/44040248864-jobs.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/002/44040248864-jobs.json",
+      "bytes": 9411,
+      "sha256": "fcb531245087df09c38fefaef24940f7198991cd1b292b49ecc2c6bb7f6d5ffb"
+    },
+    {
+      "member": "collector/snapshots/002/44040248864-jobs.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/002/44040248864-jobs.json.receipt.json",
+      "bytes": 799,
+      "sha256": "dcacf8bac77b6817cd76ba7ad9376095318b2614f4d029615c54e035c50fba39"
+    },
+    {
+      "member": "collector/snapshots/002/44040248864-run.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/002/44040248864-run.json",
+      "bytes": 12622,
+      "sha256": "1beaec41bc41bca423f4faec55b51c3f6dfb9689d92886fd30288fe5885a82be"
+    },
+    {
+      "member": "collector/snapshots/002/44040248864-run.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/002/44040248864-run.json.receipt.json",
+      "bytes": 749,
+      "sha256": "5dd8a4412581bbda2044187ceea6d01db334ee41531adff5fefb28c503fbcf60"
+    },
+    {
+      "member": "collector/snapshots/002/job-133892794705.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/002/job-133892794705.json",
+      "bytes": 2850,
+      "sha256": "d0c1acee0420a24fca1e91964009e5d5b8f7e1700544be087e263d487241e6fe"
+    },
+    {
+      "member": "collector/snapshots/002/job-133892794705.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/002/job-133892794705.json.receipt.json",
+      "bytes": 751,
+      "sha256": "a039c704bb10f6523cecd15f3fb54c834aa476ab38f4dd22a2a7aa52b107cae0"
+    },
+    {
+      "member": "collector/snapshots/002/job-133892794901.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/002/job-133892794901.json",
+      "bytes": 2802,
+      "sha256": "5e7c07749cf0a217019d359d52f274add7b6f1bf0aefebada15141c5df41019a"
+    },
+    {
+      "member": "collector/snapshots/002/job-133892794901.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/002/job-133892794901.json.receipt.json",
+      "bytes": 751,
+      "sha256": "f90a6eb99ee37d40d906a1fb0ea775dda70f603292431e17970c9bcc9c0241d9"
+    },
+    {
+      "member": "collector/snapshots/002/job-133892795291.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/002/job-133892795291.json",
+      "bytes": 3122,
+      "sha256": "6a2eb497e9faed908efa984608196636319b17ab80706af6463ede3cda0ed612"
+    },
+    {
+      "member": "collector/snapshots/002/job-133892795291.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/002/job-133892795291.json.receipt.json",
+      "bytes": 751,
+      "sha256": "4a69a8de0e03089fa2978a1856d87707ae25feb73c064fc362cf3cafcd95e81b"
+    },
+    {
+      "member": "collector/snapshots/002/job-133892795649.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/002/job-133892795649.json",
+      "bytes": 3130,
+      "sha256": "ac3976a273638e8be01debe03a2917d27869c15970ea221319ae0bb70edcc4ac"
+    },
+    {
+      "member": "collector/snapshots/002/job-133892795649.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/002/job-133892795649.json.receipt.json",
+      "bytes": 751,
+      "sha256": "060d879cbb73a141675604ff5820c526e9561107afb0a6192211995b1db05bcf"
+    },
+    {
+      "member": "collector/snapshots/002/job-133892795682.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/002/job-133892795682.json",
+      "bytes": 3130,
+      "sha256": "9416cfbdaf7774ca21ede1fb2e3165748de10556bac2ab9e400171c6c64af267"
+    },
+    {
+      "member": "collector/snapshots/002/job-133892795682.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/002/job-133892795682.json.receipt.json",
+      "bytes": 751,
+      "sha256": "53d4c5c215a69eedc535af13fe1e8435431f376741c38b271bd5dea24bae07a8"
+    },
+    {
+      "member": "collector/snapshots/002/job-133892796479.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/002/job-133892796479.json",
+      "bytes": 945,
+      "sha256": "cc92c2e20ca38c51999a5e0c6a82e4b732eb519c3169294a5b10f46a36d26789"
+    },
+    {
+      "member": "collector/snapshots/002/job-133892796479.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/002/job-133892796479.json.receipt.json",
+      "bytes": 749,
+      "sha256": "6f4df35b1311416bd2006b22215f29de49b819b9fc5738384a2186bfeb22610d"
+    },
+    {
+      "member": "collector/snapshots/003/44040248746-artifacts.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/003/44040248746-artifacts.json",
+      "bytes": 767,
+      "sha256": "d1a0959cd81bdb0fb9f0ca9b5e6f14124f262f7dc1d3ec3d099fffda7dd42f60"
+    },
+    {
+      "member": "collector/snapshots/003/44040248746-artifacts.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/003/44040248746-artifacts.json.receipt.json",
+      "bytes": 813,
+      "sha256": "b37368c2b570c40af94311b2b6c42b9148a7f9781824abe56ef9a1e01efd8ce1"
+    },
+    {
+      "member": "collector/snapshots/003/44040248746-jobs.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/003/44040248746-jobs.json",
+      "bytes": 2877,
+      "sha256": "d0cde6cf79e86c894e2686dbf70ec4048a8dae97ad27b16bbe988bc391ff3121"
+    },
+    {
+      "member": "collector/snapshots/003/44040248746-jobs.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/003/44040248746-jobs.json.receipt.json",
+      "bytes": 799,
+      "sha256": "659712fa4343640d9ed53292e83ba6a359bd3784402c427e5d233a81685d54dc"
+    },
+    {
+      "member": "collector/snapshots/003/44040248746-run.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/003/44040248746-run.json",
+      "bytes": 12668,
+      "sha256": "f5f9ab8cf94d701488fe1b0970b8abaa3eb562af50615317e32b1ed51b088d35"
+    },
+    {
+      "member": "collector/snapshots/003/44040248746-run.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/003/44040248746-run.json.receipt.json",
+      "bytes": 749,
+      "sha256": "9efd5cfebc61d9be639562d8cf86d95054fc36eb5a050bf444ac623d4f079584"
+    },
+    {
+      "member": "collector/snapshots/003/44040248806-artifacts.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/003/44040248806-artifacts.json",
+      "bytes": 766,
+      "sha256": "e823a2c371671260bd2e897cc535599f0771fc17f0d985b5bad440a7970065c0"
+    },
+    {
+      "member": "collector/snapshots/003/44040248806-artifacts.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/003/44040248806-artifacts.json.receipt.json",
+      "bytes": 813,
+      "sha256": "9ad794ab6600e722c154ae4bec99cb307a5edf2e793684853d12bb2b45ffaabf"
+    },
+    {
+      "member": "collector/snapshots/003/44040248806-jobs.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/003/44040248806-jobs.json",
+      "bytes": 3775,
+      "sha256": "d754fc050528e9532a0da046ab61209ffad9e24042c62ebbdb29be8c7bb688fc"
+    },
+    {
+      "member": "collector/snapshots/003/44040248806-jobs.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/003/44040248806-jobs.json.receipt.json",
+      "bytes": 798,
+      "sha256": "25133e41f33d7244749a19897b28e7e7863f18c18a2de980de3676cf7b6e2de6"
+    },
+    {
+      "member": "collector/snapshots/003/44040248806-run.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/003/44040248806-run.json",
+      "bytes": 12656,
+      "sha256": "0698d77c34e3f9dc4ae9e643df9ffb766a70540b701844d4d66129b874c75425"
+    },
+    {
+      "member": "collector/snapshots/003/44040248806-run.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/003/44040248806-run.json.receipt.json",
+      "bytes": 749,
+      "sha256": "a4b1fd906bf6b40657807e193291656b57550786c9f7788cbd9f41bd91a5828d"
+    },
+    {
+      "member": "collector/snapshots/003/44040248864-artifacts.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/003/44040248864-artifacts.json",
+      "bytes": 32,
+      "sha256": "244563f989470892c537c9a4622920af0d228ee4528f7d00c64a06d6cd95856c"
+    },
+    {
+      "member": "collector/snapshots/003/44040248864-artifacts.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/003/44040248864-artifacts.json.receipt.json",
+      "bytes": 812,
+      "sha256": "dbbefa54f89d41a4ea89bebbbb69378108c216e642304381ff246094d5e00e02"
+    },
+    {
+      "member": "collector/snapshots/003/44040248864-jobs.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/003/44040248864-jobs.json",
+      "bytes": 9411,
+      "sha256": "fcb531245087df09c38fefaef24940f7198991cd1b292b49ecc2c6bb7f6d5ffb"
+    },
+    {
+      "member": "collector/snapshots/003/44040248864-jobs.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/003/44040248864-jobs.json.receipt.json",
+      "bytes": 799,
+      "sha256": "311542d332e05847f0792519bd1142c361a11de3f956ace003ad94e357137c44"
+    },
+    {
+      "member": "collector/snapshots/003/44040248864-run.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/003/44040248864-run.json",
+      "bytes": 12622,
+      "sha256": "1beaec41bc41bca423f4faec55b51c3f6dfb9689d92886fd30288fe5885a82be"
+    },
+    {
+      "member": "collector/snapshots/003/44040248864-run.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/003/44040248864-run.json.receipt.json",
+      "bytes": 749,
+      "sha256": "ae0cdf05a30935dc5db6e04aafd71ef2f1c7c95be185c2067abe039e6abf6d23"
+    },
+    {
+      "member": "collector/snapshots/003/job-133892794705.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/003/job-133892794705.json",
+      "bytes": 2850,
+      "sha256": "d0c1acee0420a24fca1e91964009e5d5b8f7e1700544be087e263d487241e6fe"
+    },
+    {
+      "member": "collector/snapshots/003/job-133892794705.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/003/job-133892794705.json.receipt.json",
+      "bytes": 751,
+      "sha256": "9d920955f50035759ed319d9faa59738838e8faa7b779a4420131990fc07bd8e"
+    },
+    {
+      "member": "collector/snapshots/003/job-133892794901.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/003/job-133892794901.json",
+      "bytes": 2802,
+      "sha256": "5e7c07749cf0a217019d359d52f274add7b6f1bf0aefebada15141c5df41019a"
+    },
+    {
+      "member": "collector/snapshots/003/job-133892794901.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/003/job-133892794901.json.receipt.json",
+      "bytes": 751,
+      "sha256": "b8d679ff43ca057d56778b3d0ea49e27fb72ee9520b786a33861501daad9fad3"
+    },
+    {
+      "member": "collector/snapshots/003/job-133892795291.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/003/job-133892795291.json",
+      "bytes": 3122,
+      "sha256": "6a2eb497e9faed908efa984608196636319b17ab80706af6463ede3cda0ed612"
+    },
+    {
+      "member": "collector/snapshots/003/job-133892795291.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/003/job-133892795291.json.receipt.json",
+      "bytes": 751,
+      "sha256": "17391eefa972e500e0d6321d75be1a074469bce6b34ae0905f33bb7d6bc504f8"
+    },
+    {
+      "member": "collector/snapshots/003/job-133892795649.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/003/job-133892795649.json",
+      "bytes": 3130,
+      "sha256": "ac3976a273638e8be01debe03a2917d27869c15970ea221319ae0bb70edcc4ac"
+    },
+    {
+      "member": "collector/snapshots/003/job-133892795649.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/003/job-133892795649.json.receipt.json",
+      "bytes": 751,
+      "sha256": "41211c4d0192808b29a9e52a9cc97359b1e749cc0085ca89a9716bd67f1a9c6b"
+    },
+    {
+      "member": "collector/snapshots/003/job-133892795682.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/003/job-133892795682.json",
+      "bytes": 3130,
+      "sha256": "9416cfbdaf7774ca21ede1fb2e3165748de10556bac2ab9e400171c6c64af267"
+    },
+    {
+      "member": "collector/snapshots/003/job-133892795682.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/003/job-133892795682.json.receipt.json",
+      "bytes": 751,
+      "sha256": "fc76940d53796757083e3919bd94ce313d4b81b6260c5b4705f756da96e41ecd"
+    },
+    {
+      "member": "collector/snapshots/003/job-133892796479.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/003/job-133892796479.json",
+      "bytes": 945,
+      "sha256": "cc92c2e20ca38c51999a5e0c6a82e4b732eb519c3169294a5b10f46a36d26789"
+    },
+    {
+      "member": "collector/snapshots/003/job-133892796479.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/003/job-133892796479.json.receipt.json",
+      "bytes": 750,
+      "sha256": "a249b8a7b16aaf4e32cb07ba0bba33e9a0fbea7f898f7f8d6886056e92d6592e"
+    },
+    {
+      "member": "collector/snapshots/004/44040248746-artifacts.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/004/44040248746-artifacts.json",
+      "bytes": 767,
+      "sha256": "d1a0959cd81bdb0fb9f0ca9b5e6f14124f262f7dc1d3ec3d099fffda7dd42f60"
+    },
+    {
+      "member": "collector/snapshots/004/44040248746-artifacts.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/004/44040248746-artifacts.json.receipt.json",
+      "bytes": 813,
+      "sha256": "124d3cdceca3207b2c10265d64d373b858a70b0f1c1aa95ceec94750a396be89"
+    },
+    {
+      "member": "collector/snapshots/004/44040248746-jobs.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/004/44040248746-jobs.json",
+      "bytes": 2877,
+      "sha256": "d0cde6cf79e86c894e2686dbf70ec4048a8dae97ad27b16bbe988bc391ff3121"
+    },
+    {
+      "member": "collector/snapshots/004/44040248746-jobs.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/004/44040248746-jobs.json.receipt.json",
+      "bytes": 799,
+      "sha256": "4bf4ac144c0dd4d993481e81ba859520075b5ddbf43627df2ed4423da20ce717"
+    },
+    {
+      "member": "collector/snapshots/004/44040248746-run.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/004/44040248746-run.json",
+      "bytes": 12668,
+      "sha256": "f5f9ab8cf94d701488fe1b0970b8abaa3eb562af50615317e32b1ed51b088d35"
+    },
+    {
+      "member": "collector/snapshots/004/44040248746-run.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/004/44040248746-run.json.receipt.json",
+      "bytes": 748,
+      "sha256": "76c191d9e4ca9b3fda22048da2d0f5cfb417c8d55658864d87fc3e718301ee74"
+    },
+    {
+      "member": "collector/snapshots/004/44040248806-artifacts.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/004/44040248806-artifacts.json",
+      "bytes": 766,
+      "sha256": "e823a2c371671260bd2e897cc535599f0771fc17f0d985b5bad440a7970065c0"
+    },
+    {
+      "member": "collector/snapshots/004/44040248806-artifacts.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/004/44040248806-artifacts.json.receipt.json",
+      "bytes": 813,
+      "sha256": "33c361a5539c4248374d065a25ea85d1c36aaa473b63972be91eaf301699c4f9"
+    },
+    {
+      "member": "collector/snapshots/004/44040248806-jobs.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/004/44040248806-jobs.json",
+      "bytes": 3775,
+      "sha256": "d754fc050528e9532a0da046ab61209ffad9e24042c62ebbdb29be8c7bb688fc"
+    },
+    {
+      "member": "collector/snapshots/004/44040248806-jobs.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/004/44040248806-jobs.json.receipt.json",
+      "bytes": 799,
+      "sha256": "7546d5e3cf86ede62e65dc0af22e8667c438bb85037e2e7ddb9fd2b2834c158e"
+    },
+    {
+      "member": "collector/snapshots/004/44040248806-run.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/004/44040248806-run.json",
+      "bytes": 12656,
+      "sha256": "0698d77c34e3f9dc4ae9e643df9ffb766a70540b701844d4d66129b874c75425"
+    },
+    {
+      "member": "collector/snapshots/004/44040248806-run.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/004/44040248806-run.json.receipt.json",
+      "bytes": 749,
+      "sha256": "320bf9e069da391e34a6fadc5edbd7d87e6884ce77712f6f75285ad2b469c483"
+    },
+    {
+      "member": "collector/snapshots/004/44040248864-artifacts.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/004/44040248864-artifacts.json",
+      "bytes": 32,
+      "sha256": "244563f989470892c537c9a4622920af0d228ee4528f7d00c64a06d6cd95856c"
+    },
+    {
+      "member": "collector/snapshots/004/44040248864-artifacts.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/004/44040248864-artifacts.json.receipt.json",
+      "bytes": 812,
+      "sha256": "80e8d016d8d78281837e4f161c5b49a7b22b14bf0a7ec4bd4a66b776b0dd4232"
+    },
+    {
+      "member": "collector/snapshots/004/44040248864-jobs.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/004/44040248864-jobs.json",
+      "bytes": 9411,
+      "sha256": "fcb531245087df09c38fefaef24940f7198991cd1b292b49ecc2c6bb7f6d5ffb"
+    },
+    {
+      "member": "collector/snapshots/004/44040248864-jobs.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/004/44040248864-jobs.json.receipt.json",
+      "bytes": 799,
+      "sha256": "01e52fa9608ebe54ea81769770bcb1207c66a05db593d36c8fdb09c29b8d877c"
+    },
+    {
+      "member": "collector/snapshots/004/44040248864-run.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/004/44040248864-run.json",
+      "bytes": 12622,
+      "sha256": "1beaec41bc41bca423f4faec55b51c3f6dfb9689d92886fd30288fe5885a82be"
+    },
+    {
+      "member": "collector/snapshots/004/44040248864-run.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/004/44040248864-run.json.receipt.json",
+      "bytes": 749,
+      "sha256": "e513a078955ad246a5b0be8fe8aaabd3eacdd7cbf0aeae9b1a03a74725f1c219"
+    },
+    {
+      "member": "collector/snapshots/004/job-133892794705.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/004/job-133892794705.json",
+      "bytes": 2850,
+      "sha256": "d0c1acee0420a24fca1e91964009e5d5b8f7e1700544be087e263d487241e6fe"
+    },
+    {
+      "member": "collector/snapshots/004/job-133892794705.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/004/job-133892794705.json.receipt.json",
+      "bytes": 751,
+      "sha256": "3589fee3c9d55e07310b2dbe7262f29bb4081e745d3ce6914a0fb1772d2be4b1"
+    },
+    {
+      "member": "collector/snapshots/004/job-133892794901.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/004/job-133892794901.json",
+      "bytes": 2802,
+      "sha256": "5e7c07749cf0a217019d359d52f274add7b6f1bf0aefebada15141c5df41019a"
+    },
+    {
+      "member": "collector/snapshots/004/job-133892794901.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/004/job-133892794901.json.receipt.json",
+      "bytes": 751,
+      "sha256": "26bc4f8173db63c730df206bc14026630af9d8d8325025343dc1d140e4433e11"
+    },
+    {
+      "member": "collector/snapshots/004/job-133892795291.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/004/job-133892795291.json",
+      "bytes": 3122,
+      "sha256": "6a2eb497e9faed908efa984608196636319b17ab80706af6463ede3cda0ed612"
+    },
+    {
+      "member": "collector/snapshots/004/job-133892795291.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/004/job-133892795291.json.receipt.json",
+      "bytes": 751,
+      "sha256": "f24a95094ccadfd6e4c1e6bb77d001b8cf3ee461e5be545467965622ee4868e6"
+    },
+    {
+      "member": "collector/snapshots/004/job-133892795649.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/004/job-133892795649.json",
+      "bytes": 3130,
+      "sha256": "ac3976a273638e8be01debe03a2917d27869c15970ea221319ae0bb70edcc4ac"
+    },
+    {
+      "member": "collector/snapshots/004/job-133892795649.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/004/job-133892795649.json.receipt.json",
+      "bytes": 751,
+      "sha256": "f83c9ef8c7a437e780ba6556dae358db51c28cd15f3fc8a2d6777b925755257d"
+    },
+    {
+      "member": "collector/snapshots/004/job-133892795682.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/004/job-133892795682.json",
+      "bytes": 3130,
+      "sha256": "9416cfbdaf7774ca21ede1fb2e3165748de10556bac2ab9e400171c6c64af267"
+    },
+    {
+      "member": "collector/snapshots/004/job-133892795682.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/004/job-133892795682.json.receipt.json",
+      "bytes": 751,
+      "sha256": "1973dbb4d561da8751b3cc41a94c91991eda02ff4f43f3652d9bfa57bc3f228c"
+    },
+    {
+      "member": "collector/snapshots/004/job-133892796479.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/004/job-133892796479.json",
+      "bytes": 945,
+      "sha256": "cc92c2e20ca38c51999a5e0c6a82e4b732eb519c3169294a5b10f46a36d26789"
+    },
+    {
+      "member": "collector/snapshots/004/job-133892796479.json.receipt.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/snapshots/004/job-133892796479.json.receipt.json",
+      "bytes": 750,
+      "sha256": "245568e9d1a333941c9d8b884f0d4989886ed22ba0c0aeeb6fe2d188a1fbcff5"
+    },
+    {
+      "member": "collector/source-checkout-lines.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/source-checkout-lines.json",
+      "bytes": 2045,
+      "sha256": "8e0f8f92ce1287a2bd9f5073985f58691c36f86c3dfd6480ad159282a72190e5"
+    },
+    {
+      "member": "collector/summary.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/summary.json",
+      "bytes": 31029,
+      "sha256": "f7395b4aa5d83b973af33d0aa010d0e1b7fc610e69ae999d7e7691415bc96881"
+    },
+    {
+      "member": "collector/verification.json",
+      "source": "work/monitor-cancellation-ci-completion-20261117/verification.json",
+      "bytes": 26873,
+      "sha256": "92e22797f3494acc3e26668b9824b998c584dd8e8a2382595e43b99db7a8fedc"
+    },
+    {
+      "member": "review/REPORT.md",
+      "source": "work/monitor-cancellation-ci-review-20261117/REPORT.md",
+      "bytes": 10108,
+      "sha256": "3e9a4e6249a6a3a917fd2c9ce1aa18fb96119c01684605f791245b39c0b0aa6d"
+    },
+    {
+      "member": "review/SHA256SUMS",
+      "source": "work/monitor-cancellation-ci-review-20261117/SHA256SUMS",
+      "bytes": 33324,
+      "sha256": "e1a2d386935d00bf981b6ccdba71dece5018749f2c2f06f28c41ffbb4a6dec60"
+    },
+    {
+      "member": "review/analysis-history/r1/independent-checks.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/analysis-history/r1/independent-checks.json",
+      "bytes": 847754,
+      "sha256": "c55a1515a48c2e114b3f5ff228f4a71925a9bfe046192817da49605ede3bfd00"
+    },
+    {
+      "member": "review/analysis-history/r1/independent-results.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/analysis-history/r1/independent-results.json",
+      "bytes": 11862,
+      "sha256": "edb1467d2d4f5155ae9cdadd646dab325a5a0a1c2028676b78cd6e525d568c0e"
+    },
+    {
+      "member": "review/analysis-history/r1/recompute.py",
+      "source": "work/monitor-cancellation-ci-review-20261117/analysis-history/r1/recompute.py",
+      "bytes": 22521,
+      "sha256": "191f2c979f3ecba5a1c9518bca34fe2b14cdc353b2d9ef1e3a889446bae477a6"
+    },
+    {
+      "member": "review/analysis-history/r2/recompute.py",
+      "source": "work/monitor-cancellation-ci-review-20261117/analysis-history/r2/recompute.py",
+      "bytes": 27570,
+      "sha256": "c163d88356b7c752033d81b6525b54b2f2aa3f8d651412a791cb1cbef3983322"
+    },
+    {
+      "member": "review/context.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/context.json",
+      "bytes": 613,
+      "sha256": "a442533fedadeb453cc4caa0646ebaf4be61c9892c31b34cfe62fc0ccdb118d4"
+    },
+    {
+      "member": "review/decision.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/decision.json",
+      "bytes": 14532,
+      "sha256": "6edccb945f12cb2cd2df7559795365d2bc4781c2fa51441c140015336f554b24"
+    },
+    {
+      "member": "review/evidence-index.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/evidence-index.json",
+      "bytes": 8829,
+      "sha256": "ac73c4b0ca642594df46d61995a25bbaff54b95733d998419b88122f17bdce2c"
+    },
+    {
+      "member": "review/exit-summary.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/exit-summary.json",
+      "bytes": 1186,
+      "sha256": "1a0d5ce723e4d29944fc4c772b173ffce13d062f1e93b8a05a8de0395e4d4cc3"
+    },
+    {
+      "member": "review/extract_originals.py",
+      "source": "work/monitor-cancellation-ci-review-20261117/extract_originals.py",
+      "bytes": 2125,
+      "sha256": "04d539c0c6d16b78c15b656e94c006db1647ccec1251bbd644605b67a8e6370d"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308219775/comparison.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308219775/comparison.json",
+      "bytes": 2071,
+      "sha256": "21a81d9fd5ac5b7c689a5432e5480800da8e9263f1b37f4c37ae60d7d76b6a65"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308219775/default-shell.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308219775/default-shell.json",
+      "bytes": 82,
+      "sha256": "7e31dc14fe00bdc84388adbcb66ed36c3f1ee2eb9506ed9d7df738b77fcafffe"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308219775/fixture.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308219775/fixture.json",
+      "bytes": 729,
+      "sha256": "7e787706770eef1d6571882a92d73f73f8b967d27efe16b58e8f934d41cb1811"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308219775/independent-before.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308219775/independent-before.json",
+      "bytes": 2417,
+      "sha256": "90f061c70b8e9e871a53a592f2e5fc82038102df964f425450a33040f6b5c8e4"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308219775/independent.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308219775/independent.json",
+      "bytes": 19845,
+      "sha256": "c674852c1e6cf38fcb803aa221c9db2612edcb379329cfd9407b1618e99a3ea1"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308219775/isolated-server.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308219775/isolated-server.json",
+      "bytes": 623,
+      "sha256": "0b047b48e03256dff8a74ef66562a664de8d9b3658c92ad98eb48585b747a305"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308219775/live-fixture.receipt.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308219775/live-fixture.receipt.json",
+      "bytes": 605,
+      "sha256": "5a0c63dc6b50a2f0326463a59f7ae8bbbc1c56c597fdcfb433841cbda2b42c06"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308219775/live-fixture.stderr",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308219775/live-fixture.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308219775/live-fixture.stdout",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308219775/live-fixture.stdout",
+      "bytes": 508,
+      "sha256": "8de67a8f122ff7627c55f642cbf66320e8f9126f30d48a92d95a5a44688096ab"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308219775/live-keygen-client.receipt.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308219775/live-keygen-client.receipt.json",
+      "bytes": 603,
+      "sha256": "4458bb270561006798ef77d2bec9ddf894d99162a315d8e31591a4de2035af57"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308219775/live-keygen-client.stderr",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308219775/live-keygen-client.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308219775/live-keygen-client.stdout",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308219775/live-keygen-client.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308219775/live-keygen-host.receipt.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308219775/live-keygen-host.receipt.json",
+      "bytes": 603,
+      "sha256": "e45010e25091a0c22cbaf844b19c445fbb0e3d12ea29c8b6d6fb533dd5a11c45"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308219775/live-keygen-host.stderr",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308219775/live-keygen-host.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308219775/live-keygen-host.stdout",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308219775/live-keygen-host.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308219775/live-sshd-config.receipt.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308219775/live-sshd-config.receipt.json",
+      "bytes": 603,
+      "sha256": "751f618107325fe8ef748a9cd1865f98276284d6ff8f7688ae998ed92b0ad81b"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308219775/live-sshd-config.stderr",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308219775/live-sshd-config.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308219775/live-sshd-config.stdout",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308219775/live-sshd-config.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308219775/live-test-inventory.receipt.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308219775/live-test-inventory.receipt.json",
+      "bytes": 603,
+      "sha256": "5ed93d7fec78066843d17deccbc17e6dbaecdf40555231a1087c9723548be37b"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308219775/live-test-inventory.stderr",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308219775/live-test-inventory.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308219775/live-test-inventory.stdout",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308219775/live-test-inventory.stdout",
+      "bytes": 81,
+      "sha256": "9582e552a609b0c07dc16f46032c0a2fd5f23ce343dcd21bed0f30fb3736346f"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308219775/native-ssh-client.receipt.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308219775/native-ssh-client.receipt.json",
+      "bytes": 605,
+      "sha256": "211e166a0f9a8158b4bb0102c8ae79fc5a75bc02289ee74291b9edb43544db94"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308219775/native-ssh-client.stderr",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308219775/native-ssh-client.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308219775/native-ssh-client.stdout",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308219775/native-ssh-client.stdout",
+      "bytes": 178,
+      "sha256": "9c444afa6a8a1951ac94fa37ed414743354caf24d6edc8425c23c46fcf19c4a6"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308219775/openssh-tools.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308219775/openssh-tools.json",
+      "bytes": 259,
+      "sha256": "702b101c94dbba0d8aa5795700deb4fb45a95e93c9569c2e8aa5c4f46609147d"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308219775/owned-sshd.receipt.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308219775/owned-sshd.receipt.json",
+      "bytes": 117510,
+      "sha256": "ad52b0105bbb51df2dfc1af84bade190616ae1638d8cb32c7a8ebd95ffbb5ba0"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308219775/owned-sshd.stderr",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308219775/owned-sshd.stderr",
+      "bytes": 55,
+      "sha256": "46919868288f7f219619d713856bfa3e1dfb8ea2d3c8298111ac07dea269d280"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308219775/owned-sshd.stdout",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308219775/owned-sshd.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308219775/probe.assembly.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308219775/probe.assembly.json",
+      "bytes": 630,
+      "sha256": "a1803a3cdbf0a578dfbd4c123efc0af4d60ffb1cb09300ae36f0480acc417df7"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308219775/processes.assembly.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308219775/processes.assembly.json",
+      "bytes": 642,
+      "sha256": "6edd20e61a267f06d0e34b4a9c715235751482d2b8dd1a52f39af294bdc69143"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308219775/receipt.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308219775/receipt.json",
+      "bytes": 133865,
+      "sha256": "e407f5e5fd7c1152177d8f6f7d6790e0211f33d299064a368becb4c88e4321d1"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308219775/resources-skipped.assembly.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308219775/resources-skipped.assembly.json",
+      "bytes": 649,
+      "sha256": "890e5df47084d1d4f0ea4fed8996820b8699257bef913e7a94b01a5d753cd1c8"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308219775/resources.assembly.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308219775/resources.assembly.json",
+      "bytes": 642,
+      "sha256": "1b4a088508940433b0ea22d53f55263be237072745b0a374d426b8f68d25eaf2"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308219775/rust-client.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308219775/rust-client.json",
+      "bytes": 40209,
+      "sha256": "279d0af573e78ed2896415ad8263b20c042d2f8e2acfbb35e45e80f9148c293f"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308219775/sockets.assembly.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308219775/sockets.assembly.json",
+      "bytes": 636,
+      "sha256": "b81f2a92d8cc6dc70c0208ba55bafc7190d548e17780b783b72c1988869618b4"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308219775/source-head.receipt.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308219775/source-head.receipt.json",
+      "bytes": 603,
+      "sha256": "ca5551ed2c4c29701227035a2ff65161632b97a732321194ec1f1782de65d6da"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308219775/source-head.stderr",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308219775/source-head.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308219775/source-head.stdout",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308219775/source-head.stdout",
+      "bytes": 41,
+      "sha256": "048eeb1709fdd4143c9a98f84e60935b771abf26700dfc31ebfefe0b7a1b6254"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308219775/source-status.receipt.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308219775/source-status.receipt.json",
+      "bytes": 602,
+      "sha256": "9a1170bb454d2a78af653f5af1fa5d964d1a43c344332affca180e6670d76d73"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308219775/source-status.stderr",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308219775/source-status.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308219775/source-status.stdout",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308219775/source-status.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308219775/ssh-cleanup.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308219775/ssh-cleanup.json",
+      "bytes": 131,
+      "sha256": "f7acde0621f69a3e8a9ec971216a5ec211989887e4fac18cbeb8144a239e9384"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308219775/ssh-debug-cleanup.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308219775/ssh-debug-cleanup.json",
+      "bytes": 107316,
+      "sha256": "108cc22e617c21679c3a391c55a8a93d1f949c2e678094fb118b81e25039edde"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308219775/ssh-debug-originals.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308219775/ssh-debug-originals.json",
+      "bytes": 107339,
+      "sha256": "bff1669c667046468e047c4e414b443ea5ed2dc85d62c1660f3da5bca41f71ff"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308219775/ssh-production-binding.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308219775/ssh-production-binding.json",
+      "bytes": 960,
+      "sha256": "7ce174da073a109d9c731b76155d74de06b43dff6050f8b18fa1762eb2b6c719"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308219775/test-binary.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308219775/test-binary.json",
+      "bytes": 292,
+      "sha256": "08228f4902eab8801c096b8b8859711b35ffbd73871b983a05abc3f9fde9ccdf"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308319951/comparison.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308319951/comparison.json",
+      "bytes": 3413,
+      "sha256": "d3970b5d19175befd40c0177cac4312aa37ae10f31834b8bb833e6585d028a8f"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308319951/fixture.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308319951/fixture.json",
+      "bytes": 729,
+      "sha256": "27fea4aa7aef5dd57d3d515d425f6db6458bb64ef729b1948c1f16eeab6440ca"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308319951/fixture.receipt.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308319951/fixture.receipt.json",
+      "bytes": 605,
+      "sha256": "047a8d770576a624c76d2b0fc6db16fcf7823c74d069a2d554d7b326266e5770"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308319951/fixture.stderr",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308319951/fixture.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308319951/fixture.stdout",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308319951/fixture.stdout",
+      "bytes": 508,
+      "sha256": "0154804ab6e015f000a4a17d7585440a6b9a1c45f1f771ffba35914b2ca969b7"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308319951/independent-before.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308319951/independent-before.json",
+      "bytes": 2420,
+      "sha256": "fc6d0069d88ad3f4f65926e2a626188133f45e9f3935075a325832285a0bfd2f"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308319951/independent.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308319951/independent.json",
+      "bytes": 19133,
+      "sha256": "cff6bcdd14ae7fd3b9ccc8d648ab53b1b39b066bb6120abae69a472aa9ff336c"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308319951/probe.assembly.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308319951/probe.assembly.json",
+      "bytes": 630,
+      "sha256": "a1803a3cdbf0a578dfbd4c123efc0af4d60ffb1cb09300ae36f0480acc417df7"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308319951/probe.receipt.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308319951/probe.receipt.json",
+      "bytes": 8818,
+      "sha256": "2043466cff0ab72b016abcbee44a8e6133bd4a3b743f15f112506b5a9a729c40"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308319951/probe.stderr",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308319951/probe.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308319951/probe.stdout",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308319951/probe.stdout",
+      "bytes": 192,
+      "sha256": "6ee489f9d922522f0e08615218d1373b9bfa08bfa70eada0fb346889f470079d"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308319951/probe.wire.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308319951/probe.wire.txt",
+      "bytes": 3778,
+      "sha256": "8f01c9fa8ef3bfab5d005487a6d6f2108060a633b7ded6aa373630c2c7024c7a"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308319951/processes.assembly.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308319951/processes.assembly.json",
+      "bytes": 642,
+      "sha256": "6edd20e61a267f06d0e34b4a9c715235751482d2b8dd1a52f39af294bdc69143"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308319951/processes.receipt.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308319951/processes.receipt.json",
+      "bytes": 10051,
+      "sha256": "12cde86187b4dc1698f1590da8890e1fdb2bfb4e268ab481ff63edd469722888"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308319951/processes.stderr",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308319951/processes.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308319951/processes.stdout",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308319951/processes.stdout",
+      "bytes": 9514,
+      "sha256": "07c52e852df5e721bd30eae965648914b03c30ac77b8c5c6b6cad4991173fbf3"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308319951/processes.wire.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308319951/processes.wire.txt",
+      "bytes": 4394,
+      "sha256": "118cad62598807afb9036750d22ead8abc448c01a378c80edb6fdb4c713746b0"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308319951/receipt.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308319951/receipt.json",
+      "bytes": 66541,
+      "sha256": "6c46f849725b36693b5729ddf903eb6dcb1a31f36e4bcdb250932d587bb363e9"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308319951/resources-skipped.assembly.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308319951/resources-skipped.assembly.json",
+      "bytes": 649,
+      "sha256": "890e5df47084d1d4f0ea4fed8996820b8699257bef913e7a94b01a5d753cd1c8"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308319951/resources-skipped.receipt.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308319951/resources-skipped.receipt.json",
+      "bytes": 17170,
+      "sha256": "7f53b4de9b463646c4df42f82789faf28676f7a7a640c99495894a1b69933e7b"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308319951/resources-skipped.stderr",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308319951/resources-skipped.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308319951/resources-skipped.stdout",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308319951/resources-skipped.stdout",
+      "bytes": 657,
+      "sha256": "0e0d2d3e3e9fe4e3b1e83bb230094ce6152fa7f215b6ee06823df0ef7442631b"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308319951/resources-skipped.wire.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308319951/resources-skipped.wire.txt",
+      "bytes": 7954,
+      "sha256": "a6b83aba945711e072f0f758a68e0132769974d49d734b94e64b1d906c84df8b"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308319951/resources.assembly.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308319951/resources.assembly.json",
+      "bytes": 642,
+      "sha256": "1b4a088508940433b0ea22d53f55263be237072745b0a374d426b8f68d25eaf2"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308319951/resources.receipt.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308319951/resources.receipt.json",
+      "bytes": 17170,
+      "sha256": "2730bb97b0985a819727e48fa9e2a135b3cdc2a4cb8404de46aa9827337c143a"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308319951/resources.stderr",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308319951/resources.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308319951/resources.stdout",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308319951/resources.stdout",
+      "bytes": 906,
+      "sha256": "18ca20341be96f1689df50533629d00a7ab726f743bb5ab988ca67d38d98349c"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308319951/resources.wire.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308319951/resources.wire.txt",
+      "bytes": 7954,
+      "sha256": "ca23fadd506c060f65821c5827667cf88a170519f2a66f49594dca5853e1ad81"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308319951/runtime.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308319951/runtime.json",
+      "bytes": 239,
+      "sha256": "24b305a2c6cc4ef6d1a82ed0070ab1a809261283fd9f609971c644c210d681d9"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308319951/sockets.assembly.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308319951/sockets.assembly.json",
+      "bytes": 636,
+      "sha256": "b81f2a92d8cc6dc70c0208ba55bafc7190d548e17780b783b72c1988869618b4"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308319951/sockets.receipt.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308319951/sockets.receipt.json",
+      "bytes": 10787,
+      "sha256": "110fb8616cf46da4c3f74626b1e2e78762320d42d8eea62ff25559feefb6ee60"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308319951/sockets.stderr",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308319951/sockets.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308319951/sockets.stdout",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308319951/sockets.stdout",
+      "bytes": 4082,
+      "sha256": "25586810b4590936d13c4db352e158246f8da63e5ea69c173a77f16cc8bc429d"
+    },
+    {
+      "member": "review/extracted/parent/artifact-14308319951/sockets.wire.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/artifact-14308319951/sockets.wire.txt",
+      "bytes": 4762,
+      "sha256": "1c5cb595fc4d94e29910b843692f433a9c54cec1aa2ef7782a7759c3379eda6f"
+    },
+    {
+      "member": "review/extracted/parent/run-44040248746-attempt-1-logs/0_Actual Windows OpenSSH and original remote processes.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/run-44040248746-attempt-1-logs/0_Actual Windows OpenSSH and original remote processes.txt",
+      "bytes": 60306,
+      "sha256": "2a5597cc0b6122d0d6d140775e81287100172d04c7421a954a593c4faa04ae4c"
+    },
+    {
+      "member": "review/extracted/parent/run-44040248746-attempt-1-logs/Actual Windows OpenSSH and original remote processes/13_Post Run ._.github_actions_setup-build.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/run-44040248746-attempt-1-logs/Actual Windows OpenSSH and original remote processes/13_Post Run ._.github_actions_setup-build.txt",
+      "bytes": 886,
+      "sha256": "6bc1ffc8d9f7b50d8e1b972405ba991ca7d633b4e35798ed1002921c2e9b799a"
+    },
+    {
+      "member": "review/extracted/parent/run-44040248746-attempt-1-logs/Actual Windows OpenSSH and original remote processes/14_Post Run actions_checkout@3d3c42e5aac5ba805825da76410c181273ba90b1.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/run-44040248746-attempt-1-logs/Actual Windows OpenSSH and original remote processes/14_Post Run actions_checkout@3d3c42e5aac5ba805825da76410c181273ba90b1.txt",
+      "bytes": 1930,
+      "sha256": "c469146b54d34c88118f7a95b944d252e122104c78715251684e7aea934627a4"
+    },
+    {
+      "member": "review/extracted/parent/run-44040248746-attempt-1-logs/Actual Windows OpenSSH and original remote processes/15_Complete job.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/run-44040248746-attempt-1-logs/Actual Windows OpenSSH and original remote processes/15_Complete job.txt",
+      "bytes": 137,
+      "sha256": "573ab7b59ca52bbee643d5c5d57c000ad5eaf536ebbf37839ce3c741138b2efa"
+    },
+    {
+      "member": "review/extracted/parent/run-44040248746-attempt-1-logs/Actual Windows OpenSSH and original remote processes/1_Set up job.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/run-44040248746-attempt-1-logs/Actual Windows OpenSSH and original remote processes/1_Set up job.txt",
+      "bytes": 2236,
+      "sha256": "a2fb823a64e7743e5500bca582944350d0e6377e38ee33a0b0aa26ac8f52628a"
+    },
+    {
+      "member": "review/extracted/parent/run-44040248746-attempt-1-logs/Actual Windows OpenSSH and original remote processes/2_Run actions_checkout@3d3c42e5aac5ba805825da76410c181273ba90b1.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/run-44040248746-attempt-1-logs/Actual Windows OpenSSH and original remote processes/2_Run actions_checkout@3d3c42e5aac5ba805825da76410c181273ba90b1.txt",
+      "bytes": 14904,
+      "sha256": "dea5252676147a54989c04b438754a5e9d40f9898b5adb3dce0da8ae42be9e4e"
+    },
+    {
+      "member": "review/extracted/parent/run-44040248746-attempt-1-logs/Actual Windows OpenSSH and original remote processes/3_Run ._.github_actions_setup-build.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/run-44040248746-attempt-1-logs/Actual Windows OpenSSH and original remote processes/3_Run ._.github_actions_setup-build.txt",
+      "bytes": 11531,
+      "sha256": "faba891b4e52d3ab73c71bd3a9b813a46dd81126b192175c7e39269c5653619d"
+    },
+    {
+      "member": "review/extracted/parent/run-44040248746-attempt-1-logs/Actual Windows OpenSSH and original remote processes/4_SSH ownership and integration lab unit tests.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/run-44040248746-attempt-1-logs/Actual Windows OpenSSH and original remote processes/4_SSH ownership and integration lab unit tests.txt",
+      "bytes": 21620,
+      "sha256": "0d9f09b1d6cd792e778fb79aab644afddc622dfd5548a04b59b38804f5a4df3c"
+    },
+    {
+      "member": "review/extracted/parent/run-44040248746-attempt-1-logs/Actual Windows OpenSSH and original remote processes/5_Build exact native SSH test.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/run-44040248746-attempt-1-logs/Actual Windows OpenSSH and original remote processes/5_Build exact native SSH test.txt",
+      "bytes": 2707,
+      "sha256": "3e9541bdc983b3933a0b21d6fc8b0fb88f4d653acc395f7beaa8c5a7f69738a4"
+    },
+    {
+      "member": "review/extracted/parent/run-44040248746-attempt-1-logs/Actual Windows OpenSSH and original remote processes/6_Pinned authentication, production collectors, independent APIs and process terminal proof.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/run-44040248746-attempt-1-logs/Actual Windows OpenSSH and original remote processes/6_Pinned authentication, production collectors, independent APIs and process terminal proof.txt",
+      "bytes": 1696,
+      "sha256": "b9fd4f27cbd08950d79a234262016c80e7e964e8f8f3df2c6f9e61a9ff930318"
+    },
+    {
+      "member": "review/extracted/parent/run-44040248746-attempt-1-logs/Actual Windows OpenSSH and original remote processes/7_Preserve evidence excluding private keys and private client configuration.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/run-44040248746-attempt-1-logs/Actual Windows OpenSSH and original remote processes/7_Preserve evidence excluding private keys and private client configuration.txt",
+      "bytes": 2686,
+      "sha256": "d8230bbdea8201a1e6138e6666ae98919529b2c341e39748eebc3f62d76395e1"
+    },
+    {
+      "member": "review/extracted/parent/run-44040248746-attempt-1-logs/Actual Windows OpenSSH and original remote processes/system.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/run-44040248746-attempt-1-logs/Actual Windows OpenSSH and original remote processes/system.txt",
+      "bytes": 626,
+      "sha256": "2a016668c054eebcc16e19f004b4a131db7f884a90168f3b4b2c5cacd0736cc8"
+    },
+    {
+      "member": "review/extracted/parent/run-44040248806-attempt-1-logs/0_Actual collectors and independent Windows APIs.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/run-44040248806-attempt-1-logs/0_Actual collectors and independent Windows APIs.txt",
+      "bytes": 61842,
+      "sha256": "d96b2fe2c746b774e194aa8b4687a665f908bb37d51c1427801c449ac3c3c372"
+    },
+    {
+      "member": "review/extracted/parent/run-44040248806-attempt-1-logs/Actual collectors and independent Windows APIs/13_Post Run ._.github_actions_setup-build.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/run-44040248806-attempt-1-logs/Actual collectors and independent Windows APIs/13_Post Run ._.github_actions_setup-build.txt",
+      "bytes": 886,
+      "sha256": "caf0ab173aa38b70f6f6db8533333e0ae1afa20ccd9d8a07aa9897716834eb83"
+    },
+    {
+      "member": "review/extracted/parent/run-44040248806-attempt-1-logs/Actual collectors and independent Windows APIs/14_Post Run actions_checkout@3d3c42e5aac5ba805825da76410c181273ba90b1.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/run-44040248806-attempt-1-logs/Actual collectors and independent Windows APIs/14_Post Run actions_checkout@3d3c42e5aac5ba805825da76410c181273ba90b1.txt",
+      "bytes": 1930,
+      "sha256": "c42219a3cdf8265c04be49b9c30d5bed2d638c17877e425ae5a3a79891ad248e"
+    },
+    {
+      "member": "review/extracted/parent/run-44040248806-attempt-1-logs/Actual collectors and independent Windows APIs/15_Complete job.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/run-44040248806-attempt-1-logs/Actual collectors and independent Windows APIs/15_Complete job.txt",
+      "bytes": 137,
+      "sha256": "c14824e3a7f585a8dfa8d8bef82d558366d5d9547badd1343266ba510e941095"
+    },
+    {
+      "member": "review/extracted/parent/run-44040248806-attempt-1-logs/Actual collectors and independent Windows APIs/1_Set up job.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/run-44040248806-attempt-1-logs/Actual collectors and independent Windows APIs/1_Set up job.txt",
+      "bytes": 2233,
+      "sha256": "605f30de5b97652f1f5142f60d69a1967c676f2052bd5823a3bb2c1cd7a47201"
+    },
+    {
+      "member": "review/extracted/parent/run-44040248806-attempt-1-logs/Actual collectors and independent Windows APIs/2_Run actions_checkout@3d3c42e5aac5ba805825da76410c181273ba90b1.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/run-44040248806-attempt-1-logs/Actual collectors and independent Windows APIs/2_Run actions_checkout@3d3c42e5aac5ba805825da76410c181273ba90b1.txt",
+      "bytes": 14584,
+      "sha256": "1142693b1ae5126ba8e0553473128737fe872a3800fe9c49ad3f68cdd49deb14"
+    },
+    {
+      "member": "review/extracted/parent/run-44040248806-attempt-1-logs/Actual collectors and independent Windows APIs/3_Run ._.github_actions_setup-build.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/run-44040248806-attempt-1-logs/Actual collectors and independent Windows APIs/3_Run ._.github_actions_setup-build.txt",
+      "bytes": 11509,
+      "sha256": "64f5293cd782c7cf14a300c264be1e31ded658c07e091c28ea5ab788389d7316"
+    },
+    {
+      "member": "review/extracted/parent/run-44040248806-attempt-1-logs/Actual collectors and independent Windows APIs/4_Lab unit tests.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/run-44040248806-attempt-1-logs/Actual collectors and independent Windows APIs/4_Lab unit tests.txt",
+      "bytes": 22871,
+      "sha256": "78508c8e49d6ccf531334b7bd104f4df860c2e6173d2b80248fea7df06c04387"
+    },
+    {
+      "member": "review/extracted/parent/run-44040248806-attempt-1-logs/Actual collectors and independent Windows APIs/5_Production collectors, owned fixtures, independent APIs.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/run-44040248806-attempt-1-logs/Actual collectors and independent Windows APIs/5_Production collectors, owned fixtures, independent APIs.txt",
+      "bytes": 1282,
+      "sha256": "fd50d89de21b0993eae5de0b92ffe81ba2121f66822f4ec6ab1b945e23eb1acf"
+    },
+    {
+      "member": "review/extracted/parent/run-44040248806-attempt-1-logs/Actual collectors and independent Windows APIs/6_Captured API frames through public authenticated routing (capture replay).txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/run-44040248806-attempt-1-logs/Actual collectors and independent Windows APIs/6_Captured API frames through public authenticated routing (capture replay).txt",
+      "bytes": 3908,
+      "sha256": "35e9b1427f4524766a9588b93296b0227f9d3cb5c5625b8dc679220ec2801c8c"
+    },
+    {
+      "member": "review/extracted/parent/run-44040248806-attempt-1-logs/Actual collectors and independent Windows APIs/7_Preserve raw frames and original-process cleanup receipts.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/run-44040248806-attempt-1-logs/Actual collectors and independent Windows APIs/7_Preserve raw frames and original-process cleanup receipts.txt",
+      "bytes": 2529,
+      "sha256": "5c419f10864d6b0e53fc267ffbf955101eb1711c8bf4b742f56e687f16a70fe5"
+    },
+    {
+      "member": "review/extracted/parent/run-44040248806-attempt-1-logs/Actual collectors and independent Windows APIs/system.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/parent/run-44040248806-attempt-1-logs/Actual collectors and independent Windows APIs/system.txt",
+      "bytes": 618,
+      "sha256": "ffc044abb2f25dda983f2d39c6d2adbe22104562ff843943b67e9e69f246767f"
+    },
+    {
+      "member": "review/extracted/quality/artifact-14309783967/20261117T080256Z-25084b7fbf/generate-client-key.log",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/artifact-14309783967/20261117T080256Z-25084b7fbf/generate-client-key.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "review/extracted/quality/artifact-14309783967/20261117T080256Z-25084b7fbf/generate-host-key.log",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/artifact-14309783967/20261117T080256Z-25084b7fbf/generate-host-key.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "review/extracted/quality/artifact-14309783967/20261117T080256Z-25084b7fbf/openssh-version.log",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/artifact-14309783967/20261117T080256Z-25084b7fbf/openssh-version.log",
+      "bytes": 62,
+      "sha256": "87905b183f0ccb3b5a48013bb8fc08f3f94934106a1ddb7e2e02a09653211a4a"
+    },
+    {
+      "member": "review/extracted/quality/artifact-14309783967/20261117T080256Z-25084b7fbf/result.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/artifact-14309783967/20261117T080256Z-25084b7fbf/result.json",
+      "bytes": 2051,
+      "sha256": "a7680cd601c6b7f228b9ffaa74310a496c78ee63667c625361769f11f8265a16"
+    },
+    {
+      "member": "review/extracted/quality/artifact-14309783967/20261117T080256Z-25084b7fbf/sshd.log",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/artifact-14309783967/20261117T080256Z-25084b7fbf/sshd.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "review/extracted/quality/artifact-14309783967/20261117T080256Z-25084b7fbf/tests.log",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/artifact-14309783967/20261117T080256Z-25084b7fbf/tests.log",
+      "bytes": 2098,
+      "sha256": "fcb60c77e525d82663c026aa9b98251422c135610d6585ae25e9195c2b713409"
+    },
+    {
+      "member": "review/extracted/quality/artifact-14309783967/20261117T080256Z-25084b7fbf/validate-sshd-config.log",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/artifact-14309783967/20261117T080256Z-25084b7fbf/validate-sshd-config.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "review/extracted/quality/artifact-14309783967/20261117T080313Z-8f1ceb0e2f/generate-client-key.log",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/artifact-14309783967/20261117T080313Z-8f1ceb0e2f/generate-client-key.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "review/extracted/quality/artifact-14309783967/20261117T080313Z-8f1ceb0e2f/generate-host-key.log",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/artifact-14309783967/20261117T080313Z-8f1ceb0e2f/generate-host-key.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "review/extracted/quality/artifact-14309783967/20261117T080313Z-8f1ceb0e2f/openssh-version.log",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/artifact-14309783967/20261117T080313Z-8f1ceb0e2f/openssh-version.log",
+      "bytes": 62,
+      "sha256": "87905b183f0ccb3b5a48013bb8fc08f3f94934106a1ddb7e2e02a09653211a4a"
+    },
+    {
+      "member": "review/extracted/quality/artifact-14309783967/20261117T080313Z-8f1ceb0e2f/result.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/artifact-14309783967/20261117T080313Z-8f1ceb0e2f/result.json",
+      "bytes": 2052,
+      "sha256": "be01e37c4f5f56c591b91eef3b6e0327bb081667ab037f23f052ab3ac78b5603"
+    },
+    {
+      "member": "review/extracted/quality/artifact-14309783967/20261117T080313Z-8f1ceb0e2f/sshd.log",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/artifact-14309783967/20261117T080313Z-8f1ceb0e2f/sshd.log",
+      "bytes": 48,
+      "sha256": "49078b95cadc2a6f725b1f62b5e86c2770064b7dfa08424574a41fe9357ac200"
+    },
+    {
+      "member": "review/extracted/quality/artifact-14309783967/20261117T080313Z-8f1ceb0e2f/tests.log",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/artifact-14309783967/20261117T080313Z-8f1ceb0e2f/tests.log",
+      "bytes": 867,
+      "sha256": "ccf58a8e84bf4f34d1ffe8f6d48c4c87b84e66b10e909c80d2f1d474f5f33b4a"
+    },
+    {
+      "member": "review/extracted/quality/artifact-14309783967/20261117T080313Z-8f1ceb0e2f/validate-sshd-config.log",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/artifact-14309783967/20261117T080313Z-8f1ceb0e2f/validate-sshd-config.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "review/extracted/quality/artifact-14309968324/20261117T080034Z-9ca66e712f/generate-client-key.log",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/artifact-14309968324/20261117T080034Z-9ca66e712f/generate-client-key.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "review/extracted/quality/artifact-14309968324/20261117T080034Z-9ca66e712f/generate-host-key.log",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/artifact-14309968324/20261117T080034Z-9ca66e712f/generate-host-key.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "review/extracted/quality/artifact-14309968324/20261117T080034Z-9ca66e712f/openssh-version.log",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/artifact-14309968324/20261117T080034Z-9ca66e712f/openssh-version.log",
+      "bytes": 31,
+      "sha256": "6faf9904aac9ceb0fce08762e25a5a83dd82596100e2a6d2c6102da5eb7feaa7"
+    },
+    {
+      "member": "review/extracted/quality/artifact-14309968324/20261117T080034Z-9ca66e712f/result.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/artifact-14309968324/20261117T080034Z-9ca66e712f/result.json",
+      "bytes": 2056,
+      "sha256": "f0860d96a98183f44be2eddf1742e821c1a798bb96034bbd2ab4d7ffaf5fd9e1"
+    },
+    {
+      "member": "review/extracted/quality/artifact-14309968324/20261117T080034Z-9ca66e712f/sshd.log",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/artifact-14309968324/20261117T080034Z-9ca66e712f/sshd.log",
+      "bytes": 1826,
+      "sha256": "da4428106be1ddad0256be0e0a455988296431bc8d0339ef00c9f4389a4dedfb"
+    },
+    {
+      "member": "review/extracted/quality/artifact-14309968324/20261117T080034Z-9ca66e712f/tests.log",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/artifact-14309968324/20261117T080034Z-9ca66e712f/tests.log",
+      "bytes": 2101,
+      "sha256": "f28464793737a5d7c90549a6bf563a3ff994f0f756e0207789dfefc748d7bc8a"
+    },
+    {
+      "member": "review/extracted/quality/artifact-14309968324/20261117T080034Z-9ca66e712f/validate-sshd-config.log",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/artifact-14309968324/20261117T080034Z-9ca66e712f/validate-sshd-config.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "review/extracted/quality/artifact-14309968324/20261117T080103Z-9064227cec/generate-client-key.log",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/artifact-14309968324/20261117T080103Z-9064227cec/generate-client-key.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "review/extracted/quality/artifact-14309968324/20261117T080103Z-9064227cec/generate-host-key.log",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/artifact-14309968324/20261117T080103Z-9064227cec/generate-host-key.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "review/extracted/quality/artifact-14309968324/20261117T080103Z-9064227cec/openssh-version.log",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/artifact-14309968324/20261117T080103Z-9064227cec/openssh-version.log",
+      "bytes": 31,
+      "sha256": "6faf9904aac9ceb0fce08762e25a5a83dd82596100e2a6d2c6102da5eb7feaa7"
+    },
+    {
+      "member": "review/extracted/quality/artifact-14309968324/20261117T080103Z-9064227cec/result.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/artifact-14309968324/20261117T080103Z-9064227cec/result.json",
+      "bytes": 2055,
+      "sha256": "ed494073952134cd114a54a6eeb667dd99507eca5405a186b23586750ed859d3"
+    },
+    {
+      "member": "review/extracted/quality/artifact-14309968324/20261117T080103Z-9064227cec/sshd.log",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/artifact-14309968324/20261117T080103Z-9064227cec/sshd.log",
+      "bytes": 581,
+      "sha256": "92ff5b5ee487df06c5a92b37738d96bfedc4afef3d8616310200cb4ab9811ee0"
+    },
+    {
+      "member": "review/extracted/quality/artifact-14309968324/20261117T080103Z-9064227cec/tests.log",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/artifact-14309968324/20261117T080103Z-9064227cec/tests.log",
+      "bytes": 868,
+      "sha256": "41397a0844fba22c5a5e673cf8b8e8e70b32a21e765eb26dd6e728be8129fa15"
+    },
+    {
+      "member": "review/extracted/quality/artifact-14309968324/20261117T080103Z-9064227cec/validate-sshd-config.log",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/artifact-14309968324/20261117T080103Z-9064227cec/validate-sshd-config.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "review/extracted/quality/run-logs/0_native (windows-2025).txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/run-logs/0_native (windows-2025).txt",
+      "bytes": 1031531,
+      "sha256": "012ac2978bb02170c86bb41179e900f495012363ed7d91f0d83dc0cddd66adb3"
+    },
+    {
+      "member": "review/extracted/quality/run-logs/1_native (ubuntu-24.04).txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/run-logs/1_native (ubuntu-24.04).txt",
+      "bytes": 909271,
+      "sha256": "68f00121a6f631d5d346832b34ad177925fd2569bfc5ab1cacbb3af876e2c5a2"
+    },
+    {
+      "member": "review/extracted/quality/run-logs/2_native (macos-26).txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/run-logs/2_native (macos-26).txt",
+      "bytes": 886454,
+      "sha256": "350f60940beb53bcf122c0e32de68f27ce2eb1096322f4307be39f6071ed2f85"
+    },
+    {
+      "member": "review/extracted/quality/run-logs/native (macos-26)/10_OpenSSH interoperability (macOS and Linux).txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/run-logs/native (macos-26)/10_OpenSSH interoperability (macOS and Linux).txt",
+      "bytes": 1380,
+      "sha256": "c017fd2f3bdd04fb0c631d35496cdb3d92e01f49fbd1766b06655c8de515caa1"
+    },
+    {
+      "member": "review/extracted/quality/run-logs/native (macos-26)/11_OpenSSH forwarding lifecycles (macOS and Linux).txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/run-logs/native (macos-26)/11_OpenSSH forwarding lifecycles (macOS and Linux).txt",
+      "bytes": 1405,
+      "sha256": "a2c032dbbac78e823a4b7f162a88bb9131bb70808fa20b068b8d565a0434555c"
+    },
+    {
+      "member": "review/extracted/quality/run-logs/native (macos-26)/12_Preserve OpenSSH interoperability receipts.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/run-logs/native (macos-26)/12_Preserve OpenSSH interoperability receipts.txt",
+      "bytes": 2516,
+      "sha256": "470676e21fc7b530a04c3649b3695bbb0a50cc749b96e05cb5e6558594e403b6"
+    },
+    {
+      "member": "review/extracted/quality/run-logs/native (macos-26)/1_Set up job.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/run-logs/native (macos-26)/1_Set up job.txt",
+      "bytes": 2135,
+      "sha256": "086c1120f098432943b67c9261cf60918b52136cd8225dfe198b276c98146a2d"
+    },
+    {
+      "member": "review/extracted/quality/run-logs/native (macos-26)/23_Post Run ._.github_actions_setup-build.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/run-logs/native (macos-26)/23_Post Run ._.github_actions_setup-build.txt",
+      "bytes": 878,
+      "sha256": "bbc7d9c7a9016add1e7be4d9607ecdfea8201d58e921a5f4f044da8908cf1a8f"
+    },
+    {
+      "member": "review/extracted/quality/run-logs/native (macos-26)/24_Post Run actions_checkout@3d3c42e5aac5ba805825da76410c181273ba90b1.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/run-logs/native (macos-26)/24_Post Run actions_checkout@3d3c42e5aac5ba805825da76410c181273ba90b1.txt",
+      "bytes": 1961,
+      "sha256": "c4c1a86e5c3e877fff14c85bbaaab4ced28577331d253086070970730b12668a"
+    },
+    {
+      "member": "review/extracted/quality/run-logs/native (macos-26)/25_Complete job.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/run-logs/native (macos-26)/25_Complete job.txt",
+      "bytes": 61,
+      "sha256": "d2e3f8c2aff725dc3945d86192e6ab7928c919adbd4c1f08e30529ff0b7d8ee8"
+    },
+    {
+      "member": "review/extracted/quality/run-logs/native (macos-26)/2_Run actions_checkout@3d3c42e5aac5ba805825da76410c181273ba90b1.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/run-logs/native (macos-26)/2_Run actions_checkout@3d3c42e5aac5ba805825da76410c181273ba90b1.txt",
+      "bytes": 15407,
+      "sha256": "659ac6c38d214abc264781ca42a52d8ebaa6433fc4b0fa04008ad6b6a423d342"
+    },
+    {
+      "member": "review/extracted/quality/run-logs/native (macos-26)/3_Run ._.github_actions_setup-build.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/run-logs/native (macos-26)/3_Run ._.github_actions_setup-build.txt",
+      "bytes": 10465,
+      "sha256": "bcb53a47c4073f5304cb7ef2ab60aabc7785da4e52b607fbd9224da7504d61dd"
+    },
+    {
+      "member": "review/extracted/quality/run-logs/native (macos-26)/4_Packaging regression tests.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/run-logs/native (macos-26)/4_Packaging regression tests.txt",
+      "bytes": 12031,
+      "sha256": "5edf632cc31d092651f7fc2b210be0bce769f13cc2c2046ac6c9b1bb93605fb7"
+    },
+    {
+      "member": "review/extracted/quality/run-logs/native (macos-26)/8_Rust quality gate.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/run-logs/native (macos-26)/8_Rust quality gate.txt",
+      "bytes": 838245,
+      "sha256": "b7cab800a85c6eba4fdd523d08a0ea5c3d6e2bafadc6741057d9d3b0d38b8770"
+    },
+    {
+      "member": "review/extracted/quality/run-logs/native (macos-26)/system.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/run-logs/native (macos-26)/system.txt",
+      "bytes": 597,
+      "sha256": "966dcd33ef20d4e75f471f4a2d33298d894a0c8512763a1355d83faa4fd9eea0"
+    },
+    {
+      "member": "review/extracted/quality/run-logs/native (ubuntu-24.04)/10_OpenSSH interoperability (macOS and Linux).txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/run-logs/native (ubuntu-24.04)/10_OpenSSH interoperability (macOS and Linux).txt",
+      "bytes": 1418,
+      "sha256": "4b783de2c4651c269cc5e962fec3c38df2b1a22c064d6decf07155dbea7a7ae8"
+    },
+    {
+      "member": "review/extracted/quality/run-logs/native (ubuntu-24.04)/11_OpenSSH forwarding lifecycles (macOS and Linux).txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/run-logs/native (ubuntu-24.04)/11_OpenSSH forwarding lifecycles (macOS and Linux).txt",
+      "bytes": 1443,
+      "sha256": "9ac88c14d8c00438392e0bfff616e8ae0bbd59b222577600abca685ce531b323"
+    },
+    {
+      "member": "review/extracted/quality/run-logs/native (ubuntu-24.04)/12_Preserve OpenSSH interoperability receipts.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/run-logs/native (ubuntu-24.04)/12_Preserve OpenSSH interoperability receipts.txt",
+      "bytes": 2544,
+      "sha256": "793eb2e20c03352c8ddd78c872c2fde0603116cd9f0a362c8cc52dd870094889"
+    },
+    {
+      "member": "review/extracted/quality/run-logs/native (ubuntu-24.04)/1_Set up job.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/run-logs/native (ubuntu-24.04)/1_Set up job.txt",
+      "bytes": 2116,
+      "sha256": "ab86fbb66ea9b4267cacdbedadc37fd1a1bc0e94863716d478603b4f586e1c56"
+    },
+    {
+      "member": "review/extracted/quality/run-logs/native (ubuntu-24.04)/23_Post Run ._.github_actions_setup-build.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/run-logs/native (ubuntu-24.04)/23_Post Run ._.github_actions_setup-build.txt",
+      "bytes": 878,
+      "sha256": "5aeb8020cad069d69c777a616d242defe0022e7c4fd9cc81b89d8457422cd2d0"
+    },
+    {
+      "member": "review/extracted/quality/run-logs/native (ubuntu-24.04)/24_Post Run actions_checkout@3d3c42e5aac5ba805825da76410c181273ba90b1.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/run-logs/native (ubuntu-24.04)/24_Post Run actions_checkout@3d3c42e5aac5ba805825da76410c181273ba90b1.txt",
+      "bytes": 1745,
+      "sha256": "6c89a22a74d195607d58cf3e33f1d6a17a344542be6bce9f143054dcfbec7a0f"
+    },
+    {
+      "member": "review/extracted/quality/run-logs/native (ubuntu-24.04)/25_Complete job.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/run-logs/native (ubuntu-24.04)/25_Complete job.txt",
+      "bytes": 61,
+      "sha256": "4cda79643efee1e49b3857442668b1934d661ec26b3151942e3fce31b3856f74"
+    },
+    {
+      "member": "review/extracted/quality/run-logs/native (ubuntu-24.04)/2_Run actions_checkout@3d3c42e5aac5ba805825da76410c181273ba90b1.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/run-logs/native (ubuntu-24.04)/2_Run actions_checkout@3d3c42e5aac5ba805825da76410c181273ba90b1.txt",
+      "bytes": 11562,
+      "sha256": "dec03bd18b1153171305e89306aeb74dfc715afe26dd23e4351b591ecf2699de"
+    },
+    {
+      "member": "review/extracted/quality/run-logs/native (ubuntu-24.04)/3_Run ._.github_actions_setup-build.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/run-logs/native (ubuntu-24.04)/3_Run ._.github_actions_setup-build.txt",
+      "bytes": 36732,
+      "sha256": "b26d6e72921aaa94ea52c0c6833841fa90a73b6f61cd2d84677806811eb75d22"
+    },
+    {
+      "member": "review/extracted/quality/run-logs/native (ubuntu-24.04)/4_Packaging regression tests.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/run-logs/native (ubuntu-24.04)/4_Packaging regression tests.txt",
+      "bytes": 12071,
+      "sha256": "1b2f41cca52c85beb1e27fcb0ec3c4644a3ceca3888a9f7e73cfb94731c0feed"
+    },
+    {
+      "member": "review/extracted/quality/run-logs/native (ubuntu-24.04)/8_Rust quality gate.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/run-logs/native (ubuntu-24.04)/8_Rust quality gate.txt",
+      "bytes": 837157,
+      "sha256": "c9b616008a3b448aa24b27a463d3e1a7d331e99459187b735598e5d78c174370"
+    },
+    {
+      "member": "review/extracted/quality/run-logs/native (ubuntu-24.04)/9_Prepare Linux OpenSSH interoperability server.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/run-logs/native (ubuntu-24.04)/9_Prepare Linux OpenSSH interoperability server.txt",
+      "bytes": 1577,
+      "sha256": "4124b53488078f4d9b272b9cb491fe293af69edad27e8766411b94382eeafa14"
+    },
+    {
+      "member": "review/extracted/quality/run-logs/native (ubuntu-24.04)/system.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/run-logs/native (ubuntu-24.04)/system.txt",
+      "bytes": 601,
+      "sha256": "bab3f1f14842e31494d5f18229a2740f2657a47506f3219e7ea0cd8838172b01"
+    },
+    {
+      "member": "review/extracted/quality/run-logs/native (windows-2025)/1_Set up job.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/run-logs/native (windows-2025)/1_Set up job.txt",
+      "bytes": 2208,
+      "sha256": "6a17301cf2fdfddd617eb5ace0cacfbc028fb6397ef04506cecbab8b3647c40e"
+    },
+    {
+      "member": "review/extracted/quality/run-logs/native (windows-2025)/23_Post Run ._.github_actions_setup-build.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/run-logs/native (windows-2025)/23_Post Run ._.github_actions_setup-build.txt",
+      "bytes": 886,
+      "sha256": "94be150deeb4b6175598914067f000a7dcb0823b3db77c55769af2dc0441a863"
+    },
+    {
+      "member": "review/extracted/quality/run-logs/native (windows-2025)/24_Post Run actions_checkout@3d3c42e5aac5ba805825da76410c181273ba90b1.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/run-logs/native (windows-2025)/24_Post Run actions_checkout@3d3c42e5aac5ba805825da76410c181273ba90b1.txt",
+      "bytes": 1930,
+      "sha256": "922725863555000ab42a75175d3cf5f3aad55e992ddbb7c52ac2dd7164de895b"
+    },
+    {
+      "member": "review/extracted/quality/run-logs/native (windows-2025)/25_Complete job.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/run-logs/native (windows-2025)/25_Complete job.txt",
+      "bytes": 137,
+      "sha256": "9f1413c4e8508bd63d4346e555d9d5f7c97b67a9d41660437faeeb98ef641113"
+    },
+    {
+      "member": "review/extracted/quality/run-logs/native (windows-2025)/2_Run actions_checkout@3d3c42e5aac5ba805825da76410c181273ba90b1.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/run-logs/native (windows-2025)/2_Run actions_checkout@3d3c42e5aac5ba805825da76410c181273ba90b1.txt",
+      "bytes": 14279,
+      "sha256": "91de7f215dbc747368e9e45a38d448257e5ccdee8d61e530674e3659a8865b10"
+    },
+    {
+      "member": "review/extracted/quality/run-logs/native (windows-2025)/3_Run ._.github_actions_setup-build.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/run-logs/native (windows-2025)/3_Run ._.github_actions_setup-build.txt",
+      "bytes": 13463,
+      "sha256": "5b5ae4fd8eb5efa38d4625f69bd5f28c7408ce948565e86ff89214e0be6c93b2"
+    },
+    {
+      "member": "review/extracted/quality/run-logs/native (windows-2025)/4_Packaging regression tests.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/run-logs/native (windows-2025)/4_Packaging regression tests.txt",
+      "bytes": 12508,
+      "sha256": "8a3883990bc5fd118a8e06c3adeba8fcdd5913227435fe44a5b9bda88de8c0ca"
+    },
+    {
+      "member": "review/extracted/quality/run-logs/native (windows-2025)/5_Windows native filesystem preflight.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/run-logs/native (windows-2025)/5_Windows native filesystem preflight.txt",
+      "bytes": 10618,
+      "sha256": "ae01e03f1dd4b18e3c22b1989294b43740170c8e5e5c5945c52106c587c31001"
+    },
+    {
+      "member": "review/extracted/quality/run-logs/native (windows-2025)/6_Windows archive codec preflight.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/run-logs/native (windows-2025)/6_Windows archive codec preflight.txt",
+      "bytes": 11105,
+      "sha256": "6980b6e429c6d0e63e0d95ca7fa76288109834e5fd82a9588f9ab8e4643fcea1"
+    },
+    {
+      "member": "review/extracted/quality/run-logs/native (windows-2025)/7_Windows session backend preflight.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/run-logs/native (windows-2025)/7_Windows session backend preflight.txt",
+      "bytes": 125431,
+      "sha256": "46104a48a72631354174441a760dcf19b33f8f2a5a8de4b45f4f7a775ea278bd"
+    },
+    {
+      "member": "review/extracted/quality/run-logs/native (windows-2025)/8_Rust quality gate.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/run-logs/native (windows-2025)/8_Rust quality gate.txt",
+      "bytes": 838996,
+      "sha256": "1c7cb1641f09c125f2c9af07e5a08c407fe2a3ecdcd8672113487d393e83fefd"
+    },
+    {
+      "member": "review/extracted/quality/run-logs/native (windows-2025)/system.txt",
+      "source": "work/monitor-cancellation-ci-review-20261117/extracted/quality/run-logs/native (windows-2025)/system.txt",
+      "bytes": 601,
+      "sha256": "7837f6c30c66f163b07a2e901ddf4830142a394bfcd4b3901244c5380980fb11"
+    },
+    {
+      "member": "review/fetch_quality.py",
+      "source": "work/monitor-cancellation-ci-review-20261117/fetch_quality.py",
+      "bytes": 2995,
+      "sha256": "28a2518c3dffa5a8c6dcab02c54e8807a241cce04d907c20ca69719d906cb4d0"
+    },
+    {
+      "member": "review/independent-checks.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/independent-checks.json",
+      "bytes": 931433,
+      "sha256": "444c875b0edd61a64915ac055e5a29c16a4668cb5ffd488fd0f9a9911bdef369"
+    },
+    {
+      "member": "review/independent-results.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/independent-results.json",
+      "bytes": 14319,
+      "sha256": "16d8678f465c672b45142c664799da686a62c41cf94ba5fca59fb7506a7e61c0"
+    },
+    {
+      "member": "review/inputs/AGENTS.md",
+      "source": "work/monitor-cancellation-ci-review-20261117/inputs/AGENTS.md",
+      "bytes": 2770,
+      "sha256": "edd4266f9c01e41ed4384a3bf9c1861b39114abe916819ad1d603c9e9d8601bb"
+    },
+    {
+      "member": "review/inputs/HANDOFF.md",
+      "source": "work/monitor-cancellation-ci-review-20261117/inputs/HANDOFF.md",
+      "bytes": 24169,
+      "sha256": "398aad1f53f1e8da0133822baa139d59507bf302ff49be0e79ee6455ff0b040f"
+    },
+    {
+      "member": "review/inputs/RTK.md",
+      "source": "work/monitor-cancellation-ci-review-20261117/inputs/RTK.md",
+      "bytes": 546,
+      "sha256": "13f973cf9d47899124efae2cdb1684021ea2ed4b523c9a8c7f032197175e1aa1"
+    },
+    {
+      "member": "review/inventories/interop-20261117T080034Z-9ca66e712f.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/inventories/interop-20261117T080034Z-9ca66e712f.json",
+      "bytes": 3884,
+      "sha256": "599c5deb7b966c118eb862ae3b2936243caf3609311ead58c61ba2f02237a5b6"
+    },
+    {
+      "member": "review/inventories/interop-20261117T080103Z-9064227cec.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/inventories/interop-20261117T080103Z-9064227cec.json",
+      "bytes": 1838,
+      "sha256": "57f1be9cdb7122f6c9b0108356630ab12de2f88d526ee5a67034e9a7bb156e2b"
+    },
+    {
+      "member": "review/inventories/interop-20261117T080256Z-25084b7fbf.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/inventories/interop-20261117T080256Z-25084b7fbf.json",
+      "bytes": 3884,
+      "sha256": "e82dd8a015d047a992d3f97b5b871195cc3d821550710a09a5bd66e4bf7de640"
+    },
+    {
+      "member": "review/inventories/interop-20261117T080313Z-8f1ceb0e2f.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/inventories/interop-20261117T080313Z-8f1ceb0e2f.json",
+      "bytes": 1838,
+      "sha256": "aa1c404dd79587483dcfe9c65076ff2a86c97ca55e6b14776e0eb2ae2138445b"
+    },
+    {
+      "member": "review/inventories/macos-26-python.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/inventories/macos-26-python.json",
+      "bytes": 7485,
+      "sha256": "bbf0927e9a77cd50ee43db90fba9a76ca3ea9f49c4a8bba7dfee02cf2d2295b5"
+    },
+    {
+      "member": "review/inventories/macos-26-rust.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/inventories/macos-26-rust.json",
+      "bytes": 667512,
+      "sha256": "291b1527f25fe1574dabe23fae6007eee90797cb7ee8241f98ca4d314b2862af"
+    },
+    {
+      "member": "review/inventories/ubuntu-24.04-python.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/inventories/ubuntu-24.04-python.json",
+      "bytes": 7489,
+      "sha256": "3d777504d2d7ab8871767954cffa330f79b420eee8e91c009d71430735dc0c1b"
+    },
+    {
+      "member": "review/inventories/ubuntu-24.04-rust.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/inventories/ubuntu-24.04-rust.json",
+      "bytes": 666291,
+      "sha256": "60c08ab4b577bea236fbf0640c63d1c75ef2962fea281dd4a6210073fe8ab099"
+    },
+    {
+      "member": "review/inventories/windows-2025-python.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/inventories/windows-2025-python.json",
+      "bytes": 413,
+      "sha256": "4c813acd1fd73188e78c15d711dbeb103f7f6c34695256df40b0ad3d093373fa"
+    },
+    {
+      "member": "review/inventories/windows-2025-rust.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/inventories/windows-2025-rust.json",
+      "bytes": 665808,
+      "sha256": "459fb64786185acb7eb8241bde9d4730b6a773ba0b32bf303c8fcc7f2ff5e411"
+    },
+    {
+      "member": "review/inventories/windows-44040248746-python.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/inventories/windows-44040248746-python.json",
+      "bytes": 24049,
+      "sha256": "41d7c9d5440b75ae899a7c9e9baf352fe3acc4141f7731874bc8fd7da8e0845f"
+    },
+    {
+      "member": "review/inventories/windows-44040248806-python.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/inventories/windows-44040248806-python.json",
+      "bytes": 25905,
+      "sha256": "965492dcced8d63c83a34f1e8f7bab97d015f920806a118f586805b03e68d38e"
+    },
+    {
+      "member": "review/inventories/windows-api-capture-replay.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/inventories/windows-api-capture-replay.json",
+      "bytes": 1118,
+      "sha256": "74e18e1da39c34f2baa99390fb13f998303e37699198b2fe9421328c8dc23d1b"
+    },
+    {
+      "member": "review/inventories/windows-native-ssh.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/inventories/windows-native-ssh.json",
+      "bytes": 975,
+      "sha256": "8b8db479acded359c6b2be2dd569cee1207920fc25e08df01130be27be2323fd"
+    },
+    {
+      "member": "review/originals/quality-001/artifact-14309783967.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/originals/quality-001/artifact-14309783967.json",
+      "bytes": 722,
+      "sha256": "194395e4d7025c331bf7246d4cf89d0f2bf52dd5c778f3d7338143150a06a325"
+    },
+    {
+      "member": "review/originals/quality-001/artifact-14309783967.zip",
+      "source": "work/monitor-cancellation-ci-review-20261117/originals/quality-001/artifact-14309783967.zip",
+      "bytes": 5512,
+      "sha256": "d44532b440cc0ca0f25a56421463c61865247507c7eb0cd05ec081f41ade9df0"
+    },
+    {
+      "member": "review/originals/quality-001/artifact-14309968324.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/originals/quality-001/artifact-14309968324.json",
+      "bytes": 724,
+      "sha256": "a7201c901e48a518d0369b90ba4bc3a4746ca6ebe3fa30f63c0c0d2fcca6a000"
+    },
+    {
+      "member": "review/originals/quality-001/artifact-14309968324.zip",
+      "source": "work/monitor-cancellation-ci-review-20261117/originals/quality-001/artifact-14309968324.zip",
+      "bytes": 5593,
+      "sha256": "32554df4c5b873765d210dbde7417b255ad8adcc762a1bee737058312681c0b0"
+    },
+    {
+      "member": "review/originals/quality-001/artifacts.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/originals/quality-001/artifacts.json",
+      "bytes": 1479,
+      "sha256": "7d54ab193db7d13e1669987090c0be6ccb8eb41247eeae68b39507b95241c398"
+    },
+    {
+      "member": "review/originals/quality-001/job-133892795291.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/originals/quality-001/job-133892795291.json",
+      "bytes": 3576,
+      "sha256": "a42764d497aac51c181bcdde73a3ee9d82e77dc25571b6ae078a3f89eea126aa"
+    },
+    {
+      "member": "review/originals/quality-001/job-133892795649.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/originals/quality-001/job-133892795649.json",
+      "bytes": 3584,
+      "sha256": "1c43401bd62e07dd6fe0132017bb5d32b9f8eb24cfead90091f31122be1b6cbc"
+    },
+    {
+      "member": "review/originals/quality-001/job-133892795682.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/originals/quality-001/job-133892795682.json",
+      "bytes": 3584,
+      "sha256": "f58a2d2b71eda695aa68f6ea5d53ac9e643faf3066269536c25a408f2998e4c6"
+    },
+    {
+      "member": "review/originals/quality-001/jobs.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/originals/quality-001/jobs.json",
+      "bytes": 10773,
+      "sha256": "866d0f6109ed346de96cada443da90ae8e590f1575f8c04b4e9677b4fd9752db"
+    },
+    {
+      "member": "review/originals/quality-001/observed.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/originals/quality-001/observed.json",
+      "bytes": 1240,
+      "sha256": "dbfd3990072d10fd85ec3a4730da4bd8d69923262146334454cf54adaeb9c3f4"
+    },
+    {
+      "member": "review/originals/quality-001/run-logs.zip",
+      "source": "work/monitor-cancellation-ci-review-20261117/originals/quality-001/run-logs.zip",
+      "bytes": 1031994,
+      "sha256": "3754fc35a5ffa0c29ac9d9b67a81a4d835ea9a040b9b7a9906f582754f301a10"
+    },
+    {
+      "member": "review/originals/quality-001/run.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/originals/quality-001/run.json",
+      "bytes": 12625,
+      "sha256": "4015d408718c60918f3faf0f38b2d7d0691bd37d11e983c606fff353afb123ce"
+    },
+    {
+      "member": "review/process-terminal-inventory.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/process-terminal-inventory.json",
+      "bytes": 16771,
+      "sha256": "c21255eba1110ebe4e38273970784cd7f30e96b5dec8a92fffc6b2acf54e0df4"
+    },
+    {
+      "member": "review/receipts/extract-originals-stage.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/receipts/extract-originals-stage.json",
+      "bytes": 678,
+      "sha256": "94081f55853d9da0962e5a2eef245387ccb1fc5bf18f25a0e4fd551dd3b361b6"
+    },
+    {
+      "member": "review/receipts/extract-originals.stderr",
+      "source": "work/monitor-cancellation-ci-review-20261117/receipts/extract-originals.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "review/receipts/extract-originals.stdout",
+      "source": "work/monitor-cancellation-ci-review-20261117/receipts/extract-originals.stdout",
+      "bytes": 268,
+      "sha256": "e2a85cf3e7d40bde3ca10c064b0f75a634a04bec2e8745e431b3a573b2f837fe"
+    },
+    {
+      "member": "review/receipts/fetch-quality-001-stage.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/receipts/fetch-quality-001-stage.json",
+      "bytes": 625,
+      "sha256": "3c10a4bf6258a0c9f265471cb86ca3949c139ae771927903d2beb396ab66d194"
+    },
+    {
+      "member": "review/receipts/fetch-quality-001.stderr",
+      "source": "work/monitor-cancellation-ci-review-20261117/receipts/fetch-quality-001.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "review/receipts/fetch-quality-001.stdout",
+      "source": "work/monitor-cancellation-ci-review-20261117/receipts/fetch-quality-001.stdout",
+      "bytes": 1302,
+      "sha256": "52476a297bfd7bd13ed1f0ec314890a56eabdfb53e8ff379985d1d27416d88aa"
+    },
+    {
+      "member": "review/receipts/quality-001-artifact-14309783967.json.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/receipts/quality-001-artifact-14309783967.json.json",
+      "bytes": 710,
+      "sha256": "6e91e8a575ea96b6b527d3c45d04ce524a24f852f062d36a1834a9f85c89cecc"
+    },
+    {
+      "member": "review/receipts/quality-001-artifact-14309783967.zip.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/receipts/quality-001-artifact-14309783967.zip.json",
+      "bytes": 718,
+      "sha256": "920ab9772c78895cb06b9858c5e0ec84bbc1d79552dbc421538153ad416309f8"
+    },
+    {
+      "member": "review/receipts/quality-001-artifact-14309968324.json.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/receipts/quality-001-artifact-14309968324.json.json",
+      "bytes": 710,
+      "sha256": "62735af950774177508debf1fa9c87f702bd2888952a3da8d64a1401627191b9"
+    },
+    {
+      "member": "review/receipts/quality-001-artifact-14309968324.zip.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/receipts/quality-001-artifact-14309968324.zip.json",
+      "bytes": 718,
+      "sha256": "c28fa9daf972ba74487ece7069b094e6a1f6322c1165808956091fc7e78fc575"
+    },
+    {
+      "member": "review/receipts/quality-001-artifacts.json.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/receipts/quality-001-artifacts.json.json",
+      "bytes": 736,
+      "sha256": "c760c7816c29abbbac057a5d1ea383f6d6093e013f014e3a28a23e5b67a39992"
+    },
+    {
+      "member": "review/receipts/quality-001-job-133892795291.json.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/receipts/quality-001-job-133892795291.json.json",
+      "bytes": 699,
+      "sha256": "13109bea82b4606981ccc3a83ca259e7dc6f1bef90472bbbb3fefa5fa19b3c46"
+    },
+    {
+      "member": "review/receipts/quality-001-job-133892795649.json.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/receipts/quality-001-job-133892795649.json.json",
+      "bytes": 699,
+      "sha256": "362ce8f95a493de622d77a3756a55c574ddb50d1aa2162aaae3e1e5b6209409f"
+    },
+    {
+      "member": "review/receipts/quality-001-job-133892795682.json.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/receipts/quality-001-job-133892795682.json.json",
+      "bytes": 699,
+      "sha256": "a5108c69fe6e88fbb692a3f3d00ff8ae5122b680a11e09a47b789fc2d18f6692"
+    },
+    {
+      "member": "review/receipts/quality-001-jobs.json.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/receipts/quality-001-jobs.json.json",
+      "bytes": 744,
+      "sha256": "33b6daeefdfb8a6fd374570238caaa1a3e180cb94b5b34b6f3a42fcc3223db65"
+    },
+    {
+      "member": "review/receipts/quality-001-run-logs.zip.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/receipts/quality-001-run-logs.zip.json",
+      "bytes": 723,
+      "sha256": "8a14fff681053cb31fbfd403827de513fffbc61dbf09b3edcf3afd2d75b3e220"
+    },
+    {
+      "member": "review/receipts/quality-001-run.json.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/receipts/quality-001-run.json.json",
+      "bytes": 685,
+      "sha256": "2475b447c6325ea97a4610d5d0169c7fc18abea31391035ac759bf64c46a4f61"
+    },
+    {
+      "member": "review/receipts/recompute-r1-stage.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/receipts/recompute-r1-stage.json",
+      "bytes": 671,
+      "sha256": "3442f99ebee729fe7e9793f3a30e47461f843b3923b2f1acefc9a9486536267b"
+    },
+    {
+      "member": "review/receipts/recompute-r1.stderr",
+      "source": "work/monitor-cancellation-ci-review-20261117/receipts/recompute-r1.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "review/receipts/recompute-r1.stdout",
+      "source": "work/monitor-cancellation-ci-review-20261117/receipts/recompute-r1.stdout",
+      "bytes": 1200,
+      "sha256": "e723926300e80352a7ea74745943edde82c0f9ee50a6a78dc90571efa48b1929"
+    },
+    {
+      "member": "review/receipts/recompute-r2-stage.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/receipts/recompute-r2-stage.json",
+      "bytes": 670,
+      "sha256": "3b8f0515f20bd4d133e439cf1b717b44ac1d1e48ae7b51ba3b91bd6f0c8d4759"
+    },
+    {
+      "member": "review/receipts/recompute-r2.stderr",
+      "source": "work/monitor-cancellation-ci-review-20261117/receipts/recompute-r2.stderr",
+      "bytes": 368,
+      "sha256": "39739006c625e8352bfdb5af9afe1b2925bbbde4de7ea345cd00a35af5232be1"
+    },
+    {
+      "member": "review/receipts/recompute-r2.stdout",
+      "source": "work/monitor-cancellation-ci-review-20261117/receipts/recompute-r2.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "review/receipts/recompute-r3-stage.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/receipts/recompute-r3-stage.json",
+      "bytes": 670,
+      "sha256": "fadab77f392a16094bf4becd12a8aae594c08e1d8f720116b27fb6b29dcc87ec"
+    },
+    {
+      "member": "review/receipts/recompute-r3.stderr",
+      "source": "work/monitor-cancellation-ci-review-20261117/receipts/recompute-r3.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "review/receipts/recompute-r3.stdout",
+      "source": "work/monitor-cancellation-ci-review-20261117/receipts/recompute-r3.stdout",
+      "bytes": 972,
+      "sha256": "13726fdd21afb1e1fe126d87789d77c159673ed68cf394d11a86ca1f69d08625"
+    },
+    {
+      "member": "review/receipts/report-final-stage.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/receipts/report-final-stage.json",
+      "bytes": 667,
+      "sha256": "cb55e93ed3346222d8670dc96c161e1ad549494328d1cbaef84456cabd83a371"
+    },
+    {
+      "member": "review/receipts/report-final.stderr",
+      "source": "work/monitor-cancellation-ci-review-20261117/receipts/report-final.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "review/receipts/report-final.stdout",
+      "source": "work/monitor-cancellation-ci-review-20261117/receipts/report-final.stdout",
+      "bytes": 324,
+      "sha256": "dada4a5019f9eaa214acfd7613ce2bfae9bf02ce1ca90ad891b4d9ce56ecac2a"
+    },
+    {
+      "member": "review/recompute.py",
+      "source": "work/monitor-cancellation-ci-review-20261117/recompute.py",
+      "bytes": 27631,
+      "sha256": "d344f7064842515c9d86c057e8204ace854b6be052bb36f33053ee3e4c2c3e63"
+    },
+    {
+      "member": "review/report.py",
+      "source": "work/monitor-cancellation-ci-review-20261117/report.py",
+      "bytes": 16875,
+      "sha256": "ac80f1d38cd450372ba3da3bb46faaffcbcb89af5bbb6eea7b56b1697022b6de"
+    },
+    {
+      "member": "review/review_io.py",
+      "source": "work/monitor-cancellation-ci-review-20261117/review_io.py",
+      "bytes": 2799,
+      "sha256": "c0a1dec35b269d6eb47db707043e81e5fbb84e3d06459331e88c919f30cb1f6e"
+    },
+    {
+      "member": "review/run_stage.py",
+      "source": "work/monitor-cancellation-ci-review-20261117/run_stage.py",
+      "bytes": 1374,
+      "sha256": "bf96593811cdc1852eba89cfe040d85a16265b2c3e8c43a16ebba684ea665cbf"
+    },
+    {
+      "member": "review/seal-verification.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/seal-verification.json",
+      "bytes": 411,
+      "sha256": "7fd745b6f546c188ed293bc450576a203cd3b65d69fc009c6b011bf873c6fb3f"
+    },
+    {
+      "member": "review/source-after.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/source-after.json",
+      "bytes": 33232,
+      "sha256": "89da325e63da360484de9c3b86ed8cd31d373ff9d883452fb5a72ae7e0a28add"
+    },
+    {
+      "member": "review/source-before.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/source-before.json",
+      "bytes": 33211,
+      "sha256": "3fe2853f273560bc6dc43e710b8730b73721702848699a92a69313fccc990aec"
+    },
+    {
+      "member": "review/summary.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/summary.json",
+      "bytes": 14532,
+      "sha256": "6edccb945f12cb2cd2df7559795365d2bc4781c2fa51441c140015336f554b24"
+    },
+    {
+      "member": "review/zip-inventory.json",
+      "source": "work/monitor-cancellation-ci-review-20261117/zip-inventory.json",
+      "bytes": 64667,
+      "sha256": "1b22dfd6efbeb8a273b4ef5abd1342a332208fc24eb6dca0efecdb1f6cf6016d"
+    }
+  ]
+}
