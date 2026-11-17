@@ -1,0 +1,338 @@
+{
+  "sealed_utc": "2026-11-17T02:37:04.059945+00:00",
+  "count": 65,
+  "archive_bytes": 146313,
+  "archive_sha256": "6c7563eb05dafbd80a5c90efffca135d63872259f28efdf6534207484a5cfa76",
+  "entries": [
+    {
+      "path": "acceptance.json",
+      "bytes": 8990,
+      "sha256": "06f28eac0127ead02739b07151f25a538e9b8f303b103f666216fc427f663b94"
+    },
+    {
+      "path": "finalize/cleanup-apply-r1.json",
+      "bytes": 871,
+      "sha256": "392170ed6f624270332a325601df5e8b05594b768f7a1a02f353274328852f99"
+    },
+    {
+      "path": "finalize/cleanup-apply-r1.log",
+      "bytes": 365,
+      "sha256": "236b2069bf0c53132b20ae5bff84a736faa549bc36bbe30c6eb88e3f1b2357bd"
+    },
+    {
+      "path": "finalize/cleanup-plan-r1.json",
+      "bytes": 854,
+      "sha256": "c72390275f31e52e49bdc249427c0a517a8b99a28df888491eb6d92bf038ab5d"
+    },
+    {
+      "path": "finalize/cleanup-plan-r1.log",
+      "bytes": 357,
+      "sha256": "a078922c0e36fbcb5028dab48ca8112403d77b2099faf367efe2286d28cec3c1"
+    },
+    {
+      "path": "finalize/cleanup-plan-state-r1.json",
+      "bytes": 644359,
+      "sha256": "e2f53f5878292780b41b7019b14e1cac16452723a589c11fade1997d0572fec8"
+    },
+    {
+      "path": "finalize/cleanup-result-state-r1.json",
+      "bytes": 644362,
+      "sha256": "ec43479a27c54f579ce760e06a3831e4de722700e92867c87f99c5ec291af2f2"
+    },
+    {
+      "path": "finalize/cleanup_owned.py",
+      "bytes": 6973,
+      "sha256": "a20d566a765899bf47578edcd0814414e6143e99fe7fbd43a9c6790da910681f"
+    },
+    {
+      "path": "finalize/collect_delivery.py",
+      "bytes": 2394,
+      "sha256": "5d8eddefede8f5a78b50062e88717d0835a178688da7dd2280160551ca09004b"
+    },
+    {
+      "path": "finalize/docs-commit-r1.json",
+      "bytes": 800,
+      "sha256": "a655d1d1ce4999c79950f99a3afa6a254eae7c5a0d2d6d9ca722c6c7a002251d"
+    },
+    {
+      "path": "finalize/docs-commit-r1.log",
+      "bytes": 970,
+      "sha256": "e82ac3e2407c1737bd6c2ccfb7dc8f81de7f7d00e798dadd9e62873025e9e37e"
+    },
+    {
+      "path": "finalize/docs-push-r1.json",
+      "bytes": 774,
+      "sha256": "479a674f3bcfa072326e250af29720f318133f7218aa5f7206c01122bfd8285d"
+    },
+    {
+      "path": "finalize/docs-push-r1.log",
+      "bytes": 146,
+      "sha256": "2647561d88b395d792da70270296413190c72dfa3acf33d68a55fbe8848f4350"
+    },
+    {
+      "path": "finalize/docs-readback-r1.json",
+      "bytes": 854,
+      "sha256": "1b17cbe441a4443d9a00be10e198948482974fac9eff7819d774131217d733a1"
+    },
+    {
+      "path": "finalize/docs-readback-r1.log",
+      "bytes": 320,
+      "sha256": "40fdded87bd42135e7ce182054381bc311ded2d9def39eddf7e0b4f5d19ab160"
+    },
+    {
+      "path": "finalize/docs-readback-state-r1.json",
+      "bytes": 1318,
+      "sha256": "4396e688a15f98ba49daf39cd9fa71f722a5ab4e94296ed2a8a840909b20c5ee"
+    },
+    {
+      "path": "finalize/readback_git.py",
+      "bytes": 1438,
+      "sha256": "f3097d96cceec8746b583762c4a23c513c0176a881dd75b46035c5e27008fc83"
+    },
+    {
+      "path": "finalize/run_command.py",
+      "bytes": 1602,
+      "sha256": "a8e8f0b50f2c5d95342e36f1b8fffd4fdc5daeabbf4a382fa15300c747ce65fc"
+    },
+    {
+      "path": "finalize/seal_directory.py",
+      "bytes": 2598,
+      "sha256": "e6d7e1b1512e0176464487c1aacdc0583c2faf2f1e1c667e470ea25b31346ac5"
+    },
+    {
+      "path": "finalize/staged-r1.json",
+      "bytes": 357,
+      "sha256": "a0901c19a05470e0e0fc012f976bed88ff5dd78e3b1d4759d13cabdc6f6d216c"
+    },
+    {
+      "path": "finalize/verify-staged-r1.json",
+      "bytes": 799,
+      "sha256": "c27e428d4fbe9a15ee456ab8d210f0b6aa96b6d1b09be175f2399daa31585178"
+    },
+    {
+      "path": "finalize/verify-staged-r1.log",
+      "bytes": 339,
+      "sha256": "afec87499fae58f119c17f1679c8272a56b62fdfe306b33fb33d61c6871cb478"
+    },
+    {
+      "path": "finalize/verify_staged.py",
+      "bytes": 2623,
+      "sha256": "b21f13d555b18acd2ba15dc52bf04df7f205c9a0c52dbeb9849d3234d046015f"
+    },
+    {
+      "path": "supplemental/work/native-toolbar-20261117/seal_evidence.py",
+      "bytes": 3020,
+      "sha256": "2a5e76c566d02930a117a4b8654be92dcbd5db96c7e45c06f2ac7bc7defdbb8b"
+    },
+    {
+      "path": "supplemental/work/windows-ssh-ci-originals-20261117/quality-repair-r1/fetch-receipt.json",
+      "bytes": 8825,
+      "sha256": "ec4ce07b09449a732dd56922e62da45c5bf3121e34f4de1a0f9effa87a1a0b2a"
+    },
+    {
+      "path": "supplemental/work/windows-ssh-exact-ci-20261117/latest.json",
+      "bytes": 1173,
+      "sha256": "6dcdabf2d8460be6887ebbe14dfcdb8f34e7750a0b8ba50437f180f35f39ef9d"
+    },
+    {
+      "path": "supplemental/work/windows-ssh-exact-ci-20261117/poll-001.state.json",
+      "bytes": 1166,
+      "sha256": "233f2866ef6118203cc078ba2a21b2f9ecd30c661a4ee56f39e0264ea964db16"
+    },
+    {
+      "path": "supplemental/work/windows-ssh-exact-ci-20261117/poll-001.stdout.json",
+      "bytes": 36799,
+      "sha256": "bea88e6460da5463dcb808bd0275adc4cb9170c8d0ebf69d14055a71c4071d8b"
+    },
+    {
+      "path": "supplemental/work/windows-ssh-exact-ci-20261117/poll-002.state.json",
+      "bytes": 1166,
+      "sha256": "ff59895656fb79c603521e3d07ff8b8ee72deef3b6d4c97f33d98f92d2a70597"
+    },
+    {
+      "path": "supplemental/work/windows-ssh-exact-ci-20261117/poll-002.stdout.json",
+      "bytes": 36799,
+      "sha256": "bea88e6460da5463dcb808bd0275adc4cb9170c8d0ebf69d14055a71c4071d8b"
+    },
+    {
+      "path": "supplemental/work/windows-ssh-exact-ci-20261117/poll-003.state.json",
+      "bytes": 1166,
+      "sha256": "c877697eae81d7aa536ac448308361ba944db1264bfd1681d9d453642cfbede4"
+    },
+    {
+      "path": "supplemental/work/windows-ssh-exact-ci-20261117/poll-003.stdout.json",
+      "bytes": 36799,
+      "sha256": "bea88e6460da5463dcb808bd0275adc4cb9170c8d0ebf69d14055a71c4071d8b"
+    },
+    {
+      "path": "supplemental/work/windows-ssh-exact-ci-20261117/poll-004.state.json",
+      "bytes": 1166,
+      "sha256": "583bd4974644c31374a67bf1723419da03a46c4a29402ae262bdef83f3372c7d"
+    },
+    {
+      "path": "supplemental/work/windows-ssh-exact-ci-20261117/poll-004.stdout.json",
+      "bytes": 36799,
+      "sha256": "bea88e6460da5463dcb808bd0275adc4cb9170c8d0ebf69d14055a71c4071d8b"
+    },
+    {
+      "path": "supplemental/work/windows-ssh-exact-ci-20261117/poll-005.state.json",
+      "bytes": 1166,
+      "sha256": "655258dae249bd892d8613d278f09e76b73cd1862b99f0ec1471e3a3dc3500d4"
+    },
+    {
+      "path": "supplemental/work/windows-ssh-exact-ci-20261117/poll-005.stdout.json",
+      "bytes": 36799,
+      "sha256": "c3f8a5ef53a38be16fdaaf149f3d08b321b1d1abcdeab4f8004d1cbf3bac6dfe"
+    },
+    {
+      "path": "supplemental/work/windows-ssh-exact-ci-20261117/poll-006.state.json",
+      "bytes": 1169,
+      "sha256": "a1b3db7787ccb90c10d0d803746231941c1c3a5a591e2200b2109c1577da7601"
+    },
+    {
+      "path": "supplemental/work/windows-ssh-exact-ci-20261117/poll-006.stdout.json",
+      "bytes": 36802,
+      "sha256": "108711f81ecb2099c649ff528932e8fbc89e35a83bdff94997ba4dd229db6264"
+    },
+    {
+      "path": "supplemental/work/windows-ssh-exact-ci-20261117/poll-007.state.json",
+      "bytes": 1169,
+      "sha256": "a55e62868e75c91ab49579e4c12ec735630bd785d1d267734a39a052e7b68605"
+    },
+    {
+      "path": "supplemental/work/windows-ssh-exact-ci-20261117/poll-007.stdout.json",
+      "bytes": 36802,
+      "sha256": "108711f81ecb2099c649ff528932e8fbc89e35a83bdff94997ba4dd229db6264"
+    },
+    {
+      "path": "supplemental/work/windows-ssh-exact-ci-20261117/poll-008.state.json",
+      "bytes": 1169,
+      "sha256": "31598d73e3d9713faeda6ee1b179b803aec2f31599d7c4bdcae0ae92772f805d"
+    },
+    {
+      "path": "supplemental/work/windows-ssh-exact-ci-20261117/poll-008.stdout.json",
+      "bytes": 36802,
+      "sha256": "108711f81ecb2099c649ff528932e8fbc89e35a83bdff94997ba4dd229db6264"
+    },
+    {
+      "path": "supplemental/work/windows-ssh-exact-ci-20261117/poll-009.state.json",
+      "bytes": 1169,
+      "sha256": "df18199389899b292b6bc655297f3fb00c87f6d2da356e244914e2da7bfd3108"
+    },
+    {
+      "path": "supplemental/work/windows-ssh-exact-ci-20261117/poll-009.stdout.json",
+      "bytes": 36802,
+      "sha256": "108711f81ecb2099c649ff528932e8fbc89e35a83bdff94997ba4dd229db6264"
+    },
+    {
+      "path": "supplemental/work/windows-ssh-exact-ci-20261117/poll-010.state.json",
+      "bytes": 1170,
+      "sha256": "2ae80d78b7f04580555734ca62a142e32ff7a43d0835f5dfff77511b940c5157"
+    },
+    {
+      "path": "supplemental/work/windows-ssh-exact-ci-20261117/poll-010.stdout.json",
+      "bytes": 36802,
+      "sha256": "108711f81ecb2099c649ff528932e8fbc89e35a83bdff94997ba4dd229db6264"
+    },
+    {
+      "path": "supplemental/work/windows-ssh-exact-ci-20261117/poll-011.state.json",
+      "bytes": 1170,
+      "sha256": "ea5929bd517ce25447249c96d62511887f63c06210b54b320fc42db084cbd0cb"
+    },
+    {
+      "path": "supplemental/work/windows-ssh-exact-ci-20261117/poll-011.stdout.json",
+      "bytes": 36802,
+      "sha256": "108711f81ecb2099c649ff528932e8fbc89e35a83bdff94997ba4dd229db6264"
+    },
+    {
+      "path": "supplemental/work/windows-ssh-exact-ci-20261117/poll-012.state.json",
+      "bytes": 1170,
+      "sha256": "8dfe2e9004bac2fb916007aa13fc472592afb94727c5da5fec1b1918d36e81f0"
+    },
+    {
+      "path": "supplemental/work/windows-ssh-exact-ci-20261117/poll-012.stdout.json",
+      "bytes": 36802,
+      "sha256": "108711f81ecb2099c649ff528932e8fbc89e35a83bdff94997ba4dd229db6264"
+    },
+    {
+      "path": "supplemental/work/windows-ssh-exact-ci-20261117/poll-013.state.json",
+      "bytes": 1170,
+      "sha256": "c74b26765b854c9e7b508326a1bf536748b271a98fe427b2f96a2f6fa13eb4e1"
+    },
+    {
+      "path": "supplemental/work/windows-ssh-exact-ci-20261117/poll-013.stdout.json",
+      "bytes": 36802,
+      "sha256": "108711f81ecb2099c649ff528932e8fbc89e35a83bdff94997ba4dd229db6264"
+    },
+    {
+      "path": "supplemental/work/windows-ssh-exact-ci-20261117/poll-014.state.json",
+      "bytes": 1170,
+      "sha256": "e0f0c35c5cee419a9f054abe7051fd99e5a9e2a0858f07f045a72b29599d266e"
+    },
+    {
+      "path": "supplemental/work/windows-ssh-exact-ci-20261117/poll-014.stdout.json",
+      "bytes": 36802,
+      "sha256": "108711f81ecb2099c649ff528932e8fbc89e35a83bdff94997ba4dd229db6264"
+    },
+    {
+      "path": "supplemental/work/windows-ssh-exact-ci-20261117/poll-015.state.json",
+      "bytes": 1173,
+      "sha256": "6dcdabf2d8460be6887ebbe14dfcdb8f34e7750a0b8ba50437f180f35f39ef9d"
+    },
+    {
+      "path": "supplemental/work/windows-ssh-exact-ci-20261117/poll-015.stdout.json",
+      "bytes": 36805,
+      "sha256": "c8b81856b94fb9a134535d676a4c9d5feb285a70bb874ea6fd44189dc9a701ed"
+    },
+    {
+      "path": "supplemental/work/windows-ssh-integration-20261117/ci-completion-seal-r1.json",
+      "bytes": 921,
+      "sha256": "bec389fbe96f260462419839b7ce251e1710feffc240ef10cbd3c8dbee4545d6"
+    },
+    {
+      "path": "supplemental/work/windows-ssh-integration-20261117/ci-completion-seal-r1.log",
+      "bytes": 320,
+      "sha256": "c92f1494cfb6f493026a149b660403d876784b54b7cf832a5f7daed66815e165"
+    },
+    {
+      "path": "supplemental/work/windows-ssh-integration-20261117/ci-completion-verify-r1.json",
+      "bytes": 814,
+      "sha256": "a2548929e6f6907aa05b7937ba6e88d2d9118bd156f7919e4bc5ee84e6ab9717"
+    },
+    {
+      "path": "supplemental/work/windows-ssh-integration-20261117/ci-completion-verify-r1.log",
+      "bytes": 925,
+      "sha256": "53ff5609ffca9ddead6d8ce48fa40e5844e12ba1720842b5ac5143c34080d105"
+    },
+    {
+      "path": "supplemental/work/windows-ssh-integration-20261117/ci-completion-verify-r2.json",
+      "bytes": 814,
+      "sha256": "89c792897f491f27ca922cea0e09582d0a4b7d759e719e7f47ea6b04324a99d3"
+    },
+    {
+      "path": "supplemental/work/windows-ssh-integration-20261117/ci-completion-verify-r2.log",
+      "bytes": 927,
+      "sha256": "342eba318b7a2384a97300ed82285abe87a15e18990d8475bf4d481454b9ef43"
+    },
+    {
+      "path": "supplemental/work/windows-ssh-integration-20261117/ci-completion-verify-r3.json",
+      "bytes": 813,
+      "sha256": "832a7448dfc44f8b25a56377b5b7cd8681481e8ba314cea7a1fd98a4104301c9"
+    },
+    {
+      "path": "supplemental/work/windows-ssh-integration-20261117/ci-completion-verify-r3.log",
+      "bytes": 973,
+      "sha256": "e86ee0f6678708539c8225266537fa9f045ce8c2189bb9dbf3a5505b3ad070cd"
+    },
+    {
+      "path": "supplemental/work/windows-ssh-integration-20261117/native-archive-verify-r2.json",
+      "bytes": 792,
+      "sha256": "90bdc6ccc4a16882246e338b758a91f13472b4ef97aba789fdf428f93146a514"
+    }
+  ],
+  "excluded": [
+    "Application packages and binaries",
+    "Python bytecode",
+    "Downloaded full upstream manual; reference digest retained separately"
+  ]
+}

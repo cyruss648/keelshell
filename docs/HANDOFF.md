@@ -148,3 +148,13 @@ CI／reviewer和交付父目录中的工作副本仅供Git绑定后回收，不�
 本轮所有作者／reviewer 均已实际关闭，正常包六文件摘要及 target 目录身份前后不变。
 target 和其他任务资源保留。
 旧包与旧路径只描述历史，不把已回收路径当当前入口。
+
+本次真实Windows SSH／工具栏文档`c088062baacc0c44ccfbc98de2a817fbc2a62869`
+已普通推送并三方SHA读回一致、工作区干净。
+[本次交付封存](testing/records/2026-11-17-windows-openssh-monitor-evidence/delivery/README.md)
+保存65成员／146,313字节，包含最后42个辅助原件、工装失败及推送／清理回执；
+离线复核`0/reaped/0.192644s`。先以精确Git原件回收5目录、
+827文件／17,535,741字节；剩余展开副本的唯一维护入口现均在Git archive，
+再按精确字节核对回收，不从旧work路径续接。
+`work/windows-ssh-finalize-20261117/`保留最终文档推送与余下清理回执，
+正常包和唯一target继续保留，8位本批自有agent均已实际关闭。

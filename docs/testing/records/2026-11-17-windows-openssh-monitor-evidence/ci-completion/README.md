@@ -58,3 +58,5 @@ python3 -B docs/testing/records/2026-11-17-windows-openssh-monitor-evidence/ci-c
 workspace-only汇总器而停止，原失败回执保留；改用该专项实际声明／逐名／摘要核对后通过。
 原生GUI、安装、签名、公证、六目标发行和完整产品均不在本CI签署范围。
 英文工具栏原生子集从[单独证据](../../2026-11-17-native-toolbar-evidence/README.md)读取。
+文档`c088062`的普通推送、三方SHA读回、最后工装失败及自有副本回收见
+[交付封存](../delivery/README.md)。
