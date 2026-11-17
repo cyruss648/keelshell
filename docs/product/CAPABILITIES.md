@@ -1,5 +1,18 @@
 # Capability ledger
 
+## 2026-11-17: scoped native English toolbar observation
+
+The normal macOS arm64 package at `5d2df2f` was run with a new isolated data
+directory. All production Rust/Cargo files are unchanged through `660e90d6`.
+Ten original AX/JPEG pairs cover one empty-library window, including English
+Frost Light, Graphite Dark and Lavender Light. Right-side settings and language
+controls are visible and consistent. A new non-author visually reviewed all
+ten originals, approved only the observed subset with zero new P0-P3 findings,
+and was closed. The original owned app exited zero and was reaped.
+Compact geometry was not established; the old P2's connection/size remainder,
+full native matrix, keyboard/IME and assistive technology remain open. See
+[the native evidence](../testing/records/2026-11-17-native-toolbar-evidence/README.md).
+
 ## 2026-11-17: isolated real Windows OpenSSH acceptance gate
 
 An opt-in native Rust integration test now uses the public SSH and monitor APIs
@@ -11,9 +24,21 @@ cleanup. Private keys and client configuration stay outside uploaded evidence.
 Two independent source reviewers approved the bounded change with zero confirmed
 findings. The final local 765-input gate passed: ordinary Rust3407/0/60 ignored,
 14 rustdoc; Python493 run with3 skipped. The new native SSH test is explicitly
-ignored in that ordinary gate. Actual Windows OpenSSH, ABI and process-chain
-acceptance still await the exact-source workflow; local controls and the previous
-direct API replay do not supply that acceptance. See
+ignored in that ordinary gate. The first real Windows run failed its census /
+cleanup gate; that failure and the unknown first bad subcondition remain.
+The four-file bounded-settle/argv0 repair was independently approved with 49
+checks passing, then passed its final 765-input full gate: ordinary Rust3407/0/60
+ignored,14 rustdoc; Python501 run/3 skipped. Repair source `660e90d6` was pushed.
+Exact real OpenSSH runs43997403565 and43998970900 both completed successfully,
+as did direct API43997403484. Exact Quality43997403533 passed on Windows,
+macOS and Ubuntu: ordinary Rust3394/3407/3400 passed, zero failed,
+58/60/61 ignored;14 rustdoc each; Python501 run with38/3/3 skipped.
+macOS and Linux OpenSSH interoperability each passed18 tests.
+A new non-author approved the two SSH/API original bundles with4018 offline
+checks and zero P0-P3 findings, then was closed; this review excludes Quality.
+The510-member [CI archive](../testing/records/2026-11-17-windows-openssh-monitor-evidence/ci-completion/README.md)
+and765 exact Git inputs pass offline verification without test replay.
+Native desktop and release acceptance remain open. See
 [the batch record](../testing/records/2026-11-17-windows-openssh-monitor.md) and
 [ADR0157](../adr/0157-windows-openssh-monitor-acceptance.md).
 
@@ -35,7 +60,8 @@ missing stable resources fail, while changing or incomplete identities remain
 HOLD. Legal complete empty frames remain supported.
 
 Focused Rust / GPUI checks, real Darwin OpenSSH 15/0/0 and Linux recovery 2/0/0
-have passed within their documented scopes. The author lab suite is 111/0/0;
+have passed within their documented scopes. The author lab suite ran111 tests,
+with108 passed and3 skipped;
 both non-author reviews approved their stated scope with zero remaining
 P0-P3 findings. The final 758-input full gate passed: ordinary Rust 3407/0/59
 ignored, app 1398/0/2, 14 rustdoc, Python 405 run / 2 skipped. Independent
@@ -45,7 +71,8 @@ Windows OpenSSH, native desktop and release remain separate acceptance lanes.
 The exact source `5d2df2f` was pushed and its Windows Server2025 AMD64 workflow
 completed successfully: real collectors, independent Win32 comparison, five
 original PowerShell object terminal proofs and authenticated capture replay.
-Real Windows SSH remains UNRUN/HOLD. Exact Quality43972364934 completed
+Real Windows SSH was UNRUN/HOLD at that baseline; the later isolated gate is
+tracked in the preceding section. Exact Quality43972364934 completed
 successfully on Windows/macOS/Ubuntu: ordinary Rust3394/3407/3400 passed,
 zero failed,57/59/60 ignored;14 rustdoc each. The Windows lab actually ran
 111 tests:108 passed and3 skipped. A new non-author API-evidence review

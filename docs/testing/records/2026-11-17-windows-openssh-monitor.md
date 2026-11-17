@@ -1,8 +1,8 @@
 # Windows OpenSSH 真实监控验收 — 2026-11-17
 
-状态：首轮本机工程与两位独立源审通过并已推送；
-真实Windows OpenSSH首轮FAIL，有界settle修复已获新非作者批准并通过最终完整门禁r2；
-不签本批真实SSH、原生桌面或发行成功。
+状态：本机完整门禁、独立源审与修复已推送；
+修复工程660e90d6的两次真实Windows OpenSSH、新直接API及三平台Quality已成功，
+非作者原件复核限定批准。原首轮FAIL与未知子条件保持；原生桌面或发行分别验收。
 基线工程 `bfbea7bcc84ff433d28a635e85daed9cca337fb0`。
 设计见[ADR0157](../../adr/0157-windows-openssh-monitor-acceptance.md)。
 上一批5d2df2f的真实Windows直接API及三平台质量门禁保持原范围，
@@ -117,7 +117,47 @@ app1398/0/2、session404/0/4；Python主501 run＝498通过＋3跳过，
 门禁前后765输入逐项相等；相较工程41671be只有上述四个Python文件变化，
 Rust／Cargo输入不变，原独立编译库存与新gate逐名重核，不重复运行未变的库存命令。
 本机修复证据独立封存，首轮168成员archive不改写。
-修复提交、推送和新的真实Windows复跑继续执行，本修复不升级首轮失败。
+修复工程`660e90d6f7c7111853db7b73f4ca2344f633700d`已普通提交并推送，
+`git-push-repair-r1`为`0/reaped/4.193711s`；local／tracking／remote三方相等，
+读回工作区干净。50成员修复封存与765输入的精确Git绑定
+`0/reaped/2.714595s`，本修复不升级首轮失败。
+
+精确真实Windows SSH工作流`43997403565`及同源码独立workflow_dispatch
+`43998970900`均completed/success，直接API`43997403484`也success。
+首个SSH成功artifact14290995772为46成员／54,256字节，ZIP与GitHub digest相等；
+原seal累计21、仅master active1，20非master自然终态、四个PowerShell自然exit0，
+全部固定生产命令与精确Git来源相等。最终Job active0、原对象集合不变、
+terminal_proven／closed为true，pending／handles／debug连接均0，临时私钥目录删除。
+同源码复跑43998970900的artifact14291880367同为46成员，53,967字节ZIP；
+两次均21原对象、20非master自然终态、四个PowerShell自然exit0，完整seal及终态清理。
+两次不完整census观察数均为0，不以新成功推定原失败就是race。
+新非作者Darwin限定APPROVE，P0–P3全0，4018离线检查通过，
+`0/reaped/0.976s`，已实际关闭；原生新执行与产品测试重跑0。
+该复核覆盖6 ZIP、126 artifact成员及36日志成员，不覆盖Quality。
+首轮非作者Faraday也限定批准原工程41671be的CI原件，P0–P3全0并已关闭；
+他所供的首版两个interop artifact只有metadata，ZIP内容未代签。
+
+精确Quality43997403533现已三平台completed/success：
+
+| runner | 普通Rust passed／failed／ignored | rustdoc通过 | Python主run／skipped |
+| --- | --- | --- | --- |
+| windows-2025 | 3394／0／58 | 14 | 501／38 |
+| macos-26 | 3407／0／60 | 14 | 501／3 |
+| ubuntu-24.04 | 3400／0／61 | 14 | 501／3 |
+
+三平台各94普通套件，声明／逐名／结果摘要一致；rustdoc为14项测试、6个子运行，
+不称为14套件。包装与内嵌helper单列，Windows前置专项不重复相加。
+新Quality的macOS／Linux真实OpenSSH interop各18项通过并清理，
+本次两个7成员ZIP均实际下载、核对GitHub digest，不迁移首版未核验边界。
+Python stdout／stderr交错使首次父级统计解析停止，错误及修正保留；
+采集器诊断行不改变同一门禁步骤内唯一Ran／OK配对。
+
+新的[精确CI封存](2026-11-17-windows-openssh-monitor-evidence/ci-completion/README.md)
+保存510成员／2,555,157字节，SHA-256
+`106af79167ef5a942b45f9bd12a3a346bc7328635670fc2a3c0dbed3fdb5e9ce`。
+包括两次修复SSH、新API、Quality原ZIP与元数据、两位CI原件reviewer、
+推送读回、工装失败及8位自有agent关闭记录；原首轮168与修复50成员archive不改写。
+离线复核同时绑定765工程输入；不重放产品测试，不代签桌面或发行。
 
 首轮封存已绑定工程Git后回收6个自有关闭作者／reviewer／研究／stage目录，
 302文件／3,173,304字节均先核对原摘要；正常包、唯一target、当前CI原件保留。

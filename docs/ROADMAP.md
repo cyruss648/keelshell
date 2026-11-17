@@ -31,7 +31,15 @@ API43990824533已success，Quality43990824137三平台已success。
 当前仅4个Python文件的有界settle／argv0兼容修复已获新非作者限定批准，
 独立49项通过、P0–P3全0并已关闭；最终完整门禁r2已
 `0/reaped/731.529731s`，Rust3407/0/60 ignored、14 rustdoc、
-Python501 run／3 skipped，765输入前后无漂移。继续及时提交推送与精确Windows复跑；
+Python501 run／3 skipped，765输入前后无漂移。修复工程`660e90d6`已普通推送，
+三方SHA一致，765输入／50原件精确Git绑定通过；真实SSH43997403565及同源码
+复跑43998970900均success，API43997403484也success。
+新Quality43997403533三平台已success，Windows／macOS／Ubuntu普通Rust
+3394／3407／3400通过、0失败，各14 rustdoc；Python主501 run，
+skipped38／3／3，macOS／Linux真实OpenSSH interop各18项通过。
+新非作者Darwin限定批准两次SSH与API原件，4018离线检查通过、P0–P3全0，
+已实际关闭；510成员精确CI封存与765工程输入绑定通过，见
+[CI终态](testing/records/2026-11-17-windows-openssh-monitor-evidence/ci-completion/README.md)；
 以[ADR0157](adr/0157-windows-openssh-monitor-acceptance.md)及
 [本批记录](testing/records/2026-11-17-windows-openssh-monitor.md)接续。
 
@@ -50,8 +58,10 @@ Python501 run／3 skipped，765输入前后无漂移。继续及时提交推送�
    [栈修复记录](testing/records/2026-11-17-monitor-render-stack.md)与
    [精确 CI](testing/records/2026-11-17-monitor-render-stack-evidence/ci-completion/README.md)
    不代签当前 Windows 差分。
-3. 本次最新原生可用性观察仍为 Mac 锁屏且自动解锁失败，GUI 操作／截图 0。
-   桌面可用后，使用当前正常包复核英文工具栏 P2，再覆盖三主题、尺寸、双语与完整键盘流程。
+3. 桌面已可用。正常5d2df2f包单窗／空连接库的三推荐主题英文工具栏已有10组AX／JPEG，
+   新非作者Hume限定ship、P0–P3全0并已关闭；原进程正常exit0。
+   紧凑窗口尺寸未证实改变，旧P2连接上下文余集、完整主题／双语／键盘矩阵仍开放，
+   见[限定原生证据](testing/records/2026-11-17-native-toolbar-evidence/README.md)。
 4. 已完成批次及时普通提交／推送并读回 local／tracking／remote SHA；
    新功能按[阶段集中验证](testing/STRATEGY.md#阶段集中验证)集成、专项、新非作者复核和最终完整门禁。
    保留 UNKNOWN／quarantine 和原失败，不重放不确定动作；回收仅限本任务自有且已封存资源。
@@ -82,7 +92,7 @@ Python501 run／3 skipped，765输入前后无漂移。继续及时提交推送�
 | P1 | 工作区 | 分屏、逐叶标签、显式保存／恢复、独立窗口与窗口切换器已有实现；继续多 OS 窗口、外框、完整关闭／重连审核和 worker 回收原生矩阵，见[窗口指南](product/WORKSPACE_WINDOW_SWITCHER.md)。 |
 | P1 | 外部 AI／MCP | API／受控 CLI Ask、逐步审核 Agent、对外 MCP 已实现；继续供应商账户、真实外部客户端和文件提案闭环、撤权／重连／取消；CLI 登录身份复用启用前仍需请求前隔离证明，见[能力计划](product/DESIGN_AND_AGENT_PLAN.md)。 |
 | P2 | 日常文件与编辑器 | UTF-16 LE/BE、五种显式旧编码、审核保存／备份／合并／读回和键盘已有实现；继续更多编码边界、原生文件管理器拖放、完整键盘／辅助技术和其他平台，保持原字节与备份合同，见[文本格式](product/REMOTE_TEXT_FORMAT.md)及[文件键盘](product/FILE_BROWSER_KEYBOARD.md)。 |
-| P2 | 监控与网络 | 按项能力、缓存、Linux 恢复、远端 macOS 只读资源及账户可见 TCP/UDP端口与缓存分页已有实现；UDP专项、真实SSH、最终门禁及两位独立复核通过，原生另验。Windows 只读采集与界面本批已整合，完整 gate／独立复核、真实 Server2025 AMD64 API与三平台精确CI均通过；继续真实 Windows SSH、更多工具缺失后恢复、真实错误／取消和 ICMP 诊断矩阵；Darwin主动探测／终止及不支持指标保持未知，见[Windows记录](testing/records/2026-11-17-windows-read-only-monitor.md)、[UDP记录](testing/records/2026-11-17-darwin-udp-sockets.md)、[监听记录](testing/records/2026-11-17-darwin-tcp-listeners.md)与[资源记录](testing/records/2026-11-16-host-monitor.md)。 |
+| P2 | 监控与网络 | 按项能力、缓存、Linux 恢复、远端 macOS 只读资源及账户可见 TCP/UDP端口与缓存分页已有实现；UDP专项、真实SSH、最终门禁及两位独立复核通过，原生另验。Windows只读采集及界面已整合，本批精确真实OpenSSH两次成功，原件非作者复核批准、新Quality三平台成功并封存；更多工具缺失后恢复、真实错误／取消和ICMP矩阵仍开放，Darwin主动探测／终止及不支持指标保持未知，见[Windows SSH记录](testing/records/2026-11-17-windows-openssh-monitor.md)、[UDP记录](testing/records/2026-11-17-darwin-udp-sockets.md)、[监听记录](testing/records/2026-11-17-darwin-tcp-listeners.md)与[资源记录](testing/records/2026-11-16-host-monitor.md)。 |
 | P2 | 持久化隧道 | 命名规则、三方向转发、流量、审核／停止及运行快照显式恢复已有实现；继续完整重连／管理、owner 失效、真实远端和跨平台验收，见[隧道指南](product/NAMED_TUNNEL_RULE_MANAGEMENT.md)。 |
 | P2 | 配置恢复／同步 | 审核恢复、回退与认证加密目录同步已有实现；跨机器挂载、断电耐久性、最终一致同步器适用性及约束仍待验，不把原子发布专项扩成这些承诺，见[同步指南](product/PROFILE_SYNC.md)和[原子发布记录](testing/records/2026-11-14-profile-sync-atomic-publish.md)。 |
 | P3 | AI 知识复用 | 本地分类、显式 Ask、审核式批量管理与命令片段草稿已有实现；跨设备同步和更多复用待设计，不恢复旧 SSH 权限、不自动执行 runbook，见[知识指南](product/AI_KNOWLEDGE_LIBRARY.md)。 |

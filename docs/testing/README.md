@@ -1,5 +1,7 @@
 # 测试索引
 
+- [Windows 真实 OpenSSH](records/2026-11-17-windows-openssh-monitor.md)：隔离服务器、公开生产路由、独立 Win32 对照与原采集进程终态；精确修复后的两次真实SSH、新API和三平台Quality成功，非作者原件复核批准，[510成员CI终态](records/2026-11-17-windows-openssh-monitor-evidence/ci-completion/README.md)已封存。首轮FAIL及未知子条件保持。
+- [三主题英文工具栏原生子集](records/2026-11-17-native-toolbar-evidence/README.md)：正常 macOS 包、10 组原图／AX和新非作者限定批准；紧凑尺寸及完整原生矩阵保持开放。
 - [监控渲染栈边界](records/2026-11-17-monitor-render-stack.md)：保留原Ubuntu／Windows真实栈溢出；731输入的私有分区构建、显式2 MiB完整app1375/0/2、两位独立限定批准及正常包结构通过，修复后精确CI与原生另验。
 - [远端 macOS UDP 端口与缓存分页](records/2026-11-17-darwin-udp-sockets.md)：严格双栈绑定／指定对端、未绑定过滤、完整帧／描述符预算、双语三主题及全部缓存行分页；真实OpenSSH15项、最终普通Rust3325项与两位独立复核通过，桌面与发行另验。
 - [审核式 SSH 路径比较](records/2026-11-16-ssh-path-comparison.md)：两条真实连接的审核、交替内存样本、严格协议与取消、三主题双语和真实 localhost OpenSSH 流延迟/限速实验；原生与 IP 丢包分别验收。

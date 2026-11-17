@@ -1,7 +1,8 @@
 # ADR 0157 — Windows OpenSSH 监控的隔离验收
 
 日期：2026-11-17。状态：工程已实施并通过本机门禁与独立源审；
-当前没有本批真实Windows SSH成功回执。
+精确修复工程660e90d6的两次真实Windows SSH、直接API与三平台Quality均成功，
+新非作者限定批准SSH／API原件；原首轮失败保持，原生桌面与发行继续另验。
 基线：`bfbea7bcc84ff433d28a635e85daed9cca337fb0`。
 
 ## 目标
@@ -78,4 +79,12 @@ Rust结构化回执、独立前后读数、调试接纳和清理回执。Git工�
 真实cmd.exe还会在argv0后加入空格，只有这一参数边界允许归一化，
 生产选项／Base64仍保持逐字节绑定。四文件修订已获新非作者限定批准，
 49项独立控制通过；冻结后的完整门禁r2通过，765工程输入前后无漂移。
-修订后的真实Windows验收尚待新精确提交，原FAIL保持。
+修复工程`660e90d6f7c7111853db7b73f4ca2344f633700d`已普通提交／推送，
+真实SSH43997403565与同源码独立复跑43998970900均success。
+两次均21原对象、20非master自然终态、四个PowerShell自然exit0，
+完整seal仅master存活，最终Job空、handle0、原集合不变且临时密钥目录删除。
+两次没有记录不完整census观察，不能据新成功断言原失败确为race。
+新非作者对SSH／API原件4018项离线检查通过、P0–P3全0并已关闭。
+精确Quality43997403533三平台成功，范围与原件从
+[CI终态](../testing/records/2026-11-17-windows-openssh-monitor-evidence/ci-completion/README.md)读取；
+旧FAIL及首次坏census的精确子条件UNKNOWN保持。

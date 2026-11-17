@@ -44,10 +44,16 @@ CPU 曲线复用同一份已验证的当前点，不增加轮询。暂停、断�
 
 ## 验证边界
 
-当前正在补充独立的真实 OpenSSH 联调工作流：隔离回环 sshd、固定主机指纹、
-公开 Rust SSH／监控接口、独立 Win32 对照及采集进程自然终态。
-工装已经实现，尚未取得本批 Windows 原生执行结果；
+真实OpenSSH隔离联调已取得精确工程`660e90d6`的两次成功工作流：
+`43997403565`与`43998970900`。隔离回环sshd、固定主机指纹、
+公开Rust SSH／监控接口、独立Win32对照及采集原进程自然终态分别核验，
+不连接客户主机或改变已安装SSH服务。新Quality43997403533三平台已成功，
+macOS／Linux真实OpenSSH interop各18项通过；新非作者对两次SSH与API原件的
+4018项离线检查通过，限定批准、P0–P3全0并已关闭。Quality不在该reviewer范围；
+完整日志、Git来源与digest由[精确CI封存](../testing/records/2026-11-17-windows-openssh-monitor-evidence/ci-completion/README.md)独立重算；
 见[本批记录](../testing/records/2026-11-17-windows-openssh-monitor.md)。
+原首轮`43990824640`的census／清理FAIL保持，首次坏读数精确子条件UNKNOWN；
+后续成功不改写原失败，也不构成恶意程序沙箱或其他Windows版本的运行证明。
 
 2026-11-17 精确工程 `5d2df2f` 的 Windows Server2025 AMD64 hosted 验证已通过
 生产采集、独立 Win32 对照、五类 cmd／PowerShell 原对象自然终态和认证路由 replay。
@@ -59,7 +65,8 @@ CPU 曲线复用同一份已验证的当前点，不增加轮询。暂停、断�
 Windows 工装执行实际生产采集命令，经 `cmd.exe` 启动，并用独立 Win32 API 对照
 自有进程和双栈 TCP/UDP 对象。原始帧可以通过认证 monitor 路由回放；
 该回放不证明真实 Windows OpenSSH 的认证、默认 shell 或远端进程终态。
-当前独立 SSH 工装只做前置检查，明确 HOLD；没有实际 SSH 成功签署路径。
+前批手动isolated-ssh job只做前置检查并保持HOLD；
+新的真实OpenSSH工作流独立执行认证及原进程终态，不使用这个前置job补签。
 任何 API 或 runner 成绩均不能代签原生窗口、键盘、IME 或辅助技术。
 
 协议、分层与取消不变量见 [ADR 0156](../adr/0156-windows-read-only-monitor.md)，
