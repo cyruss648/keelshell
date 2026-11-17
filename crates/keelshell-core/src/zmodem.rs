@@ -407,10 +407,15 @@ fn metadata(bytes: &[u8]) -> Result<FileOffer, Error> {
     if size > MAX_FILE_BYTES {
         return Err(Error::Limit("file bytes"));
     }
-    if fields.len() > 6 {
+    // Some peers include the deprecated seventh (decimal file type) field.
+    // Validate its representation, but never let it override the mode policy.
+    if fields.len() > 7 {
         return Err(Error::InvalidMetadata);
     }
     for (index, field) in fields.iter().enumerate().skip(1) {
+        if !field.bytes().all(|byte| byte.is_ascii_digit()) {
+            return Err(Error::InvalidMetadata);
+        }
         let radix = if index <= 2 { 8 } else { 10 };
         let value = u64::from_str_radix(field, radix).map_err(|_| Error::InvalidMetadata)?;
         if index == 2 {

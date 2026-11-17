@@ -10,6 +10,25 @@ SHA-256 分别为 `3b6e75e988ef096fd7ec4941241f9a03299c0f1e3933a3100ee5ac7af8496
 
 ## 当前实现与验证
 
+独立Zmodem peer交叉联调当前候选已完成实现与源码复核，基线`ac7ec43`，见
+[ADR0158](adr/0158-independent-zmodem-peer-matrix.md)与
+[进行中记录](testing/records/2026-11-17-independent-zmodem-peers.md)。
+当前冻结r7，765输入aggregate
+`7ae00377c1eb95929710c7d8170d444ea293f8c27a3c8690cb83aa79bde3ede6`。
+core七字段兼容106项通过；Rust夹具18库存／8默认通过，Python30通过。
+Fermat限定批准r7原三文件，41项独立及当前控制全通过、P0–P3全0，
+历史三P2已关闭并保留原件，已实际关闭。core由Peirce另限定批准并预编译复跑106项；
+原件4,138项及r7补充1,714项离线复核限定批准，已实际关闭。
+最终完整门禁`0/reaped/796.379603s`：普通Rust3419/0/62 ignored、14 rustdoc，
+Python主523 run/3 skipped；94普通套件逐名库存相等、765输入前后不变。
+持久原件见[623成员封存](testing/records/2026-11-17-independent-zmodem-peers-evidence/README.md)。
+最终真实r7：lrzsz9／10、SexyZ8／10；batch三文件分别审核／保存、取消、
+CRC16／CRC32首个完整ZDATA及同shell继续输入有通过，空文件／缺OO失败保持OPEN。
+更早lrzszr6一次10／10不证明可重复稳定；旧全流marker不证明CRC帧格式，已改为
+审核后有界首帧完整CRC向量匹配。完整产品、FILE-05、三平台原生和发行不关闭。
+本轮官方依赖复查42／113声明通过、71项registry相关失败，后次有界复查超时，
+完整最新仍UNKNOWN。唯一target连续归属本checkout，不clean；没有新增用户chat／worktree。
+
 Windows真实OpenSSH修复工程`660e90d6f7c7111853db7b73f4ca2344f633700d`
 已普通提交／推送，local／tracking／remote三方一致且读回干净。
 765工程输入与50成员修复原件的精确Git绑定`0/reaped/2.714595s`。

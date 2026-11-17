@@ -12,6 +12,7 @@ from contextlib import ExitStack
 from datetime import datetime, timezone
 import ctypes
 import errno
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -33,6 +34,11 @@ TEST_COMMAND = [
 ]
 CLEANUP_RESERVE = 12.0
 PROCESS_TABLE_TIMEOUT = 3.0
+ZMODEM_DEFAULT_ARGS = ("-b", "-vv")
+ZMODEM_ARGS_JSON_BYTES = 16_384
+ZMODEM_MAX_ARGS = 32
+ZMODEM_ARG_BYTES = 2_048
+ZMODEM_ARGS_BYTES = 8_192
 
 
 class InteropFailure(Exception):
@@ -57,6 +63,74 @@ def executable(name, fallbacks=()):
         if Path(candidate).is_file() and os.access(candidate, os.X_OK):
             return str(Path(candidate).absolute())
     raise InteropFailure(f"Required executable {name!r} is missing; install it outside this script")
+
+
+def zmodem_peer_args(raw, variable):
+    """Parse a bounded JSON string array, preserving literal argv elements."""
+    if raw is None:
+        return list(ZMODEM_DEFAULT_ARGS)
+    try:
+        if len(raw.encode("utf-8")) > ZMODEM_ARGS_JSON_BYTES:
+            raise InteropFailure(f"{variable} exceeds the 16384-byte JSON budget")
+    except UnicodeEncodeError as error:
+        raise InteropFailure(f"{variable} must contain valid UTF-8") from error
+    try:
+        arguments = json.loads(raw)
+    except (ValueError, RecursionError) as error:
+        raise InteropFailure(f"{variable} must be a JSON string array") from error
+    if not isinstance(arguments, list) or any(not isinstance(value, str) for value in arguments):
+        raise InteropFailure(f"{variable} must be a JSON string array")
+    if len(arguments) > ZMODEM_MAX_ARGS:
+        raise InteropFailure(f"{variable} exceeds the 32-argument budget")
+    total = 0
+    for value in arguments:
+        if any(ord(character) < 32 or ord(character) == 127 for character in value):
+            raise InteropFailure(f"{variable} contains a control character")
+        try:
+            size = len(value.encode("utf-8"))
+        except UnicodeEncodeError as error:
+            raise InteropFailure(f"{variable} must contain valid UTF-8 arguments") from error
+        if size > ZMODEM_ARG_BYTES:
+            raise InteropFailure(f"{variable} exceeds the 2048-byte argument budget")
+        total += size
+        if total > ZMODEM_ARGS_BYTES:
+            raise InteropFailure(f"{variable} exceeds the 8192-byte total argument budget")
+    return arguments
+
+
+def zmodem_peers(environment, deadline, check_interrupt):
+    """Validate peer inputs and hash their executable bytes before SSH setup."""
+    peers = {}
+    for role in ("rz", "sz"):
+        check_interrupt()
+        variable = "KEELSHELL_ZMODEM_" + role.upper()
+        arguments = zmodem_peer_args(environment.get(variable + "_ARGS"), variable + "_ARGS")
+        value = environment.get(variable)
+        if not value or any(ord(character) < 32 or 127 <= ord(character) <= 159 for character in value):
+            raise InteropFailure(f"{variable} requires an absolute executable path without control characters")
+        path = Path(value)
+        if not path.is_absolute() or not path.is_file() or not os.access(path, os.X_OK):
+            raise InteropFailure(f"{variable} requires an existing absolute executable file")
+        digest = hashlib.sha256()
+        size = 0
+        try:
+            with path.open("rb") as peer:
+                while True:
+                    check_interrupt()
+                    if time.monotonic() >= deadline:
+                        raise InteropFailure("Overall deadline reached during Zmodem peer preflight")
+                    chunk = peer.read(1024 * 1024)
+                    check_interrupt()
+                    if not chunk:
+                        break
+                    digest.update(chunk)
+                    size += len(chunk)
+        except OSError as error:
+            raise InteropFailure(f"{variable} executable contents cannot be read") from error
+        # Keep the caller's exact path (including a multi-call symlink's name),
+        # and record only peer inputs rather than the inherited environment.
+        peers[role] = {"path": value, "args": arguments, "sha256": digest.hexdigest(), "bytes": size}
+    return peers
 
 
 def config_value(value):
@@ -341,7 +415,7 @@ def main():
     parser.add_argument("--timeout", type=float, default=300, help="Total seconds including cleanup (15–300, default 300)")
     suite = parser.add_mutually_exclusive_group()
     suite.add_argument("--zmodem", action="store_true",
-                        help="Run real raw-PTY Zmodem tests; requires KEELSHELL_ZMODEM_RZ and KEELSHELL_ZMODEM_SZ")
+                        help="Run real raw-PTY Zmodem tests; requires KEELSHELL_ZMODEM_RZ and KEELSHELL_ZMODEM_SZ; optional _ARGS JSON arrays default to [\"-b\",\"-vv\"]")
     suite.add_argument("--monitor-darwin", action="store_true",
                        help="Run resource/process monitoring tests against this macOS host")
     arguments = parser.parse_args()
@@ -360,6 +434,7 @@ def main():
     test_command = list(TEST_COMMAND)
     if arguments.zmodem:
         test_command[test_command.index("openssh_interop")] = "zmodem_openssh"
+        test_command.append("--show-output")
     if arguments.monitor_darwin:
         test_command[test_command.index("openssh_interop")] = "darwin_monitor_interop"
     overall_deadline = start + arguments.timeout
@@ -395,6 +470,10 @@ def main():
         with ExitStack() as stack:
             runner = Runner(output, overall_deadline - CLEANUP_RESERVE, stack, receipt, check_interrupt)
             try:
+                peers = zmodem_peers(os.environ, runner.deadline, check_interrupt) if arguments.zmodem else {}
+                if arguments.zmodem:
+                    receipt["zmodem_peers"] = peers
+                check_interrupt()
                 sshd = executable("sshd", ("/usr/sbin/sshd", "/usr/local/sbin/sshd"))
                 keygen = executable("ssh-keygen", ("/usr/bin/ssh-keygen",))
                 cargo = executable("cargo")
@@ -439,6 +518,10 @@ def main():
                     "KEELSHELL_OPENSSH_CLIENT_KEY": str(scratch / "client"),
                     "KEELSHELL_OPENSSH_ROOT": str(scratch),
                 })
+                for role, peer in peers.items():
+                    variable = "KEELSHELL_ZMODEM_" + role.upper()
+                    environment[variable] = peer["path"]
+                    environment[variable + "_ARGS"] = json.dumps(peer["args"], ensure_ascii=False, separators=(",", ":"))
                 tests = runner.start("tests", [cargo, *test_command[1:]], environment)
                 runner.wait("tests", tests, server)
                 summary = re.search(r"test result: ok\. (\d+) passed; 0 failed; 0 ignored;", (output / "tests.log").read_text(encoding="utf-8", errors="replace"))

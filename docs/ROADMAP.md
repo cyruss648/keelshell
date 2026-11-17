@@ -20,6 +20,16 @@
 
 ## 当前批次与接续顺序
 
+独立Zmodem peer交叉联调进行中，见[ADR0158](adr/0158-independent-zmodem-peer-matrix.md)与
+[本批记录](testing/records/2026-11-17-independent-zmodem-peers.md)。
+已修复捕获报文暴露的七字段metadata拒绝，core106项通过；
+未修改SexyZ真实PTY由3／10提升到8／10通过，两个空文件下载失败继续OPEN。
+有界peer argv／来源摘要、三文件逐项审核和中途取消已整合，
+新非作者Fermat源审已批准且关闭三P2，Peirce的core／原件复核限定批准，两位均已关闭。
+最终r7下lrzsz9／10、SexyZ8／10，单文件空传／缺OO边界保持；
+冻结后完整门禁已通过：Rust3419/0/62 ignored、14 rustdoc、Python主523 run/3 skipped；
+94普通套件逐名库存、765输入前后核对通过，不关闭FILE-05／旧lrzsz边界。
+
 Windows 真实 OpenSSH 监控联调本机工程已完成，基线 `bfbea7b`：
 隔离服务器、原进程调试接纳与公开 Rust 路由用例已整合，
 父级整合Python271 run／0失败／3跳过，两位新非作者限定批准、P0–P3全0并实际关闭。
@@ -74,6 +84,8 @@ skipped38／3／3，macOS／Linux真实OpenSSH interop各18项通过。
 - 独立 peer 的直接 PTY strict `OO` 兼容保持 `HOLD/PARTIAL`：严格 `Finished` 必须实际收到 `OO`。
   缺握手警告、逐文件已验证保存、peer 退出 0、pipe relay 对照分别记录，均不能补签严格完成；
   继续独立 peer、真实 SSH PTY、取消／尾部恢复及同一 shell 新输入的可重复矩阵，见[收尾记录](testing/records/2026-11-15-bounded-zmodem-farewell.md)。
+  [11月17日交叉矩阵](testing/records/2026-11-17-independent-zmodem-peers.md)已取得SexyZ的
+  CRC16／CRC32实际格式和严格OO、同shell继续输入、首文件保存后取消；空文件发送两失败保持。
 - Windows 来源／私有 staging／安全发布后端与 UI 已接入，前批后端预检和完整 app 通过；
   新 ZIP codec 41 项及 session 两项祖先替换断言已通过；原 958 完整 gate 的 Python 工装失败保持。
   发布标记修订已复核、封存、推送，当前 ee3 三平台完整 gate 已通过，原生桌面仍待验。

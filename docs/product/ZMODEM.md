@@ -1,6 +1,7 @@
 # 远端终端中的审核式 Zmodem
 
-状态：2026-11-15 `AUTHOR_GATE_PASS / NON_AUTHOR_SOURCE_APPROVED / DIRECT_PTY_ACCEPTANCE_OPEN`。
+状态：2026-11-17 `AUTHOR_GATE_PASS / NON_AUTHOR_SOURCE_APPROVED / DIRECT_PTY_ACCEPTANCE_OPEN`。
+本批完整工程门禁与限定非作者复核已通过；11月15日原门禁及失败结论保持。
 接收端增加有界最终握手等待：确认最终回复已写出之后等待三秒，缺少 `OO` 时
 显示独立的握手未确认警告，保留已验证保存回执和普通终端尾部。精确交还输入后
 可在同一 shell 继续新输入；严格 `Finished` 仍只认实际 `OO`。
@@ -10,6 +11,15 @@
 [ADR 0137](../adr/0137-bounded-zmodem-farewell.md)；
 [前批记录](../testing/records/2026-11-15-reviewed-pty-zmodem.md)保留初始实现和失败。
 本页不是三平台原生验收或 FILE-05 完成声明。
+
+2026-11-17继续独立peer交叉验收：修复七字段ZFILE元数据的有界兼容，
+新增逐文件单次审核与首文件保存后取消的真实SSH用例。未修改SexyZ实际结果由
+3／10通过提升到8／10；两项涉及空文件的下载仍失败。CRC16、CRC32与同shell返回
+已有各自实际格式及严格OO回执；不覆盖旧peer失败、其他OS或原生文件选择。
+最终冻结r7的原版lrzsz实测9／10，完整三文件逐项回执与严格OO通过，
+单个空文件缺OO仍失败；SexyZ为8／10。更早lrzsz一次10／10不证明稳定兼容。
+CRC格式仅由审核后的首个完整ZDATA向量匹配证明，不从全流marker或参数名称推断。
+当前门禁与复核状态见[独立peer记录](../testing/records/2026-11-17-independent-zmodem-peers.md)。
 
 ## 使用流程
 
@@ -89,6 +99,8 @@ peer 经临时管道转发到真实 SSH PTY 的对照通过，不能替代直接
 - 文件名必须是可移植 UTF-8 basename；拒绝路径分隔符、穿越、设备名、
   alternate data stream、重复及大小写别名。
 - 必须声明长度，并核验完整内容长度。协议流量、分片、包数、重试和等待都有界。
+- 文件元数据最多七个数值字段；历史可选file type仅校验无符号十进制表示并忽略含义，
+  不能覆盖普通文件mode、目标路径、字节预算或用户审核。额外字段及非法数字拒绝。
 - 拒绝 ZCOMMAND；任何协议内容都不能转化为可执行终端命令。
 
 core 只负责纯协议；session 负责文件、连接及审核；app 负责唯一 PTY 写入通道

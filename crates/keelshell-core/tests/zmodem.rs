@@ -151,6 +151,25 @@ fn receiver_decodes_independent_hex_metadata_and_binary16_data_wire_vectors() {
 }
 
 #[test]
+fn receiver_decodes_captured_seven_field_metadata_at_every_wire_split() {
+    // Unchanged external peer on an OpenSSH raw PTY, 2026-11-17. This
+    // captured CRC-32 frame is independent of the production encoders.
+    let captured = b"**\x18C\x18D\x18@\x18@\x18B\x18A\xc9\x18C\x18\xd3v\
+        first.bin\x18@19 15276741714 0 0 2 41 0\x18@\x18kH\xa4fj\x11";
+    let expected = FileOffer {
+        name: "first.bin".to_owned(),
+        size: 19,
+    };
+    for split in 0..=captured.len() {
+        let mut receiver = receiver();
+        let mut events = receiver.feed(&captured[..split]).unwrap();
+        events.extend(receiver.feed(&captured[split..]).unwrap());
+        assert_eq!(events, vec![Event::Offer(expected.clone())], "{split}");
+        assert_eq!(receiver.pending_offer(), Some(&expected), "{split}");
+    }
+}
+
+#[test]
 fn detector_preserves_plain_text_and_incomplete_literal_signatures() {
     let mut detector = Detector::new();
     let plain = b"rz\r\nB00 **\\x18B00000000000000\n$ ";
@@ -642,6 +661,84 @@ fn receiver_requires_declared_size_and_valid_regular_mode() {
             "{bad:?}"
         );
     }
+}
+
+#[test]
+fn receiver_ignores_valid_legacy_file_type_without_reinterpreting_the_mode() {
+    for format in [HeaderFormat::Binary16, HeaderFormat::Binary32] {
+        for legacy_type in ["0", "1", "120777", "18446744073709551615"] {
+            let mut receiver = receiver();
+            let metadata = format!("data.bin\x0019 0 100644 0 2 19 {legacy_type}\0");
+            let expected = FileOffer {
+                name: "data.bin".to_owned(),
+                size: 19,
+            };
+            assert_eq!(
+                receiver
+                    .feed(&metadata_bytes(metadata.as_bytes(), format))
+                    .unwrap(),
+                vec![Event::Offer(expected.clone())],
+            );
+            assert_eq!(receiver.pending_offer(), Some(&expected));
+        }
+    }
+}
+
+#[test]
+fn receiver_rejects_invalid_legacy_field_and_additional_metadata_fields() {
+    for suffix in [
+        "0 extra",
+        "0 0",
+        "-1",
+        "+0",
+        "0x10",
+        "1.0",
+        "type",
+        "18446744073709551616",
+        "１",
+        "0\0hidden",
+    ] {
+        let mut receiver = receiver();
+        let metadata = format!("data.bin\x0019 0 100644 0 2 19 {suffix}\0");
+        assert_eq!(
+            receiver.feed(&metadata_bytes(metadata.as_bytes(), HeaderFormat::Binary32)),
+            Err(Error::InvalidMetadata),
+            "{suffix}",
+        );
+        assert!(receiver.pending_offer().is_none());
+    }
+}
+
+#[test]
+fn receiver_seven_field_metadata_preserves_path_mode_size_and_numeric_validation() {
+    for bad in [
+        b"../x\x001 0 100644 0 1 1 0\0".as_slice(),
+        b"x\x001 0 120777 0 1 1 0\0",
+        b"x\x001 0 40755 0 1 1 0\0",
+        b"x\x001 8 100644 0 1 1 0\0",
+        b"x\x001 0 100648 0 1 1 0\0",
+        b"x\x001 +0 100644 0 1 1 0\0",
+        b"x\x001 0 100644 +0 1 1 0\0",
+    ] {
+        let mut receiver = receiver();
+        assert!(
+            receiver
+                .feed(&metadata_bytes(bad, HeaderFormat::Binary32))
+                .is_err(),
+            "{bad:?}",
+        );
+        assert!(receiver.pending_offer().is_none());
+    }
+    let mut receiver = receiver();
+    let oversized = format!("x\0{} 0 100644 0 1 1 0\0", MAX_FILE_BYTES + 1);
+    assert_eq!(
+        receiver.feed(&metadata_bytes(
+            oversized.as_bytes(),
+            HeaderFormat::Binary32,
+        )),
+        Err(Error::Limit("file bytes")),
+    );
+    assert!(receiver.pending_offer().is_none());
 }
 
 #[test]
