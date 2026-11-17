@@ -205,12 +205,33 @@ class AdapterTests(unittest.TestCase):
 
     def test_resolution_missing_selected_family_never_runs_tool_probe(self):
         self.write_tool()
-        for dns in ("import sys;sys.exit(3)", "print('[\"::1\"]')"):
-            self.seen.clear()
-            report = self.run_adapter(dns=dns)
-            self.assertIn(report["status"], ("dns_failure", "traceroute_failure"))
-            self.assertEqual(len(self.seen), 2)
-            self.assertFalse(report["traceroute"]["hops"])
+        # Exercise the adapter's DNS decision, independent of interpreter
+        # startup in the version/resolver stages. Process ownership and real
+        # deadlines are covered separately; a probe here is always a failure.
+        for resolved, status, reason in (
+            (("exited", 3, b"", b""), "dns_failure", "resolution_failed"),
+            (("exited", 0, b'["::1"]', b""), "traceroute_failure", "invalid_output"),
+        ):
+            with self.subTest(status=status):
+                self.seen.clear()
+                with mock.patch.object(self, "actual_runner", side_effect=[
+                    ("exited", 0, b"", UPSTREAM_VERSION_STDERR), resolved,
+                ]) as run:
+                    report = self.run_adapter()
+                self.assertEqual((report["status"], report["traceroute"]["reason"]),
+                                 (status, reason))
+                self.assertEqual(run.call_count, 2)
+                self.assertEqual(self.seen[0], ["/usr/bin/traceroute", "--version"])
+                self.assertEqual(self.seen[1][:-1],
+                                 [sys.executable, "-I", "-S", "-B", "-c",
+                                  adapter.TRACE_RESOLVER])
+                self.assertEqual(json.loads(base64.b64decode(self.seen[1][-1])),
+                                 {"host": REQUEST["host"], "family": "ipv4"})
+                self.assertEqual(report["traceroute"]["implementation"],
+                                 "linux_traceroute_2_1_5")
+                self.assertIsNone(report["traceroute"]["address"])
+                self.assertFalse(report["addresses"])
+                self.assertFalse(report["traceroute"]["hops"])
 
     def test_permission_options_nonzero_missing_and_flood_have_fixed_reasons(self):
         for text, code, err, reason in (

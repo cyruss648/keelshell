@@ -258,10 +258,13 @@ class OwnedProcessTests(unittest.TestCase):
         with tempfile.TemporaryDirectory(prefix="keelshell-icmp-supervisor-") as root:
             fake = Path(root) / "ping"
             pidfile = Path(root) / "pid"
+            reapfile = Path(root) / "reap.json"
             fake.write_text(
                 f"#!{sys.executable}\nimport pathlib,os,sys,time\n"
                 f"if sys.argv[1:]==['-V']:\n print({VERSION!r},end='');sys.exit(0)\n"
-                f"pathlib.Path({str(pidfile)!r}).write_text(str(os.getpid()))\ntime.sleep(30)\n")
+                f"ready=pathlib.Path({str(pidfile.with_suffix('.ready'))!r})\n"
+                "ready.write_text(str(os.getpid()))\n"
+                f"ready.replace({str(pidfile)!r})\ntime.sleep(30)\n")
             fake.chmod(0o700)
             source = (SOURCE / "icmp.py").read_text()
             source += (
@@ -272,10 +275,37 @@ class OwnedProcessTests(unittest.TestCase):
                 " return _real_stat(_fake if path in ('/usr/bin/ping','/bin/ping') else path,*a,**kw)\n"
                 "os.stat=_stat\n"
                 "_real_popen=subprocess.Popen\n"
+                "_owned=[]\n"
                 "def _popen(argv,*a,**kw):\n"
                 " if argv[0] in ('/usr/bin/ping','/bin/ping'): argv=[_fake,*argv[1:]]\n"
-                " return _real_popen(argv,*a,**kw)\n"
-                "subprocess.Popen=_popen\n")
+                " child=_real_popen(argv,*a,**kw)\n"
+                " _owned.append(child)\n"
+                " return child\n"
+                "subprocess.Popen=_popen\n"
+                # Admission is covered by AdapterTests. Here only the final
+                # sleeping child should spend the real eight-second budget.
+                "_real_run=icmp_run_owned\n"
+                "def icmp_run_owned(argv,*a,**kw):\n"
+                " if argv[0] in ('/usr/bin/ping','/bin/ping') and argv[1:]==['-V']:\n"
+                f"  return 'exited',0,{VERSION.encode()!r},b''\n"
+                f" if argv[0]==sys.executable and argv[-2]=={DNS_WORKER!r}:\n"
+                "  return 'exited',0,b'KEELSHELL_DIAGNOSTIC_V1\\n"
+                "{\"status\":\"success\",\"addresses\":[{\"family\":\"IPv4\","
+                "\"address\":\"127.0.0.1\"}],\"limited\":false,"
+                "\"timing\":{\"resolve_ms\":1}}\\n',b''\n"
+                " return _real_run(argv,*a,**kw)\n"
+                "_real_diagnostic=icmp_diagnostic\n"
+                "def icmp_diagnostic(*a,**kw):\n"
+                " report=_real_diagnostic(*a,**kw)\n"
+                " records=[]\n"
+                " for owned in _owned:\n"
+                "  try: reaped=os.waitpid(owned.pid,os.WNOHANG)\n"
+                "  except ChildProcessError: reaped='already_reaped'\n"
+                "  records.append({'pid':owned.pid,'returncode':owned.returncode,"
+                "'reaped':reaped,'pipes_closed':"
+                "all(pipe.closed for pipe in (owned.stdout,owned.stderr))})\n"
+                f" with open({str(reapfile)!r},'w') as output: json.dump(records,output)\n"
+                " return report\n")
             source += (SOURCE / "probe.py").read_text()
             request = base64.b64encode(json.dumps(REQUEST).encode()).decode()
             worker = base64.b64encode(DNS_WORKER.encode()).decode()
@@ -287,10 +317,12 @@ class OwnedProcessTests(unittest.TestCase):
                 child.stdin.write(source.encode())
                 child.stdin.close()
                 child.stdin = None
-                until = started + 2
-                while not pidfile.exists() and time.monotonic() < until:
+                until = started + 5
+                while not pidfile.exists() and child.poll() is None and time.monotonic() < until:
                     time.sleep(.01)
                 self.assertTrue(pidfile.exists())
+                pid = int(pidfile.read_text())
+                os.kill(pid, 0)  # The final child must still be alive before cancellation.
                 if cancel:
                     for number in (signal.SIGHUP, signal.SIGTERM, signal.SIGINT):
                         child.send_signal(number)
@@ -300,19 +332,33 @@ class OwnedProcessTests(unittest.TestCase):
                 self.assertEqual(out.count(b"KEELSHELL_DIAGNOSTIC_V1\n"), 1)
                 report = json.loads(out.split(b"\n", 1)[1])
                 self.assertEqual(report["status"], "interrupted" if cancel else "timeout")
+                self.assertEqual(report["icmp"]["reason"], "interrupted" if cancel else "deadline")
+                self.assertEqual(report["icmp"]["address"], "127.0.0.1")
+                self.assertEqual(report["icmp"]["implementation"], "iputils_20240117")
                 self.assertIsNone(report["icmp"]["counts"])
                 self.assertLess(time.monotonic() - started, 8.5)
+                self.assertEqual(json.loads(reapfile.read_text()), [{
+                    "pid": pid, "returncode": -signal.SIGKILL,
+                    "reaped": "already_reaped", "pipes_closed": True,
+                }])
+                if not cancel:
+                    self.assertGreaterEqual(report["timing"]["total_ms"], 7500)
                 with self.assertRaises(ProcessLookupError):
-                    os.kill(int(pidfile.read_text()), 0)
+                    os.kill(pid, 0)
             finally:
-                if child.poll() is None:
-                    child.kill()
+                try:
+                    if child.poll() is None:
+                        child.kill()
                     child.communicate(timeout=1)
-                if pidfile.exists():
-                    try:
-                        os.killpg(int(pidfile.read_text()), signal.SIGKILL)
-                    except ProcessLookupError:
-                        pass
+                finally:
+                    for pipe in (child.stdin, child.stdout, child.stderr):
+                        if pipe is not None:
+                            pipe.close()
+                    if pidfile.exists():
+                        try:
+                            os.killpg(int(pidfile.read_text()), signal.SIGKILL)
+                        except ProcessLookupError:
+                            pass
 
     def test_full_supervisor_repeated_shutdown_reaps_fake_ping_before_one_frame(self):
         self.supervisor_fixture(cancel=True)

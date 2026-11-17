@@ -1,5 +1,34 @@
 use super::*;
-use gpui_kit::component::Selectable;
+use gpui_kit::component::{
+    Selectable,
+    scroll::{Scrollbar, ScrollbarMode},
+};
+
+fn review_scrollbar(
+    id: &'static str,
+    handle: &ScrollHandle,
+    label: &'static str,
+    cx: &App,
+) -> AnyElement {
+    let visual = crate::design::palette(cx);
+    div()
+        .id(id)
+        .test_support()
+        .absolute()
+        .inset_0()
+        .aria_label(label)
+        .child(
+            Scrollbar::vertical(handle)
+                .id(format!("{id}-control"))
+                .mode(ScrollbarMode::Always)
+                .styles(|styles| {
+                    styles
+                        .track(|style| style.width(px(12.)).bg(rgb(visual.canvas).into()))
+                        .thumb(|style| style.width(px(7.)).bg(rgb(visual.muted)))
+                }),
+        )
+        .into_any_element()
+}
 
 fn action_label(state: ActionState, cx: &App) -> &'static str {
     match state {
@@ -44,7 +73,9 @@ impl Workspace {
                 .w(px(850.)).h(px(660.)).max_w(relative(0.96)).max_h(relative(0.94)).min_w_0().min_h_0()
                 .bg(rgb(visual.surface)).text_color(rgb(visual.text)).border_1().border_color(rgb(visual.border)).rounded_lg().shadow_lg().flex().flex_col().overflow_hidden()
                 .child(div().p_3().flex_shrink_0().font_weight(FontWeight::SEMIBOLD).child(t(cx, "审阅远程文件完整替换", "Review complete remote file replacement")))
-                .child(div().id("mcp-file-review-scroll").test_support().flex_1().min_h_0().overflow_y_scroll().p_3().flex().flex_col().gap_2()
+                .child(div().flex_1().min_h_0().relative().flex().flex_col()
+                    .child(div().id("mcp-file-review-scroll").test_support().flex_1().min_h_0().overflow_y_scroll().track_scroll(&self.mcp.file_review_scroll).p_3().pr(px(24.))
+                    .child(div().id("mcp-file-review-content").test_support().flex().flex_col().gap_2()
                     .child(div().child(format!("{} · {}", action.label, action_label(action.state, cx))))
                     .child(div().id("mcp-file-review-path").test_support().role(accesskit::Role::Label).aria_label(review::visible_command(&proposal.path)).font_family("monospace").overflow_x_scroll().child(review::visible_command(&proposal.path)))
                     .child(div().text_xs().child(review::visible_command(&action.route)))
@@ -53,7 +84,8 @@ impl Workspace {
                     .child(div().text_sm().text_color(rgb(visual.muted)).child(t(cx,
                         "下面显示原文全部删除、替换正文全部加入。写入前再次核对内容、大小、权限及时间；并发远端修改仍无法获得 SFTP 原子比较锁。关闭审阅保留待审提案；拒绝、到期或撤权不会写入。",
                         "The diff shows every original line removed and every replacement line added. Content, size, permissions and time are checked again before writing; SFTP cannot atomically lock out concurrent remote changes. Closing keeps the pending proposal. Rejection, expiry or revocation does not write.")))
-                    .child(div().id("mcp-file-review-diff").test_support().flex_shrink_0().overflow_x_scroll().font_family("monospace").text_sm().whitespace_normal().bg(rgb(visual.canvas)).p_2().child(diff.clone())))
+                    .child(div().id("mcp-file-review-diff").test_support().flex_shrink_0().overflow_x_scroll().font_family("monospace").text_sm().whitespace_normal().bg(rgb(visual.canvas)).p_2().child(diff.clone()))))
+                    .child(review_scrollbar("mcp-file-review-scrollbar", &self.mcp.file_review_scroll, t(cx, "完整文件审阅正文滚动条", "Complete file review scrollbar"), cx)))
                 .child(div().id("mcp-file-review-footer").test_support().flex_shrink_0().p_3().border_t_1().border_color(rgb(visual.border)).flex().flex_wrap().justify_end().gap_2()
                     .child(Button::new("mcp-file-review-close").ghost().label(t(cx, "暂不处理", "Keep pending"))
                         .on_click(cx.listener(|view, _, _, cx| { view.mcp.reviewing = None; cx.notify(); })))
@@ -290,6 +322,9 @@ impl Workspace {
                                                         == ActionKind::FileChange
                                             }) {
                                                 view.mcp.reviewing = Some(id);
+                                                view.mcp
+                                                    .file_review_scroll
+                                                    .set_offset(Point::default());
                                                 cx.notify();
                                             } else {
                                                 view.review_mcp_action(id, true, cx);
@@ -304,11 +339,15 @@ impl Workspace {
             .child(div().id("mcp-dialog").test_support().track_focus(&self.overlay_focus)
                 .w(px(850.)).h(px(660.)).max_w(relative(0.96)).max_h(relative(0.94)).min_w_0().min_h_0()
                 .bg(rgb(visual.surface)).text_color(rgb(visual.text)).border_1().border_color(rgb(visual.border)).rounded_lg().shadow_lg().flex().flex_col().overflow_hidden()
-                .child(div().p_3().flex().items_center().justify_between()
+                .child(div().p_3().flex_shrink_0().flex().items_center().justify_between()
                     .child(div().text_lg().font_weight(FontWeight::SEMIBOLD).child(t(cx, "对外 MCP 授权与审阅", "External MCP grants and review")))
                     .child(Button::new("mcp-close").ghost().compact().label("×").accessibility_label(t(cx, "关闭 MCP 设置", "Close MCP settings"))
                         .on_click(cx.listener(|view, _, window, cx| { view.mcp.show = false; view.focus_current_surface(window, cx); cx.notify(); }))))
-                .child(div().id("mcp-scroll").test_support().flex_1().min_h_0().overflow_y_scroll().px_4().pb_4().flex().flex_col().gap_3()
+                // Keep a stable viewport and an explicit drag route to every
+                // review, even when wheel input is unavailable.
+                .child(div().flex_1().min_h_0().relative().flex().flex_col()
+                    .child(div().id("mcp-scroll").test_support().flex_1().min_h_0().overflow_y_scroll().track_scroll(&self.mcp.content_scroll).px_4().pr(px(24.)).pb_4()
+                    .child(div().id("mcp-scroll-content").test_support().flex().flex_col().gap_3()
                     .child(div().text_sm().text_color(rgb(visual.muted)).child(t(cx,
                         "外部智能体只能读取勾选能力、所选文本和授权路径，或提交待审提案。不能直接执行、代登录或解锁凭据。临时配置可供多个客户端使用，直到授权变更、撤销或应用退出；授权不保存，变更后需重新复制。",
                         "External agents may read only selected capabilities, fragments and paths, or propose commands for review. They cannot execute, log in or unlock credentials. Temporary settings may serve multiple clients until grants change, access is disabled or the app exits. Grants are not saved; changes require fresh settings.")))
@@ -333,7 +372,8 @@ impl Workspace {
                             .disabled(!self.mcp.has_clearable_actions())
                             .on_click(cx.listener(|view, _, _, cx| { view.mcp.clear_finished_actions(); cx.notify(); }))))
                     .child(actions)
-                    .child(self.mcp_client_settings(cx)))
+                    .child(self.mcp_client_settings(cx))))
+                    .child(review_scrollbar("mcp-scrollbar", &self.mcp.content_scroll, t(cx, "MCP 授权与提案正文滚动条", "MCP grants and proposals scrollbar"), cx)))
                 .child(div().p_3().flex_shrink_0().border_t_1().border_color(rgb(visual.border)).flex().flex_wrap().justify_end().gap_2()
                     .child(Button::new("mcp-disable").ghost().label(t(cx, "关闭并撤销全部授权", "Disable and revoke all"))
                         .on_click(cx.listener(|view, _, _, cx| { view.mcp.stop(); view.mcp.status = Message::new("MCP 已关闭，全部临时授权已撤销。", "MCP is off; all temporary grants are revoked."); cx.notify(); })))

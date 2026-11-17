@@ -20,6 +20,22 @@
 
 ## 当前批次与接续顺序
 
+优先关闭真实原生发现的MCP审核滚动裁切：准确e394正常包上的文件提案未写入，
+按钮存在AX但裁在固定footer后，实际撤权及正常退出／自有资源回收已完成。
+两种模板实际复制解析及三主题长连接宽窗已有原件；紧凑尺寸仍HOLD。
+视口／自然高度正文分离、两个主题化显式滑块及GPUI回归已实现，见
+[ADR0162](adr/0162-mcp-review-scroll-content.md)和
+[记录](testing/records/2026-11-17-mcp-review-scroll.md)。
+新正常包原生拖动已完成完整101行diff首尾、批准文件后6628字节独立全等读回、
+另一命令原生拒绝；原滚轮未位移／根因UNKNOWN继续OPEN。
+15组原图、三主题双语宽窗及资源回收有原件；紧凑原生另验。
+首轮完整门禁两个网络夹具失败保留，确定测试前置条件后冻结777输入r2，
+最终完整门禁`0/reaped/782.087748s`，Rust3469/0/68 ignored、15rustdoc、
+Python主526run/3skipped，96普通库存逐名／摘要及777输入前后相等。
+新非作者源审／专项4项、夹具34项批准，限定原图ship；均已关闭，
+唯一原生滚轮P2保持OPEN。包绑定r1，r2只有三个测试文件不同，
+生产输入相等；不把原生子集扩大成当前整个工程／完整产品通过。
+
 监控读取取消已实现，受控SSH18通过／1忽略、能力缓存10项、
 真实Darwin OpenSSH监控15项通过；旧实现12项取消红控制失败保留。
 两轮门禁的expect_used及旧traceroute工装失败保留；后者仅固定前置条件，
@@ -35,9 +51,14 @@ Heisenberg the 2nd批准r3唯一Python修订，P0–P3全0且均已关闭；
 工程`6ae91d2`已普通推送、三方SHA相等、读回干净；
 777新／777旧f910输入与540成员Git绑定通过。
 六个自有目录／549文件已按原件摘要回收，唯一target及两正常包保持。
-新Quality44040248864／Windows API44040248806／SSH44040248746
-在UTC07:38:44均in_progress；从[交付原件](testing/records/2026-11-17-monitor-read-cancellation-evidence/delivery/README.md)
-接续，不重复未变工程的完整门禁。
+新Quality44040248864／Windows API44040248806／SSH44040248746均已success，
+Windows／macOS／Ubuntu普通Rust3453／3466／3459通过、0失败，各15rustdoc；
+7ZIP／172成员与449原件精确封存、新非作者Parfit离线复核批准并已关闭。
+文档9d57510已普通推送、三方SHA一致；777旧工程／文档Git绑定通过，
+两处449文件展开副本按原件回收，target目录身份与三正常包摘要保持。
+历史seal HOLD／master125／自然255与1／API isolatedSSH skipped／native UNRUN保持；
+从[精确CI](testing/records/2026-11-17-monitor-read-cancellation-evidence/ci-completion/README.md)
+接续，不重复未变工程的完整门禁，不代签当前MCP。
 
 MCP接入与提案记录增量的实现与限定工程验证完成：纯Codex／Claude模板和原生显式复制、
 保留Unknown的批量清理、独立准确提案核对已实现；核对不执行／重试或改写状态。

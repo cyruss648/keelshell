@@ -10,6 +10,35 @@ SHA-256 分别为 `3b6e75e988ef096fd7ec4941241f9a03299c0f1e3933a3100ee5ac7af8496
 
 ## 当前实现与验证
 
+基线e394f6d新正常包的真实Podman SSH／SFTP原生联调发现MCP文件审核滚动裁切：
+提案仅入待审、原文件SHA不变，但完整审核按钮在固定footer下方且滚轮未移出。
+已实际撤权、客户端断开且应用正常exit0/reaped；
+自有容器／网络／派生镜像／私钥已核对回收。两种客户端模板原生复制及结构解析通过，
+三主题长连接宽窗原图保留；900×580仍未证实，不能关闭完整native。
+已分离滚动视口与自然高度正文，增加两个独立主题化显式滚动条并补生产GPUI回归，见
+[ADR0162](adr/0162-mcp-review-scroll-content.md)及
+[实际记录](testing/records/2026-11-17-mcp-review-scroll.md)。
+新正常r1包实际拖动后完整文件审核可达，完整101行diff首尾可见，
+原生批准后独立SFTP读回6628字节全等，另项命令原生拒绝／客户端查询rejected。
+九次工具调用均非错误，客户端／原应用自然exit0/reaped，
+全部授权撤销，自有Podman容器／网络／派生镜像及私钥目录已按身份回收。
+15组未编辑JPEG／完整AX保留，三主题双语宽窗限定通过；
+原生滚轮仍未位移、根因UNKNOWN、紧凑原生和完整矩阵继续开放。
+首轮完整门禁在两个网络测试夹具失败，原件及ResourceWarning保留；
+仅确定测试前置条件并加强真实子进程回收断言，生产网络supervisor未改。
+长diff回归补强后专项4通过，最终777输入r2 aggregate
+`5b5c1d2887d21ecf7e721d212e81f9f64acfe574b6ba32689dd9c6ad0cbb1e12`，
+最终完整门禁`0/reaped/782.087748s`：普通Rust3469/0/68 ignored、
+15rustdoc、Python主526run/3skipped，fmt／严格Clippy／依赖政策及三个controller通过。
+96普通二进制逐名库存和前后摘要相等，777输入前后相等。
+Sartre源审及新专项独立4项通过，Gauss夹具独立34项通过，P0–P3全0；
+Herschel实际查看15新图、限定ship，补审关闭三测试输入归属P2，
+唯一原生滚轮P2保持OPEN，三位reviewer及作者均已实际关闭。
+正常包绑定r1，最终r2仅三个测试文件不同、774项相等；生产输入相同，
+不宣称整个工作树与r1相等，不把旧测试二进制代签新增断言。
+555件原件已持久化至[本批封存](testing/records/2026-11-17-mcp-review-scroll-evidence/README.md)，
+后续以此为维护入口；准确提交后再作777工程Git绑定与自有展开副本回收。
+
 监控读取的及时取消已实现，见[ADR0161](adr/0161-monitor-read-cancellation.md)及
 [本批记录](testing/records/2026-11-17-monitor-read-cancellation.md)。
 generation撤权唤醒exec及探针锁等待，旧请求返回Cancelled；
@@ -33,8 +62,18 @@ local／tracking／remote三方相等、读回干净；777新输入／777旧f910
 540归档成员的精确Git绑定通过，`0/reaped/0.325499s`。
 按完整文件集／摘要回收6自有目录、549文件／20,925,270逻辑字节，
 包含9个仅按已封存来源回执核对的第三方正文／长摘录；target和两正常包保持。
-新Quality44040248864、Windows API44040248806及SSH44040248746在
-UTC07:38:44读回均in_progress，不预填成功。
+新Quality44040248864、Windows API44040248806及SSH44040248746均已
+completed/success；Windows／macOS／Ubuntu普通Rust3453／3466／3459通过、
+0失败、各15rustdoc，Python主526run、skip53／3／3。
+7原始ZIP／172成员、4官方artifact digest及449原件精确封存，
+非作者Parfit独立3318离线检查通过、P0–P3全0且已关闭。
+SSH seal HOLD、master cleanup125非自然、非master自然255×5／1×1、
+API isolated SSH skipped和native_gui UNRUN保持，
+见[精确CI终态](testing/records/2026-11-17-monitor-read-cancellation-evidence/ci-completion/README.md)。
+文档`9d57510f24efcb522a0bc6af51c440e817dcd5c5`已普通提交／推送，
+local／tracking／remote一致，777旧工程与新文档Git绑定通过。
+两处已封存CI展开副本449文件／13,052,356逻辑字节已按精确Git原件回收，
+唯一target目录身份与三正常包文件摘要保持；CI只签旧工程，不代签本批MCP源码或原生。
 维护从[本批封存](testing/records/2026-11-17-monitor-read-cancellation-evidence/README.md)
 及交付回执接续，已回收work副本不再作为入口。
 本轮官方直接依赖复查37包／113声明全部通过，前次registry失败保留；
@@ -266,8 +305,14 @@ Python 主 discovery 各 293 run，skipped 为 34／2／2；包装与 helper 独
 `CARGO_BUILD_JOBS=2`、`MACOSX_DEPLOYMENT_TARGET=15.0`。
 归属为当前 checkout，连续使用不 clean；切换源码归属先依
 [共享 target 合同](testing/SHARED_TARGET.md)失效本项目产物并核对编译库存。
-当前本批正常包为 `work/mcp-client-native-20261117/package-r1/KeelShell.app`，
-精确f910e001，已在隔离空目录正常运行并退出，11组原图范围见本页顶部，未安装。
+当前本批正常包为 `work/mcp-scrollbar-native-20261117/package-r1/KeelShell.app`，
+绑定上述r1冻结777输入，app SHA
+`cb963bbce61dd5af79770064a98c61ba524bc8fcaeed8e32a82e6392041c456b`，
+真实SSH／SFTP文件审核与读回、命令拒绝后已正常退出，未安装。
+`normal-build-final-test-differences.json`记录最终r2的三测试差异；
+维护用包和原件保持，不将未提交manifest改写为已提交工程。
+前批包 `work/mcp-client-native-20261117/package-r1/KeelShell.app`，
+精确f910e001，11组空授权原图限定保留，未安装。
 前批包 `work/windows-monitor-delivery-20261117/package-r2/KeelShell.app` 仅保留为旧验证原件，
 manifest 绑定精确工程5d2df2f，五个应用文件与提交前包逐字节相等，
 arm64／minos15.0 结构检查通过，本次已在独立目录运行并正常退出，未安装。
