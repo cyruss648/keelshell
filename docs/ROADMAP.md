@@ -20,6 +20,14 @@
 
 ## 当前批次与接续顺序
 
+Windows 真实 OpenSSH 监控联调本机工程已完成，基线 `bfbea7b`：
+隔离服务器、原进程调试接纳与公开 Rust 路由用例已整合，
+父级整合Python271 run／0失败／3跳过，两位新非作者限定批准、P0–P3全0并实际关闭。
+765输入冻结后的完整门禁r1通过：Rust3407/0/60 ignored、14 rustdoc、
+Python493 run／3 skipped，库存逐名相等。精确提交推送和本批 Windows 实际执行仍待完成；
+以[ADR0157](adr/0157-windows-openssh-monitor-acceptance.md)及
+[本批记录](testing/records/2026-11-17-windows-openssh-monitor.md)接续。
+
 1. Windows 远端只读监控：固定 PowerShell 采集、独立身份、资源／进程／端口、按项缓存、
    三主题双语与未知值语义已整合。真实 Darwin SSH 15 项、Linux 恢复 2 项及专项通过；
    独立审查发现的 admission 后撤权与对照漏报均已修复。

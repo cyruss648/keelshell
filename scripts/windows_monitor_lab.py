@@ -318,9 +318,10 @@ class OwnedChild:
             self.image_query.argtypes = [W.HANDLE, U32, W.LPWSTR, C.POINTER(U32)]
             self.image_query.restype = W.BOOL
 
-    def start(self):
+    def start(self, environment=None):
         try:
-            self.process = self.owner.spawn(self.command, ROOT, dict(os.environ), self.budget)
+            environment = dict(os.environ) if environment is None else dict(environment)
+            self.process = self.owner.spawn(self.command, ROOT, environment, self.budget)
             for stream, destination in ((self.process.stdout, self.stdout),
                                         (self.process.stderr, self.stderr)):
                 pump = lifecycle.Pump(stream)

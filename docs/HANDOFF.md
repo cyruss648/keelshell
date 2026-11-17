@@ -10,6 +10,21 @@ SHA-256 分别为 `3b6e75e988ef096fd7ec4941241f9a03299c0f1e3933a3100ee5ac7af8496
 
 ## 当前实现与验证
 
+Windows真实OpenSSH监控验收的本机工程已完成，基线文档提交`bfbea7b`：
+隔离短命sshd、原进程调试接纳／终态和公开Rust路由用例分工实现，
+见[ADR0157](adr/0157-windows-openssh-monitor-acceptance.md)与
+[开发记录](testing/records/2026-11-17-windows-openssh-monitor.md)。
+父级离线专项r2共39项通过，Rust目标已编译、逐名库存与严格Clippy通过；
+本机负向控制实际以`WindowsRequired`失败退出101，不能误签Windows成功。
+新非作者分别复核SSH／Rust与调试生命周期，均限定批准、P0–P3全0；
+两位作者与两位reviewer已实际关闭。集成Python专项271 run／0失败／3跳过。
+最终完整门禁r1已exit0/reaped/699.028665s，普通Rust3407/0/60 ignored、
+14 rustdoc、Python493 run／3 skipped；app1398/0/2、session404/0/4。
+app1400／session408／routing10／live1库存逐名相等，冻结765输入、aggregate
+`71872297a9a7b067fd85723de4e5c9c10f908dcc6a7e63ab91eeed6cb902db3a`；
+门禁前后与库存后无漂移。待普通提交推送及本批精确Windows执行；
+本段不覆盖下述上一批成功范围。
+
 Windows 远端只读监控已整合：独立平台身份、固定 PowerShell 5.1 JSON、严格解析、
 按项缓存、CPU gauge／未知指标、工作集、端口、三主题双语与带年龄的 AI 缓存。
 基线 `4209e272260aff6374e6216423ce8e0157bea2f4`；工程
@@ -84,6 +99,7 @@ Python 主 discovery 各 293 run，skipped 为 34／2／2；包装与 helper 独
 1. Windows 本批已推送，本机完整门禁、两位非作者源码／功能复核、精确库存和Git绑定通过；
    API workflow与Quality43972364934三平台成功、原job／API原件封存通过，
    新非作者API回执复算批准且已关闭。维护从精确记录接续，不重复未变工程全门禁。
+   下一批真实OpenSSH开发先从上面的ADR0157和开发记录继续，不能跳过最终新冻结与复核。
 2. 按[路线](ROADMAP.md)继续真实 Windows SSH、独立 Zmodem peer、外部 AI／MCP、
    隧道与同步、原生矩阵及六目标发行；完整产品目标不标 complete。
 3. 桌面可用后先复核英文工具栏 P2，再补三主题／尺寸／双语／焦点／IME／辅助技术。

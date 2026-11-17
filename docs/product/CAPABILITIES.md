@@ -1,5 +1,22 @@
 # Capability ledger
 
+## 2026-11-17: isolated real Windows OpenSSH acceptance gate
+
+An opt-in native Rust integration test now uses the public SSH and monitor APIs
+against an owned loopback OpenSSH server. The Python gate pins the generated
+host identity, preserves the default shell, compares independent Win32 readings,
+and requires original collector processes to finish naturally before server
+cleanup. Private keys and client configuration stay outside uploaded evidence.
+
+Two independent source reviewers approved the bounded change with zero confirmed
+findings. The final local 765-input gate passed: ordinary Rust3407/0/60 ignored,
+14 rustdoc; Python493 run with3 skipped. The new native SSH test is explicitly
+ignored in that ordinary gate. Actual Windows OpenSSH, ABI and process-chain
+acceptance still await the exact-source workflow; local controls and the previous
+direct API replay do not supply that acceptance. See
+[the batch record](../testing/records/2026-11-17-windows-openssh-monitor.md) and
+[ADR0157](../adr/0157-windows-openssh-monitor-acceptance.md).
+
 ## 2026-11-17: remote Windows read-only monitoring
 
 The session transport independently confirms the platform before routing fixed

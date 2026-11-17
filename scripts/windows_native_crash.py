@@ -259,8 +259,12 @@ class WindowsJob:
         if not present and not self.api.AssignProcessToJobObject(self.job, handle):
             raise OwnershipError("AssignProcessToJobObject failed")
 
-    def spawn(self, command, cwd, env, deadline, merge_error=False):
+    def spawn(self, command, cwd, env, deadline, merge_error=False, *, creation_flags=0):
         """Create suspended with an explicit inheritable pipe-handle allowlist."""
+        # Only the descendant-debug barrier may augment creation. In particular,
+        # DEBUG_ONLY_THIS_PROCESS and CREATE_BREAKAWAY_FROM_JOB are forbidden.
+        if type(creation_flags) is not int or creation_flags not in (0, 0x00000001):
+            raise OwnershipError("unsupported owned process creation flags")
         import msvcrt
         deadline.remaining(reserve=CLEANUP_RESERVE)
         api = self.api
@@ -314,13 +318,16 @@ class WindowsJob:
             startup.lpAttributeList = attribute
             line = ctypes.create_unicode_buffer(subprocess.list2cmdline(command))
             block = ctypes.create_unicode_buffer("\0".join(f"{key}={value}" for key, value in sorted(env.items(), key=lambda item: item[0].upper())) + "\0\0")
-            flags = 0x00000004 | 0x00000400 | 0x00080000  # SUSPENDED / UNICODE_ENV / EXTENDED_STARTUPINFO
+            flags = 0x00000004 | 0x00000400 | 0x00080000 | creation_flags
             if not api.CreateProcessW(None, line, None, None, True, flags, block, str(cwd), ctypes.byref(startup), ctypes.byref(information)):
                 raise OwnershipError("CreateProcessW failed")
             created = True
             # Retain the native handles before wrapping pipes or assigning.
-            process = WindowsProcess(api, information.dwProcessId, information.hProcess,
-                                     information.hThread, None, None, None)
+            # A debug owner also pumps during this method's failure waits. The
+            # ordinary owner keeps exactly the existing process implementation.
+            process_type = getattr(self, "_process_factory", WindowsProcess)
+            process = process_type(api, information.dwProcessId, information.hProcess,
+                                   information.hThread, None, None, None)
             self.process = process
             self.processes.append(process)
             for fd in child_fds:
@@ -355,14 +362,18 @@ class WindowsJob:
             # Even an interruption between CreateProcessW returning and Python
             # root registration must release the still-suspended native root.
             if process is None and (created or information.hProcess):
-                api.TerminateProcess(information.hProcess, 125)
-                try:
-                    allowance = deadline.remaining()
-                except TimeoutError:
-                    allowance = 0
-                api.WaitForSingleObject(information.hProcess, max(0, int(allowance * 1000)))
-                api.CloseHandle(information.hThread)
-                api.CloseHandle(information.hProcess)
+                debug_cleanup = getattr(self, "_cleanup_unregistered_creation", None)
+                if creation_flags and debug_cleanup is not None:
+                    debug_cleanup(information, deadline)
+                else:
+                    api.TerminateProcess(information.hProcess, 125)
+                    try:
+                        allowance = deadline.remaining()
+                    except TimeoutError:
+                        allowance = 0
+                    api.WaitForSingleObject(information.hProcess, max(0, int(allowance * 1000)))
+                    api.CloseHandle(information.hThread)
+                    api.CloseHandle(information.hProcess)
             if attribute_initialized:
                 api.DeleteProcThreadAttributeList(attribute)
             for fd in fds:
@@ -620,10 +631,21 @@ def finish_owned(owner, process, pumps, deadline, capture):
             except (OSError, OwnershipError, TimeoutError, subprocess.SubprocessError):
                 errors.add("owned_fallback_pipe_terminal_failed")
         finally:
-            owner.close()  # Windows final-handle close kills ordinary descendants.
-            for stream in [process.stdin, process.stdout, process.stderr]:
-                if stream and not any(pump.stream is stream and pump.thread.is_alive() for pump in pumps):
-                    stream.close()
+            try:
+                owner.close()  # Windows final-handle close kills ordinary descendants.
+            except Exception:
+                # Preserve a receipt even when final owned-handle closure fails.
+                errors.add("owned_close_failed")
+            finally:
+                for stream in [process.stdin, process.stdout, process.stderr]:
+                    if stream is not None and not any(
+                            pump.stream is stream and pump.thread.is_alive() for pump in pumps):
+                        try:
+                            stream.close()
+                        except Exception:
+                            errors.add("owned_stream_close_failed")
+    if terminal is not None:
+        terminal["errors"] = sorted(errors)
     return terminal, errors
 
 

@@ -1,0 +1,54 @@
+name: Windows OpenSSH monitor integration
+on:
+  push:
+    branches: ['**']
+    paths-ignore: ['docs/**', '**/*.md']
+  pull_request:
+    paths-ignore: ['docs/**', '**/*.md']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  actual-openssh:
+    name: Actual Windows OpenSSH and original remote processes
+    runs-on: windows-2025
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-build
+      - name: SSH ownership and integration lab unit tests
+        shell: pwsh
+        run: |
+          python -B -m unittest discover -s scripts -p "test_windows_ssh*.py" -v
+          exit $LASTEXITCODE
+      - name: Build exact native SSH test
+        shell: pwsh
+        run: |
+          $metadata = Join-Path $env:RUNNER_TEMP 'windows-ssh-test-build.jsonl'
+          cargo test --locked -p keelshell-session --test windows_openssh_monitor --no-run --message-format=json-render-diagnostics > $metadata
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $binaries = @(Get-Content -LiteralPath $metadata | ForEach-Object {
+            $item = $_ | ConvertFrom-Json
+            if ($item.reason -eq 'compiler-artifact' -and $item.profile.test -eq $true -and
+                $item.target.name -ceq 'windows_openssh_monitor' -and $item.executable) {
+              $item.executable
+            }
+          })
+          if ($binaries.Count -ne 1) { throw 'Exactly one native SSH test binary is required' }
+          "KEELSHELL_WINDOWS_SSH_TEST_BINARY=$($binaries[0])" >> $env:GITHUB_ENV
+      - name: Pinned authentication, production collectors, independent APIs and process terminal proof
+        shell: pwsh
+        run: |
+          python -B scripts/windows_monitor_ssh.py --source "$env:GITHUB_SHA" --test-binary "$env:KEELSHELL_WINDOWS_SSH_TEST_BINARY" --seconds 240 --output "$env:RUNNER_TEMP\keelshell-windows-openssh-live"
+          # Missing prerequisites or incomplete original-object evidence is nonzero HOLD.
+          exit $LASTEXITCODE
+      - name: Preserve evidence excluding private keys and private client configuration
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: windows-openssh-monitor-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/keelshell-windows-openssh-live/
+          if-no-files-found: warn
+          retention-days: 7

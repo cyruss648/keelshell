@@ -44,6 +44,11 @@ CPU 曲线复用同一份已验证的当前点，不增加轮询。暂停、断�
 
 ## 验证边界
 
+当前正在补充独立的真实 OpenSSH 联调工作流：隔离回环 sshd、固定主机指纹、
+公开 Rust SSH／监控接口、独立 Win32 对照及采集进程自然终态。
+工装已经实现，尚未取得本批 Windows 原生执行结果；
+见[本批记录](../testing/records/2026-11-17-windows-openssh-monitor.md)。
+
 2026-11-17 精确工程 `5d2df2f` 的 Windows Server2025 AMD64 hosted 验证已通过
 生产采集、独立 Win32 对照、五类 cmd／PowerShell 原对象自然终态和认证路由 replay。
 同一工程的Windows／macOS／Ubuntu完整质量门禁均成功，普通Rust分别3394／3407／3400通过、

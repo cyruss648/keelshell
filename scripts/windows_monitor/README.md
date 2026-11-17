@@ -54,6 +54,42 @@ covering Windows OpenSSH token/broker descendants, not merely channel closure.
 Private key material stays outside the uploaded output directory and is
 removed before the final receipt is written.
 
+The separate live gate is `windows_monitor_ssh.py`. On a native Windows host,
+compile the ignored `windows_openssh_monitor` Rust integration target and pass
+the exact executable reported by Cargo:
+
+```powershell
+python -B scripts/windows_monitor_ssh.py `
+  --source <clean-40-character-Git-commit> `
+  --test-binary <Cargo-reported-windows_openssh_monitor-executable> `
+  --seconds 240 --output <new-evidence-directory>
+```
+
+This opt-in gate starts only its own loopback sshd with a protected temporary
+key directory. It preserves the installed default shell and uses the public
+Rust SSH and monitor APIs. A wrong-pin rejection precedes pinned authentication.
+Resources, processes and sockets are collected once each, then compared with
+the owned dual-stack fixture and independent Win32 readings. Missing native
+tools or incomplete evidence cannot become a success.
+
+`windows_monitor/debug_job.py` admits inherited debug processes before their
+first instruction. Each admission retains the original object and binds its
+PID, creation time, image and command line before the first continue. The live
+gate requires the four source-exact production PowerShell operations to exit
+naturally with code zero. Client disconnect and channel EOF alone cannot prove
+this. It closes admission before stopping its server and checks the final
+original-object census, Job, debug connections, pipes and owned handles.
+Cleanup-induced exits cannot replace natural collector exits. Unexplained
+external broker descendants remain HOLD.
+
+The live gate is implemented but has not yet completed native Windows
+execution in this development batch. Its structured Rust report and independent
+API evidence, original-process admissions and cleanup receipts have separate
+files. Private keys and the client configuration stay outside the artifact
+directory. `windows-monitor-ssh.yml` runs this live gate against the exact
+committed source and always preserves its output; it does not replace or
+upgrade the prerequisite-only `--mode ssh` command above.
+
 `windows-monitor.yml` has separate direct-API and isolated-SSH jobs on
 `windows-2025`. Both use the existing setup action. The SSH job deliberately
 reports HOLD as a nonzero result. Both always upload their own evidence.
