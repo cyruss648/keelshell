@@ -1,0 +1,17 @@
+{
+  "members": 80,
+  "bytes": 2530841,
+  "sha256": "c8f4f9d3b8d988bd4a41ed4a6767f1890e33133d57f963ea78c3f24e829180e2",
+  "engineering_source": "39d9041f350e30788b39121959d2ae7f7efea043",
+  "engineering_inputs": 777,
+  "exact_source_blobs_match": true,
+  "delivery_commit": null,
+  "raw_capture_pairs": 10,
+  "production_changes": 0,
+  "independent_final_assertions": 907,
+  "first_client_deadline_failure_preserved": true,
+  "second_client_read_only_calls": 3,
+  "file_proposal": "rejected; entire original unchanged",
+  "normal_app_exit": "0/reaped",
+  "boundary": "Observed bidirectional content movement using CUA up/down labels; direction mapping cause UNKNOWN. Physical input, compact native size, full GUI matrix and release unverified."
+}

@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "python3",
+    "-B",
+    "docs/testing/records/2026-11-17-mcp-review-scroll-evidence/wheel-diagnosis/verify.py",
+    "--bind-source"
+  ],
+  "cwd": "/Users/hdh/.codex/worktrees/editor-unicode-codec-20261114/keelshell",
+  "pid": 18723,
+  "started_at_utc": "2026-11-17T10:06:13.015689+00:00",
+  "completed_at_utc": "2026-11-17T10:06:13.176843+00:00",
+  "exit_code": 0,
+  "timed_out": false,
+  "reaped": true,
+  "duration_seconds": 0.161015
+}

@@ -1,0 +1,521 @@
+{
+  "source": "39d9041f350e30788b39121959d2ae7f7efea043",
+  "members": 80,
+  "logical_bytes": 4987390,
+  "bytes": 2530841,
+  "sha256": "c8f4f9d3b8d988bd4a41ed4a6767f1890e33133d57f963ea78c3f24e829180e2",
+  "files": [
+    {
+      "member": "probe/Containerfile",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/Containerfile",
+      "bytes": 218,
+      "sha256": "fa3dd37162fad60fe7609c25181071a08f21a926b714926e9724939fbe873346"
+    },
+    {
+      "member": "probe/captures/01-pending-before-wheel.ax.txt",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/captures/01-pending-before-wheel.ax.txt",
+      "bytes": 1140,
+      "sha256": "208aad519e8154dc261218c87e5443eb9bf4e553ef94c64f390381c1f6834bfc"
+    },
+    {
+      "member": "probe/captures/01-pending-before-wheel.jpg",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/captures/01-pending-before-wheel.jpg",
+      "bytes": 436932,
+      "sha256": "d3383d993021803e14e5073fed4339ee7ad894dfa97b7e55e8db21d852982df9"
+    },
+    {
+      "member": "probe/captures/02-coordinate-down-one-page.ax.txt",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/captures/02-coordinate-down-one-page.ax.txt",
+      "bytes": 1140,
+      "sha256": "208aad519e8154dc261218c87e5443eb9bf4e553ef94c64f390381c1f6834bfc"
+    },
+    {
+      "member": "probe/captures/02-coordinate-down-one-page.jpg",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/captures/02-coordinate-down-one-page.jpg",
+      "bytes": 437062,
+      "sha256": "4b3487438b1f9a2913212da6b149a8a4b96c26272a823ce742c67f5ac0e98357"
+    },
+    {
+      "member": "probe/captures/03-coordinate-up-one-page.ax.txt",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/captures/03-coordinate-up-one-page.ax.txt",
+      "bytes": 1140,
+      "sha256": "208aad519e8154dc261218c87e5443eb9bf4e553ef94c64f390381c1f6834bfc"
+    },
+    {
+      "member": "probe/captures/03-coordinate-up-one-page.jpg",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/captures/03-coordinate-up-one-page.jpg",
+      "bytes": 403159,
+      "sha256": "36ee901bb61ffb9b855086f38aeacba1ad25512f9d128f069b2fc9d07bae4228"
+    },
+    {
+      "member": "probe/captures/04-coordinate-down-returns-top.ax.txt",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/captures/04-coordinate-down-returns-top.ax.txt",
+      "bytes": 1140,
+      "sha256": "208aad519e8154dc261218c87e5443eb9bf4e553ef94c64f390381c1f6834bfc"
+    },
+    {
+      "member": "probe/captures/04-coordinate-down-returns-top.jpg",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/captures/04-coordinate-down-returns-top.jpg",
+      "bytes": 437062,
+      "sha256": "4b3487438b1f9a2913212da6b149a8a4b96c26272a823ce742c67f5ac0e98357"
+    },
+    {
+      "member": "probe/captures/05-diff-top-entered-via-wheel.ax.txt",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/captures/05-diff-top-entered-via-wheel.ax.txt",
+      "bytes": 539,
+      "sha256": "976a6fb6d4b9406e5b267bd811f34e489a1fe09877127f9af424661bd08d0ea9"
+    },
+    {
+      "member": "probe/captures/05-diff-top-entered-via-wheel.jpg",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/captures/05-diff-top-entered-via-wheel.jpg",
+      "bytes": 453171,
+      "sha256": "adc58bf643dbd60d3679827a761e5b3088c74bb340107bb96109a866462f9501"
+    },
+    {
+      "member": "probe/captures/06-diff-end-with-wheel-up.ax.txt",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/captures/06-diff-end-with-wheel-up.ax.txt",
+      "bytes": 539,
+      "sha256": "976a6fb6d4b9406e5b267bd811f34e489a1fe09877127f9af424661bd08d0ea9"
+    },
+    {
+      "member": "probe/captures/06-diff-end-with-wheel-up.jpg",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/captures/06-diff-end-with-wheel-up.jpg",
+      "bytes": 456543,
+      "sha256": "1d62705f14791cc8e84ea5c0c30b701cce9aa5431502eebeff28b879d852f4fc"
+    },
+    {
+      "member": "probe/captures/07-diff-top-with-wheel-down.ax.txt",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/captures/07-diff-top-with-wheel-down.ax.txt",
+      "bytes": 539,
+      "sha256": "976a6fb6d4b9406e5b267bd811f34e489a1fe09877127f9af424661bd08d0ea9"
+    },
+    {
+      "member": "probe/captures/07-diff-top-with-wheel-down.jpg",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/captures/07-diff-top-with-wheel-down.jpg",
+      "bytes": 453153,
+      "sha256": "72de8cd9ba7197550626cf6f539971c1f403936bee3f7eaf925f1c6d2e871cce"
+    },
+    {
+      "member": "probe/captures/08-file-proposal-rejected.ax.txt",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/captures/08-file-proposal-rejected.ax.txt",
+      "bytes": 1076,
+      "sha256": "4c76c74ebdd522ddf9a841a23b64656abdd5152788a6adbbf1b852113614b66d"
+    },
+    {
+      "member": "probe/captures/08-file-proposal-rejected.jpg",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/captures/08-file-proposal-rejected.jpg",
+      "bytes": 408840,
+      "sha256": "a13152c5c6772c3260cfdeabacde002518517e81c9f98a051ba6de2096cf41ef"
+    },
+    {
+      "member": "probe/captures/09-all-grants-revoked.ax.txt",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/captures/09-all-grants-revoked.ax.txt",
+      "bytes": 1071,
+      "sha256": "da2fd82bd5ee5023a52d70dde504c7b3d8c0c7a34a6a19c6ec7db48e0f15841d"
+    },
+    {
+      "member": "probe/captures/09-all-grants-revoked.jpg",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/captures/09-all-grants-revoked.jpg",
+      "bytes": 387810,
+      "sha256": "773cc64ab9ea394cbfa3c026b93a82174fb46d5ee0cfece735b30c6e13bec53f"
+    },
+    {
+      "member": "probe/captures/10-owned-app-close-review.ax.txt",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/captures/10-owned-app-close-review.ax.txt",
+      "bytes": 432,
+      "sha256": "31021c31f0d36629ba8f1963919366502d3059f0423c52bc6daab388cba5a19f"
+    },
+    {
+      "member": "probe/captures/10-owned-app-close-review.jpg",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/captures/10-owned-app-close-review.jpg",
+      "bytes": 181844,
+      "sha256": "0fb9c2906fde89e129718c97949facc654817c03fc11b9a3d8bd5c103a470d43"
+    },
+    {
+      "member": "probe/cleanup_resources.py",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/cleanup_resources.py",
+      "bytes": 2759,
+      "sha256": "3d20a387e8c63f236609738febbf74265abea8e9f8901d5b5b5f969cd73c53ab"
+    },
+    {
+      "member": "probe/container-ready.jsonl",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/container-ready.jsonl",
+      "bytes": 83,
+      "sha256": "1bbf50da87e24f3168767374a11348bb86ce75019b868936abda4b9173437f18"
+    },
+    {
+      "member": "probe/continue-after-file-review",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/continue-after-file-review",
+      "bytes": 104,
+      "sha256": "0b476fe4ddde0cee7f25618753780abf8c0f9bfc3d09063415af5df772e06ec5"
+    },
+    {
+      "member": "probe/final-fixture-cleanup.json",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/final-fixture-cleanup.json",
+      "bytes": 30182,
+      "sha256": "f3bc38bbfaa1be80affe86648a5f5cc11d8ecbf7885eb527aa4df51ff0a4b5d6"
+    },
+    {
+      "member": "probe/fixture-cleanup-r1/command.log",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/fixture-cleanup-r1/command.log",
+      "bytes": 74,
+      "sha256": "b6db3e6d2ecb0801fd87dd86c1446cdb971fc6f3481355b0ec911223ee9d21d6"
+    },
+    {
+      "member": "probe/fixture-cleanup-r1/result.json",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/fixture-cleanup-r1/result.json",
+      "bytes": 447,
+      "sha256": "f0ad7be2accba3d3e7515b04ae13dc53a7560d8837270b7fca578b4d89bd4493"
+    },
+    {
+      "member": "probe/fixture-setup-r1/command.log",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/fixture-setup-r1/command.log",
+      "bytes": 337,
+      "sha256": "e1a89c7732482915ea94d93d4eae783a7b6802f85bbe1aa063e590997d0621bf"
+    },
+    {
+      "member": "probe/fixture-setup-r1/result.json",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/fixture-setup-r1/result.json",
+      "bytes": 401,
+      "sha256": "1dcc245b155aef374cb8c75b0fc7999a7b79b82203d0db762197aa4094528032"
+    },
+    {
+      "member": "probe/image-build-r1/command.log",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/image-build-r1/command.log",
+      "bytes": 631,
+      "sha256": "0dbf4df99e0d55dd0c8d53dccdde59ac76b9a4ee1adc394652748e8de55b190a"
+    },
+    {
+      "member": "probe/image-build-r1/result.json",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/image-build-r1/result.json",
+      "bytes": 840,
+      "sha256": "b9b9f423acd317c3137ecd8ad68d6848b28e818029a4dc7d584162257ed9409e"
+    },
+    {
+      "member": "probe/image-id",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/image-id",
+      "bytes": 71,
+      "sha256": "5041b757a52ffc773d834fa43d981a8f12d0751fea6e7dfe4b610a342f9b8b76"
+    },
+    {
+      "member": "probe/mcp-file-proposal-pending.json",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/mcp-file-proposal-pending.json",
+      "bytes": 638,
+      "sha256": "68916d2dd80a2c372b7efe6e890ed1cf9e6aadb358961b891fd39cfc1dda2da3"
+    },
+    {
+      "member": "probe/mcp-file-rejected-readback-r2.json",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/mcp-file-rejected-readback-r2.json",
+      "bytes": 743,
+      "sha256": "bfb6c737341e8b0bf86720e9932487e49523c7e5890ddb3805e21783e238f602"
+    },
+    {
+      "member": "probe/mcp-native-client-result.json",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/mcp-native-client-result.json",
+      "bytes": 336,
+      "sha256": "e3b8c9b9d421a145342c774477113001f9bba4e318bc769030909cc93a240919"
+    },
+    {
+      "member": "probe/mcp-native-readback-r2-result.json",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/mcp-native-readback-r2-result.json",
+      "bytes": 679,
+      "sha256": "84bdac7f216f83df2934aefa72ca13fc8526bf1ceccee3b2697aa3a4f02b5dd2"
+    },
+    {
+      "member": "probe/mcp_native_client.py",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/mcp_native_client.py",
+      "bytes": 7363,
+      "sha256": "0fa0adf4206e7fa5e03af472f8918b08779d0c222d9b25cfc82fef1aa56ac922"
+    },
+    {
+      "member": "probe/mcp_readback_only.py",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/mcp_readback_only.py",
+      "bytes": 6080,
+      "sha256": "e0f0829270e1833773b84af7fb831f06419e8639ade63df8e985fd68f6bf9bff"
+    },
+    {
+      "member": "probe/native-app-r1/command.log",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/native-app-r1/command.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "probe/native-app-r1/result.json",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/native-app-r1/result.json",
+      "bytes": 574,
+      "sha256": "ed41352863f95e1ecccceb19be2edf134503a828dd39757d61208e230c68801a"
+    },
+    {
+      "member": "probe/native-client-r1/command.log",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/native-client-r1/command.log",
+      "bytes": 1208,
+      "sha256": "48c0a05993e8113bc357534687c1c479e836b1f429970e6f45236120b9db1176"
+    },
+    {
+      "member": "probe/native-client-r1/result.json",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/native-client-r1/result.json",
+      "bytes": 415,
+      "sha256": "59c3a4a440b1f990027e960e7dbd2e6dbe93bb9de8c78cc4ff03ca103907182a"
+    },
+    {
+      "member": "probe/native-readback-r2/command.log",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/native-readback-r2/command.log",
+      "bytes": 140,
+      "sha256": "92cc99e7072dc3038f64c3549ded0fc81b911d835b468f406da60355a9f636ce"
+    },
+    {
+      "member": "probe/native-readback-r2/result.json",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/native-readback-r2/result.json",
+      "bytes": 413,
+      "sha256": "fa2efcf9c9ba80848b61d47aa5572f4af6c3d8299131ed8fd7b819c029b3a06e"
+    },
+    {
+      "member": "probe/native-wheel-actions.json",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/native-wheel-actions.json",
+      "bytes": 3895,
+      "sha256": "3ac9441cae326ac689b7cba043f4c373fa92d830649cfb8f5cdee24b1b838967"
+    },
+    {
+      "member": "probe/normal-build-input-binding.json",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/normal-build-input-binding.json",
+      "bytes": 167005,
+      "sha256": "e2fe545027a40e54526ce695ddb6e897e0f5d6b8a97e4e930a914a867973184f"
+    },
+    {
+      "member": "probe/owned-resources.json",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/owned-resources.json",
+      "bytes": 935,
+      "sha256": "bd6b7cf4b98a39835d17f9d659639135842af36f32118bd45a917ffbe00d76a2"
+    },
+    {
+      "member": "probe/r3-container-create.stderr",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/r3-container-create.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "probe/r3-container-create.stdout",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/r3-container-create.stdout",
+      "bytes": 65,
+      "sha256": "df236e7eae18b250430e5e5c8d2a57cbf6e4231d429837349d8576ed82374796"
+    },
+    {
+      "member": "probe/r3-container-inspect.stderr",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/r3-container-inspect.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "probe/r3-container-inspect.stdout",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/r3-container-inspect.stdout",
+      "bytes": 14949,
+      "sha256": "db689a9784e46bcecdbfa574f4323601a1bd2092512d2b0bb325ad951e3db20d"
+    },
+    {
+      "member": "probe/r3-container-start.stderr",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/r3-container-start.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "probe/r3-container-start.stdout",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/r3-container-start.stdout",
+      "bytes": 65,
+      "sha256": "df236e7eae18b250430e5e5c8d2a57cbf6e4231d429837349d8576ed82374796"
+    },
+    {
+      "member": "probe/r3-copy-client-key.stderr",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/r3-copy-client-key.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "probe/r3-copy-client-key.stdout",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/r3-copy-client-key.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "probe/r3-host-fingerprint.stderr",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/r3-host-fingerprint.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "probe/r3-host-fingerprint.stdout",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/r3-host-fingerprint.stdout",
+      "bytes": 76,
+      "sha256": "57fe3055dd9913dba05ee19eb97039f80a43621aabd142cce8d87514670222e3"
+    },
+    {
+      "member": "probe/r3-network-create-r2.stderr",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/r3-network-create-r2.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "probe/r3-network-create-r2.stdout",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/r3-network-create-r2.stdout",
+      "bytes": 42,
+      "sha256": "329aa4c5d1881f4f680375cec4c7e2ff5d6590aed9002e9bb41aa7efae12effd"
+    },
+    {
+      "member": "probe/r3-network-inspect-r2.stderr",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/r3-network-inspect-r2.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "probe/r3-network-inspect-r2.stdout",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/r3-network-inspect-r2.stdout",
+      "bytes": 723,
+      "sha256": "fb264e177f2a01fc4791a2eadea49d8ef801fe4c98707963503b58b176c83ebf"
+    },
+    {
+      "member": "probe/r3-read-host-public-key.stderr",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/r3-read-host-public-key.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "probe/r3-read-host-public-key.stdout",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/r3-read-host-public-key.stdout",
+      "bytes": 82,
+      "sha256": "b48c295dfe86dba9dec50f650fbd2051a54c51a2e396c1ce23cfb2ca3b0f377b"
+    },
+    {
+      "member": "probe/r3-ssh-preflight.stderr",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/r3-ssh-preflight.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "probe/r3-ssh-preflight.stdout",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/r3-ssh-preflight.stdout",
+      "bytes": 113,
+      "sha256": "b00c4c3739ddb19df07a829d397ad4cb7d08d939e3c306f2b972dc6d5a8bc206"
+    },
+    {
+      "member": "probe/restored-helper-provenance.json",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/restored-helper-provenance.json",
+      "bytes": 942,
+      "sha256": "01a30c4d6f468dd3038314bf78eb747f3850728f14ac921f8730fe2a4332dbdc"
+    },
+    {
+      "member": "probe/run.py",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/run.py",
+      "bytes": 1720,
+      "sha256": "a04a95d4cb34450a37d19790a597f11c9e1417e8cc9d9fbd8efe7410353962fd"
+    },
+    {
+      "member": "probe/server.py",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/server.py",
+      "bytes": 3555,
+      "sha256": "ea51b72c951ee8c0c721e78077aef418271919d58275d07b8a33618174c3ffd7"
+    },
+    {
+      "member": "probe/setup-events.jsonl",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/setup-events.jsonl",
+      "bytes": 6226,
+      "sha256": "b28f382f5eda7884027dd51dc27090b940542aacfdba49d591000aa7a7398861"
+    },
+    {
+      "member": "probe/setup.py",
+      "source": "work/mcp-wheel-native-diagnosis-20261117/setup.py",
+      "bytes": 6672,
+      "sha256": "5d533e8c606da51bff1e77fcad430789495394df21e202bf75e656eb5c064daa"
+    },
+    {
+      "member": "review/binding-supplement.json",
+      "source": "work/mcp-wheel-native-review-20261117/binding-supplement.json",
+      "bytes": 101057,
+      "sha256": "fa640b3fe3a83554d7fe671c41eac60ba6318ef68748d81895ddb34ba19d0bc6"
+    },
+    {
+      "member": "review/checks-r1.json",
+      "source": "work/mcp-wheel-native-review-20261117/checks-r1.json",
+      "bytes": 151257,
+      "sha256": "5ab4d1c1c148d3a997a82fb56a305d7db16ec57d81dec95251d5649fc718ab1c"
+    },
+    {
+      "member": "review/checks-r3.json",
+      "source": "work/mcp-wheel-native-review-20261117/checks-r3.json",
+      "bytes": 156271,
+      "sha256": "d5baf9681243c2037443ea1ef5ec2a8f69b61f21d88ecf99f6acdc5342547fbf"
+    },
+    {
+      "member": "review/checks.json",
+      "source": "work/mcp-wheel-native-review-20261117/checks.json",
+      "bytes": 151257,
+      "sha256": "5ab4d1c1c148d3a997a82fb56a305d7db16ec57d81dec95251d5649fc718ab1c"
+    },
+    {
+      "member": "review/offline-r3/command.log",
+      "source": "work/mcp-wheel-native-review-20261117/offline-r3/command.log",
+      "bytes": 274,
+      "sha256": "9fb731bf19e1eae8bb887598bf4cf5864c9e026115d9b03f7084f472467dc6d6"
+    },
+    {
+      "member": "review/offline-r3/result.json",
+      "source": "work/mcp-wheel-native-review-20261117/offline-r3/result.json",
+      "bytes": 584,
+      "sha256": "c64fe8559caeb4825968664e7f5bc4ea4ca7297ba1b0a5f46bf5ad685f93b8e7"
+    },
+    {
+      "member": "review/report.md",
+      "source": "work/mcp-wheel-native-review-20261117/report.md",
+      "bytes": 20464,
+      "sha256": "07cb27df655bb64fd794fb8dc687c3b80ec114d2aaaaa5785f7b6eb3c486aca2"
+    },
+    {
+      "member": "review/review.json",
+      "source": "work/mcp-wheel-native-review-20261117/review.json",
+      "bytes": 37373,
+      "sha256": "33c73b07096bd10e99236be58da475c03dd6b952399dbc4391da4ca9d54af897"
+    },
+    {
+      "member": "review/verify_offline.py",
+      "source": "work/mcp-wheel-native-review-20261117/verify_offline.py",
+      "bytes": 24116,
+      "sha256": "71733819f37b31a8f340d8d617286c2d5147a96f53e7ebb3e0d71f985018134c"
+    },
+    {
+      "member": "review/verify_offline_r3.py",
+      "source": "work/mcp-wheel-native-review-20261117/verify_offline_r3.py",
+      "bytes": 18604,
+      "sha256": "0cc43de97549df657062fdc95f1c3aec225a066d9303ae7775135103e1450ee3"
+    }
+  ],
+  "exclusions": [
+    {
+      "source": "work/mcp-wheel-native-diagnosis-20261117/runtime-r1/state.json",
+      "bytes": 1332,
+      "sha256": "ed4a0e19faf1d5f138abd5a89ba46053b4ecd91d600e376fda48847e176d5052",
+      "reason": "Isolated runtime/profile metadata; excluded from publication"
+    },
+    {
+      "source": "work/mcp-wheel-native-diagnosis-20261117/runtime-r1/state.json.backups/0e387bed-6835-43ae-8971-dad1fe5d2a5e.json",
+      "bytes": 901,
+      "sha256": "9f01bcd0abd7c8897b1826edff901d4c0503cdd31dd767646b994521072994ce",
+      "reason": "Isolated runtime/profile metadata; excluded from publication"
+    },
+    {
+      "source": "work/mcp-wheel-native-diagnosis-20261117/runtime-r1/state.json.backups/630108f1-477d-43d0-9dc4-3e4cedeeb72f.json",
+      "bytes": 973,
+      "sha256": "6ab88a65b9f09a3d122ca116829f5ec01df0ea00b2646fb8534eab5f10274ca1",
+      "reason": "Isolated runtime/profile metadata; excluded from publication"
+    },
+    {
+      "source": "work/mcp-wheel-native-diagnosis-20261117/runtime-r1/state.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "reason": "Isolated runtime/profile metadata; excluded from publication"
+    },
+    {
+      "source": "work/mcp-wheel-native-diagnosis-20261117/runtime-r1/transfer-recovery.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "reason": "Isolated runtime/profile metadata; excluded from publication"
+    }
+  ]
+}
