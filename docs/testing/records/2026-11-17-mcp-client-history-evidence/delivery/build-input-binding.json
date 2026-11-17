@@ -1,0 +1,12 @@
+{
+  "observed_at_utc": "2026-11-17T06:23:17.369290+00:00",
+  "source": "f910e0013832643f09b112b08443675a956d5551",
+  "engineering_inputs": 777,
+  "aggregate_sha256": "b34aedb8d859f1ca0b97934b707c71de8200b3ffd8a53ab602d323809932553e",
+  "all_working_engineering_bytes_match_frozen_candidate": true,
+  "git_binding": "verify_git_binding.py previously bound these exact frozen rows to f910e001; source-readback.json was clean before the normal build",
+  "native_release_build": "parent/normal-release-build-r1/result.json in delivery originals",
+  "native_package": "parent/normal-package-manifest.json in delivery originals",
+  "single_target_continuous_checkout": true,
+  "boundary": "Post-build source-input and recorded build/package provenance, not a reproducible independent rebuild or native mutation acceptance."
+}

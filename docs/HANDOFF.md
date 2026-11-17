@@ -22,8 +22,22 @@ MCP 客户端模板与未知记录增量的实现与限定工程验证完成，�
 最终完整门禁`0/reaped/815.372858s`：Rust3455/0/68 ignored、15rustdoc、
 Python主526 run/3 skipped，fmt/严格Clippy/依赖政策/三个controller通过。
 96普通套件逐名库存及二进制摘要相等；首轮库存工装不识别两条内嵌Python前缀，
-已修解析而未重跑产品测试，原失败保留。精确提交/推送/Git绑定随后记录。
-本批再次实际观察为锁屏、GUI操作／截图0，没有用旧包代签。
+已修解析而未重跑产品测试，原失败保留。
+工程`f910e0013832643f09b112b08443675a956d5551`已普通提交/推送，
+local/tracking/remote一致、读回干净；777新输入/769旧CI输入和574成员Git绑定通过。
+两处本批原件副本按字节回收，260文件/3,457,053逻辑字节，target与旧包不变。
+首轮锁屏操作/截图0保留；随后桌面可用，新建f910正常arm64/minos15.0包，
+实际单窗空库取得11组JPEG/AX，三推荐主题各中文/英文MCP空授权面板可见，
+复制/临时配置/授权/清理始终disabled，没有原生复制或未知动作业务。
+原进程`0/reaped/340.564409s`；Boole实际查看全部11图，限定ship、
+P0–P3全0，独立347原件检查/13报告读回通过并关闭，完整原生矩阵仍开放。
+交付及原图见[90成员原件](testing/records/2026-11-17-mcp-client-history-evidence/delivery/README.md)。
+当前正常新包`work/mcp-client-native-20261117/package-r1/KeelShell.app`，
+app SHA`70045d6ff4f278a8a9df8bea075dcaa6bb65b3304895924101af588c90c2f110`，
+没有安装；首轮旧包仍单独保留，不再当作本批入口。
+UTC06:20:45新Quality44026933453的macOS已success，Windows/Ubuntu仍进行中；
+Windows API44026933510/SSH44026933475为API状态success，
+尚不由状态代签本批三平台原件。
 
 本地转发的原 SSH 生命周期增量已完成实现／本机验证，基线 `660645f`，见
 [ADR0159](adr/0159-local-forward-transport-lifetime.md)和
@@ -48,13 +62,16 @@ local／tracking／remote三方一致；769输入和478归档成员精确Git绑�
 新Windows API44020265273及SSH44020265248、Quality44020265369均已completed/success；
 Windows／Ubuntu／macOS普通Rust3422／3428／3435通过、0失败，各14rustdoc。
 Python主526 run、skip53／3／3；7个原始ZIP、172成员、4个artifact digest相等，
-77项离线检查通过、0差异，独立终态原件复核另记。isolated-SSH skipped、
+77项父级离线检查通过、0差异；新非作者Heisenberg独立13,543项通过、限定批准并关闭。
+P0/P1/P2为0、历史checksum P3一项已由外层完整manifest与说明纠正关闭，
+未关闭P0–P3全0，原工装失败和9成员复核原件保留。isolated-SSH skipped、
 native_gui=UNRUN和历史HOLD／cleanup非全exit0保留，不扩大为原生或发行。
 769工程输入r2 aggregate
 `83e2e1b00ba4d373a407030c79538f8a5039347931236344315ad8b70844a5b7`；
 唯一target连续归属本checkout，不clean、不并行Cargo。
 uuid锁已从1.29.2更新1.29.3，声明仍1.29；新完整官方快照37包／113声明全部通过，
-取代前批的最新性UNKNOWN，不改写其registry失败。当前桌面又锁定，GUI操作／截图0。
+取代前批的最新性UNKNOWN，不改写其registry失败。该生命周期批当时桌面锁定，
+GUI操作／截图0；后续新MCP包的解锁原生观察见本页顶部，不改写当时事实。
 
 独立Zmodem peer交叉联调当前候选已完成实现与源码复核，基线`ac7ec43`，见
 [ADR0158](adr/0158-independent-zmodem-peer-matrix.md)与
@@ -212,7 +229,9 @@ Python 主 discovery 各 293 run，skipped 为 34／2／2；包装与 helper 独
 `CARGO_BUILD_JOBS=2`、`MACOSX_DEPLOYMENT_TARGET=15.0`。
 归属为当前 checkout，连续使用不 clean；切换源码归属先依
 [共享 target 合同](testing/SHARED_TARGET.md)失效本项目产物并核对编译库存。
-当前正常包为 `work/windows-monitor-delivery-20261117/package-r2/KeelShell.app`，
+当前本批正常包为 `work/mcp-client-native-20261117/package-r1/KeelShell.app`，
+精确f910e001，已在隔离空目录正常运行并退出，11组原图范围见本页顶部，未安装。
+前批包 `work/windows-monitor-delivery-20261117/package-r2/KeelShell.app` 仅保留为旧验证原件，
 manifest 绑定精确工程5d2df2f，五个应用文件与提交前包逐字节相等，
 arm64／minos15.0 结构检查通过，本次已在独立目录运行并正常退出，未安装。
 本批CI／API原件从上述[精确CI封存](testing/records/2026-11-17-windows-read-only-monitor-evidence/ci-completion/README.md)读取，
@@ -226,6 +245,8 @@ CI／reviewer和交付父目录中的工作副本仅供Git绑定后回收，不�
 本轮所有作者／reviewer 均已实际关闭，正常包六文件摘要及 target 目录身份前后不变。
 target 和其他任务资源保留。
 旧包与旧路径只描述历史，不把已回收路径当当前入口。
+本批MCP源码/原图的展开维护入口已转至Git归档；最终docs-only推送及其核对/回收
+由`work/mcp-client-finalize-20261117/`保留小型实际回执，正常f910包和唯一target保留。
 
 本次真实Windows SSH／工具栏文档`c088062baacc0c44ccfbc98de2a817fbc2a62869`
 已普通推送并三方SHA读回一致、工作区干净。

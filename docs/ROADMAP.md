@@ -27,9 +27,17 @@ MCP接入与提案记录增量的实现与限定工程验证完成：纯Codex／
 独立预编译62项通过并关闭。最终完整门禁通过Rust3455/0/68 ignored、
 15rustdoc及Python主526 run/3 skipped，96普通库存逐名和二进制摘要相等。
 原编译／首提案布局／库存工装解析失败保留；
-本批原生锁屏，完整供应商客户端／三平台原生仍开放。
+首轮原生锁屏保留；随后f910新正常包在隔离空目录取得11组原JPEG/AX，
+三推荐主题各双语的MCP空授权面板与客户端选中样式可见，原进程exit0/reaped；
+复制模板始终disabled，没有新原生复制/未知动作闭环。
+完整供应商客户端／三平台原生仍开放。
 从[本批记录](testing/records/2026-11-17-mcp-client-history.md)接续精确交付，
-不重复未变工程的完整门禁。
+不重复未变工程的完整门禁。工程f910e001已普通推送、三方一致，
+777新输入/769旧输入/574成员Git绑定通过；原图非作者Boole实际查看11张，
+限定ship、P0–P3全0，独立347检查/13报告读回通过并关闭；
+90成员交付原件已封存。本批Quality44026933453的macOS已success、
+Windows/Ubuntu仍进行中，
+两Windows工作流为API状态success，新三平台终态单独验。
 
 本地转发的原SSH生命周期增量已整合，见[ADR0159](adr/0159-local-forward-transport-lifetime.md)及
 [本批记录](testing/records/2026-11-17-tunnel-transport-lifetime.md)。
@@ -47,6 +55,8 @@ Windows／Ubuntu／macOS普通Rust3422／3428／3435通过、0失败，各14rust
 Python主526 run、skip53／3／3，7原始ZIP／172成员和4个digest已取得核对，
 见[精确CI](testing/records/2026-11-17-tunnel-transport-lifetime-evidence/ci-completion/README.md)。
 API isolated-SSH skipped、native_gui=UNRUN与历史HOLD／清理exit125保留；
+新非作者Heisenberg离线13,543项通过、限定批准且关闭，
+checksum历史P3已由外层完整原件说明纠正，未关闭P0–P3全0；
 不代签本批新MCP源码、原生或发行。
 uuid锁更新1.29.3后，完整官方直接依赖新快照37包／113声明全部通过。
 原生再次锁屏、GUI操作／截图0；三平台原生及完整隧道阶段继续开放。

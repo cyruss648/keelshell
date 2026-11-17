@@ -1,0 +1,31 @@
+{
+  "source": "f910e0013832643f09b112b08443675a956d5551",
+  "pixel_dimensions": {
+    "width": 2880,
+    "height": 1866
+  },
+  "raw_cua_bytes": true,
+  "files": [
+    {
+      "file": "frost-light-en.jpg",
+      "capture": "03-frost-light-en-claude-mcp.jpg",
+      "label": "Frost Light / English / Claude Code selected",
+      "bytes": 326612,
+      "sha256": "17788d015b155fda48d84f1a72ddf9b4ba63c4ac6ee76168812cc90de3efbde6"
+    },
+    {
+      "file": "graphite-dark-en.jpg",
+      "capture": "06-graphite-dark-en-mcp.jpg",
+      "label": "Graphite Dark / English / Codex CLI selected",
+      "bytes": 309168,
+      "sha256": "b8759a4cb60f9950d7d98ef515df4accf1a77cac44011208eb3531cb0fd451bf"
+    },
+    {
+      "file": "lavender-light-en.jpg",
+      "capture": "09-lavender-light-en-codex-mcp.jpg",
+      "label": "Lavender Light / English / Codex CLI selected",
+      "bytes": 324460,
+      "sha256": "bda248b9231f15b0decd1c57accf0dfdf0399cb750b21d03f29f7afde76ad471"
+    }
+  ]
+}

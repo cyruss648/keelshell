@@ -19,11 +19,19 @@ failures remain recorded. A new non-author approved the frozen SOURCE + FUNCTION
 scope with zero P0-P3 findings and independently executed 62 prebuilt tests.
 The final gate passed 3,455 ordinary Rust tests and 15 rustdoc tests; Python main
 ran 526 tests with three skips. All 96 ordinary inventories and binary digests
-match, and the 777 engineering inputs remain unchanged. Native desktop was
-locked during this batch, with zero GUI actions and
-screenshots; installed-client loading and full vendor business workflows remain
+match, and the 777 engineering inputs remain unchanged. Source `f910e001` is
+pushed with matching local/tracking/remote SHAs and exact Git-bound originals.
+The first native attempt was locked with zero actions/screenshots; the subsequent
+new normal package produced 11 real JPEG/AX pairs in one isolated empty-library
+window, including each recommended theme in Chinese and English. The original
+owned process exited zero and was reaped. Copy-template/current-launch/grant/
+history buttons remained disabled without an active grant, so native copy success
+and the unknown-action flow are not established. Installed-client loading and full vendor business workflows remain
 open. See [client setup](EXTERNAL_MCP.md), [unknown history](MCP_ACTION_HISTORY.md)
 and the [exact batch record](../testing/records/2026-11-17-mcp-client-history.md).
+The new non-author visually inspected all 11 originals, approved only that visible
+subset with zero P0-P3 findings, and was closed. Independent evidence checks
+passed 347 cases plus 13 report-readback checks; no product or GUI was rerun.
 
 ## 2026-11-17: original transport lifetime for local forwarding
 
@@ -51,6 +59,10 @@ matching artifact digests. The API isolated-SSH job remains skipped and neither
 Windows artifact establishes native GUI acceptance. See the
 [lifecycle record](../testing/records/2026-11-17-tunnel-transport-lifetime.md).
 Windows real OpenSSH forwarding, native desktop and release acceptance remain open.
+An independent non-author approved only these old CI originals after 13,543
+offline checks. P0/P1/P2 were zero; one historical checksum-coverage P3 is
+explicitly corrected by the complete outer manifest and explanation, with zero
+open findings. The reviewer is closed; no local product tests or GUI were rerun.
 
 ## 2026-11-17: scoped native English toolbar observation
 

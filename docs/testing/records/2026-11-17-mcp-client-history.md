@@ -95,7 +95,50 @@ reviewer 工装最初的 raw-string/sentinel 解析失败和路径查找失败�
 
 ## 原生与客户端边界
 
-2026-11-17 本批 CUA inventory 返回 Mac 锁定且自动解锁未成功；
+2026-11-17 本批首轮 CUA inventory 返回 Mac 锁定且自动解锁未成功；
 GUI 操作和截图均为 0，没有启动旧包代签当前工程。
 纯模板、受控 loopback SSH/SFTP 和 headless 绘制不等于实际 Codex/Claude Code
 配置加载、八工具供应商业务或三平台原生验收。
+
+后续实际桌面已可用，使用精确已推送工程
+`f910e0013832643f09b112b08443675a956d5551` 新构建正常双程序包：
+release build `0/reaped/219.335732s`，打包 `0/reaped/0.147274s`，
+arm64/minos15.0 结构检查 `0/reaped/0.136847s`。
+app SHA-256 为
+`70045d6ff4f278a8a9df8bea075dcaa6bb65b3304895924101af588c90c2f110`；
+没有覆盖安装或复用旧包证明新代码。
+
+从新隔离空目录启动的原进程 PID34098，实际
+`0/reaped/340.564409s`，无超时；关闭审核显示 0 SSH/0 文件草稿。
+11 组原 JPEG/AX 均保留，真实像素 2880×1866，未缩放、转码或修改：
+初始霜白 System（实际深色）工作区；三套主题选择页；
+Frost Light、Graphite Dark、Lavender Light 各中文/英文的 MCP 空授权面板；
+客户端 Codex/Claude 的可见选中样式；Tab 后关闭按钮可见轮廓；关闭审核。
+AX 的 focused element 仍报告窗口，不能由轮廓代签完整焦点或辅助技术。
+Escape 实际回到工作区。一次截图重编号后使用旧 AX34 被拒，更新为实际 AX7
+后主题切换成功，原工装失败保留。
+
+本次没有活动 SSH 授权，复制模板、临时配置、清理和授权按钮保持禁用；
+没有点击复制、启动 MCP 或供应商，也没有未知动作模态和远端文件/命令动作。
+这些是原生入口、禁用状态和可见布局证据，不是原生复制成功或远端业务闭环。
+最小/紧凑尺寸、更多明暗组合、多窗口、IME/VoiceOver、Windows/Linux 和发行继续开放。
+新非作者的原图复核与交付回执从
+[本批交付原件](2026-11-17-mcp-client-history-evidence/delivery/README.md)接续。
+Boole 已实际查看全部 11 图，对可见子集限定 ship/APPROVE，P0–P3 全 0，
+独立原件审计347/347、报告读回13/13通过，并已关闭；
+没有 GUI 或产品重跑。其首轮辅助清单误计的工装失败保留。
+
+## 精确工程交付
+
+工程 `f910e0013832643f09b112b08443675a956d5551` 已普通提交/推送，
+local/tracking/remote 三方相同，读回时工作区干净。
+777 个新工程输入、769 个旧 CI 工程输入及两归档 574 成员精确 Git 绑定通过，
+`0/reaped/0.197138s`；不由 HEAD 相等或 Cargo 缓存代签。
+Git 绑定后按完整文件集及原字节核对回收父级/reviewer 两目录，
+260 文件/3,457,053 逻辑字节；唯一 target 目录身份及旧正常包六文件摘要相同。
+此后新增的正常 f910 包单独保留，维护入口见当前交接。
+
+本工程 Quality `44026933453` 和两个 Windows 工作流独立跟踪，
+不由旧 cdf1e171 的 CI 成功或本机门禁推断新三平台终态。
+UTC06:20:45 后次实际 API 快照为 macOS success、Ubuntu/Windows in_progress；
+两 Windows 工作流为 success，仍未下载和验收本批新原始测试/artifact。

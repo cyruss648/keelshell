@@ -1,0 +1,550 @@
+{
+  "schema_version": 1,
+  "members": 90,
+  "logical_bytes": 3729876,
+  "bytes": 2020794,
+  "sha256": "763e6eabc3bdc2e599f44423ea4f7f0cfcdf631eae4677b526925594a45b37b9",
+  "excluded": [],
+  "files": [
+    {
+      "member": "parent/archive_evidence.py",
+      "source": "work/mcp-client-delivery-20261117/archive_evidence.py",
+      "bytes": 3177,
+      "sha256": "53b9d35420469c4589e669970b6d085d68cff0be8c0c581230df12e7bdebbc10"
+    },
+    {
+      "member": "parent/ci-original-copy-cleanup-r1/command.log",
+      "source": "work/mcp-client-delivery-20261117/ci-original-copy-cleanup-r1/command.log",
+      "bytes": 3552,
+      "sha256": "071b348a783a3c8b5fe342b521e499ed4d51ab178139ab454e59906d3aa73309"
+    },
+    {
+      "member": "parent/ci-original-copy-cleanup-r1/result.json",
+      "source": "work/mcp-client-delivery-20261117/ci-original-copy-cleanup-r1/result.json",
+      "bytes": 737,
+      "sha256": "373d66cb3a7abb2f749891355f3a3f0acb41119fd2522a981ea5e5446d36718e"
+    },
+    {
+      "member": "parent/ci-original-copy-cleanup.json",
+      "source": "work/mcp-client-delivery-20261117/ci-original-copy-cleanup.json",
+      "bytes": 3926,
+      "sha256": "737f1a7cf8ec85acecf0805cf7cf363a56383ef030e7a5ee955c6e42afbada52"
+    },
+    {
+      "member": "parent/cleanup_sealed.py",
+      "source": "work/mcp-client-delivery-20261117/cleanup_sealed.py",
+      "bytes": 5073,
+      "sha256": "b68eb48bcf0f359004c272e45294243858f079ead9da9cecfc3356fe26bad39f"
+    },
+    {
+      "member": "parent/exact-git-binding-r1/command.log",
+      "source": "work/mcp-client-delivery-20261117/exact-git-binding-r1/command.log",
+      "bytes": 1027,
+      "sha256": "8b1ada31dc2b77b832e853ab7069e6275a613320d59f24ff2f1752ccbcfd0f50"
+    },
+    {
+      "member": "parent/exact-git-binding-r1/result.json",
+      "source": "work/mcp-client-delivery-20261117/exact-git-binding-r1/result.json",
+      "bytes": 496,
+      "sha256": "d8dec81ee491e0837e3cd17f8d896c287f03b5413c3ddfb67a60a35f0d1a7c23"
+    },
+    {
+      "member": "parent/launch_native.py",
+      "source": "work/mcp-client-delivery-20261117/launch_native.py",
+      "bytes": 2343,
+      "sha256": "a151211232d526c744d445dd0b32e08a150066b9cf3173457246914bf461462d"
+    },
+    {
+      "member": "parent/native-app-result.json",
+      "source": "work/mcp-client-delivery-20261117/native-app-result.json",
+      "bytes": 724,
+      "sha256": "b751f05afb999b0ef55e59f823b8f04c204b83fbe275ce062cb5858db4ca4495"
+    },
+    {
+      "member": "parent/native-app-start.json",
+      "source": "work/mcp-client-delivery-20261117/native-app-start.json",
+      "bytes": 574,
+      "sha256": "ca8d6bcf57307b39e2e1ebf6901794a54c608eb8b2fdd73b852ae1338b23ffc2"
+    },
+    {
+      "member": "parent/native-app.log",
+      "source": "work/mcp-client-delivery-20261117/native-app.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "parent/native-availability-r2.json",
+      "source": "work/mcp-client-delivery-20261117/native-availability-r2.json",
+      "bytes": 331,
+      "sha256": "a4311fbb65c7eb93b7794d55ad1c5155506309321d461b6d5458d06a55e87e9c"
+    },
+    {
+      "member": "parent/native-captures/01-frost-system-zh-workspace.ax.txt",
+      "source": "work/mcp-client-delivery-20261117/native-captures/01-frost-system-zh-workspace.ax.txt",
+      "bytes": 3299,
+      "sha256": "702a11bc0fbecc5be318bfab66c67fbcfd6cf2edf8ce5862c99409513afb9a7a"
+    },
+    {
+      "member": "parent/native-captures/01-frost-system-zh-workspace.jpg",
+      "source": "work/mcp-client-delivery-20261117/native-captures/01-frost-system-zh-workspace.jpg",
+      "bytes": 364974,
+      "sha256": "eee078ff45f668f0f5c103091093a67becfe1a8064dbb51156590706eae72828"
+    },
+    {
+      "member": "parent/native-captures/02-frost-system-zh-mcp.ax.txt",
+      "source": "work/mcp-client-delivery-20261117/native-captures/02-frost-system-zh-mcp.ax.txt",
+      "bytes": 1139,
+      "sha256": "4aeff39edb8f7f91ec9986bc9387f65acbd304c02cebc1d8847871df8108d149"
+    },
+    {
+      "member": "parent/native-captures/02-frost-system-zh-mcp.jpg",
+      "source": "work/mcp-client-delivery-20261117/native-captures/02-frost-system-zh-mcp.jpg",
+      "bytes": 277040,
+      "sha256": "9232ae33f9c781a9e170c869cb8d6322f47763c4c500c6a4e8333b199c6a807f"
+    },
+    {
+      "member": "parent/native-captures/03-frost-light-en-claude-mcp.ax.txt",
+      "source": "work/mcp-client-delivery-20261117/native-captures/03-frost-light-en-claude-mcp.ax.txt",
+      "bytes": 1169,
+      "sha256": "ab6166cfe174ee6eb81808d10505e1038d2f541ea742f17827c402564b20c744"
+    },
+    {
+      "member": "parent/native-captures/03-frost-light-en-claude-mcp.jpg",
+      "source": "work/mcp-client-delivery-20261117/native-captures/03-frost-light-en-claude-mcp.jpg",
+      "bytes": 326612,
+      "sha256": "17788d015b155fda48d84f1a72ddf9b4ba63c4ac6ee76168812cc90de3efbde6"
+    },
+    {
+      "member": "parent/native-captures/04-frost-light-en-codex-focus.ax.txt",
+      "source": "work/mcp-client-delivery-20261117/native-captures/04-frost-light-en-codex-focus.ax.txt",
+      "bytes": 1169,
+      "sha256": "ab6166cfe174ee6eb81808d10505e1038d2f541ea742f17827c402564b20c744"
+    },
+    {
+      "member": "parent/native-captures/04-frost-light-en-codex-focus.jpg",
+      "source": "work/mcp-client-delivery-20261117/native-captures/04-frost-light-en-codex-focus.jpg",
+      "bytes": 328036,
+      "sha256": "ca9513f8135a6f8e68d703d230735486441bf193d76125a530a2526fa70771bf"
+    },
+    {
+      "member": "parent/native-captures/05-themes-en-registry.ax.txt",
+      "source": "work/mcp-client-delivery-20261117/native-captures/05-themes-en-registry.ax.txt",
+      "bytes": 706,
+      "sha256": "27a8773b980bd39a1c2894aefd20ebfc94fc3ee89b92e96fbfc2382acb9af617"
+    },
+    {
+      "member": "parent/native-captures/05-themes-en-registry.jpg",
+      "source": "work/mcp-client-delivery-20261117/native-captures/05-themes-en-registry.jpg",
+      "bytes": 316979,
+      "sha256": "cbb55bc300628590324ca5a64f200d4cf81dab7ad3c8591d38ea6ca4f7f12198"
+    },
+    {
+      "member": "parent/native-captures/06-graphite-dark-en-mcp.ax.txt",
+      "source": "work/mcp-client-delivery-20261117/native-captures/06-graphite-dark-en-mcp.ax.txt",
+      "bytes": 1169,
+      "sha256": "ab6166cfe174ee6eb81808d10505e1038d2f541ea742f17827c402564b20c744"
+    },
+    {
+      "member": "parent/native-captures/06-graphite-dark-en-mcp.jpg",
+      "source": "work/mcp-client-delivery-20261117/native-captures/06-graphite-dark-en-mcp.jpg",
+      "bytes": 309168,
+      "sha256": "b8759a4cb60f9950d7d98ef515df4accf1a77cac44011208eb3531cb0fd451bf"
+    },
+    {
+      "member": "parent/native-captures/07-graphite-dark-zh-claude-mcp.ax.txt",
+      "source": "work/mcp-client-delivery-20261117/native-captures/07-graphite-dark-zh-claude-mcp.ax.txt",
+      "bytes": 1139,
+      "sha256": "4aeff39edb8f7f91ec9986bc9387f65acbd304c02cebc1d8847871df8108d149"
+    },
+    {
+      "member": "parent/native-captures/07-graphite-dark-zh-claude-mcp.jpg",
+      "source": "work/mcp-client-delivery-20261117/native-captures/07-graphite-dark-zh-claude-mcp.jpg",
+      "bytes": 275487,
+      "sha256": "5039f114b8a284033776ac79d30f3f6cfd8bfe94fe995db06c86744e3c45a632"
+    },
+    {
+      "member": "parent/native-captures/08-lavender-light-zh-mcp.ax.txt",
+      "source": "work/mcp-client-delivery-20261117/native-captures/08-lavender-light-zh-mcp.ax.txt",
+      "bytes": 1139,
+      "sha256": "4aeff39edb8f7f91ec9986bc9387f65acbd304c02cebc1d8847871df8108d149"
+    },
+    {
+      "member": "parent/native-captures/08-lavender-light-zh-mcp.jpg",
+      "source": "work/mcp-client-delivery-20261117/native-captures/08-lavender-light-zh-mcp.jpg",
+      "bytes": 289544,
+      "sha256": "f7d8ef06bbb75ce1f4efac632e926eae142c048a8951a761e6f63bbefdb60f06"
+    },
+    {
+      "member": "parent/native-captures/09-lavender-light-en-codex-mcp.ax.txt",
+      "source": "work/mcp-client-delivery-20261117/native-captures/09-lavender-light-en-codex-mcp.ax.txt",
+      "bytes": 1169,
+      "sha256": "ab6166cfe174ee6eb81808d10505e1038d2f541ea742f17827c402564b20c744"
+    },
+    {
+      "member": "parent/native-captures/09-lavender-light-en-codex-mcp.jpg",
+      "source": "work/mcp-client-delivery-20261117/native-captures/09-lavender-light-en-codex-mcp.jpg",
+      "bytes": 324460,
+      "sha256": "bda248b9231f15b0decd1c57accf0dfdf0399cb750b21d03f29f7afde76ad471"
+    },
+    {
+      "member": "parent/native-captures/10-frost-light-zh-mcp.ax.txt",
+      "source": "work/mcp-client-delivery-20261117/native-captures/10-frost-light-zh-mcp.ax.txt",
+      "bytes": 1139,
+      "sha256": "4aeff39edb8f7f91ec9986bc9387f65acbd304c02cebc1d8847871df8108d149"
+    },
+    {
+      "member": "parent/native-captures/10-frost-light-zh-mcp.jpg",
+      "source": "work/mcp-client-delivery-20261117/native-captures/10-frost-light-zh-mcp.jpg",
+      "bytes": 291482,
+      "sha256": "e04f07460e1092f690927f42d8cb66410d78e725ce40532c462a66e39baf1ae2"
+    },
+    {
+      "member": "parent/native-captures/11-empty-window-close-review.ax.txt",
+      "source": "work/mcp-client-delivery-20261117/native-captures/11-empty-window-close-review.ax.txt",
+      "bytes": 432,
+      "sha256": "bcc760585b01da083d906364479e1b19c1aa502c8afc9897be02c9fb77a1e1b7"
+    },
+    {
+      "member": "parent/native-captures/11-empty-window-close-review.jpg",
+      "source": "work/mcp-client-delivery-20261117/native-captures/11-empty-window-close-review.jpg",
+      "bytes": 168257,
+      "sha256": "2389aac33259d98df87354c52dc3bffb59be51bc72e400acc642de4517068b11"
+    },
+    {
+      "member": "parent/native-captures/captures.json",
+      "source": "work/mcp-client-delivery-20261117/native-captures/captures.json",
+      "bytes": 1822,
+      "sha256": "4a0ac7ecfd29aff507eb76db9ac07e8f829d4e2ca3a1edfba624afee266171ab"
+    },
+    {
+      "member": "parent/native-observations.json",
+      "source": "work/mcp-client-delivery-20261117/native-observations.json",
+      "bytes": 7433,
+      "sha256": "dbfcb65ed7cd983bf8aed0d36126e4f80d096147cd4c8ffa6df2e3f6dac7c70c"
+    },
+    {
+      "member": "parent/native-process-absence.json",
+      "source": "work/mcp-client-delivery-20261117/native-process-absence.json",
+      "bytes": 333,
+      "sha256": "554badcf10a2f2f91709431c93f3ab186310a0d156cff852663108d233c61d14"
+    },
+    {
+      "member": "parent/native-runtime-originals/state.json",
+      "source": "work/mcp-client-delivery-20261117/native-runtime-originals/state.json",
+      "bytes": 1490,
+      "sha256": "b991d74f911ad1977217e31a241270280afd72a59f3d78216df3bcd8644648b7"
+    },
+    {
+      "member": "parent/native-runtime-originals/state.json.backups/0148cc10-ca63-4c36-aec2-c49fb995fec6.json",
+      "source": "work/mcp-client-delivery-20261117/native-runtime-originals/state.json.backups/0148cc10-ca63-4c36-aec2-c49fb995fec6.json",
+      "bytes": 1121,
+      "sha256": "955451fe54ef322bd4061c5a08e52d20deda390e613b98b9ea6c77b8fb3939f7"
+    },
+    {
+      "member": "parent/native-runtime-originals/state.json.backups/0248636f-335a-4815-8adf-f577b2d2c7e9.json",
+      "source": "work/mcp-client-delivery-20261117/native-runtime-originals/state.json.backups/0248636f-335a-4815-8adf-f577b2d2c7e9.json",
+      "bytes": 1119,
+      "sha256": "26de6bc26ff462c384858e4998d3318448df52e96948ff64654839f3bff56f18"
+    },
+    {
+      "member": "parent/native-runtime-originals/state.json.backups/1048a4d3-6654-469b-9325-1d5ddabb4c93.json",
+      "source": "work/mcp-client-delivery-20261117/native-runtime-originals/state.json.backups/1048a4d3-6654-469b-9325-1d5ddabb4c93.json",
+      "bytes": 1118,
+      "sha256": "8c91db56abf9b9e33a629b43d21d8bcb887259b3a88edf2d80cdb87bbd11b2a6"
+    },
+    {
+      "member": "parent/native-runtime-originals/state.json.backups/3bf9c0f3-3d98-4ab2-8be1-61c1888f351d.json",
+      "source": "work/mcp-client-delivery-20261117/native-runtime-originals/state.json.backups/3bf9c0f3-3d98-4ab2-8be1-61c1888f351d.json",
+      "bytes": 1116,
+      "sha256": "77e683e9439b1b31ed11c2ecaeb5387d788ab7f355eac6aad438b4bd98fe0b28"
+    },
+    {
+      "member": "parent/native-runtime-originals/state.json.backups/4b6aa613-e026-4f46-bb62-b03eb227556c.json",
+      "source": "work/mcp-client-delivery-20261117/native-runtime-originals/state.json.backups/4b6aa613-e026-4f46-bb62-b03eb227556c.json",
+      "bytes": 1119,
+      "sha256": "42c3cc61618495c046b6db9bae9c2eff7a0249245d95582251708711b56bdda0"
+    },
+    {
+      "member": "parent/native-runtime-originals/state.json.backups/514b63ce-8555-481f-aa25-169c498ebf13.json",
+      "source": "work/mcp-client-delivery-20261117/native-runtime-originals/state.json.backups/514b63ce-8555-481f-aa25-169c498ebf13.json",
+      "bytes": 1116,
+      "sha256": "0c6378519164a8b4a1ed970ed0f20e14799d52f7daed37b37a82ed5377c17f72"
+    },
+    {
+      "member": "parent/native-runtime-originals/state.json.backups/69d74eb4-bb57-40a1-a94c-b084f47e47fd.json",
+      "source": "work/mcp-client-delivery-20261117/native-runtime-originals/state.json.backups/69d74eb4-bb57-40a1-a94c-b084f47e47fd.json",
+      "bytes": 1120,
+      "sha256": "bc5a3c2c6e85d5af5c64df8e0ef44c3051829e8d0d5e4e797692105cd65dec51"
+    },
+    {
+      "member": "parent/native-runtime-originals/state.json.backups/75a2cc51-a031-4985-b0ff-fdd00f380695.json",
+      "source": "work/mcp-client-delivery-20261117/native-runtime-originals/state.json.backups/75a2cc51-a031-4985-b0ff-fdd00f380695.json",
+      "bytes": 1122,
+      "sha256": "703cbefd6ebebdc3720ac22430363529bba581067bda859bda5100d4a1c86867"
+    },
+    {
+      "member": "parent/native-runtime-originals/state.json.lock",
+      "source": "work/mcp-client-delivery-20261117/native-runtime-originals/state.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "parent/new-source-ci-initial-r1/command.log",
+      "source": "work/mcp-client-delivery-20261117/new-source-ci-initial-r1/command.log",
+      "bytes": 36877,
+      "sha256": "702b67a81be1486d972d10e2667ec4204a5010679208b05d348011104df4600d"
+    },
+    {
+      "member": "parent/new-source-ci-initial-r1/result.json",
+      "source": "work/mcp-client-delivery-20261117/new-source-ci-initial-r1/result.json",
+      "bytes": 475,
+      "sha256": "7df069aae5116876a8cb5efb6a0b7d2b846c5120751de21a69e2bbf5a4745dc7"
+    },
+    {
+      "member": "parent/new-source-ci-initial-summary.json",
+      "source": "work/mcp-client-delivery-20261117/new-source-ci-initial-summary.json",
+      "bytes": 756,
+      "sha256": "426f75fd52024dc5b84795f7a310818cbe88b3d276b05d45ca7de01da7e0a1e0"
+    },
+    {
+      "member": "parent/new-source-ci-jobs-r1/command.log",
+      "source": "work/mcp-client-delivery-20261117/new-source-ci-jobs-r1/command.log",
+      "bytes": 9411,
+      "sha256": "755c7093a58fe14a1c6c6067d960e701cb92a9bce8a1975607cd7c49165aad4d"
+    },
+    {
+      "member": "parent/new-source-ci-jobs-r1/result.json",
+      "source": "work/mcp-client-delivery-20261117/new-source-ci-jobs-r1/result.json",
+      "bytes": 430,
+      "sha256": "b323aba9fd5ffb8fef264604be03f3c87d8e938cdcc65cbdd499a81c343175aa"
+    },
+    {
+      "member": "parent/new-source-ci-jobs-r2/command.log",
+      "source": "work/mcp-client-delivery-20261117/new-source-ci-jobs-r2/command.log",
+      "bytes": 9865,
+      "sha256": "03ca5877254ec5a8ec77f89f41410c11cda7be64afbde701b3346d3f4a382c01"
+    },
+    {
+      "member": "parent/new-source-ci-jobs-r2/result.json",
+      "source": "work/mcp-client-delivery-20261117/new-source-ci-jobs-r2/result.json",
+      "bytes": 430,
+      "sha256": "54bf0aa1eec30ee1c6f459a09c268bc7860425872378c8fb95030b33dcc5639a"
+    },
+    {
+      "member": "parent/new-source-ci-jobs-summary-r2.json",
+      "source": "work/mcp-client-delivery-20261117/new-source-ci-jobs-summary-r2.json",
+      "bytes": 788,
+      "sha256": "b2a23c8e530ce8fa9d4ad88d227568a389d2815d8dd01f6a2cf9c1bdc059bec6"
+    },
+    {
+      "member": "parent/new-source-ci-status-r2/command.log",
+      "source": "work/mcp-client-delivery-20261117/new-source-ci-status-r2/command.log",
+      "bytes": 36877,
+      "sha256": "702b67a81be1486d972d10e2667ec4204a5010679208b05d348011104df4600d"
+    },
+    {
+      "member": "parent/new-source-ci-status-r2/result.json",
+      "source": "work/mcp-client-delivery-20261117/new-source-ci-status-r2/result.json",
+      "bytes": 475,
+      "sha256": "dd2d4f422b3727ec74b01c63157ac66c79a833d3301ad0ccb1b84bcf79f1d1f9"
+    },
+    {
+      "member": "parent/new-source-ci-status-r3/command.log",
+      "source": "work/mcp-client-delivery-20261117/new-source-ci-status-r3/command.log",
+      "bytes": 36877,
+      "sha256": "702b67a81be1486d972d10e2667ec4204a5010679208b05d348011104df4600d"
+    },
+    {
+      "member": "parent/new-source-ci-status-r3/result.json",
+      "source": "work/mcp-client-delivery-20261117/new-source-ci-status-r3/result.json",
+      "bytes": 475,
+      "sha256": "45ccd30689219e585059d9021ea8b757eb6b14ec98de2e76482bd34cb5581bb0"
+    },
+    {
+      "member": "parent/normal-native-structure-r1/command.log",
+      "source": "work/mcp-client-delivery-20261117/normal-native-structure-r1/command.log",
+      "bytes": 3669,
+      "sha256": "0f28b62ee1f20685529451f21a09a5be1804574bc0c472b8f8517248632962b4"
+    },
+    {
+      "member": "parent/normal-native-structure-r1/result.json",
+      "source": "work/mcp-client-delivery-20261117/normal-native-structure-r1/result.json",
+      "bytes": 519,
+      "sha256": "f165956146cb462a9d0227826a82cdbd0c889ca6799453351b03b212532e98df"
+    },
+    {
+      "member": "parent/normal-package-manifest.json",
+      "source": "work/mcp-client-delivery-20261117/normal-package-manifest.json",
+      "bytes": 1238,
+      "sha256": "89021256613ea03ac308bb7dea8e79123574cb2db0f32675ac979980596d2d61"
+    },
+    {
+      "member": "parent/normal-package-r1/command.log",
+      "source": "work/mcp-client-delivery-20261117/normal-package-r1/command.log",
+      "bytes": 213,
+      "sha256": "a72f82af01c4fe5a04697dccbd3fe015485173fb05823dbfb8d7887366821218"
+    },
+    {
+      "member": "parent/normal-package-r1/result.json",
+      "source": "work/mcp-client-delivery-20261117/normal-package-r1/result.json",
+      "bytes": 767,
+      "sha256": "af3959f3e7e4f46e5ab26e97ce3aebe6aa618762ad1cb1907b557de3a60d3cdd"
+    },
+    {
+      "member": "parent/normal-release-build-r1/command.log",
+      "source": "work/mcp-client-delivery-20261117/normal-release-build-r1/command.log",
+      "bytes": 1131,
+      "sha256": "2461fb7f487b8337f3334055ae68be54c4c37fce4ceb1e14f58b35c0fb38bf33"
+    },
+    {
+      "member": "parent/normal-release-build-r1/result.json",
+      "source": "work/mcp-client-delivery-20261117/normal-release-build-r1/result.json",
+      "bytes": 442,
+      "sha256": "71a01206c5526e6eb121b3cfb6396b0d78cf5d1ccc052102d31ac2138103d1e0"
+    },
+    {
+      "member": "parent/run.py",
+      "source": "work/mcp-client-delivery-20261117/run.py",
+      "bytes": 1720,
+      "sha256": "a04a95d4cb34450a37d19790a597f11c9e1417e8cc9d9fbd8efe7410353962fd"
+    },
+    {
+      "member": "parent/source-commit-r1/command.log",
+      "source": "work/mcp-client-delivery-20261117/source-commit-r1/command.log",
+      "bytes": 1704,
+      "sha256": "3457e2a9f9f798dc9b6f65b26b36ec10dac5f6f73333ff7d2b13581cfb9bf971"
+    },
+    {
+      "member": "parent/source-commit-r1/result.json",
+      "source": "work/mcp-client-delivery-20261117/source-commit-r1/result.json",
+      "bytes": 426,
+      "sha256": "159f5ef1240f799ad3837a44b27317a6133b6639879b33a198b3585200748f0c"
+    },
+    {
+      "member": "parent/source-copy-cleanup-r1/command.log",
+      "source": "work/mcp-client-delivery-20261117/source-copy-cleanup-r1/command.log",
+      "bytes": 2126,
+      "sha256": "df4bac85f32acaf009447c50b357d5e2e23a0d8855376eaf8e68e96a83909f20"
+    },
+    {
+      "member": "parent/source-copy-cleanup-r1/result.json",
+      "source": "work/mcp-client-delivery-20261117/source-copy-cleanup-r1/result.json",
+      "bytes": 784,
+      "sha256": "a6a22973ff06d990f9b0ef8b03107e1082ce8273bfeadb247dd8ff70cff520db"
+    },
+    {
+      "member": "parent/source-copy-cleanup.json",
+      "source": "work/mcp-client-delivery-20261117/source-copy-cleanup.json",
+      "bytes": 2352,
+      "sha256": "00c8af4b8e47f327b18b0b1c380019b9cdf012954ea3ce99d4a86370d7abc64d"
+    },
+    {
+      "member": "parent/source-push-r1/command.log",
+      "source": "work/mcp-client-delivery-20261117/source-push-r1/command.log",
+      "bytes": 146,
+      "sha256": "6bb0f5cd00424c0d649472cecd8648292a5496a15b7fcf8856cddb60da9f05c2"
+    },
+    {
+      "member": "parent/source-push-r1/result.json",
+      "source": "work/mcp-client-delivery-20261117/source-push-r1/result.json",
+      "bytes": 400,
+      "sha256": "00d5ff25ac856adacff9f24e8b0f83566eb2169d548657de1900d1208899021d"
+    },
+    {
+      "member": "parent/source-readback.json",
+      "source": "work/mcp-client-delivery-20261117/source-readback.json",
+      "bytes": 507,
+      "sha256": "ab95c99b6251b92937d927b0681828a21bec9337d7ab42330a22877320092eb1"
+    },
+    {
+      "member": "review/REPORT.md",
+      "source": "work/mcp-native-finish-review-20261117/REPORT.md",
+      "bytes": 12943,
+      "sha256": "5dcc8993bc7e028f5cac2178bac28b35abe3d18a5be28372d595c78889afd2f1"
+    },
+    {
+      "member": "review/audit-command.json",
+      "source": "work/mcp-native-finish-review-20261117/audit-command.json",
+      "bytes": 2517,
+      "sha256": "7788ee5affc352e3f6546199d36ccb18a4dadfe21099a8f85f7816a32cef54d1"
+    },
+    {
+      "member": "review/audit-r1.json",
+      "source": "work/mcp-native-finish-review-20261117/audit-r1.json",
+      "bytes": 121492,
+      "sha256": "1f0027a2584a1417f7a46cf9d6b8a6892116b0ee40d14d929e7d23dff0974432"
+    },
+    {
+      "member": "review/audit.py",
+      "source": "work/mcp-native-finish-review-20261117/audit.py",
+      "bytes": 30748,
+      "sha256": "07112d5a02c79716b72f6c1d2c8e69b7e2776605f6623391fb35694da5ba5239"
+    },
+    {
+      "member": "review/review-result.json",
+      "source": "work/mcp-native-finish-review-20261117/review-result.json",
+      "bytes": 72158,
+      "sha256": "300c08cbc7893a9e92c43f70a6054c9c4c89d065312e8281efa7ecb1385d5163"
+    },
+    {
+      "member": "runtime/state.json",
+      "source": "work/mcp-client-native-20261117/runtime-r1/state.json",
+      "bytes": 1490,
+      "sha256": "b991d74f911ad1977217e31a241270280afd72a59f3d78216df3bcd8644648b7"
+    },
+    {
+      "member": "runtime/state.json.backups/0148cc10-ca63-4c36-aec2-c49fb995fec6.json",
+      "source": "work/mcp-client-native-20261117/runtime-r1/state.json.backups/0148cc10-ca63-4c36-aec2-c49fb995fec6.json",
+      "bytes": 1121,
+      "sha256": "955451fe54ef322bd4061c5a08e52d20deda390e613b98b9ea6c77b8fb3939f7"
+    },
+    {
+      "member": "runtime/state.json.backups/0248636f-335a-4815-8adf-f577b2d2c7e9.json",
+      "source": "work/mcp-client-native-20261117/runtime-r1/state.json.backups/0248636f-335a-4815-8adf-f577b2d2c7e9.json",
+      "bytes": 1119,
+      "sha256": "26de6bc26ff462c384858e4998d3318448df52e96948ff64654839f3bff56f18"
+    },
+    {
+      "member": "runtime/state.json.backups/1048a4d3-6654-469b-9325-1d5ddabb4c93.json",
+      "source": "work/mcp-client-native-20261117/runtime-r1/state.json.backups/1048a4d3-6654-469b-9325-1d5ddabb4c93.json",
+      "bytes": 1118,
+      "sha256": "8c91db56abf9b9e33a629b43d21d8bcb887259b3a88edf2d80cdb87bbd11b2a6"
+    },
+    {
+      "member": "runtime/state.json.backups/3bf9c0f3-3d98-4ab2-8be1-61c1888f351d.json",
+      "source": "work/mcp-client-native-20261117/runtime-r1/state.json.backups/3bf9c0f3-3d98-4ab2-8be1-61c1888f351d.json",
+      "bytes": 1116,
+      "sha256": "77e683e9439b1b31ed11c2ecaeb5387d788ab7f355eac6aad438b4bd98fe0b28"
+    },
+    {
+      "member": "runtime/state.json.backups/4b6aa613-e026-4f46-bb62-b03eb227556c.json",
+      "source": "work/mcp-client-native-20261117/runtime-r1/state.json.backups/4b6aa613-e026-4f46-bb62-b03eb227556c.json",
+      "bytes": 1119,
+      "sha256": "42c3cc61618495c046b6db9bae9c2eff7a0249245d95582251708711b56bdda0"
+    },
+    {
+      "member": "runtime/state.json.backups/514b63ce-8555-481f-aa25-169c498ebf13.json",
+      "source": "work/mcp-client-native-20261117/runtime-r1/state.json.backups/514b63ce-8555-481f-aa25-169c498ebf13.json",
+      "bytes": 1116,
+      "sha256": "0c6378519164a8b4a1ed970ed0f20e14799d52f7daed37b37a82ed5377c17f72"
+    },
+    {
+      "member": "runtime/state.json.backups/69d74eb4-bb57-40a1-a94c-b084f47e47fd.json",
+      "source": "work/mcp-client-native-20261117/runtime-r1/state.json.backups/69d74eb4-bb57-40a1-a94c-b084f47e47fd.json",
+      "bytes": 1120,
+      "sha256": "bc5a3c2c6e85d5af5c64df8e0ef44c3051829e8d0d5e4e797692105cd65dec51"
+    },
+    {
+      "member": "runtime/state.json.backups/75a2cc51-a031-4985-b0ff-fdd00f380695.json",
+      "source": "work/mcp-client-native-20261117/runtime-r1/state.json.backups/75a2cc51-a031-4985-b0ff-fdd00f380695.json",
+      "bytes": 1122,
+      "sha256": "703cbefd6ebebdc3720ac22430363529bba581067bda859bda5100d4a1c86867"
+    },
+    {
+      "member": "runtime/state.json.lock",
+      "source": "work/mcp-client-native-20261117/runtime-r1/state.json.lock",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}
