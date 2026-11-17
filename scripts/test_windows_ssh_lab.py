@@ -128,6 +128,22 @@ class AdmissionEvidenceTests(unittest.TestCase):
             row["command_line"] = '"' + PS + '"' + row["command_line"][len("powershell.exe"):]
         self.assertEqual(len(self.check(value)["operations"]), 4)
 
+    def test_native_cmd_extra_space_after_program_keeps_exact_source_arguments(self):
+        value = snapshot()
+        for row in value["admissions"][1:]:
+            row["command_line"] = row["command_line"].replace(
+                "powershell.exe -NoLogo", "powershell.exe  -NoLogo", 1)
+        result = self.check(value)
+        self.assertEqual(sorted(row["operation"] for row in result["operations"]),
+                         sorted(lab.OPERATIONS))
+
+    def test_extra_space_inside_fixed_arguments_is_not_normalized(self):
+        value = snapshot()
+        value["admissions"][1]["command_line"] = value["admissions"][1]["command_line"].replace(
+            "-NoLogo -NoProfile", "-NoLogo  -NoProfile")
+        with self.assertRaises(lab.Hold):
+            self.check(value)
+
     def test_unclosed_admission_or_incomplete_census_never_signs_success(self):
         for field in ("admission_closed", "complete_original_object_census", "identities_bound"):
             for state in (False, None, 1, "true"):

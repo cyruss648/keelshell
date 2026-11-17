@@ -1,0 +1,263 @@
+{
+  "sealed_utc": "2026-11-17T01:39:08.823182+00:00",
+  "count": 50,
+  "archive_bytes": 1534547,
+  "archive_sha256": "80267e52512c12b94422468f4be62a7ede55ab6dd7efbf1d42dd8e6e8ebedb60",
+  "entries": [
+    {
+      "path": "acceptance.json",
+      "bytes": 1001,
+      "sha256": "ff2fcfad4b83e54bc9d9a7bab0efc91edea8b7c573ee1957d8645f2a882abe5d"
+    },
+    {
+      "path": "first-ci/direct-api/artifact-14287416838.zip",
+      "bytes": 46698,
+      "sha256": "f32b40a9680eb1273af7926766451815dbaf8ade27ece083ca9495d9e6596752"
+    },
+    {
+      "path": "first-ci/direct-api/artifacts.json",
+      "bytes": 766,
+      "sha256": "d8774aa4ff04f492360543cfd1ebfafe94c0abb6c8de4bca99939f981373889e"
+    },
+    {
+      "path": "first-ci/direct-api/fetch-receipt.json",
+      "bytes": 9862,
+      "sha256": "50108f5f21044f6ee1a014ca7a15568cfd3b4d835baee5e98f3bc22816dd2383"
+    },
+    {
+      "path": "first-ci/direct-api/jobs.json",
+      "bytes": 3775,
+      "sha256": "a749c360c2b5d58a4e21f53e74726598e12541b12850db866c6768581344c422"
+    },
+    {
+      "path": "first-ci/direct-api/logs.zip",
+      "bytes": 31941,
+      "sha256": "fba9b762228b24367025c8619855a7bc23f3ba9658872d8df355caa999c811e4"
+    },
+    {
+      "path": "first-ci/direct-api/run.json",
+      "bytes": 12263,
+      "sha256": "220242966aa1b643b081158cac35029e5461550461ea1d5e7f008bbc1f0bfd0d"
+    },
+    {
+      "path": "first-ci/openssh-r1/artifact-14287312342.zip",
+      "bytes": 29884,
+      "sha256": "87301385ce6ba76011476175fc566a3cefa6c435ab563c3e781b6c03f9ebbdec"
+    },
+    {
+      "path": "first-ci/openssh-r1/artifacts.json",
+      "bytes": 767,
+      "sha256": "2a3754d930e0c3e77e9de43f39181d966f07f0cbbcabd2e704e6c0592ca35676"
+    },
+    {
+      "path": "first-ci/openssh-r1/fetch-receipt.json",
+      "bytes": 11650,
+      "sha256": "63b218670bd967114dcd8653b9800c0f9e5d690b91370c35cccf27e784ef7731"
+    },
+    {
+      "path": "first-ci/openssh-r1/jobs.json",
+      "bytes": 2877,
+      "sha256": "d863b910913a90560152aaa5739c5a7ef546a573860f546f5ec26d7e249602bb"
+    },
+    {
+      "path": "first-ci/openssh-r1/logs.zip",
+      "bytes": 44758,
+      "sha256": "6146fb7a58196110525ce7dad75a9ccc62fd8a0f342a0f1df1b483cca041af88"
+    },
+    {
+      "path": "first-ci/openssh-r1/run.json",
+      "bytes": 12275,
+      "sha256": "57625cf41aae99b06e5973ff63335cd04147188532cb68bad8eb41c5a2721dec"
+    },
+    {
+      "path": "first-ci/quality-r1/artifacts.json",
+      "bytes": 1479,
+      "sha256": "5de41fc4880deeccab349b2d8384e4b557cf16600547e8506ceb52879eee987d"
+    },
+    {
+      "path": "first-ci/quality-r1/fetch-receipt.json",
+      "bytes": 8825,
+      "sha256": "805bb444da21bc26aa171ed068a0c373384daff54d20f4a70d36430487447acd"
+    },
+    {
+      "path": "first-ci/quality-r1/jobs.json",
+      "bytes": 10206,
+      "sha256": "81d8557367b85575796ad393b86f07dfecd0b7b1a1fd02173fd2819c0cea62ba"
+    },
+    {
+      "path": "first-ci/quality-r1/logs.zip",
+      "bytes": 1024196,
+      "sha256": "9b28f6b306043472f68c7fa0b217c66507b420530f2076c20fb8c575b0d1a37d"
+    },
+    {
+      "path": "first-ci/quality-r1/run.json",
+      "bytes": 12232,
+      "sha256": "824cc0f3cae84673676933b9feedde1d793ec32bae03e1df8061dce7589f278c"
+    },
+    {
+      "path": "integration/fetch-quality-first-r1.json",
+      "bytes": 851,
+      "sha256": "d43cccd0892c07e8aea65f51f56aedd9f5e450bf13c0818f9f050c34c4e32ec8"
+    },
+    {
+      "path": "integration/fetch-quality-first-r1.log",
+      "bytes": 497,
+      "sha256": "b7d3375195f6092db7574b4246c016ce51122d5b6936aa88f8a521a54889abd5"
+    },
+    {
+      "path": "integration/fetch_run.py",
+      "bytes": 3317,
+      "sha256": "a7e532682221faae02400e59cf72039915ef613cdecbf55f91b364b6f2eeffa4"
+    },
+    {
+      "path": "integration/full-gate-inputs-after-r2.json",
+      "bytes": 141011,
+      "sha256": "0a77a9fe43d9d5658c568a91667b1c9affb39c94dc458561c9cc259b4e9ce9e8"
+    },
+    {
+      "path": "integration/full-gate-inputs-r2.json",
+      "bytes": 141018,
+      "sha256": "13523eed11f0d1eacf8bf25fd93d9155f3bb4b020788c7e85053003156d8784c"
+    },
+    {
+      "path": "integration/full-gate-r2.json",
+      "bytes": 781,
+      "sha256": "b14344684636584b55a69ef0764d232bcc812289180a5ea213b4390fb7bf1b34"
+    },
+    {
+      "path": "integration/full-gate-r2.log",
+      "bytes": 667734,
+      "sha256": "d1bbe0156162b172b4174838dc8c3517cf62b93abb3cfca50ed9242f4e1518c5"
+    },
+    {
+      "path": "integration/gate-summary-r2.json",
+      "bytes": 526628,
+      "sha256": "0c5b716ce5a759ce061eaf9c42b2f159b94b0db7678a0fde1b2fe43ec1c5620b"
+    },
+    {
+      "path": "integration/quality-watch-first-r1.json",
+      "bytes": 797,
+      "sha256": "e4785084e9964f81807e000f5a7e7de760ee4407ea738bcaaf92d3a34e04886d"
+    },
+    {
+      "path": "integration/quality-watch-first-r1.log",
+      "bytes": 130747,
+      "sha256": "7797dfe52a1610b12df73d7465567ed1dfcc33ad3d015d46f924e8d977931bcf"
+    },
+    {
+      "path": "integration/repair-agent-lifecycle.json",
+      "bytes": 741,
+      "sha256": "6b74f5eb9ad0d2809f0be090528675e127b3dbac87df11480e206ffffd9e59e8"
+    },
+    {
+      "path": "integration/repair-candidate-inputs-r1.json",
+      "bytes": 140943,
+      "sha256": "7c7a49c6fcd76665cf0917f368cc224d74ebc40f512387ef22d24633a9cc12d7"
+    },
+    {
+      "path": "integration/repair-python-r1.json",
+      "bytes": 836,
+      "sha256": "87fa483bed545d132c2ccd75420c865e7befcf5708771bbb7ea4ba959d80842b"
+    },
+    {
+      "path": "integration/repair-python-r1.log",
+      "bytes": 17437,
+      "sha256": "25587dbbb5e0006dacf950138b0c099d8e71565819f14c3767beefcf159a4f4c"
+    },
+    {
+      "path": "integration/repair-windows-integration-r1.json",
+      "bytes": 831,
+      "sha256": "7c63ca24465107f83c8f2c4445722e9fa3eab6687fad5ebd66c49a64ce0b9900"
+    },
+    {
+      "path": "integration/repair-windows-integration-r1.log",
+      "bytes": 54267,
+      "sha256": "15ddfb01d9ff7ff3e2d6e0d072bcb95c067bd9c6446e3b494e42afb9297ed0ea"
+    },
+    {
+      "path": "integration/run_command.py",
+      "bytes": 1602,
+      "sha256": "a8e8f0b50f2c5d95342e36f1b8fffd4fdc5daeabbf4a382fa15300c747ce65fc"
+    },
+    {
+      "path": "integration/snapshot_inputs.py",
+      "bytes": 1964,
+      "sha256": "3033568fb0b3900acc7f2e8cee9cc34ffac695e1cfec691e14cc9a34762293e0"
+    },
+    {
+      "path": "integration/windows-ssh-failure-analysis-r1.json",
+      "bytes": 1246,
+      "sha256": "78c0c40a99c82504e985aa33b2850917176a0e3b276d455d5c63bff10dc3eea2"
+    },
+    {
+      "path": "repair.diff",
+      "bytes": 15213,
+      "sha256": "1a16d90437fc08453f0212c4191028ed6b7b820853a28970e82867a24ef39148"
+    },
+    {
+      "path": "review/independent-controls/diff-check.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "review/independent-controls/diff-check.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "review/independent-controls/execution-receipt-r1.json",
+      "bytes": 4507,
+      "sha256": "4baaecf9f894cfbb99440d997f29f122eb5ed6b77a8cbbb7363dbd9ce7b67dbf"
+    },
+    {
+      "path": "review/independent-controls/independent.stderr",
+      "bytes": 2337,
+      "sha256": "2c16c8270cfd8e6d5c716fdf0cfda617addf6ea1519d58fa9cdc7f26688674d7"
+    },
+    {
+      "path": "review/independent-controls/independent.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "review/independent-controls/review_controls.py",
+      "bytes": 14477,
+      "sha256": "df60b5ed146291ab9ff58a4db4e902e4c57c7226db2ba0083ed1ae2265d43011"
+    },
+    {
+      "path": "review/independent-controls/risk-classes.stderr",
+      "bytes": 6537,
+      "sha256": "7c9acd408380efcbb3c5bf3efcd749088c26199c735fd6dbfcd021caec587792"
+    },
+    {
+      "path": "review/independent-controls/risk-classes.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "review/independent-controls/run_review.py",
+      "bytes": 4016,
+      "sha256": "bb0f71945150b8aaf2b0619255de12b4785e45889d322320732c4117b2b32f8a"
+    },
+    {
+      "path": "review/notice/review-decision-r1.json",
+      "bytes": 2721,
+      "sha256": "bb38c8f360e31c3c6be5065056c4d182c99e8c39e6109eed8080cfa8a76446aa"
+    },
+    {
+      "path": "review/report/review-r1.md",
+      "bytes": 10284,
+      "sha256": "4e18b12a1fc41a971349ba3658b307de0de65d791125fa99a5c486c87c2de3f4"
+    },
+    {
+      "path": "selection.json",
+      "bytes": 12365,
+      "sha256": "4a81d6f97c77b6f40b39196548a2b9ea0ab4b01b3e315bcc1e847a927641fffc"
+    }
+  ],
+  "excluded": [
+    "Application packages and binaries",
+    "Python bytecode",
+    "Downloaded full upstream manual; reference digest retained separately"
+  ]
+}

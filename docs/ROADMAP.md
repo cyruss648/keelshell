@@ -24,7 +24,14 @@ Windows 真实 OpenSSH 监控联调本机工程已完成，基线 `bfbea7b`：
 隔离服务器、原进程调试接纳与公开 Rust 路由用例已整合，
 父级整合Python271 run／0失败／3跳过，两位新非作者限定批准、P0–P3全0并实际关闭。
 765输入冻结后的完整门禁r1通过：Rust3407/0/60 ignored、14 rustdoc、
-Python493 run／3 skipped，库存逐名相等。精确提交推送和本批 Windows 实际执行仍待完成；
+Python493 run／3 skipped，库存逐名相等。工程`41671be`已普通推送、三方SHA一致，
+765输入／168原件精确Git绑定通过；OpenSSH43990824640已FAIL，
+API43990824533已success，Quality43990824137三平台已success。
+真实认证、三类采集和4个PowerShell自然exit0不补签原Job census／清理失败；
+当前仅4个Python文件的有界settle／argv0兼容修复已获新非作者限定批准，
+独立49项通过、P0–P3全0并已关闭；最终完整门禁r2已
+`0/reaped/731.529731s`，Rust3407/0/60 ignored、14 rustdoc、
+Python501 run／3 skipped，765输入前后无漂移。继续及时提交推送与精确Windows复跑；
 以[ADR0157](adr/0157-windows-openssh-monitor-acceptance.md)及
 [本批记录](testing/records/2026-11-17-windows-openssh-monitor.md)接续。
 

@@ -31,14 +31,19 @@ archive 内 `selection.json` 保存原路径和 20 份上游原文／响应体�
 - 依赖完整新鲜度仍 **UNKNOWN**；未修改 Cargo.toml 或 Cargo.lock。
   本轮最新 CUA 原生通道为 Mac 锁屏且自动解锁失败，GUI 操作／截图0。
 
-只读重算封存、最终 gate、库存、两位评审和完整源码绑定：
+只读重算首轮封存、最终 gate、库存、两位评审和完整源码绑定。
+当前工作区已有四文件修复，使用首轮精确提交模式；无参数模式仅适用于首轮工程输入：
 
 ```sh
-python3 -B docs/testing/records/2026-11-17-windows-openssh-monitor-evidence/verify.py
-python3 -B docs/testing/records/2026-11-17-windows-openssh-monitor-evidence/verify.py --source EXACT_COMMIT_SHA
+python3 -B docs/testing/records/2026-11-17-windows-openssh-monitor-evidence/verify.py --source 41671be1a7fdfd96cec3a57f876519aeab2fa0d5
 ```
 
-首次工作区重算已 exit0；精确 Git、推送及 Windows 实际运行另行记录。
+首次工作区重算已 exit0；工程`41671be1a7fdfd96cec3a57f876519aeab2fa0d5`
+已普通推送，完整765输入及168成员原件的精确Git绑定重算
+`0/reaped/2.410740s`，三方SHA一致且读回干净。
+推送后Windows实际运行另行记录。
 本封存的 Windows SSH 实际执行为0，不签 Win32 ABI、OpenSSH token/broker 链、
 原生 GPUI Kit 桌面、安装或发行成功。维护入口为[本批记录](../2026-11-17-windows-openssh-monitor.md)；
 archive 内原工作路径是历史出处，回收后不作为当前运行入口。
+首轮真实CI与后续四文件修复的门禁／审查另见[修复证据](repair/README.md)，
+本页168成员与原摘要保持不变。

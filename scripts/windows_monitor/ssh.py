@@ -328,12 +328,13 @@ def validate_powershell_admissions(snapshot, commands, executable):
         if ntpath.normcase(row.get("image", "")) != ntpath.normcase(executable):
             continue
         # The DEBUG event supplies the original command line before admission.
-        # OpenSSH may spell argv[0] as the filename or a full path; the fixed
-        # production arguments following it must remain byte-for-byte identical.
+        # OpenSSH may spell argv[0] as the filename or a full path.
+        # cmd.exe may add spaces between argv[0] and the first argument. Only
+        # that boundary is normalized; all production arguments stay exact.
         text = row.get("command_line", "")
         matched = re.fullmatch(
             r'(?:"([^"\r\n]+)"|([^"\s]+))'
-            r"( -NoLogo -NoProfile -NonInteractive -EncodedCommand [A-Za-z0-9+/]+=*)",
+            r" +(-NoLogo -NoProfile -NonInteractive -EncodedCommand [A-Za-z0-9+/]+=*)",
             text,
         )
         if matched is None:
@@ -342,7 +343,7 @@ def validate_powershell_admissions(snapshot, commands, executable):
         if (ntpath.normcase(program) != "powershell.exe"
                 and ntpath.normcase(program) != ntpath.normcase(executable)):
             raise lab.LabError("ssh_powershell_argv_identity_mismatch")
-        command = "powershell.exe" + matched[3]
+        command = "powershell.exe " + matched[3]
         if command not in expected or row.get("exit_code") != 0:
             raise lab.LabError("ssh_powershell_does_not_match_exact_production_command")
         powershell.append({"operation": expected[command], "pid": row["pid"],

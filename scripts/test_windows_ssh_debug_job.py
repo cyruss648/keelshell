@@ -708,6 +708,120 @@ class SealAndBudgetControls(unittest.TestCase):
         self.assertEqual(api.limits.ProcessMemoryLimit, 987654)
         owner.close()
 
+    def test_natural_seal_retries_changing_active_counts_before_exact_final_census(self):
+        owner, api, master = self.master()
+        child = api.object(pid=42)
+        owner.pump_debug(owner._budget)
+        api.exit(child)
+        owner.pump_debug(owner._budget)
+        accounting = owner.accounting
+        calls = 0
+
+        def changing(budget):
+            nonlocal calls
+            calls += 1
+            value = accounting(budget)
+            if calls == 1:
+                value.ActiveProcesses = 2
+            return value
+
+        with mock.patch.object(owner, "accounting", side_effect=changing):
+            evidence = owner.seal_admission(owner._budget, settle_seconds=0.1)
+        self.assertTrue(evidence["admission_closed"])
+        self.assertTrue(evidence["complete_original_object_census"])
+        self.assertEqual(evidence["errors"], [])
+        first = evidence["incomplete_census_observations"][0]
+        self.assertEqual((first["active_before"], first["active_after"]), (2, 1))
+        self.assertEqual(first["current_pids"], [master.pid])
+        self.assertTrue(all(row["natural_terminal_before_cleanup"]
+                            for row in evidence["admissions"] if not row["is_master"]))
+        owner.close()
+
+    def test_natural_seal_pumps_pending_create_before_signing_cumulative_total(self):
+        owner, api, _ = self.master()
+        child = api.object(pid=42)
+        pump = owner.pump_debug
+        calls = 0
+
+        def delayed(budget):
+            nonlocal calls
+            calls += 1
+            if calls == 1:
+                return 0
+            count = pump(budget)
+            if not child.exit_queued:
+                api.exit(child)
+                count += pump(budget)
+            return count
+
+        with mock.patch.object(owner, "pump_debug", side_effect=delayed):
+            evidence = owner.seal_admission(owner._budget, settle_seconds=0.1)
+        first = evidence["incomplete_census_observations"][0]
+        self.assertEqual((first["total_after"], first["admitted"]), (2, 1))
+        self.assertEqual(first["unknown_pids"], [child.pid])
+        self.assertEqual(evidence["job_total_processes"], len(evidence["admissions"]))
+        self.assertTrue(evidence["complete_original_object_census"])
+        self.assertTrue(evidence["admissions"][1]["identity_bound_before_first_continue"])
+        self.assertTrue(evidence["admissions"][1]["natural_terminal_before_cleanup"])
+        owner.close()
+
+    def test_unresolved_cumulative_omission_exhausts_settle_without_sealing(self):
+        owner, api, _ = self.master()
+        api.total_override = 2
+        with self.assertRaisesRegex(lifecycle.OwnershipError, "census_incomplete"):
+            owner.seal_admission(owner._budget, settle_seconds=0)
+        self.assertFalse(owner.admission_closed)
+        evidence = owner.terminal_evidence()
+        self.assertFalse(evidence["complete_original_object_census"])
+        self.assertFalse(evidence["terminal_proven"])
+        self.assertEqual(evidence["incomplete_census_observations"][0]["admitted"], 1)
+        with self.assertRaises(lifecycle.OwnershipError):
+            owner.close()
+
+    def test_asynchronous_termination_census_cannot_return_zero_until_stable(self):
+        owner, _, _ = self.master()
+        owner.seal_admission(owner._budget, settle_seconds=0)
+        owner.terminate()
+        accounting = owner.accounting
+        calls = 0
+
+        def changing(budget):
+            nonlocal calls
+            calls += 1
+            value = accounting(budget)
+            if calls == 1:
+                value.ActiveProcesses = 1
+            return value
+
+        with mock.patch.object(owner, "accounting", side_effect=changing):
+            self.assertGreater(owner.active(owner._budget), 0)
+            self.assertEqual(owner.active(owner._budget), 0)
+        self.assertEqual(owner.terminal_evidence()["errors"], [])
+        owner.close()
+
+    def test_settling_never_tolerates_a_changed_sealed_cumulative_total(self):
+        owner, api, _ = self.master()
+        owner.seal_admission(owner._budget, settle_seconds=0)
+        api.total_override = 2
+        with self.assertRaisesRegex(lifecycle.OwnershipError, "census_incomplete"):
+            owner.active(owner._budget)
+        self.assertFalse(owner.terminal_evidence()["terminal_proven"])
+        with self.assertRaises(lifecycle.OwnershipError):
+            owner.close()
+
+    def test_census_snapshots_do_not_expose_mutable_internal_pid_lists(self):
+        owner, api, master = self.master()
+        api.active_override = 2
+        self.assertFalse(owner._census(owner._budget, settling=True))
+        api.active_override = None
+        evidence = owner.terminal_evidence()
+        evidence["incomplete_census_observations"][0]["current_pids"].clear()
+        evidence["last_census_observation"]["current_pids"].clear()
+        fresh = owner.terminal_evidence()
+        self.assertEqual(fresh["incomplete_census_observations"][0]["current_pids"], [master.pid])
+        self.assertEqual(fresh["last_census_observation"]["current_pids"], [master.pid])
+        owner.close()
+
     def test_live_nonmaster_cannot_be_sealed_or_killed_to_pass_natural_snapshot(self):
         owner, api, _ = self.master()
         api.object(pid=42)

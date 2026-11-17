@@ -10,6 +10,21 @@ SHA-256 分别为 `3b6e75e988ef096fd7ec4941241f9a03299c0f1e3933a3100ee5ac7af8496
 
 ## 当前实现与验证
 
+真实OpenSSH首轮`43990824640`已FAIL：Rust真实认证／采集及独立对照完成，
+4个PowerShell原对象自然exit0；整体在Job census／清理处失败，不能移签成功。
+首个坏census的分项读数旧代码未记录，精确失败子条件仍未知；
+最终21接纳／21累计、20非master自然终态和0未关闭句柄也不补签旧失败。
+当前4个Python文件修复有界settle与argv0双空格兼容，765输入aggregate
+`fb78496b8d0b22bd6fc38da46df994d16c144d1f040f83ff468a98c49ff633af`。
+专项96 run／0失败／1 native跳过，Windows相关整合279 run／0失败／3跳过；
+新非作者Copernicus限定批准、P0–P3全0，独立49项通过且已实际关闭。
+修复后最终完整门禁r2已`0/reaped/731.529731s`：Rust3407/0/60 ignored、
+14 rustdoc、Python501 run／3 skipped；765输入前后无漂移。
+正在封存、提交推送，修复后的真实Windows复跑仍待验，
+从[修复证据](testing/records/2026-11-17-windows-openssh-monitor-evidence/repair/README.md)接续。
+原本机168成员封存保持原字节；两位作者／两位首轮reviewer副本及stage已按原摘要
+回收6目录、302文件／3,173,304字节，正常包和唯一target保留。
+
 Windows真实OpenSSH监控验收的本机工程已完成，基线文档提交`bfbea7b`：
 隔离短命sshd、原进程调试接纳／终态和公开Rust路由用例分工实现，
 见[ADR0157](adr/0157-windows-openssh-monitor-acceptance.md)与
@@ -22,7 +37,11 @@ Windows真实OpenSSH监控验收的本机工程已完成，基线文档提交`bf
 14 rustdoc、Python493 run／3 skipped；app1398/0/2、session404/0/4。
 app1400／session408／routing10／live1库存逐名相等，冻结765输入、aggregate
 `71872297a9a7b067fd85723de4e5c9c10f908dcc6a7e63ab91eeed6cb902db3a`；
-门禁前后与库存后无漂移。待普通提交推送及本批精确Windows执行；
+门禁前后与库存后无漂移。工程`41671be1a7fdfd96cec3a57f876519aeab2fa0d5`
+已普通提交／推送，本地／tracking／远端三方一致，读回干净；
+765输入与168成员原件的精确Git绑定exit0/reaped/2.410740s。
+本批真实OpenSSH43990824640已FAIL、直接API43990824533已success，
+Quality43990824137已三平台completed/success；
 本段不覆盖下述上一批成功范围。
 
 Windows 远端只读监控已整合：独立平台身份、固定 PowerShell 5.1 JSON、严格解析、
@@ -99,7 +118,8 @@ Python 主 discovery 各 293 run，skipped 为 34／2／2；包装与 helper 独
 1. Windows 本批已推送，本机完整门禁、两位非作者源码／功能复核、精确库存和Git绑定通过；
    API workflow与Quality43972364934三平台成功、原job／API原件封存通过，
    新非作者API回执复算批准且已关闭。维护从精确记录接续，不重复未变工程全门禁。
-   下一批真实OpenSSH开发先从上面的ADR0157和开发记录继续，不能跳过最终新冻结与复核。
+   本批真实OpenSSH首轮失败后的修复已通过新非作者复核与最终完整门禁r2，
+   继续提交推送、核验新的精确Windows工作流；首轮FAIL原件保持。
 2. 按[路线](ROADMAP.md)继续真实 Windows SSH、独立 Zmodem peer、外部 AI／MCP、
    隧道与同步、原生矩阵及六目标发行；完整产品目标不标 complete。
 3. 桌面可用后先复核英文工具栏 P2，再补三主题／尺寸／双语／焦点／IME／辅助技术。

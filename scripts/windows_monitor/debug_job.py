@@ -14,6 +14,7 @@ same PID, or call a post-continue reading a pre-instruction identity binding.
 """
 
 import ctypes as C
+from copy import deepcopy
 from dataclasses import dataclass
 import math
 import os
@@ -40,6 +41,7 @@ WAIT_OBJECT_0, WAIT_TIMEOUT = 0, 258
 MAX_COMMAND_BYTES = 65536
 MAX_EVENTS_PER_PUMP = 64
 MAX_REFRESH_PER_PUMP = 64
+MAX_CENSUS_OBSERVATIONS = 16
 PUMP_SECONDS = 0.01
 _DEBUG_THREAD = threading.local()
 
@@ -243,6 +245,9 @@ class WindowsDebugJob(WindowsJob):
         self._last_total = None
         self._last_active = None
         self._census_complete = False
+        self._census_checks = 0
+        self._census_observations = []
+        self._last_census = None
         self._events = 0
         self._refresh_cursor = 0
         self._continued = 0
@@ -660,7 +665,7 @@ class WindowsDebugJob(WindowsJob):
             self._refresh_cursor += 1
             self._refresh_original(row, budget)
 
-    def _census(self, budget):
+    def _census(self, budget, *, settling=False):
         before = self.accounting(budget)
         pids = self.process_ids(budget)
         after = self.accounting(budget)
@@ -671,10 +676,33 @@ class WindowsDebugJob(WindowsJob):
             and all(pid in self._by_pid for pid in pids)
             and before.ActiveProcesses == after.ActiveProcesses == len(pids)
         )
-        if self.terminal_prepared and after.TotalProcesses != self.terminal_total:
+        changed_after_seal = (
+            self.terminal_prepared
+            and (before.TotalProcesses != self.terminal_total
+                 or after.TotalProcesses != self.terminal_total)
+        )
+        if changed_after_seal:
             complete = False
+        self._census_checks += 1
+        self._last_census = {
+            "total_before": before.TotalProcesses, "total_after": after.TotalProcesses,
+            "admitted": len(self._originals),
+            "active_before": before.ActiveProcesses, "active_after": after.ActiveProcesses,
+            "current_pids": list(pids), "complete": complete,
+            "unknown_pids": [pid for pid in pids if pid not in self._by_pid],
+            "unbound_originals": sum(not row.bound or not row.member for row in self._originals),
+            "sealed_total": self.terminal_total if self.terminal_prepared else None,
+            "settling": settling,
+        }
+        if not complete and len(self._census_observations) < MAX_CENSUS_OBSERVATIONS:
+            self._census_observations.append(dict(self._last_census))
         self._census_complete = complete
-        if not complete:
+        # These are separate native reads. While natural exits or asynchronous
+        # termination are settling, their counts may legitimately differ.
+        # Retrying cannot sign a terminal: callers must obtain one complete
+        # census within the original budget. A sealed cumulative total may
+        # never change, including during a retry.
+        if not complete and (not settling or changed_after_seal):
             self._fail("debug_admissions_job_census_incomplete")
         return complete
 
@@ -729,16 +757,18 @@ class WindowsDebugJob(WindowsJob):
             raise
         while True:
             self.pump_debug(budget)
-            self._census(budget)
+            complete = self._census(budget, settling=True)
             self._raise_errors()
             if self._master is None or self._master.signaled or self._terminating:
                 self._fail("debug_live_master_unproven_at_seal")
                 self._raise_errors()
-            if all(row.natural for row in self._originals if row is not self._master):
+            if complete and all(row.natural for row in self._originals if row is not self._master):
                 if self._last_active == 1 and self.process_ids(budget) == [self._master.pid]:
                     break
             allowance = min(end - time.monotonic(), budget.remaining(reserve=CLEANUP_RESERVE))
             if allowance <= 0:
+                if not complete:
+                    self._fail("debug_admissions_job_census_incomplete")
                 self._fail("debug_non_master_natural_settle_expired")
                 self._raise_errors()
             time.sleep(min(0.001, allowance))
@@ -781,13 +811,15 @@ class WindowsDebugJob(WindowsJob):
     def active(self, deadline):
         deadline = _SharedBudget(self._budget, deadline)
         self._pump(deadline, strict=False)
-        self._census(deadline)
+        complete = self._census(deadline, settling=True)
         self._refresh_originals(deadline)
         pending = sum(not row.signaled or row.exit_code is None or not row.exit_continued
                       for row in self._originals)
         self.terminal_pending = pending
         self._raise_errors()
-        return max(self._last_active, pending, len(self._connections), int(self._pending is not None))
+        return max(self._last_active, self._last_census["active_before"],
+                   len(self._last_census["current_pids"]), pending, len(self._connections),
+                   int(self._pending is not None), int(not complete))
 
     def original_wait_handles(self):
         """Stable handles, including earlier original objects after PID reuse."""
@@ -881,6 +913,9 @@ class WindowsDebugJob(WindowsJob):
             "admissions": rows, "job_total_processes": self._last_total,
             "job_active_processes": self._last_active,
             "complete_original_object_census": self._census_complete and not self._errors,
+            "census_checks": self._census_checks,
+            "incomplete_census_observations": deepcopy(self._census_observations),
+            "last_census_observation": deepcopy(self._last_census),
             "admission_closed": self.admission_closed,
             "admission_phase_closed": self._admission_phase_closed,
             "identities_bound": all(row.bound for row in self._originals) and bool(rows),
